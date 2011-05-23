@@ -1,5 +1,7 @@
 #!/bin/bash
 
+assert_git_repository
+
 function help {
 	echo "usage: git flow feature [list] [-v]"
 	echo "       git flow feature start [-F] <name> [<base>]"

@@ -1,6 +1,10 @@
 #!/bin/bash
 # /bin/bash ~/twgit/twgit
 
+if [ "$DEBUG" = "1" ]; then
+	set -x
+fi
+
 # Includes :
 . `dirname $0`/conf/config.inc.sh
 . $TWGIT_INC_DIR/common.inc.sh

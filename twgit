@@ -1,0 +1,56 @@
+#!/bin/bash
+# /bin/bash ~/twgit/twgit
+
+# Includes :
+. `dirname $0`/conf/config.inc.sh
+. $TWGIT_INC_DIR/common.inc.sh
+
+function help {
+	echo "usage: git flow <subcommand>"
+	echo
+	echo "Available subcommands are:"
+	echo "   init      Initialize a new git repo with support for the branching model."
+	echo "   feature   Manage your feature branches."
+	echo "   release   Manage your release branches."
+	echo "   hotfix    Manage your hotfix branches."
+	echo "   support   Manage your support branches."
+	echo "   version   Shows version information."
+	echo
+	echo "Try 'git flow <subcommand> help' for details."
+}
+
+function main {
+	if [ $# -lt 1 ]; then
+		help
+		exit 1
+	fi
+	
+	# load command:
+	if [ ! -z "$1" ]; then
+		local command="$1"; shift
+		local command_file="$TWGIT_INC_DIR/twgit_$command.inc.sh";
+		if [ ! -e "$command_file" ]; then
+			echo "Command not found: '$command'"
+			help
+			exit 1
+		else
+			. "$command_file"
+		fi
+	fi
+	
+	# run the specified action:
+	local action='help'
+	if [ ! -z "$1" ]; then
+		action="$1"; shift
+	fi
+	local action_func_name="cmd_$action"
+	if ! type "$action_func_name" >/dev/null 2>&1; then
+		echo "Unknown action: '$action'"
+		help
+		exit 1
+	else
+		$action_func_name "$@"
+	fi
+}
+
+main "$@"

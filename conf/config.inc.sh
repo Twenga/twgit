@@ -1,0 +1,10 @@
+#!/bin/bash
+
+TWGIT_ROOT_DIR=$(dirname "$0")
+TWGIT_INC_DIR="$TWGIT_ROOT_DIR/inc"
+TWGIT_CONF_DIR="$TWGIT_ROOT_DIR/conf"
+
+TWGIT_PREFIX_FEATURE='feature/'
+TWGIT_PREFIX_RELEASE='release/'
+TWGIT_PREFIX_HOTFIX='hotfix/'
+TWGIT_PREFIX_DEMO='demo/'

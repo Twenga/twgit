@@ -7,4 +7,7 @@ TWGIT_CONF_DIR="$TWGIT_ROOT_DIR/conf"
 TWGIT_PREFIX_FEATURE='feature/'
 TWGIT_PREFIX_RELEASE='release/'
 TWGIT_PREFIX_HOTFIX='hotfix/'
+TWGIT_PREFIX_TAG='v'
 TWGIT_PREFIX_DEMO='demo/'
+
+TWGIT_ORIGIN=$(git remote show -n | head -n1)

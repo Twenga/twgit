@@ -2,43 +2,51 @@
 
 assert_git_repository
 
-function help {
-	echo "usage: git flow feature [list] [-v]"
-	echo "       git flow feature start [-F] <name> [<base>]"
-	echo "       git flow feature finish [-rFk] [<name|nameprefix>]"
-	echo "       git flow feature publish <name>"
-	echo "       git flow feature track <name>"
-	echo "       git flow feature diff [<name|nameprefix>]"
-	echo "       git flow feature rebase [-i] [<name|nameprefix>]"
-	echo "       git flow feature checkout [<name|nameprefix>]"
-	echo "       git flow feature pull <remote> [<name>]"
+function usage {
+	echo; help 'Usage:'
+	help_detail 'twgit feature [list] [-v]'
+	help_detail "twgit feature start [-F] <name> [<base>]"
+	help_detail 'twgit feature finish [-rFk] [<name|nameprefix>]'
+	help_detail 'twgit feature publish <name>'
+	help_detail 'twgit feature track <name>'
+	help_detail 'twgit feature diff [<name|nameprefix>]'
+	help_detail 'twgit feature rebase [-i] [<name|nameprefix>]'
+	help_detail 'twgit feature checkout [<name|nameprefix>]'
+	help_detail 'twgit feature pull <remote> [<name>]'
+	echo
 }
 
 function cmd_help {
-	help
+	usage
 	exit 0
 }
 
 function cmd_list {
 	local feature_branches=$(echo "$(get_local_branches)" | grep "^$TWGIT_PREFIX_FEATURE")
 	if [ -z "$feature_branches" ]; then
-		echo "No feature branches exist."
-		echo ""
-		echo "You can start a new feature branch:"
-		echo ""
-		echo "    git flow feature start <name> [<base>]"
-		echo ""
+		info 'No feature branch exists.'
+		echo
+		help 'You can start a new feature branch:'
+		help_detail 'git flow feature start <name> [<base>]'
+		echo
+	else
+		echo $feature_branches
 	fi
-	echo $feature_branches
-	echo ">>`get_current_branch`"
 }
 
 function cmd_start {
 	local branch="$1"
-	if [ -z "$branch" ]; then
-		echo "Missing argument <name>"
-		help
-		exit 1
+	require_arg 'branch' "$branch"
+	local branch_fullname="$TWGIT_PREFIX_FEATURE$branch"
+	
+	assert_clean_working_tree
+	if has $branch_fullname $(get_local_branches); then
+		die "Local feature '$branch' already exists. Pick another name."
 	fi
-	assert_branch_absent "$branch"
+	
+#	local errormsg=$(git rev-parse --git-dir 2>&1)
+#	[ $? ] && die "[Git error msg] $errormsg"
+#	if ! git checkout -b "$branch" "$BASE"; then
+#		die "Could not create feature branch '$BRANCH'"
+#	fi
 }

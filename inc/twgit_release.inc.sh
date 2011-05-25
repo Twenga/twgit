@@ -4,15 +4,11 @@ assert_git_repository
 
 function usage {
 	echo; help 'Usage:'
-	help_detail 'twgit release [list] [-v]'
-	help_detail "twgit release start [-F] <name> [<base>]"
-	help_detail 'twgit release finish [-rFk] [<name|nameprefix>]'
-	help_detail 'twgit release publish <name>'
-	help_detail 'twgit release track <name>'
-	help_detail 'twgit release diff [<name|nameprefix>]'
-	help_detail 'twgit release rebase [-i] [<name|nameprefix>]'
-	help_detail 'twgit release checkout [<name|nameprefix>]'
-	help_detail 'twgit release pull <remote> [<name>]'
+	help_detail 'twgit release <action>'
+	echo; help 'Available actions are:'
+	help_detail '<b>list</b>     ...'
+	help_detail '<b>start</b>    ...'
+	help_detail '[help]   Display this help.'
 	echo
 }
 
@@ -46,17 +42,21 @@ function cmd_start {
 		die "Local release '$release_fullname' already exists! Pick another name."
 	fi
 	
-	processing 'Git fetch...'
-	git fetch --tags
+	processing "git fetch $TWGIT_ORIGIN --tags..."
+	git fetch $TWGIT_ORIGIN --tags || die "Could not fetch '$TWGIT_ORIGIN'!"
 	
 	local last_tag=$(get_last_tag)
 	if [ -z "$last_tag" ]; then
 		die 'No tag created!'
 	fi
+	#local short_last_tag=${last_tag:${#$TWGIT_PREFIX_TAG}}
 	
-	processing 'Git checkout ...'
-	#git push $TWGIT_ORIGIN tag:$release_fullname
+	processing "git checkout -b $release_fullname $last_tag"
+	git checkout -b $release_fullname $last_tag || die "Could not check out tag '$last_tag'!"
+	# Switched to a new branch '$release_fullname'
 	
+	processing "git push --set-upstream $TWGIT_ORIGIN $release_fullname"
+	git push --set-upstream $TWGIT_ORIGIN $release_fullname || die "Could not push release '$release_fullname'!"
 	
 	
 # git merge-base "`git rev-parse 'tests_git'`" "`git rev-parse 'origin/tests_git'`"	

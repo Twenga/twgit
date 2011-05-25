@@ -11,16 +11,15 @@ fi
 
 function usage {
 	echo; help 'Usage:'
-	help_detail 'twgit <action>'
-	echo; help 'Available actions are:'
-	help_detail 'init      Initialize a new git repo with support for the branching model.'
-	help_detail 'feature   Manage your feature branches.'
-	help_detail 'release   Manage your release branches.'
-	help_detail 'hotfix    Manage your hotfix branches.'
-	help_detail 'support   Manage your support branches.'
-	help_detail 'version   Shows version information.'
+	help_detail 'twgit <command>'
+	echo; help 'Available commands are:'
+	help_detail '<b>feature</b>   Manage your feature branches.'
+	help_detail '<b>release</b>   Manage your release branches.'
+	help_detail '<b>hotfix</b>    Manage your hotfix branches.'
+	help_detail '<b>tag</b>       Manage your tags.'
+	help_detail '[help]    Display this help.'
 	echo; help 'See also:'
-	help_detail "Try 'twgit <action> help' for details."
+	help_detail "Try 'twgit <command> [help]' for details."
 	echo
 }
 
@@ -34,7 +33,10 @@ function main {
 	if [ ! -z "$1" ]; then
 		local command="$1"; shift
 		local command_file="$TWGIT_INC_DIR/twgit_$command.inc.sh";
-		if [ ! -e "$command_file" ]; then
+		if [ "$command" = 'help' ]; then
+			usage
+			exit 0
+		elif [ ! -e "$command_file" ]; then
 			error "Command not found: '$command'"
 			usage
 			exit 1

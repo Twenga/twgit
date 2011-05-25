@@ -15,6 +15,7 @@ UI=(
 	[help.color]='\033[0;36m'
 	[help_detail.header]='    '
 	[help_detail.color]='\033[0;37m'
+	[help_detail.bold.color]='\033[1;37m'
 	[normal.color]='\033[0;37m'
 	[warning.header]='\033[33m/!\ '
 	[warning.color]='\033[0;33m'
@@ -60,11 +61,14 @@ function displayMsg {
 	local msg=$2
 	
 	local is_defined=`echo ${!UI[*]} | grep "\b$type\b" | wc -l`
-	[ $is_defined = 0 ] && echo "Unknown display type '$type'!" >&2 && exit
+	[ $is_defined = 0 ] && echo "Unknown display type '$type'!" >&2 && exit 1
+	local escape_color=$(echo ${UI[$type'.color']} | sed 's/\\/\\\\/g')
+	local escape_bold_color=$(echo ${UI[$type'.bold.color']} | sed 's/\\/\\\\/g')
 	
 	if [ ! -z "${UI[$type'.header']}" ]; then
 		echo -en "${UI[$type'.header']}"
 	fi
+	msg=$(echo "$msg" | sed "s/<b>/$escape_bold_color/g" | sed "s#</b>#$escape_color#g")
 	echo -e "${UI[$type'.color']}$msg${UI['normal.color']}"
 }
 
@@ -91,7 +95,7 @@ function get_current_branch {
 }
 
 function get_all_tags {
-	git tag;
+	git tag | sort -n;
 }
 
 function get_last_tag {
@@ -160,6 +164,11 @@ function assert_clean_working_tree {
 }
 
 function assert_valid_ref_name {
+	git check-ref-format --branch "$1" 1>/dev/null 2>&1
+	if [ $? -ne 0 ]; then
+		die "'$1' is not a valid reference name!"
+	fi
+	
 	echo $1 | grep -vP "^$TWGIT_PREFIX_FEATURE" \
 		| grep -vP "^$TWGIT_PREFIX_RELEASE" \
 		| grep -vP "^$TWGIT_PREFIX_HOTFIX" \

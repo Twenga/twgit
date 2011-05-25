@@ -1,5 +1,23 @@
 #!/bin/bash
+
 # /bin/bash ~/twgit/twgit
+#
+# sudo vi /usr/local/bin/twgit
+#	#!/bin/bash
+#	/bin/bash ~/twgit/twgit $@
+# sudo chmod +x /usr/local/bin/twgit
+	
+
+# .bash_profile
+# function get_git_branch {
+#     local branch=$(git branch --no-color 2>/dev/null | grep -P '^\*' | sed 's/* //')
+#     [ ! -z "$branch" ] && echo " \[\e[1;30m\]git\[\e[1;35m\]$branch"
+# }
+# export PROMPT_COMMAND='PS1="\[\e[0;32m\]\h:\w$(get_git_branch)\[\e[1;32m\]\\$\[\e[m\] "'	
+
+# TODO ne pas enchaîner les fetch
+# TODO autocomplétion
+# TODO autoincrement [major].[minor].[revision]
 
 if [ "$DEBUG" = "1" ]; then
 	set -x
@@ -11,7 +29,7 @@ fi
 
 function usage {
 	echo; help 'Usage:'
-	help_detail 'twgit <command>'
+	help_detail 'twgit <command> [action]'
 	echo; help 'Available commands are:'
 	help_detail '<b>feature</b>   Manage your feature branches.'
 	help_detail '<b>release</b>   Manage your release branches.'
@@ -19,7 +37,7 @@ function usage {
 	help_detail '<b>tag</b>       Manage your tags.'
 	help_detail '[help]    Display this help.'
 	echo; help 'See also:'
-	help_detail "Try 'twgit <command> [help]' for details."
+	help_detail "Try 'twgit <command> [help]' for more details."
 	echo
 }
 

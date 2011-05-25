@@ -23,27 +23,27 @@ UI=(
 )
 
 function processing {
-	displayMsg processing "$1"; 
+	displayMsg processing "$1"
 }
 
 function info { 
-	displayMsg info "$1"; 
+	displayMsg info "$1"
 }
 
 function help { 
-	displayMsg help "$1"; 
+	displayMsg help "$1"
 }
 
 function help_detail { 
-	displayMsg help_detail "$1"; 
+	displayMsg help_detail "$1"
 }
 
 function warn { 
-	displayMsg warning "$1" >&2; 
+	displayMsg warning "$1" >&2
 }
 
 function error { 
-	displayMsg error "$1" >&2;
+	displayMsg error "$1" >&2
 }
 
 function die {
@@ -79,15 +79,15 @@ function displayMsg {
 #____________________________________________________________________
 
 function get_all_branches { 
-	( git branch --no-color; git branch -r --no-color) | sed 's/^[* ] //';
+	git branch -a --no-color | sed 's/^[* ] //'
 }
 
 function get_local_branches { 
-	git branch --no-color | sed 's/^[* ] //';
+	git branch --no-color | sed 's/^[* ] //'
 }
 
 function get_remote_branches { 
-	git branch -r --no-color | sed 's/^[* ] //'; 
+	git branch -r --no-color | sed 's/^[* ] //'
 }
 
 function get_current_branch { 
@@ -95,7 +95,7 @@ function get_current_branch {
 }
 
 function get_all_tags {
-	git tag | sort -n;
+	git tag | sort -n
 }
 
 function get_last_tag {
@@ -107,10 +107,6 @@ function get_last_tag {
 #^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 # Questions
 #____________________________________________________________________
-
-function is_branch_exists {
-	has $1 $(get_all_branches)
-}
 
 
 
@@ -158,8 +154,12 @@ function require_arg {
 }
 
 function assert_clean_working_tree {
+	processing 'Check clean working tree...'
 	if [ `git status --porcelain --ignore-submodules=all | wc -l` -ne 0 ]; then
-		die 'Untracked files or changes to be committed in your working tree! Try: git status'
+		error 'Untracked files or changes to be committed in your working tree!'
+		processing 'git status'
+		git status
+		exit 1
 	fi
 }
 
@@ -179,6 +179,7 @@ function assert_valid_ref_name {
 }
 
 function assert_valid_release_name {
+	processing 'Check valid ref name...'
 	local release="$1"
 	assert_valid_ref_name "$release"
 }
@@ -195,5 +196,7 @@ function escape {
 
 function has {
 	local item=$1; shift
-	echo " $@ " | grep -q " $(escape $item) "
+	#echo " $@ " | grep -q " $(escape $item) "
+	local n=$(echo " $@ " | grep " $(escape $item) " | wc -l)
+	[ $n = '0' ] && echo 0 || echo 1
 }

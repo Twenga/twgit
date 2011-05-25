@@ -6,8 +6,11 @@ function usage {
 	echo; help 'Usage:'
 	help_detail 'twgit release <action>'
 	echo; help 'Available actions are:'
-	help_detail '<b>list</b>     ...'
-	help_detail '<b>start</b>    ...'
+	help_detail '<b>list</b>     List remote releases. Add <b>-n</b> or <b>--no-fetch</b> to do not pre fetch.'
+	help_detail '<b>start <releasename></b>'
+	help_detail "    Create both a new local and remote release, or fetch the remote release."
+	help_detail "    Prefix '$TWGIT_PREFIX_RELEASE' will be added to the specified <releasename>."
+	help_detail '<b>finish <releasename> <tagname></b>'
 	help_detail '[help]   Display this help.'
 	echo
 }
@@ -18,33 +21,59 @@ function cmd_help {
 }
 
 function cmd_list {
-	local tags=$(get_all_tags)
-	if [ -z "$tags" ]; then
-		info 'No tag exists.'
-		echo
-		help 'You can start a new feature branch:'
-		help_detail 'git flow feature start <name> [<base>]'
+	if [ "$1" != '-n' -a "$1" != '--no-fetch' ]; then
+		processing "git fetch $TWGIT_ORIGIN..."
+		git fetch $TWGIT_ORIGIN || die "Could not fetch '$TWGIT_ORIGIN'!"
+	fi
+	
+	local releases=$(git branch -r --merged $TWGIT_ORIGIN/HEAD | grep "$TWGIT_ORIGIN/$TWGIT_PREFIX_RELEASE" | sed 's/^[* ]*//')
+	help "Remote releases merged:"
+	if [ -z "$releases" ]; then
+		info 'No merged release branch exists.'
 		echo
 	else
-		echo $tags
+		local release
+		for release in $releases; do
+			info "Release: $release"
+			git show $release --pretty=medium | head -n4
+		done
+	fi
+		
+	local releases=$(git branch -r --no-merged $TWGIT_ORIGIN/HEAD | grep "$TWGIT_ORIGIN/$TWGIT_PREFIX_RELEASE" | sed 's/^[* ]*//')
+	help "Remote releases NOT merged:"
+	if [ -z "$releases" ]; then
+		info 'No release branch NOT merged exists.'
+		echo
+	else
+		local release
+		for release in $releases; do
+			info "Release: $release"
+			git show $release --pretty=medium | head -n4
+		done
 	fi
 }
 
 function cmd_start {
-	local release="$1"
-	require_arg 'release' "$release"
+	local release="$1"; require_arg 'release' "$release"
 	local release_fullname="$TWGIT_PREFIX_RELEASE$release"
 	
 	#checks
 	assert_valid_release_name $release
 	assert_clean_working_tree
-	if has $release_fullname $(get_local_branches); then
+	if [ $(has $release_fullname $(get_local_branches)) = '1' ]; then
 		die "Local release '$release_fullname' already exists! Pick another name."
 	fi
 	
 	processing "git fetch $TWGIT_ORIGIN --tags..."
 	git fetch $TWGIT_ORIGIN --tags || die "Could not fetch '$TWGIT_ORIGIN'!"
 	
+	processing 'Check remote releases...'
+	local is_remote_exists=$(has "$TWGIT_ORIGIN/$release_fullname" $(get_remote_branches))
+	if [ $is_remote_exists = '1' ]; then
+		processing "Remote release '$release_fullname' detected."
+	fi	
+	
+	processing 'Get last tag...'
 	local last_tag=$(get_last_tag)
 	if [ -z "$last_tag" ]; then
 		die 'No tag created!'
@@ -55,8 +84,10 @@ function cmd_start {
 	git checkout -b $release_fullname $last_tag || die "Could not check out tag '$last_tag'!"
 	# Switched to a new branch '$release_fullname'
 	
-	processing "git push --set-upstream $TWGIT_ORIGIN $release_fullname"
-	git push --set-upstream $TWGIT_ORIGIN $release_fullname || die "Could not push release '$release_fullname'!"
+	if [ $is_remote_exists = '0' ]; then
+		processing "git push --set-upstream $TWGIT_ORIGIN $release_fullname"
+		git push --set-upstream $TWGIT_ORIGIN $release_fullname || die "Could not push release '$release_fullname'!"
+	fi
 	
 	
 # git merge-base "`git rev-parse 'tests_git'`" "`git rev-parse 'origin/tests_git'`"	
@@ -69,5 +100,41 @@ function cmd_start {
 }
 
 function cmd_finish {
-	:
+	local release="$1"; require_arg 'release' "$release"
+	local release_fullname="$TWGIT_PREFIX_RELEASE$release"
+	
+	local tag="$2"; require_arg 'tag' "$tag"
+	local tag_fullname="$TWGIT_PREFIX_TAG$tag"
+	
+	assert_clean_working_tree
+	
+	processing "git fetch $TWGIT_ORIGIN --tags..."
+	git fetch $TWGIT_ORIGIN --tags || die "Could not fetch '$TWGIT_ORIGIN'!"
+	
+	processing 'Check remote releases...'
+	local is_release_exists=$(has "$TWGIT_ORIGIN/$release_fullname" $(get_remote_branches))
+	if [ $is_release_exists = '0' ]; then
+		die "Unknown '$release_fullname' remote release! Try: twgit release list"
+	fi
+	
+	processing 'Check tags...'
+	local is_tag_exixsts=$(has "$tag_fullname" $(get_all_tags))
+	if [ $is_tag_exixsts = '1' ]; then
+		die "Tag '$tag_fullname' already exists! Try: twgit tag list"
+	fi
+	
+	processing "[git] git checkout $TWGIT_MASTER"
+	git checkout $TWGIT_MASTER || die "Could not checkout '$TWGIT_ORIGIN'!"
+	
+	processing "[git] git merge --no-ff $TWGIT_ORIGIN/$TWGIT_MASTER"
+	git merge --no-ff $TWGIT_ORIGIN/$TWGIT_MASTER || die "Could not merge '$TWGIT_ORIGIN/$TWGIT_MASTER' into '$TWGIT_MASTER'!"
+	
+	processing "[git] git merge --no-ff $release_fullname"
+	git merge --no-ff $release_fullname || die "Could not merge '$release_fullname' into '$TWGIT_MASTER'!"
+	
+	processing "[git] git tag -a $tag_fullname -m "[by twgit] twgit release finish $release_fullname""
+	git tag -a $tag_fullname -m "[by twgit] twgit release finish $release_fullname" || die "Could not tag '$TWGIT_MASTER'!"
+	
+	processing "[git] git push --tags $TWGIT_ORIGIN $TWGIT_MASTER"
+	git push --tags $TWGIT_ORIGIN $TWGIT_MASTER || die "Could not push '$TWGIT_MASTER' on '$TWGIT_ORIGIN'!"
 }

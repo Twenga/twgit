@@ -10,4 +10,5 @@ TWGIT_PREFIX_HOTFIX='hotfix-'
 TWGIT_PREFIX_TAG='v'
 TWGIT_PREFIX_DEMO='demo-'
 
-TWGIT_ORIGIN=$(git remote show -n | head -n1)
+TWGIT_ORIGIN=$(git remote show -n 2>/dev/null | head -n1)
+TWGIT_MASTER='master'

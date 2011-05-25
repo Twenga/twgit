@@ -48,7 +48,7 @@ function cmd_list {
 		local release
 		for release in $releases; do
 			info "Release: $release"
-			git show $release --pretty=medium | head -n4
+			git show $release --pretty=medium | grep -v '^Merge: ' | head -n4
 		done
 	fi
 }
@@ -58,7 +58,7 @@ function cmd_start {
 	local release_fullname="$TWGIT_PREFIX_RELEASE$release"
 	
 	#checks
-	assert_valid_release_name $release
+	assert_valid_ref_name $release
 	assert_clean_working_tree
 	if [ $(has $release_fullname $(get_local_branches)) = '1' ]; then
 		die "Local release '$release_fullname' already exists! Pick another name."
@@ -88,15 +88,6 @@ function cmd_start {
 		processing "git push --set-upstream $TWGIT_ORIGIN $release_fullname"
 		git push --set-upstream $TWGIT_ORIGIN $release_fullname || die "Could not push release '$release_fullname'!"
 	fi
-	
-	
-# git merge-base "`git rev-parse 'tests_git'`" "`git rev-parse 'origin/tests_git'`"	
-
-#	local errormsg=$(git rev-parse --git-dir 2>&1)
-#	[ $? ] && die "[Git error msg] $errormsg"
-#	if ! git checkout -b "$branch" "$BASE"; then
-#		die "Could not create feature branch '$BRANCH'"
-#	fi
 }
 
 function cmd_finish {
@@ -116,6 +107,7 @@ function cmd_finish {
 	if [ $is_release_exists = '0' ]; then
 		die "Unknown '$release_fullname' remote release! Try: twgit release list"
 	fi
+	assert_branches_equal "$release_fullname" "$TWGIT_ORIGIN/$release_fullname"
 	
 	processing 'Check tags...'
 	local is_tag_exixsts=$(has "$tag_fullname" $(get_all_tags))

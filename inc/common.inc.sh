@@ -128,19 +128,23 @@ function assert_git_repository {
 }
 
 function assert_branches_equal {
-	assert_local_branch "$1"
-	assert_remote_branch "$2"
-	git_compare_branches "$1" "$2"
+	processing 'Compare remote and local branches...'
+	if [ $(has $1 $(get_local_branches)) = '0' ]; then
+		die "Local branch '$1' does not exist and is required!"
+	elif [ $(has $2 $(get_remote_branches)) = '0' ]; then
+		die "Remote branch '$2' does not exist and is required!"
+	fi		
+	compare_branches "$1" "$2"
 	local status=$?
 	if [ $status -gt 0 ]; then
 		warn "Branches '$1' and '$2' have diverged."
 		if [ $status -eq 1 ]; then
-			die "And branch '$1' may be fast-forwarded."
+			die "And local branch '$1' may be fast-forwarded!"
 		elif [ $status -eq 2 ]; then
 			# Warn here, since there is no harm in being ahead
 			warn "And local branch '$1' is ahead of '$2'."
 		else
-			die "Branches need merging first."
+			die "Branches need merging first!"
 		fi
 	fi
 }
@@ -164,6 +168,7 @@ function assert_clean_working_tree {
 }
 
 function assert_valid_ref_name {
+	processing 'Check valid ref name...'
 	git check-ref-format --branch "$1" 1>/dev/null 2>&1
 	if [ $? -ne 0 ]; then
 		die "'$1' is not a valid reference name!"
@@ -176,12 +181,6 @@ function assert_valid_ref_name {
 	if [ $? -ne 0 ]; then
 		die 'Unauthorized reference prefix! Pick another name.'
 	fi
-}
-
-function assert_valid_release_name {
-	processing 'Check valid ref name...'
-	local release="$1"
-	assert_valid_ref_name "$release"
 }
 
 
@@ -199,4 +198,33 @@ function has {
 	#echo " $@ " | grep -q " $(escape $item) "
 	local n=$(echo " $@ " | grep " $(escape $item) " | wc -l)
 	[ $n = '0' ] && echo 0 || echo 1
+}
+
+
+# Tests whether branches and their "origin" counterparts have diverged and need
+# merging first. It returns error codes to provide more detail, like so:
+#
+# 0    Branch heads point to the same commit
+# 1    First given branch needs fast-forwarding
+# 2    Second given branch needs fast-forwarding
+# 3    Branch needs a real merge
+# 4    There is no merge base, i.e. the branches have no common ancestors
+#
+function compare_branches {
+	local commit1=$(git rev-parse "$1")
+	local commit2=$(git rev-parse "$2")
+	if [ "$commit1" != "$commit2" ]; then
+		local base=$(git merge-base "$commit1" "$commit2")
+		if [ $? -ne 0 ]; then
+			return 4
+		elif [ "$commit1" = "$base" ]; then
+			return 1
+		elif [ "$commit2" = "$base" ]; then
+			return 2
+		else
+			return 3
+		fi
+	else
+		return 0
+	fi
 }

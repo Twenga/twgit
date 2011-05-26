@@ -24,6 +24,7 @@ function cmd_list {
 	if [ "$1" != '-n' -a "$1" != '--no-fetch' ]; then
 		processing "git fetch $TWGIT_ORIGIN..."
 		git fetch $TWGIT_ORIGIN || die "Could not fetch '$TWGIT_ORIGIN'!"
+		echo
 	fi
 	
 	local releases=$(git branch -r --merged $TWGIT_ORIGIN/HEAD | grep "$TWGIT_ORIGIN/$TWGIT_PREFIX_RELEASE" | sed 's/^[* ]*//')

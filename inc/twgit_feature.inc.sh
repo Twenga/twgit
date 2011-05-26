@@ -10,6 +10,7 @@ function usage {
 	help_detail '<b>start <featurename></b>'
 	help_detail "    Create both a new local and remote feature, or fetch the remote feature."
 	help_detail "    Prefix '$TWGIT_PREFIX_FEATURE' will be added to the specified <featurename>."
+	help_detail '<b>remove <featurename></b>'
 	help_detail '[help]   Display this help.'
 	echo
 }
@@ -23,6 +24,7 @@ function cmd_list {
 	if [ "$1" != '-n' -a "$1" != '--no-fetch' ]; then
 		processing "git fetch $TWGIT_ORIGIN..."
 		git fetch $TWGIT_ORIGIN || die "Could not fetch '$TWGIT_ORIGIN'!"
+		echo
 	fi
 		
 	local features=$(git branch -r | grep "$TWGIT_ORIGIN/$TWGIT_PREFIX_FEATURE" | sed 's/^[* ]*//')
@@ -112,4 +114,33 @@ function cmd_start {
 	local git_options=$([ $is_remote_exists = '0' ] && echo '--set-upstream' || echo '')
 	processing "git push $git_options $TWGIT_ORIGIN $feature_fullname"
 	git push $git_options $TWGIT_ORIGIN $feature_fullname || die "Could not push feature '$feature_fullname'!"
+}
+
+function cmd_remove {
+	local feature="$1"; require_arg 'feature' "$feature"
+	local feature_fullname="$TWGIT_PREFIX_FEATURE$feature"
+	
+	assert_valid_ref_name $feature
+	
+	processing "git fetch $TWGIT_ORIGIN --tags..."
+	git fetch $TWGIT_ORIGIN --tags || die "Could not fetch '$TWGIT_ORIGIN'!"
+	
+	if [ $(has $feature_fullname $(get_local_branches)) = '1' ]; then
+		processing "git branch -D $feature_fullname"
+		git branch -D $feature_fullname || die "Remove local feature '$feature_fullname' failed!"
+	else
+		processing "Local feature '$feature_fullname' not found."
+	fi
+	
+	if [ $(has "$TWGIT_ORIGIN/$feature_fullname" $(get_remote_branches)) = '1' ]; then
+		processing "git push $TWGIT_ORIGIN :$feature_fullname"
+		git push $TWGIT_ORIGIN :$feature_fullname
+		if [ $? -ne 0 ]; then
+			processing "Remove remote feature '$TWGIT_ORIGIN/$feature_fullname' failed! Maybe already deleted... so:"
+			processing "git remote prune $TWGIT_ORIGIN"
+			git remote prune $TWGIT_ORIGIN || die "Prune failed!"
+		fi
+	else
+		die "Remote feature '$TWGIT_ORIGIN/$feature_fullname' not found!"
+	fi	
 }

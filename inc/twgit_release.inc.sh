@@ -11,6 +11,7 @@ function usage {
 	help_detail "    Create both a new local and remote release, or fetch the remote release."
 	help_detail "    Prefix '$TWGIT_PREFIX_RELEASE' will be added to the specified <releasename>."
 	help_detail '<b>finish <releasename> <tagname></b>'
+	help_detail '<b>remove <releasename></b>'
 	help_detail '[help]   Display this help.'
 	echo
 }
@@ -65,8 +66,8 @@ function cmd_start {
 		die "Local release '$release_fullname' already exists! Pick another name."
 	fi
 	
-	processing "git fetch $TWGIT_ORIGIN --tags..."
-	git fetch $TWGIT_ORIGIN --tags || die "Could not fetch '$TWGIT_ORIGIN'!"
+	processing "git fetch $TWGIT_ORIGIN..."
+	git fetch $TWGIT_ORIGIN || die "Could not fetch '$TWGIT_ORIGIN'!"
 	
 	processing 'Check remote releases...'
 	local is_remote_exists=$(has "$TWGIT_ORIGIN/$release_fullname" $(get_remote_branches))
@@ -102,8 +103,8 @@ function cmd_finish {
 	
 	assert_clean_working_tree
 	
-	processing "git fetch $TWGIT_ORIGIN --tags..."
-	git fetch $TWGIT_ORIGIN --tags || die "Could not fetch '$TWGIT_ORIGIN'!"
+	processing "git fetch $TWGIT_ORIGIN..."
+	git fetch $TWGIT_ORIGIN || die "Could not fetch '$TWGIT_ORIGIN'!"
 	
 	processing 'Check remote releases...'
 	local is_release_exists=$(has "$TWGIT_ORIGIN/$release_fullname" $(get_remote_branches))
@@ -132,4 +133,33 @@ function cmd_finish {
 	
 	processing "[git] git push --tags $TWGIT_ORIGIN $TWGIT_MASTER"
 	git push --tags $TWGIT_ORIGIN $TWGIT_MASTER || die "Could not push '$TWGIT_MASTER' on '$TWGIT_ORIGIN'!"
+}
+
+function cmd_remove {
+	local release="$1"; require_arg 'release' "$release"
+	local release_fullname="$TWGIT_PREFIX_RELEASE$release"
+	
+	assert_valid_ref_name $release
+	
+	processing "git fetch $TWGIT_ORIGIN..."
+	git fetch $TWGIT_ORIGIN || die "Could not fetch '$TWGIT_ORIGIN'!"
+	
+	if [ $(has $release_fullname $(get_local_branches)) = '1' ]; then
+		processing "git branch -D $release_fullname"
+		git branch -D $release_fullname || die "Remove local release '$release_fullname' failed!"
+	else
+		processing "Local release '$release_fullname' not found."
+	fi
+	
+	if [ $(has "$TWGIT_ORIGIN/$release_fullname" $(get_remote_branches)) = '1' ]; then
+		processing "git push $TWGIT_ORIGIN :$release_fullname"
+		git push $TWGIT_ORIGIN :$release_fullname
+		if [ $? -ne 0 ]; then
+			processing "Remove remote release '$TWGIT_ORIGIN/$release_fullname' failed! Maybe already deleted... so:"
+			processing "git remote prune $TWGIT_ORIGIN"
+			git remote prune $TWGIT_ORIGIN || die "Prune failed!"
+		fi
+	else
+		die "Remote release '$TWGIT_ORIGIN/$release_fullname' not found!"
+	fi	
 }

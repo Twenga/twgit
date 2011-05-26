@@ -88,8 +88,8 @@ function cmd_start {
 		die "Local feature '$feature_fullname' already exists! Pick another name."
 	fi
 	
-	processing "git fetch $TWGIT_ORIGIN --tags..."
-	git fetch $TWGIT_ORIGIN --tags || die "Could not fetch '$TWGIT_ORIGIN'!"
+	processing "git fetch $TWGIT_ORIGIN..."
+	git fetch $TWGIT_ORIGIN || die "Could not fetch '$TWGIT_ORIGIN'!"
 	
 	processing 'Check remote features...'
 	local is_remote_exists=$(has "$TWGIT_ORIGIN/$feature_fullname" $(get_remote_branches))
@@ -116,14 +116,15 @@ function cmd_start {
 	git push $git_options $TWGIT_ORIGIN $feature_fullname || die "Could not push feature '$feature_fullname'!"
 }
 
+# TODO error: Cannot delete the branch 'release-test3' which you are currently on
 function cmd_remove {
 	local feature="$1"; require_arg 'feature' "$feature"
 	local feature_fullname="$TWGIT_PREFIX_FEATURE$feature"
 	
 	assert_valid_ref_name $feature
 	
-	processing "git fetch $TWGIT_ORIGIN --tags..."
-	git fetch $TWGIT_ORIGIN --tags || die "Could not fetch '$TWGIT_ORIGIN'!"
+	processing "git fetch $TWGIT_ORIGIN..."
+	git fetch $TWGIT_ORIGIN || die "Could not fetch '$TWGIT_ORIGIN'!"
 	
 	if [ $(has $feature_fullname $(get_local_branches)) = '1' ]; then
 		processing "git branch -D $feature_fullname"

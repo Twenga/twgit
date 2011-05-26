@@ -4,10 +4,11 @@
 // http://localhost/TwGit/inc/ws_redmine.inc.php?issue=7573
 
 // http://redmine.twenga.com/projects/api2/issues.xml
+// http://twgit:7T8qyL@redmine.twenga.com/projects/api2/issues.xml?key=c0bb67bc6ae9b1693ac3f06a8e7fd8f5eefa425f
 
 include_once(__DIR__ . '/../lib/phpactiveresource/ActiveResource.php');
-define('USERNAME', 'gaubry');
-define('PASSWORD', 'jR7nN0');
+define('USERNAME', 'twgit');
+define('PASSWORD', '7T8qyL');
 define('SITE_URL', 'http://' . USERNAME . ':' . PASSWORD . '@redmine.twenga.com/');
 
 class Issue extends ActiveResource {
@@ -39,4 +40,5 @@ if ($issue->error !== false) {
 	echo 'Project: ' . $issue->project . "\n";
 	echo 'Subject: ' . $issue->subject . "\n";
 	echo 'Description: ' . $issue->description . "\n";
+	echo 'Assign to: ' . $issue->assigned_to->attributes()->name . "\n";
 }

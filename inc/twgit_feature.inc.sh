@@ -37,6 +37,42 @@ function cmd_list {
 			git show $feature --pretty=medium | grep -v '^Merge: ' | head -n4
 		done
 	fi
+	
+	local features=$(git branch -r --merged $TWGIT_ORIGIN/HEAD | grep "$TWGIT_ORIGIN/$TWGIT_PREFIX_FEATURE" | sed 's/^[* ]*//')
+	help "Remote features merged into master:"
+	if [ -z "$features" ]; then
+		info 'No feature branch exists.'
+		echo
+	else
+		local feature
+		for feature in $features; do
+			info "Feature: $feature"
+			git show $feature --pretty=medium | grep -v '^Merge: ' | head -n4
+		done
+	fi
+	
+	help "Remote features merged into releases NOT merged into master:"
+	local releases=$(git branch -r --no-merged $TWGIT_ORIGIN/HEAD | grep "$TWGIT_ORIGIN/$TWGIT_PREFIX_RELEASE" | sed 's/^[* ]*//')
+	if [ -z "$releases" ]; then
+		info 'No release branch NOT merged exists.'
+		echo
+	else	
+		local release
+		for release in $releases; do
+			help "Remote features merged into '$release' NOT merged into master:"
+			local features=$(git branch -r --merged $release | grep "$TWGIT_ORIGIN/$TWGIT_PREFIX_FEATURE" | sed 's/^[* ]*//')
+			if [ -z "$features" ]; then
+				info 'No feature branch exists.'
+				echo
+			else
+				local feature
+				for feature in $features; do
+					info "Feature: $feature"
+					git show $feature --pretty=medium | grep -v '^Merge: ' | head -n4
+				done
+			fi
+		done
+	fi
 }
 
 function cmd_start {
@@ -68,10 +104,12 @@ function cmd_start {
 	
 	processing "git checkout -b $feature_fullname $last_tag"
 	git checkout -b $feature_fullname $last_tag || die "Could not check out tag '$last_tag'!"
-	# Switched to a new branch '$release_fullname'
 	
-	if [ $is_remote_exists = '0' ]; then
-		processing "git push --set-upstream $TWGIT_ORIGIN $feature_fullname"
-		git push --set-upstream $TWGIT_ORIGIN $feature_fullname || die "Could not push feature '$feature_fullname'!"
-	fi
+	local commit_msg=$(printf "$TWGIT_FIRST_COMMIT_MSG" "feature" "$feature_fullname")
+	processing "git commit --allow-empty -am \"$commit_msg\""
+	git commit --allow-empty -am "$commit_msg" || die "Could not make init commit!"
+	
+	local git_options=$([ $is_remote_exists = '0' ] && echo '--set-upstream' || echo '')
+	processing "git push $git_options $TWGIT_ORIGIN $feature_fullname"
+	git push $git_options $TWGIT_ORIGIN $feature_fullname || die "Could not push feature '$feature_fullname'!"
 }

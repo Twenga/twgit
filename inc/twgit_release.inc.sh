@@ -27,7 +27,7 @@ function cmd_list {
 	fi
 	
 	local releases=$(git branch -r --merged $TWGIT_ORIGIN/HEAD | grep "$TWGIT_ORIGIN/$TWGIT_PREFIX_RELEASE" | sed 's/^[* ]*//')
-	help "Remote releases merged:"
+	help "Remote releases merged into master:"
 	if [ -z "$releases" ]; then
 		info 'No merged release branch exists.'
 		echo
@@ -40,7 +40,7 @@ function cmd_list {
 	fi
 		
 	local releases=$(git branch -r --no-merged $TWGIT_ORIGIN/HEAD | grep "$TWGIT_ORIGIN/$TWGIT_PREFIX_RELEASE" | sed 's/^[* ]*//')
-	help "Remote releases NOT merged:"
+	help "Remote releases NOT merged into master:"
 	if [ -z "$releases" ]; then
 		info 'No release branch NOT merged exists.'
 		echo
@@ -82,12 +82,14 @@ function cmd_start {
 	
 	processing "git checkout -b $release_fullname $last_tag"
 	git checkout -b $release_fullname $last_tag || die "Could not check out tag '$last_tag'!"
-	# Switched to a new branch '$release_fullname'
 	
-	if [ $is_remote_exists = '0' ]; then
-		processing "git push --set-upstream $TWGIT_ORIGIN $release_fullname"
-		git push --set-upstream $TWGIT_ORIGIN $release_fullname || die "Could not push release '$release_fullname'!"
-	fi
+	local commit_msg=$(printf "$TWGIT_FIRST_COMMIT_MSG" "release" "$release_fullname")
+	processing "git commit --allow-empty -am \"$commit_msg\""
+	git commit --allow-empty -am "$commit_msg" || die "Could not make init commit!"
+	
+	local git_options=$([ $is_remote_exists = '0' ] && echo '--set-upstream' || echo '')
+	processing "git push $git_options $TWGIT_ORIGIN $release_fullname"
+	git push $git_options $TWGIT_ORIGIN $release_fullname || die "Could not push release '$release_fullname'!"
 }
 
 function cmd_finish {

@@ -1,0 +1,44 @@
+#!bash
+#
+# bash completion support for core twgit
+# copy to ~/.bash_completion
+#
+# Doc: http://www.debian-administration.org/article/317/An_introduction_to_bash_completion_part_2
+
+function _twgit {
+	local cur prev opts
+	COMPREPLY=()
+	cur="${COMP_WORDS[COMP_CWORD]}"
+	prev="${COMP_WORDS[COMP_CWORD-1]}"
+	opts="feature help hotfix release tag"
+	
+	if [ "$COMP_CWORD" = "1" ]; then
+		COMPREPLY=( $(compgen -W "${opts}" -- ${cur}) )
+		return 0
+	elif [ "$COMP_CWORD" = "2" ]; then
+		case "${prev}" in
+			feature)
+				local subopts="help list remove start"
+				COMPREPLY=( $(compgen -W "${subopts}" -- ${cur}) )
+				return 0
+				;;
+			release)
+				local subopts="finish help list remove start"
+				COMPREPLY=( $(compgen -W "${subopts}" -- ${cur}) )
+				return 0
+				;;
+			tag)
+				local subopts="help list"
+				COMPREPLY=( $(compgen -W "${subopts}" -- ${cur}) )
+				return 0
+				;;
+			hotfix)
+				return 0
+				;;
+			*)
+			;;
+		esac	
+	fi
+}
+
+complete -F _twgit twgit

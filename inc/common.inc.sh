@@ -102,11 +102,55 @@ function get_last_tag {
 	git tag | sort -rn | head -n1
 }
 
+function get_next_version {
+	local change_type="$1"
+	local current_version="$2" 
+	local next_version
+	
+	local types='major minor build'
+	local major=$(echo $current_version | cut -d. -f1)
+	local minor=$(echo $current_version | cut -d. -f2)
+	local build=$(echo $current_version | cut -d. -f3)
+	
+	case "$change_type" in
+		major) let major++ ;;
+		minor) let minor++ ;;
+		build) let build++ ;;
+		*) die "Invalid version change type: '$change_type'!" ;;
+	esac
+	echo "$major.$minor.$build"
+}
 
-
-#^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-# Questions
-#____________________________________________________________________
+function get_rank_contributors {
+	local branch="$1" author state='pre_author'
+	declare -A lines
+	
+	local tmpfile=$(tempfile)
+	git log -M -C -p --no-color "$branch" > "$tmpfile"
+	while read line; do
+		if ([ "$state" = 'pre_author' ] || [ "$state" = 'post_author' ]) && [ "${line:0:8}" = 'Author: ' ]; then
+			echo "LINE=$line"
+			author=$(echo "${line:8}" | sed 's/.*<//' | sed 's/>.*//')
+			if [ "$author" != "fs3@twenga.com" ]; then
+				state='post_author'
+				let lines[$author]=0
+			fi
+		fi
+		if [ "$state" = 'post_author' ] && [ "${line:0:3}" = '+++' ]; then
+			state='in_diff'
+		fi
+		if [ "$state" = 'in_diff' ] && ([ "${line:0:1}" = '+' ] || [ "${line:0:1}" = '-' ]); then
+			let lines[$author]++
+		fi		
+		if [ "$state" = 'in_diff' ] && [ "${line:0:6}" = 'commit' ]; then
+			state='pre_author'
+		fi
+	done < "$tmpfile"
+	rm -f "$tmpfile"
+	echo ">>>${#lines[@]}"
+	echo ">>>${!lines[@]}"
+	echo ">>>${lines[@]}"
+}
 
 
 
@@ -181,6 +225,12 @@ function assert_valid_ref_name {
 	if [ $? -ne 0 ]; then
 		die 'Unauthorized reference prefix! Pick another name.'
 	fi
+}
+
+function assert_valid_tag_name {
+	assert_valid_ref_name
+	processing 'Check valid tag name...'
+	$(echo "$1" | grep -qP '^'$TWGIT_PREFIX_TAG'[0-9]+\.[0-9]+\.[0-9]+$') || die 'Unauthorized tag name!'
 }
 
 

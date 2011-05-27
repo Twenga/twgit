@@ -8,8 +8,9 @@
 # sudo chmod +x /usr/local/bin/twgit
 
 # TODO ne pas enchaîner les fetch
-# TODO autocomplétion
+# TODO autocomplétion des options
 # TODO autoincrement [major].[minor].[revision]
+# TODO proposer Yes/No de résoudre certains pb ?
 
 if [ "$DEBUG" = "1" ]; then
 	set -x
@@ -27,7 +28,7 @@ function usage {
 	help_detail '<b>release</b>   Manage your release branches.'
 	help_detail '<b>hotfix</b>    Manage your hotfix branches.'
 	help_detail '<b>tag</b>       Manage your tags.'
-	help_detail '[help]    Display this help.'
+	help_detail '<b>[help]</b>    Display this help.'
 	echo; help 'See also:'
 	help_detail "Try 'twgit <command> [help]' for more details."
 	echo
@@ -70,5 +71,7 @@ function main {
 	fi
 }
 
+get_rank_contributors origin/master
+exit
 assert_git_configured
 main "$@"

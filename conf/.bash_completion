@@ -1,9 +1,9 @@
 #!bash
-#
-# bash completion support for core twgit
-# copy to ~/.bash_completion
-#
-# Doc: http://www.debian-administration.org/article/317/An_introduction_to_bash_completion_part_2
+
+#^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+# Bash completion support for twgit.
+# Dest path: /etc/bash_completion.d/twgit
+#____________________________________________________________________
 
 function _twgit {
 	local cur prev opts

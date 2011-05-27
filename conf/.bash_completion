@@ -23,7 +23,7 @@ function _twgit {
 				return 0
 				;;
 			release)
-				local subopts="finish help list remove start"
+				local subopts="finish help list remove reset start"
 				COMPREPLY=( $(compgen -W "${subopts}" -- ${cur}) )
 				return 0
 				;;

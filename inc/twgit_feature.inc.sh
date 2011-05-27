@@ -6,13 +6,15 @@ function usage {
 	echo; help 'Usage:'
 	help_detail 'twgit feature <action>'
 	echo; help 'Available actions are:'
-	help_detail '<b>list</b>     List remote features. Add <b>-n</b> or <b>--no-fetch</b> to do not pre fetch.'
+	help_detail '<b>list</b>'
+	help_detail '    List remote features. Add <b>-n</b> or <b>--no-fetch</b> to do not pre fetch.'; echo
 	help_detail '<b>start <featurename></b>'
-	help_detail "    Create both a new local and remote feature, or fetch the remote feature."
-	help_detail "    Prefix '$TWGIT_PREFIX_FEATURE' will be added to the specified <featurename>."
+	help_detail '    Create both a new local and remote feature, or fetch the remote feature.'
+	help_detail "    Prefix '$TWGIT_PREFIX_FEATURE' will be added to the specified <featurename>."; echo
 	help_detail '<b>remove <featurename></b>'
-	help_detail '[help]   Display this help.'
-	echo
+	help_detail '    Remove both local and remote specified feature branch.'; echo
+	help_detail '<b>[help]</b>'
+	help_detail '    Display this help.'; echo
 }
 
 function cmd_help {

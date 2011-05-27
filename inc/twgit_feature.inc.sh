@@ -116,12 +116,14 @@ function cmd_start {
 	git push $git_options $TWGIT_ORIGIN $feature_fullname || die "Could not push feature '$feature_fullname'!"
 }
 
-# TODO error: Cannot delete the branch 'release-test3' which you are currently on
 function cmd_remove {
 	local feature="$1"; require_arg 'feature' "$feature"
 	local feature_fullname="$TWGIT_PREFIX_FEATURE$feature"
 	
 	assert_valid_ref_name $feature
+
+	processing "Check current branch..."	
+	[ $(get_current_branch) = "$feature_fullname" ] && die "Cannot delete the feature '$feature_fullname' which you are currently on!"
 	
 	processing "git fetch $TWGIT_ORIGIN..."
 	git fetch $TWGIT_ORIGIN || die "Could not fetch '$TWGIT_ORIGIN'!"

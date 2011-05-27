@@ -141,6 +141,9 @@ function cmd_remove {
 	
 	assert_valid_ref_name $release
 	
+	processing "Check current branch..."	
+	[ $(get_current_branch) = "$release_fullname" ] && die "Cannot delete the release '$release_fullname' which you are currently on!"
+	
 	processing "git fetch $TWGIT_ORIGIN..."
 	git fetch $TWGIT_ORIGIN || die "Could not fetch '$TWGIT_ORIGIN'!"
 	

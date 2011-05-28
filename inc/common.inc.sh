@@ -346,3 +346,9 @@ function process_fetch () {
 		[ ! -z "$option" ] && echo
 	fi
 }
+
+function process_first_commit () {
+	local commit_msg=$(printf "$TWGIT_FIRST_COMMIT_MSG" "$1" "$2")
+	processing "git commit --allow-empty -am \"$commit_msg\""
+	git commit --allow-empty -am "$commit_msg" || die "Could not make init commit!"
+}

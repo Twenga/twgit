@@ -79,9 +79,7 @@ function cmd_start () {
 	processing "git checkout -b $release_fullname $last_tag"
 	git checkout -b $release_fullname $last_tag || die "Could not check out tag '$last_tag'!"
 	
-	local commit_msg=$(printf "$TWGIT_FIRST_COMMIT_MSG" "release" "$release_fullname")
-	processing "git commit --allow-empty -am \"$commit_msg\""
-	git commit --allow-empty -am "$commit_msg" || die "Could not make init commit!"
+	process_first_commit 'release' "$release_fullname"
 	
 	local git_options=$([ $is_remote_exists = '0' ] && echo '--set-upstream' || echo '')
 	processing "git push $git_options $TWGIT_ORIGIN $release_fullname"

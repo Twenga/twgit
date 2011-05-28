@@ -35,15 +35,12 @@ function cmd_list () {
 		echo
 	fi
 	
-	local releases=$(git branch -r --merged $TWGIT_ORIGIN/HEAD | grep "$TWGIT_ORIGIN/$TWGIT_PREFIX_RELEASE" | sed 's/^[* ]*//' | tail -n 5)
-	help "Remote releases merged into master (last 5):"
+	local releases=$(git branch -r --merged $TWGIT_ORIGIN/HEAD | grep "$TWGIT_ORIGIN/$TWGIT_PREFIX_RELEASE" | sed 's/^[* ]*//')
+	help "Remote releases merged into master:"
 	if [ -z "$releases" ]; then
 		info 'No merged release branch exists.'; echo
 	else
-		for release in $releases; do
-			info "Release: $release"
-			git show $release --pretty=medium | head -n4
-		done
+		display_branches 'Release: ' "$releases"
 	fi
 		
 	local releases=$(git branch -r --no-merged $TWGIT_ORIGIN/HEAD | grep "$TWGIT_ORIGIN/$TWGIT_PREFIX_RELEASE" | sed 's/^[* ]*//')
@@ -52,10 +49,7 @@ function cmd_list () {
 		info 'No release branch NOT merged exists.'; echo
 	else
 		[ $(echo "$releases" | wc -w) -ge 2 ] && warn "No more one release should be listed here!"
-		for release in $releases; do
-			info "Release: $release"
-			git show $release --pretty=medium | grep -v '^Merge: ' | head -n4
-		done
+		display_branches 'Release: ' "$releases"
 	fi
 }
 

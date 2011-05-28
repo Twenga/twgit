@@ -11,6 +11,7 @@ UI=(
 	[error.header]='\033[0;33m/!\ '
 	[error.color]='\033[1;31m'
 	[info.color]='\033[1;37m'
+	[info.bold.color]='\033[1;33m'
 	[help.header]='\033[1;36m(i) '
 	[help.color]='\033[0;36m'
 	[help_detail.header]='    '
@@ -77,7 +78,7 @@ function displayMsg () {
 #^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 # Gestion des paramètres (et options) des fonctions
 #
-# Les options peuvent être mélangées aux paramètres.
+# Les options (une lettre max) peuvent être mélangées aux paramètres.
 # Syntaxe admises (6 options ici) : -a -b-c -def
 #
 # Usage :
@@ -326,4 +327,13 @@ function compare_branches () {
 	else
 		return 0
 	fi
+}
+
+function display_branches () {
+	local title="$1"
+	local branches="$2"
+	for branch in $branches; do
+		info "$title$branch"
+		git show $branch --pretty=medium | grep -v '^Merge: ' | head -n4
+	done
 }

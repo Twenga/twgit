@@ -9,7 +9,7 @@ function usage () {
 	help_detail '<b>committers <featurename></b>'
 	help_detail '    List committers into the specified remote feature.'; echo
 	help_detail '<b>list</b>'
-	help_detail '    List remote features. Add <b>-n</b> or <b>--no-fetch</b> to do not pre fetch.'; echo
+	help_detail '    List remote features. Add <b>-n</b> to do not pre fetch.'; echo
 	help_detail '<b>remove <featurename></b>'
 	help_detail '    Remove both local and remote specified feature branch.'; echo
 	help_detail '<b>start <featurename></b>'
@@ -45,57 +45,45 @@ function cmd_committers () {
 }
 
 function cmd_list () {
-	if [ "$1" != '-n' -a "$1" != '--no-fetch' ]; then
+	process_options "$@"
+	
+	if ! isset_option 'n'; then
 		processing "git fetch $TWGIT_ORIGIN..."
 		git fetch $TWGIT_ORIGIN || die "Could not fetch '$TWGIT_ORIGIN'!"
 		echo
 	fi
-		
-	local features=$(git branch -r | grep "$TWGIT_ORIGIN/$TWGIT_PREFIX_FEATURE" | sed 's/^[* ]*//')
-	help "Remote features:"
-	if [ -z "$features" ]; then
-		info 'No feature branch exists.'
-		echo
-	else
-		for feature in $features; do
-			info "Feature: $feature"
-			git show $feature --pretty=medium | grep -v '^Merge: ' | head -n4
-		done
-	fi
 	
 	local features=$(git branch -r --merged $TWGIT_ORIGIN/HEAD | grep "$TWGIT_ORIGIN/$TWGIT_PREFIX_FEATURE" | sed 's/^[* ]*//')
-	help "Remote features merged into master:"
+	help "Remote features merged into master via releases:"
 	if [ -z "$features" ]; then
-		info 'No feature branch exists.'
-		echo
+		info 'No feature branch exists.'; echo
 	else
-		for feature in $features; do
-			info "Feature: $feature"
-			git show $feature --pretty=medium | grep -v '^Merge: ' | head -n4
-		done
+		display_branches 'Feature: ' "$features"
 	fi
 	
 	help "Remote features merged into releases NOT merged into master:"
 	local releases=$(git branch -r --no-merged $TWGIT_ORIGIN/HEAD | grep "$TWGIT_ORIGIN/$TWGIT_PREFIX_RELEASE" | sed 's/^[* ]*//')
 	if [ -z "$releases" ]; then
-		info 'No release branch NOT merged exists.'
-		echo
+		info 'No release branch NOT merged exists.'; echo
 	else	
 		for release in $releases; do
-			help "Remote features merged into '$release' NOT merged into master:"
+			info "<b>Release '$release':</b>"
 			local features=$(git branch -r --merged $release | grep "$TWGIT_ORIGIN/$TWGIT_PREFIX_FEATURE" | sed 's/^[* ]*//')
 			if [ -z "$features" ]; then
-				info 'No feature branch exists.'
-				echo
+				info 'No feature branch exists.'; echo
 			else
-				local feature
-				for feature in $features; do
-					info "Feature: $feature"
-					git show $feature --pretty=medium | grep -v '^Merge: ' | head -n4
-				done
+				display_branches 'Feature: ' "$features"
 			fi
 		done
 	fi
+	
+	local features=$(git branch -r | grep "$TWGIT_ORIGIN/$TWGIT_PREFIX_FEATURE" | sed 's/^[* ]*//')
+	help "Remote features not finished:"
+	if [ -z "$features" ]; then
+		info 'No feature branch exists.'; echo
+	else
+		display_branches 'Feature: ' "$features"
+	fi	
 }
 
 function cmd_start () {

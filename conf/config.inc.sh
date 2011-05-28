@@ -12,6 +12,7 @@ TWGIT_PREFIX_DEMO='demo-'
 
 TWGIT_PREFIX_COMMIT_MSG='[twgit]'
 TWGIT_FIRST_COMMIT_MSG="$TWGIT_PREFIX_COMMIT_MSG Init %s '%s'."
+TWGIT_GIT_COMMAND_PROMPT='git# '
 
 TWGIT_ORIGIN=$(git remote show -n 2>/dev/null | head -n1)
 TWGIT_MASTER='master'

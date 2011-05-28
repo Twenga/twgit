@@ -27,7 +27,7 @@ function cmd_help () {
 
 function cmd_committers () {
 	process_options "$@"
-	require_parameter feature
+	require_parameter 'feature'
 	local feature="$RETVAL"
 	local feature_fullname="$TWGIT_PREFIX_FEATURE$feature"
 	
@@ -81,7 +81,7 @@ function cmd_list () {
 
 function cmd_start () {
 	process_options "$@"
-	require_parameter feature
+	require_parameter 'feature'
 	local feature="$RETVAL"
 	local feature_fullname="$TWGIT_PREFIX_FEATURE$feature"
 	
@@ -97,14 +97,11 @@ function cmd_start () {
 		processing "Remote feature '$feature_fullname' detected."
 	fi	
 	
-	processing 'Get last tag...'
+	assert_tag_exists
 	local last_tag=$(get_last_tag)
-	if [ -z "$last_tag" ]; then
-		die 'No tag created!'
-	fi
 	#local short_last_tag=${last_tag:${#$TWGIT_PREFIX_TAG}}
 	
-	processing "git checkout -b $feature_fullname $last_tag"
+	processing "${TWGIT_GIT_COMMAND_PROMPT}git checkout -b $feature_fullname $last_tag"
 	git checkout -b $feature_fullname $last_tag || die "Could not check out tag '$last_tag'!"
 	
 	process_first_commit 'feature' "$feature_fullname"
@@ -113,7 +110,7 @@ function cmd_start () {
 
 function cmd_remove () {
 	process_options "$@"
-	require_parameter feature
+	require_parameter 'feature'
 	local feature="$RETVAL"
 	local feature_fullname="$TWGIT_PREFIX_FEATURE$feature"
 	

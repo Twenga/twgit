@@ -85,7 +85,7 @@ function displayMsg () {
 # function f () {
 #	process_options "$@"
 #	isset_option 'f' && echo "OK" || echo "NOK"
-#	require_parameter my_name
+#	require_parameter 'my_name'
 #	local release="$RETVAL"
 #	...
 # }
@@ -118,12 +118,14 @@ function require_parameter () {
 	local name=$1
 	local param="${FCT_PARAMETERS%% *}"
 	FCT_PARAMETERS="${FCT_PARAMETERS:$((${#param}+1))}"
-	if [ -z "$param" ]; then
+	if [ ! -z "$param" ]; then
+		RETVAL=$param
+	elif [ "$name" = '-' ]; then
+		RETVAL=''
+	else
 		error "Missing argument <$name>!"
 		usage
 		exit 1
-	else
-		RETVAL=$param
 	fi	
 }
 
@@ -163,15 +165,15 @@ function get_next_version () {
 	
 	local major=$(echo $current_version | cut -d. -f1)
 	local minor=$(echo $current_version | cut -d. -f2)
-	local build=$(echo $current_version | cut -d. -f3)
+	local revision=$(echo $current_version | cut -d. -f3)
 	
 	case "$change_type" in
 		major) let major++ ;;
 		minor) let minor++ ;;
-		build) let build++ ;;
+		revision) let revision++ ;;
 		*) die "Invalid version change type: '$change_type'!" ;;
 	esac
-	echo "$major.$minor.$build"
+	echo "$major.$minor.$revision"
 }
 
 # git shortlog -nse ne comptabilise que les commits...
@@ -229,9 +231,9 @@ function assert_git_repository () {
 
 function assert_branches_equal () {
 	processing 'Compare remote and local branches...'
-	if has $1 $(get_local_branches); then
+	if ! has $1 $(get_local_branches); then
 		die "Local branch '$1' does not exist and is required!"
-	elif has $2 $(get_remote_branches); then
+	elif ! has $2 $(get_remote_branches); then
 		die "Remote branch '$2' does not exist and is required!"
 	fi		
 	compare_branches "$1" "$2"
@@ -259,7 +261,7 @@ function assert_clean_working_tree () {
 	processing 'Check clean working tree...'
 	if [ `git status --porcelain --ignore-submodules=all | wc -l` -ne 0 ]; then
 		error 'Untracked files or changes to be committed in your working tree!'
-		processing 'git status'
+		processing "${TWGIT_GIT_COMMAND_PROMPT}git status"
 		git status
 		exit 1
 	fi
@@ -282,15 +284,22 @@ function assert_valid_ref_name () {
 }
 
 function assert_valid_tag_name () {
-	assert_valid_ref_name
+	local tag="$1"
+	assert_valid_ref_name "$tag"
 	processing 'Check valid tag name...'
-	$(echo "$1" | grep -qP '^'$TWGIT_PREFIX_TAG'[0-9]+\.[0-9]+\.[0-9]+$') || die 'Unauthorized tag name!'
+	$(echo "$tag" | grep -qP '^'$TWGIT_PREFIX_TAG'[0-9]+\.[0-9]+\.[0-9]+$') || die "Unauthorized tag name: '$tag'!"
 }
 
 function assert_working_tree_is_not_to_delete_branch () {
 	local branch="$1"
 	processing "Check current branch..."	
 	[ $(get_current_branch) = "$branch" ] && die "Cannot delete the branch '$branch' which you are currently on!"
+}
+
+function assert_tag_exists () {
+	processing 'Get last tag...'
+	local last_tag="$(get_last_tag)"
+	[ -z "$last_tag" ] && die 'No tag exists!' || echo "Last tag: $last_tag"
 }
 
 
@@ -302,7 +311,7 @@ function assert_working_tree_is_not_to_delete_branch () {
 function process_fetch () {
 	local option="$1"
 	if [ -z "$option" ] || ! isset_option "$option"; then
-		processing "git fetch $TWGIT_ORIGIN..."
+		processing "${TWGIT_GIT_COMMAND_PROMPT}git fetch $TWGIT_ORIGIN..."
 		git fetch $TWGIT_ORIGIN || die "Could not fetch '$TWGIT_ORIGIN'!"
 		[ ! -z "$option" ] && echo
 	fi
@@ -310,7 +319,7 @@ function process_fetch () {
 
 function process_first_commit () {
 	local commit_msg=$(printf "$TWGIT_FIRST_COMMIT_MSG" "$1" "$2")
-	processing "git commit --allow-empty -am \"$commit_msg\""
+	processing "${TWGIT_GIT_COMMAND_PROMPT}git commit --allow-empty -am \"$commit_msg\""
 	git commit --allow-empty -am "$commit_msg" || die "Could not make init commit!"
 }
 
@@ -318,14 +327,14 @@ function process_push_branch () {
 	local branch="$1"
 	local is_remote_exists="$2"
 	local git_options=$([ $is_remote_exists = '0' ] && echo '--set-upstream' || echo '')
-	processing "git push $git_options $TWGIT_ORIGIN $branch"
+	processing "${TWGIT_GIT_COMMAND_PROMPT}git push $git_options $TWGIT_ORIGIN $branch"
 	git push $git_options $TWGIT_ORIGIN $branch || die "Could not push branch '$branch'!"
 }
 
 function remove_local_branch () {
 	local branch="$1"
 	if has $branch $(get_local_branches); then
-		processing "git branch -D $branch"
+		processing "${TWGIT_GIT_COMMAND_PROMPT}git branch -D $branch"
 		git branch -D $branch || die "Remove local branch '$branch' failed!"
 	else
 		processing "Local branch '$branch' not found."
@@ -335,11 +344,11 @@ function remove_local_branch () {
 function remove_remote_branch () {
 	local branch="$1"
 	if has "$TWGIT_ORIGIN/$branch" $(get_remote_branches); then
-		processing "git push $TWGIT_ORIGIN :$branch"
+		processing "${TWGIT_GIT_COMMAND_PROMPT}git push $TWGIT_ORIGIN :$branch"
 		git push $TWGIT_ORIGIN :$branch
 		if [ $? -ne 0 ]; then
 			processing "Remove remote branch '$TWGIT_ORIGIN/$branch' failed! Maybe already deleted... so:"
-			processing "git remote prune $TWGIT_ORIGIN"
+			processing "${TWGIT_GIT_COMMAND_PROMPT}git remote prune $TWGIT_ORIGIN"
 			git remote prune $TWGIT_ORIGIN || die "Prune failed!"
 		fi
 	else

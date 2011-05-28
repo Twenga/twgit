@@ -54,12 +54,9 @@ function cmd_start () {
 	local release="$RETVAL"
 	local release_fullname="$TWGIT_PREFIX_RELEASE$release"
 	
-	#checks
 	assert_valid_ref_name $release
 	assert_clean_working_tree
-	if has $release_fullname $(get_local_branches); then
-		die "Local release '$release_fullname' already exists! Pick another name."
-	fi
+	assert_new_local_branch $release_fullname
 	
 	process_fetch
 	

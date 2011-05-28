@@ -85,12 +85,9 @@ function cmd_start () {
 	local feature="$RETVAL"
 	local feature_fullname="$TWGIT_PREFIX_FEATURE$feature"
 	
-	#checks
 	assert_valid_ref_name $feature
 	assert_clean_working_tree
-	if has $feature_fullname $(get_local_branches); then
-		die "Local feature '$feature_fullname' already exists! Pick another name."
-	fi
+	assert_new_local_branch $feature_fullname
 	
 	process_fetch
 	

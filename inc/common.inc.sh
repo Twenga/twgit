@@ -160,9 +160,7 @@ function get_last_tag () {
 function get_next_version () {
 	local change_type="$1"
 	local current_version="$2" 
-	local next_version
 	
-	local types='major minor build'
 	local major=$(echo $current_version | cut -d. -f1)
 	local minor=$(echo $current_version | cut -d. -f2)
 	local build=$(echo $current_version | cut -d. -f3)
@@ -248,6 +246,12 @@ function assert_branches_equal () {
 		else
 			die "Branches need merging first!"
 		fi
+	fi
+}
+
+function assert_new_local_branch () {
+	if has $1 $(get_local_branches); then
+		die "Local branch '$1' already exists! Pick another name."
 	fi
 }
 

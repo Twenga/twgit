@@ -8,15 +8,15 @@ function usage {
 	echo; help 'Available actions are:'
 	help_detail '<b>list</b>'
 	help_detail '    List remote releases. Add <b>-n</b> or <b>--no-fetch</b> to do not pre fetch.'; echo
-	help_detail '<b>start <releasename></b>'
-	help_detail '    Create both a new local and remote release, or fetch the remote release.'
-	help_detail "    Prefix '$TWGIT_PREFIX_RELEASE' will be added to the specified <releasename>."; echo
 	help_detail '<b>finish <releasename> <tagname></b>'
 	help_detail '    Merge specified release branch into master, create a new tag and push.'; echo
 	help_detail '<b>remove <releasename></b>'
 	help_detail '    Remove both local and remote specified release branch.'; echo
 	help_detail '<b>reset <releasename></b>'
 	help_detail '    Call remove <releasename> and start <releasename>'; echo
+	help_detail '<b>start <releasename></b>'
+	help_detail '    Create both a new local and remote release, or fetch the remote release.'
+	help_detail "    Prefix '$TWGIT_PREFIX_RELEASE' will be added to the specified <releasename>."; echo
 	help_detail '<b>[help]</b>'
 	help_detail '    Display this help.'; echo
 }

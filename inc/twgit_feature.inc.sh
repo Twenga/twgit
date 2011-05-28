@@ -7,14 +7,14 @@ function usage {
 	help_detail 'twgit feature <action>'
 	echo; help 'Available actions are:'
 	help_detail '<b>committers <featurename></b>'
-	help_detail '    List committers of the specified remote features.'; echo
+	help_detail '    List committers into the specified remote feature.'; echo
 	help_detail '<b>list</b>'
 	help_detail '    List remote features. Add <b>-n</b> or <b>--no-fetch</b> to do not pre fetch.'; echo
+	help_detail '<b>remove <featurename></b>'
+	help_detail '    Remove both local and remote specified feature branch.'; echo
 	help_detail '<b>start <featurename></b>'
 	help_detail '    Create both a new local and remote feature, or fetch the remote feature.'
 	help_detail "    Prefix '$TWGIT_PREFIX_FEATURE' will be added to the specified <featurename>."; echo
-	help_detail '<b>remove <featurename></b>'
-	help_detail '    Remove both local and remote specified feature branch.'; echo
 	help_detail '<b>[help]</b>'
 	help_detail '    Display this help.'; echo
 	# get_rank_contributors origin/master
@@ -29,8 +29,14 @@ function cmd_committers () {
 	local feature="$1"; require_arg 'feature' "$feature"
 	local feature_fullname="$TWGIT_PREFIX_FEATURE$feature"
 	
+	processing "git fetch $TWGIT_ORIGIN..."
+	git fetch $TWGIT_ORIGIN || die "Could not fetch '$TWGIT_ORIGIN'!"
+	echo
+	
 	if [ $(has "$TWGIT_ORIGIN/$feature_fullname" $(get_remote_branches)) = '1' ]; then
+		info "Committers into '$TWGIT_ORIGIN/$feature_fullname' remote feature:"
 		get_rank_contributors "$TWGIT_ORIGIN/$feature_fullname"
+		echo
 	else
 		die "Unknown remote feature '$feature_fullname'."
 	fi

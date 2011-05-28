@@ -18,7 +18,7 @@ function _twgit {
 	elif [ "$COMP_CWORD" = "2" ]; then
 		case "${prev}" in
 			feature)
-				local subopts="help list remove start"
+				local subopts="committers help list remove start"
 				COMPREPLY=( $(compgen -W "${subopts}" -- ${cur}) )
 				return 0
 				;;

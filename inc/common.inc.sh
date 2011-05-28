@@ -75,6 +75,60 @@ function displayMsg () {
 
 
 #^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+# Gestion des paramètres (et options) des fonctions
+#
+# Les options peuvent être mélangées aux paramètres.
+# Syntaxe admises (6 options ici) : -a -b-c -def
+#
+# Usage :
+# function f () {
+#	process_options "$@"
+#	isset_option 'f' && echo "OK" || echo "NOK"
+#	require_parameter my_name
+#	local release="$RETVAL"
+#	...
+# }
+#____________________________________________________________________
+
+FCT_OPTIONS=''
+FCT_PARAMETERS=''
+RETVAL='' # to avoid subshell
+function process_options {
+	local param
+	while [ $# -gt 0 ]; do
+		# PB qd echo "-n"... : param=`echo "$1" | grep -P '^-[^-]' | sed s/-//g`
+		[ ${#1} -gt 1 ] && [ ${1:0:1} = '-' ] && [ ${1:1:1} != '-' ] && param="${1:1}" || param=''
+		param=$(echo "$param" | sed s/-//g)
+		if [ ! -z "$param" ]; then
+			FCT_OPTIONS="$FCT_OPTIONS $(echo $param | sed 's/\(.\)/\1 /g')"
+		else
+			FCT_PARAMETERS="$FCT_PARAMETERS $1"
+		fi
+		shift
+	done
+	FCT_PARAMETERS=${FCT_PARAMETERS:1}
+}
+
+function isset_option () {
+	has $1 "$FCT_OPTIONS"
+}
+
+function require_parameter () {
+	local name=$1
+	local param="${FCT_PARAMETERS%% *}"
+	FCT_PARAMETERS="${FCT_PARAMETERS:$((${#param}+1))}"
+	if [ -z "$param" ]; then
+		error "Missing argument <$name>!"
+		usage
+		exit 1
+	else
+		RETVAL=$param
+	fi	
+}
+
+
+
+#^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 # Get
 #____________________________________________________________________
 
@@ -176,9 +230,9 @@ function assert_git_repository () {
 
 function assert_branches_equal () {
 	processing 'Compare remote and local branches...'
-	if [ $(has $1 $(get_local_branches)) = '0' ]; then
+	if has $1 $(get_local_branches); then
 		die "Local branch '$1' does not exist and is required!"
-	elif [ $(has $2 $(get_remote_branches)) = '0' ]; then
+	elif has $2 $(get_remote_branches); then
 		die "Remote branch '$2' does not exist and is required!"
 	fi		
 	compare_branches "$1" "$2"
@@ -194,14 +248,6 @@ function assert_branches_equal () {
 			die "Branches need merging first!"
 		fi
 	fi
-}
-
-function require_arg () {
-	if [ -z "$2" ]; then
-		error "Missing argument <$1>!"
-		usage
-		exit 1
-	fi	
 }
 
 function assert_clean_working_tree () {
@@ -248,9 +294,9 @@ function escape () {
 
 function has () {
 	local item=$1; shift
-	#echo " $@ " | grep -q " $(escape $item) "
-	local n=$(echo " $@ " | grep " $(escape $item) " | wc -l)
-	[ $n = '0' ] && echo 0 || echo 1
+	echo " $@ " | grep -q " $(escape $item) "
+	#local n=$(echo " $@ " | grep " $(escape $item) " | wc -l)
+	#[ $n = '0' ] && echo 0 || echo 1
 }
 
 

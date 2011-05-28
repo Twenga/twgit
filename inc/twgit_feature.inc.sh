@@ -26,14 +26,16 @@ function cmd_help () {
 }
 
 function cmd_committers () {
-	local feature="$1"; require_arg 'feature' "$feature"
+	process_options "$@"
+	require_parameter feature
+	local feature="$RETVAL"
 	local feature_fullname="$TWGIT_PREFIX_FEATURE$feature"
 	
 	processing "git fetch $TWGIT_ORIGIN..."
 	git fetch $TWGIT_ORIGIN || die "Could not fetch '$TWGIT_ORIGIN'!"
 	echo
 	
-	if [ $(has "$TWGIT_ORIGIN/$feature_fullname" $(get_remote_branches)) = '1' ]; then
+	if has "$TWGIT_ORIGIN/$feature_fullname" $(get_remote_branches); then
 		info "Committers into '$TWGIT_ORIGIN/$feature_fullname' remote feature:"
 		get_rank_contributors "$TWGIT_ORIGIN/$feature_fullname"
 		echo
@@ -55,7 +57,6 @@ function cmd_list () {
 		info 'No feature branch exists.'
 		echo
 	else
-		local feature
 		for feature in $features; do
 			info "Feature: $feature"
 			git show $feature --pretty=medium | grep -v '^Merge: ' | head -n4
@@ -68,7 +69,6 @@ function cmd_list () {
 		info 'No feature branch exists.'
 		echo
 	else
-		local feature
 		for feature in $features; do
 			info "Feature: $feature"
 			git show $feature --pretty=medium | grep -v '^Merge: ' | head -n4
@@ -81,7 +81,6 @@ function cmd_list () {
 		info 'No release branch NOT merged exists.'
 		echo
 	else	
-		local release
 		for release in $releases; do
 			help "Remote features merged into '$release' NOT merged into master:"
 			local features=$(git branch -r --merged $release | grep "$TWGIT_ORIGIN/$TWGIT_PREFIX_FEATURE" | sed 's/^[* ]*//')
@@ -100,13 +99,15 @@ function cmd_list () {
 }
 
 function cmd_start () {
-	local feature="$1"; require_arg 'feature' "$feature"
+	process_options "$@"
+	require_parameter feature
+	local feature="$RETVAL"
 	local feature_fullname="$TWGIT_PREFIX_FEATURE$feature"
 	
 	#checks
 	assert_valid_ref_name $feature
 	assert_clean_working_tree
-	if [ $(has $feature_fullname $(get_local_branches)) = '1' ]; then
+	if has $feature_fullname $(get_local_branches); then
 		die "Local feature '$feature_fullname' already exists! Pick another name."
 	fi
 	
@@ -114,7 +115,7 @@ function cmd_start () {
 	git fetch $TWGIT_ORIGIN || die "Could not fetch '$TWGIT_ORIGIN'!"
 	
 	processing 'Check remote features...'
-	local is_remote_exists=$(has "$TWGIT_ORIGIN/$feature_fullname" $(get_remote_branches))
+	local is_remote_exists=$(has "$TWGIT_ORIGIN/$feature_fullname" $(get_remote_branches) && echo 1 || echo 0)
 	if [ $is_remote_exists = '1' ]; then
 		processing "Remote feature '$feature_fullname' detected."
 	fi	
@@ -139,7 +140,9 @@ function cmd_start () {
 }
 
 function cmd_remove () {
-	local feature="$1"; require_arg 'feature' "$feature"
+	process_options "$@"
+	require_parameter feature
+	local feature="$RETVAL"
 	local feature_fullname="$TWGIT_PREFIX_FEATURE$feature"
 	
 	assert_valid_ref_name $feature
@@ -150,14 +153,14 @@ function cmd_remove () {
 	processing "git fetch $TWGIT_ORIGIN..."
 	git fetch $TWGIT_ORIGIN || die "Could not fetch '$TWGIT_ORIGIN'!"
 	
-	if [ $(has $feature_fullname $(get_local_branches)) = '1' ]; then
+	if has $feature_fullname $(get_local_branches); then
 		processing "git branch -D $feature_fullname"
 		git branch -D $feature_fullname || die "Remove local feature '$feature_fullname' failed!"
 	else
 		processing "Local feature '$feature_fullname' not found."
 	fi
 	
-	if [ $(has "$TWGIT_ORIGIN/$feature_fullname" $(get_remote_branches)) = '1' ]; then
+	if has "$TWGIT_ORIGIN/$feature_fullname" $(get_remote_branches); then
 		processing "git push $TWGIT_ORIGIN :$feature_fullname"
 		git push $TWGIT_ORIGIN :$feature_fullname
 		if [ $? -ne 0 ]; then

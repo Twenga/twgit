@@ -7,7 +7,7 @@ function usage () {
 	help_detail 'twgit release <action>'
 	echo; help 'Available actions are:'
 	help_detail '<b>list</b>'
-	help_detail '    List remote releases. Add <b>-n</b> or <b>--no-fetch</b> to do not pre fetch.'; echo
+	help_detail '    List remote releases. Add <b>-n</b> to do not pre fetch.'; echo
 	help_detail '<b>finish <releasename> <tagname></b>'
 	help_detail '    Merge specified release branch into master, create a new tag and push.'; echo
 	help_detail '<b>remove <releasename></b>'
@@ -27,19 +27,19 @@ function cmd_help () {
 }
 
 function cmd_list () {
-	if [ "$1" != '-n' -a "$1" != '--no-fetch' ]; then
+	process_options "$@"
+	
+	if ! isset_option 'n'; then
 		processing "git fetch $TWGIT_ORIGIN..."
 		git fetch $TWGIT_ORIGIN || die "Could not fetch '$TWGIT_ORIGIN'!"
 		echo
 	fi
 	
-	local releases=$(git branch -r --merged $TWGIT_ORIGIN/HEAD | grep "$TWGIT_ORIGIN/$TWGIT_PREFIX_RELEASE" | sed 's/^[* ]*//')
-	help "Remote releases merged into master:"
+	local releases=$(git branch -r --merged $TWGIT_ORIGIN/HEAD | grep "$TWGIT_ORIGIN/$TWGIT_PREFIX_RELEASE" | sed 's/^[* ]*//' | tail -n 5)
+	help "Remote releases merged into master (last 5):"
 	if [ -z "$releases" ]; then
-		info 'No merged release branch exists.'
-		echo
+		info 'No merged release branch exists.'; echo
 	else
-		local release
 		for release in $releases; do
 			info "Release: $release"
 			git show $release --pretty=medium | head -n4
@@ -47,12 +47,11 @@ function cmd_list () {
 	fi
 		
 	local releases=$(git branch -r --no-merged $TWGIT_ORIGIN/HEAD | grep "$TWGIT_ORIGIN/$TWGIT_PREFIX_RELEASE" | sed 's/^[* ]*//')
-	help "Remote releases NOT merged into master:"
+	help "Remote releases NOT merged into master (normally at most one):"
 	if [ -z "$releases" ]; then
-		info 'No release branch NOT merged exists.'
-		echo
+		info 'No release branch NOT merged exists.'; echo
 	else
-		local release
+		[ $(echo "$releases" | wc -w) -ge 2 ] && warn "No more one release should be listed here!"
 		for release in $releases; do
 			info "Release: $release"
 			git show $release --pretty=medium | grep -v '^Merge: ' | head -n4
@@ -61,13 +60,15 @@ function cmd_list () {
 }
 
 function cmd_start () {
-	local release="$1"; require_arg 'release' "$release"
+	process_options "$@"
+	require_parameter release
+	local release="$RETVAL"
 	local release_fullname="$TWGIT_PREFIX_RELEASE$release"
 	
 	#checks
 	assert_valid_ref_name $release
 	assert_clean_working_tree
-	if [ $(has $release_fullname $(get_local_branches)) = '1' ]; then
+	if has $release_fullname $(get_local_branches); then
 		die "Local release '$release_fullname' already exists! Pick another name."
 	fi
 	
@@ -75,7 +76,7 @@ function cmd_start () {
 	git fetch $TWGIT_ORIGIN || die "Could not fetch '$TWGIT_ORIGIN'!"
 	
 	processing 'Check remote releases...'
-	local is_remote_exists=$(has "$TWGIT_ORIGIN/$release_fullname" $(get_remote_branches))
+	local is_remote_exists=$(has "$TWGIT_ORIGIN/$release_fullname" $(get_remote_branches) && echo 1 || echo 0)
 	if [ $is_remote_exists = '1' ]; then
 		processing "Remote release '$release_fullname' detected."
 	fi	
@@ -100,10 +101,13 @@ function cmd_start () {
 }
 
 function cmd_finish () {
-	local release="$1"; require_arg 'release' "$release"
+	process_options "$@"
+	require_parameter release
+	local release="$RETVAL"
 	local release_fullname="$TWGIT_PREFIX_RELEASE$release"
-	
-	local tag="$2"; require_arg 'tag' "$tag"
+
+	require_parameter tag
+	local tag="$RETVAL"	
 	local tag_fullname="$TWGIT_PREFIX_TAG$tag"
 	
 	assert_clean_working_tree
@@ -112,14 +116,14 @@ function cmd_finish () {
 	git fetch $TWGIT_ORIGIN || die "Could not fetch '$TWGIT_ORIGIN'!"
 	
 	processing 'Check remote releases...'
-	local is_release_exists=$(has "$TWGIT_ORIGIN/$release_fullname" $(get_remote_branches))
+	local is_release_exists=$(has "$TWGIT_ORIGIN/$release_fullname" $(get_remote_branches) && echo 1 || echo 0)
 	if [ $is_release_exists = '0' ]; then
 		die "Unknown '$release_fullname' remote release! Try: twgit release list"
 	fi
 	assert_branches_equal "$release_fullname" "$TWGIT_ORIGIN/$release_fullname"
 	
 	processing 'Check tags...'
-	local is_tag_exixsts=$(has "$tag_fullname" $(get_all_tags))
+	local is_tag_exixsts=$(has "$tag_fullname" $(get_all_tags) && echo 1 || echo 0)
 	if [ $is_tag_exixsts = '1' ]; then
 		die "Tag '$tag_fullname' already exists! Try: twgit tag list"
 	fi
@@ -141,7 +145,9 @@ function cmd_finish () {
 }
 
 function cmd_remove () {
-	local release="$1"; require_arg 'release' "$release"
+	process_options "$@"
+	require_parameter release
+	local release="$RETVAL"
 	local release_fullname="$TWGIT_PREFIX_RELEASE$release"
 	
 	assert_valid_ref_name $release
@@ -152,14 +158,14 @@ function cmd_remove () {
 	processing "git fetch $TWGIT_ORIGIN..."
 	git fetch $TWGIT_ORIGIN || die "Could not fetch '$TWGIT_ORIGIN'!"
 	
-	if [ $(has $release_fullname $(get_local_branches)) = '1' ]; then
+	if has $release_fullname $(get_local_branches); then
 		processing "git branch -D $release_fullname"
 		git branch -D $release_fullname || die "Remove local release '$release_fullname' failed!"
 	else
 		processing "Local release '$release_fullname' not found."
 	fi
 	
-	if [ $(has "$TWGIT_ORIGIN/$release_fullname" $(get_remote_branches)) = '1' ]; then
+	if has "$TWGIT_ORIGIN/$release_fullname" $(get_remote_branches); then
 		processing "git push $TWGIT_ORIGIN :$release_fullname"
 		git push $TWGIT_ORIGIN :$release_fullname
 		if [ $? -ne 0 ]; then
@@ -173,6 +179,8 @@ function cmd_remove () {
 }
 
 function cmd_reset () {
-	local release="$1"; require_arg 'release' "$release"
+	process_options "$@"
+	require_parameter release
+	local release="$RETVAL"
 	cmd_remove $release && cmd_start $release
 }

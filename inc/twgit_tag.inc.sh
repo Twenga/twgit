@@ -2,7 +2,7 @@
 
 assert_git_repository
 
-function usage {
+function usage () {
 	echo; help 'Usage:'
 	help_detail 'twgit tag <action>'
 	echo; help 'Available actions are:'
@@ -12,12 +12,12 @@ function usage {
 	help_detail '    Display this help.'; echo
 }
 
-function cmd_help {
+function cmd_help () {
 	usage
 	exit 0
 }
 
-function cmd_list {
+function cmd_list () {
 	if [ "$1" != '-n' -a "$1" != '--no-fetch' ]; then
 		processing "git fetch $TWGIT_ORIGIN..."
 		git fetch $TWGIT_ORIGIN || die "Could not fetch '$TWGIT_ORIGIN'!"

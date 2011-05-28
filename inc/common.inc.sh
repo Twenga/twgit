@@ -22,31 +22,31 @@ UI=(
 	[processing.color]='\033[1;30m'
 )
 
-function processing {
+function processing () {
 	displayMsg processing "$1"
 }
 
-function info { 
+function info () { 
 	displayMsg info "$1"
 }
 
-function help { 
+function help () { 
 	displayMsg help "$1"
 }
 
-function help_detail { 
+function help_detail () { 
 	displayMsg help_detail "$1"
 }
 
-function warn { 
+function warn () { 
 	displayMsg warning "$1" >&2
 }
 
-function error { 
+function error () { 
 	displayMsg error "$1" >&2
 }
 
-function die {
+function die () {
 	error "$1"
 	echo
 	exit 1
@@ -56,7 +56,7 @@ function die {
 #
 # @param string $1 type de message à afficher : conditionne l'éventuelle en-tête et la couleur
 # @ parma string $2 message à afficher
-function displayMsg {
+function displayMsg () {
 	local type=$1
 	local msg=$2
 	
@@ -78,31 +78,31 @@ function displayMsg {
 # Get
 #____________________________________________________________________
 
-function get_all_branches { 
+function get_all_branches () { 
 	git branch -a --no-color | sed 's/^[* ] //'
 }
 
-function get_local_branches { 
+function get_local_branches () { 
 	git branch --no-color | sed 's/^[* ] //'
 }
 
-function get_remote_branches { 
+function get_remote_branches () { 
 	git branch -r --no-color | sed 's/^[* ] //'
 }
 
-function get_current_branch { 
+function get_current_branch () { 
 	git branch --no-color | grep '^\* ' | grep -v 'no branch' | sed 's/^* //g'
 }
 
-function get_all_tags {
+function get_all_tags () {
 	git tag | sort -n
 }
 
-function get_last_tag {
+function get_last_tag () {
 	git tag | sort -rn | head -n1
 }
 
-function get_next_version {
+function get_next_version () {
 	local change_type="$1"
 	local current_version="$2" 
 	local next_version
@@ -122,7 +122,7 @@ function get_next_version {
 }
 
 # git shortlog -nse ne comptabilise que les commits...
-function get_rank_contributors {
+function get_rank_contributors () {
 	local branch="$1" author state='pre_author'
 	declare -A lines
 	
@@ -161,7 +161,7 @@ function get_rank_contributors {
 # Assertions
 #____________________________________________________________________
 
-function assert_git_configured {
+function assert_git_configured () {
 	if ! git config --global user.name 1>/dev/null; then
 		die "Unknown user.name! Do: git config --global user.name 'Firstname Lastname'"
 	elif ! git config --global user.email 1>/dev/null; then
@@ -169,12 +169,12 @@ function assert_git_configured {
 	fi
 }
 
-function assert_git_repository {
+function assert_git_repository () {
 	local errormsg=$(git rev-parse --git-dir 2>&1 1>/dev/null)
 	[ ! -z "$errormsg" ] && die "[Git error msg] $errormsg"
 }
 
-function assert_branches_equal {
+function assert_branches_equal () {
 	processing 'Compare remote and local branches...'
 	if [ $(has $1 $(get_local_branches)) = '0' ]; then
 		die "Local branch '$1' does not exist and is required!"
@@ -196,7 +196,7 @@ function assert_branches_equal {
 	fi
 }
 
-function require_arg {
+function require_arg () {
 	if [ -z "$2" ]; then
 		error "Missing argument <$1>!"
 		usage
@@ -204,7 +204,7 @@ function require_arg {
 	fi	
 }
 
-function assert_clean_working_tree {
+function assert_clean_working_tree () {
 	processing 'Check clean working tree...'
 	if [ `git status --porcelain --ignore-submodules=all | wc -l` -ne 0 ]; then
 		error 'Untracked files or changes to be committed in your working tree!'
@@ -214,7 +214,7 @@ function assert_clean_working_tree {
 	fi
 }
 
-function assert_valid_ref_name {
+function assert_valid_ref_name () {
 	processing 'Check valid ref name...'
 	git check-ref-format --branch "$1" 1>/dev/null 2>&1
 	if [ $? -ne 0 ]; then
@@ -230,7 +230,7 @@ function assert_valid_ref_name {
 	fi
 }
 
-function assert_valid_tag_name {
+function assert_valid_tag_name () {
 	assert_valid_ref_name
 	processing 'Check valid tag name...'
 	$(echo "$1" | grep -qP '^'$TWGIT_PREFIX_TAG'[0-9]+\.[0-9]+\.[0-9]+$') || die 'Unauthorized tag name!'
@@ -242,11 +242,11 @@ function assert_valid_tag_name {
 # Tools
 #____________________________________________________________________
 
-function escape {
+function escape () {
 	echo "$1" | sed 's/\([\.\+\$\*]\)/\\\1/g'
 }
 
-function has {
+function has () {
 	local item=$1; shift
 	#echo " $@ " | grep -q " $(escape $item) "
 	local n=$(echo " $@ " | grep " $(escape $item) " | wc -l)
@@ -263,7 +263,7 @@ function has {
 # 3    Branch needs a real merge
 # 4    There is no merge base, i.e. the branches have no common ancestors
 #
-function compare_branches {
+function compare_branches () {
 	local commit1=$(git rev-parse "$1")
 	local commit2=$(git rev-parse "$2")
 	if [ "$commit1" != "$commit2" ]; then

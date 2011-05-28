@@ -2,7 +2,7 @@
 
 assert_git_repository
 
-function usage {
+function usage () {
 	echo; help 'Usage:'
 	help_detail 'twgit release <action>'
 	echo; help 'Available actions are:'
@@ -21,12 +21,12 @@ function usage {
 	help_detail '    Display this help.'; echo
 }
 
-function cmd_help {
+function cmd_help () {
 	usage
 	exit 0
 }
 
-function cmd_list {
+function cmd_list () {
 	if [ "$1" != '-n' -a "$1" != '--no-fetch' ]; then
 		processing "git fetch $TWGIT_ORIGIN..."
 		git fetch $TWGIT_ORIGIN || die "Could not fetch '$TWGIT_ORIGIN'!"
@@ -60,7 +60,7 @@ function cmd_list {
 	fi
 }
 
-function cmd_start {
+function cmd_start () {
 	local release="$1"; require_arg 'release' "$release"
 	local release_fullname="$TWGIT_PREFIX_RELEASE$release"
 	
@@ -99,7 +99,7 @@ function cmd_start {
 	git push $git_options $TWGIT_ORIGIN $release_fullname || die "Could not push release '$release_fullname'!"
 }
 
-function cmd_finish {
+function cmd_finish () {
 	local release="$1"; require_arg 'release' "$release"
 	local release_fullname="$TWGIT_PREFIX_RELEASE$release"
 	
@@ -140,7 +140,7 @@ function cmd_finish {
 	git push --tags $TWGIT_ORIGIN $TWGIT_MASTER || die "Could not push '$TWGIT_MASTER' on '$TWGIT_ORIGIN'!"
 }
 
-function cmd_remove {
+function cmd_remove () {
 	local release="$1"; require_arg 'release' "$release"
 	local release_fullname="$TWGIT_PREFIX_RELEASE$release"
 	
@@ -172,7 +172,7 @@ function cmd_remove {
 	fi	
 }
 
-function cmd_reset {
+function cmd_reset () {
 	local release="$1"; require_arg 'release' "$release"
 	cmd_remove $release && cmd_start $release
 }

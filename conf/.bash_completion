@@ -5,7 +5,7 @@
 # Dest path: /etc/bash_completion.d/twgit
 #____________________________________________________________________
 
-function _twgit {
+function _twgit () {
 	local cur prev opts
 	COMPREPLY=()
 	cur="${COMP_WORDS[COMP_CWORD]}"

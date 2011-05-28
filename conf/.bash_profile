@@ -5,7 +5,7 @@
 #____________________________________________________________________
 
 
-function get_git_branch {
+function get_git_branch () {
 	local branch=$(git branch --no-color 2>/dev/null | grep -P '^\*' | sed 's/* //')
 	[ ! -z "$branch" ] && echo " \[\e[1;30m\]git\[\e[1;35m\]$branch"
 }

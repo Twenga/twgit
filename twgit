@@ -20,7 +20,7 @@ fi
 . `dirname $0`/conf/config.inc.sh
 . $TWGIT_INC_DIR/common.inc.sh
 
-function usage {
+function usage () {
 	echo; help 'Usage:'
 	help_detail 'twgit <command> [action]'
 	echo; help 'Available commands are:'
@@ -34,7 +34,7 @@ function usage {
 	echo
 }
 
-function main {
+function main () {
 	if [ $# -lt 1 ]; then
 		usage
 		exit 1

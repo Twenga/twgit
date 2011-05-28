@@ -2,7 +2,7 @@
 
 assert_git_repository
 
-function usage {
+function usage () {
 	echo; help 'Usage:'
 	help_detail 'twgit feature <action>'
 	echo; help 'Available actions are:'
@@ -20,7 +20,7 @@ function usage {
 	# get_rank_contributors origin/master
 }
 
-function cmd_help {
+function cmd_help () {
 	usage
 	exit 0
 }
@@ -42,7 +42,7 @@ function cmd_committers () {
 	fi
 }
 
-function cmd_list {
+function cmd_list () {
 	if [ "$1" != '-n' -a "$1" != '--no-fetch' ]; then
 		processing "git fetch $TWGIT_ORIGIN..."
 		git fetch $TWGIT_ORIGIN || die "Could not fetch '$TWGIT_ORIGIN'!"
@@ -99,7 +99,7 @@ function cmd_list {
 	fi
 }
 
-function cmd_start {
+function cmd_start () {
 	local feature="$1"; require_arg 'feature' "$feature"
 	local feature_fullname="$TWGIT_PREFIX_FEATURE$feature"
 	
@@ -138,7 +138,7 @@ function cmd_start {
 	git push $git_options $TWGIT_ORIGIN $feature_fullname || die "Could not push feature '$feature_fullname'!"
 }
 
-function cmd_remove {
+function cmd_remove () {
 	local feature="$1"; require_arg 'feature' "$feature"
 	local feature_fullname="$TWGIT_PREFIX_FEATURE$feature"
 	

@@ -92,8 +92,7 @@ function cmd_start () {
 		processing "Remote release '$release_fullname' detected."
 	fi	
 	
-	processing "${TWGIT_GIT_COMMAND_PROMPT}git checkout -b $release_fullname $last_tag"
-	git checkout -b $release_fullname $last_tag || die "Could not check out tag '$last_tag'!"
+	process_git_command "git checkout -b $release_fullname $last_tag" "Could not check out tag '$last_tag'!"
 	
 	process_first_commit 'release' "$release_fullname"
 	process_push_branch $release_fullname $is_remote_exists
@@ -126,20 +125,11 @@ function cmd_finish () {
 	[ $is_tag_exists = '1' ] && die "Tag '$tag_fullname' already exists! Try: twgit tag list"
 	exit
 	
-	processing "${TWGIT_GIT_COMMAND_PROMPT}git checkout $TWGIT_MASTER"
-	git checkout $TWGIT_MASTER || die "Could not checkout '$TWGIT_ORIGIN'!"
-	
-	processing "${TWGIT_GIT_COMMAND_PROMPT}git merge --no-ff $TWGIT_ORIGIN/$TWGIT_MASTER"
-	git merge --no-ff $TWGIT_ORIGIN/$TWGIT_MASTER || die "Could not merge '$TWGIT_ORIGIN/$TWGIT_MASTER' into '$TWGIT_MASTER'!"
-	
-	processing "${TWGIT_GIT_COMMAND_PROMPT}git merge --no-ff $release_fullname"
-	git merge --no-ff $release_fullname || die "Could not merge '$release_fullname' into '$TWGIT_MASTER'!"
-	
-	processing "${TWGIT_GIT_COMMAND_PROMPT}git tag -a $tag_fullname -m "[by twgit] twgit release finish $release_fullname""
-	git tag -a $tag_fullname -m "[by twgit] twgit release finish $release_fullname" || die "Could not tag '$TWGIT_MASTER'!"
-	
-	processing "${TWGIT_GIT_COMMAND_PROMPT}git push --tags $TWGIT_ORIGIN $TWGIT_MASTER"
-	git push --tags $TWGIT_ORIGIN $TWGIT_MASTER || die "Could not push '$TWGIT_MASTER' on '$TWGIT_ORIGIN'!"
+	process_git_command "git checkout $TWGIT_MASTER" "Could not checkout '$TWGIT_ORIGIN'!"
+	process_git_command "git merge --no-ff $TWGIT_ORIGIN/$TWGIT_MASTER" "Could not merge '$TWGIT_ORIGIN/$TWGIT_MASTER' into '$TWGIT_MASTER'!"
+	process_git_command "git merge --no-ff $release_fullname" "Could not merge '$release_fullname' into '$TWGIT_MASTER'!"
+	process_git_command "git tag -a $tag_fullname -m \"${TWGIT_PREFIX_COMMIT_MSG}Release finish: $release_fullname\"" "Could not tag '$TWGIT_MASTER'!"
+	process_git_command "git push --tags $TWGIT_ORIGIN $TWGIT_MASTER" "Could not push '$TWGIT_MASTER' on '$TWGIT_ORIGIN'!"
 }
 
 function cmd_remove () {

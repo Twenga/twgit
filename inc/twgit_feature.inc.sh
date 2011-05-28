@@ -71,7 +71,7 @@ function cmd_list () {
 	fi
 	
 	local features=$(git branch -r | grep "$TWGIT_ORIGIN/$TWGIT_PREFIX_FEATURE" | sed 's/^[* ]*//')
-	help "Remote features not finished:"
+	help "Remote features in progress:"
 	if [ -z "$features" ]; then
 		info 'No feature branch exists.'; echo
 	else
@@ -101,8 +101,7 @@ function cmd_start () {
 	local last_tag=$(get_last_tag)
 	#local short_last_tag=${last_tag:${#$TWGIT_PREFIX_TAG}}
 	
-	processing "${TWGIT_GIT_COMMAND_PROMPT}git checkout -b $feature_fullname $last_tag"
-	git checkout -b $feature_fullname $last_tag || die "Could not check out tag '$last_tag'!"
+	process_git_command "git checkout -b $feature_fullname $last_tag" "Could not check out tag '$last_tag'!"
 	
 	process_first_commit 'feature' "$feature_fullname"
 	process_push_branch $feature_fullname $is_remote_exists

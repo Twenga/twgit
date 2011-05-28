@@ -261,8 +261,7 @@ function assert_clean_working_tree () {
 	processing 'Check clean working tree...'
 	if [ `git status --porcelain --ignore-submodules=all | wc -l` -ne 0 ]; then
 		error 'Untracked files or changes to be committed in your working tree!'
-		processing "${TWGIT_GIT_COMMAND_PROMPT}git status"
-		git status
+		process_git_command 'git status'
 		exit 1
 	fi
 }
@@ -311,31 +310,34 @@ function assert_tag_exists () {
 function process_fetch () {
 	local option="$1"
 	if [ -z "$option" ] || ! isset_option "$option"; then
-		processing "${TWGIT_GIT_COMMAND_PROMPT}git fetch $TWGIT_ORIGIN..."
-		git fetch $TWGIT_ORIGIN || die "Could not fetch '$TWGIT_ORIGIN'!"
+		process_git_command "git fetch $TWGIT_ORIGIN" "Could not fetch '$TWGIT_ORIGIN'!"
 		[ ! -z "$option" ] && echo
 	fi
 }
 
 function process_first_commit () {
 	local commit_msg=$(printf "$TWGIT_FIRST_COMMIT_MSG" "$1" "$2")
-	processing "${TWGIT_GIT_COMMAND_PROMPT}git commit --allow-empty -am \"$commit_msg\""
-	git commit --allow-empty -am "$commit_msg" || die "Could not make init commit!"
+	process_git_command "git commit --allow-empty -am \"$commit_msg\"" 'Could not make initial commit!'
 }
 
 function process_push_branch () {
 	local branch="$1"
 	local is_remote_exists="$2"
 	local git_options=$([ $is_remote_exists = '0' ] && echo '--set-upstream' || echo '')
-	processing "${TWGIT_GIT_COMMAND_PROMPT}git push $git_options $TWGIT_ORIGIN $branch"
-	git push $git_options $TWGIT_ORIGIN $branch || die "Could not push branch '$branch'!"
+	process_git_command "git push $git_options $TWGIT_ORIGIN $branch" "Could not push branch '$branch'!"
+}
+
+function process_git_command () {
+	local cmd="$1"
+	local error_msg="$2"
+	processing "$TWGIT_GIT_COMMAND_PROMPT$cmd"
+	$cmd || die "$error_msg"
 }
 
 function remove_local_branch () {
 	local branch="$1"
 	if has $branch $(get_local_branches); then
-		processing "${TWGIT_GIT_COMMAND_PROMPT}git branch -D $branch"
-		git branch -D $branch || die "Remove local branch '$branch' failed!"
+		process_git_command "git branch -D $branch" "Remove local branch '$branch' failed!"
 	else
 		processing "Local branch '$branch' not found."
 	fi
@@ -344,12 +346,10 @@ function remove_local_branch () {
 function remove_remote_branch () {
 	local branch="$1"
 	if has "$TWGIT_ORIGIN/$branch" $(get_remote_branches); then
-		processing "${TWGIT_GIT_COMMAND_PROMPT}git push $TWGIT_ORIGIN :$branch"
-		git push $TWGIT_ORIGIN :$branch
+		process_git_command "git push $TWGIT_ORIGIN :$branch" "Delete remote branch '$TWGIT_ORIGIN/$branch' failed "
 		if [ $? -ne 0 ]; then
 			processing "Remove remote branch '$TWGIT_ORIGIN/$branch' failed! Maybe already deleted... so:"
-			processing "${TWGIT_GIT_COMMAND_PROMPT}git remote prune $TWGIT_ORIGIN"
-			git remote prune $TWGIT_ORIGIN || die "Prune failed!"
+			process_git_command "git remote prune $TWGIT_ORIGIN" "Prune failed!"
 		fi
 	else
 		die "Remote branch '$TWGIT_ORIGIN/$branch' not found!"

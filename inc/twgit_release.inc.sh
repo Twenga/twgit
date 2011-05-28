@@ -141,19 +141,8 @@ function cmd_remove () {
 	[ $(get_current_branch) = "$release_fullname" ] && die "Cannot delete the release '$release_fullname' which you are currently on!"
 	
 	process_fetch
-	process_remove_local_branch $release_fullname
-	
-	if has "$TWGIT_ORIGIN/$release_fullname" $(get_remote_branches); then
-		processing "git push $TWGIT_ORIGIN :$release_fullname"
-		git push $TWGIT_ORIGIN :$release_fullname
-		if [ $? -ne 0 ]; then
-			processing "Remove remote release '$TWGIT_ORIGIN/$release_fullname' failed! Maybe already deleted... so:"
-			processing "git remote prune $TWGIT_ORIGIN"
-			git remote prune $TWGIT_ORIGIN || die "Prune failed!"
-		fi
-	else
-		die "Remote release '$TWGIT_ORIGIN/$release_fullname' not found!"
-	fi	
+	remove_local_branch $release_fullname
+	remove_remote_branch $release_fullname
 }
 
 function cmd_reset () {

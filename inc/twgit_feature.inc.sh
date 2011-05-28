@@ -129,17 +129,6 @@ function cmd_remove () {
 	[ $(get_current_branch) = "$feature_fullname" ] && die "Cannot delete the feature '$feature_fullname' which you are currently on!"
 	
 	process_fetch
-	process_remove_local_branch $feature_fullname
-	
-	if has "$TWGIT_ORIGIN/$feature_fullname" $(get_remote_branches); then
-		processing "git push $TWGIT_ORIGIN :$feature_fullname"
-		git push $TWGIT_ORIGIN :$feature_fullname
-		if [ $? -ne 0 ]; then
-			processing "Remove remote feature '$TWGIT_ORIGIN/$feature_fullname' failed! Maybe already deleted... so:"
-			processing "git remote prune $TWGIT_ORIGIN"
-			git remote prune $TWGIT_ORIGIN || die "Prune failed!"
-		fi
-	else
-		die "Remote feature '$TWGIT_ORIGIN/$feature_fullname' not found!"
-	fi	
+	remove_local_branch $feature_fullname
+	remove_remote_branch $feature_fullname
 }

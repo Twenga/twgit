@@ -304,7 +304,7 @@ function process_first_commit () {
 	git commit --allow-empty -am "$commit_msg" || die "Could not make init commit!"
 }
 
-function process_remove_local_branch () {
+function remove_local_branch () {
 	local branch="$1"
 	if has $branch $(get_local_branches); then
 		processing "git branch -D $branch"
@@ -312,6 +312,21 @@ function process_remove_local_branch () {
 	else
 		processing "Local branch '$branch' not found."
 	fi
+}
+
+function remove_remote_branch () {
+	local branch="$1"
+	if has "$TWGIT_ORIGIN/$branch" $(get_remote_branches); then
+		processing "git push $TWGIT_ORIGIN :$branch"
+		git push $TWGIT_ORIGIN :$branch
+		if [ $? -ne 0 ]; then
+			processing "Remove remote branch '$TWGIT_ORIGIN/$branch' failed! Maybe already deleted... so:"
+			processing "git remote prune $TWGIT_ORIGIN"
+			git remote prune $TWGIT_ORIGIN || die "Prune failed!"
+		fi
+	else
+		die "Remote branch '$TWGIT_ORIGIN/$branch' not found!"
+	fi	
 }
 
 

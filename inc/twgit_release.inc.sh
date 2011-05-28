@@ -130,9 +130,7 @@ function cmd_remove () {
 	local release_fullname="$TWGIT_PREFIX_RELEASE$release"
 	
 	assert_valid_ref_name $release
-	
-	processing "Check current branch..."	
-	[ $(get_current_branch) = "$release_fullname" ] && die "Cannot delete the release '$release_fullname' which you are currently on!"
+	assert_working_tree_is_not_to_delete_branch $release_fullname
 	
 	process_fetch
 	remove_local_branch $release_fullname

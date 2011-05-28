@@ -287,6 +287,12 @@ function assert_valid_tag_name () {
 	$(echo "$1" | grep -qP '^'$TWGIT_PREFIX_TAG'[0-9]+\.[0-9]+\.[0-9]+$') || die 'Unauthorized tag name!'
 }
 
+function assert_working_tree_is_not_to_delete_branch () {
+	local branch="$1"
+	processing "Check current branch..."	
+	[ $(get_current_branch) = "$branch" ] && die "Cannot delete the branch '$branch' which you are currently on!"
+}
+
 
 
 #^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^

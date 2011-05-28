@@ -118,9 +118,7 @@ function cmd_remove () {
 	local feature_fullname="$TWGIT_PREFIX_FEATURE$feature"
 	
 	assert_valid_ref_name $feature
-
-	processing "Check current branch..."	
-	[ $(get_current_branch) = "$feature_fullname" ] && die "Cannot delete the feature '$feature_fullname' which you are currently on!"
+	assert_working_tree_is_not_to_delete_branch $feature_fullname
 	
 	process_fetch
 	remove_local_branch $feature_fullname

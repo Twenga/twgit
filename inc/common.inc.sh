@@ -286,7 +286,38 @@ function assert_valid_tag_name () {
 
 
 #^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-# Tools
+# Traitements
+#____________________________________________________________________
+
+function process_fetch () {
+	local option="$1"
+	if [ -z "$option" ] || ! isset_option "$option"; then
+		processing "git fetch $TWGIT_ORIGIN..."
+		git fetch $TWGIT_ORIGIN || die "Could not fetch '$TWGIT_ORIGIN'!"
+		[ ! -z "$option" ] && echo
+	fi
+}
+
+function process_first_commit () {
+	local commit_msg=$(printf "$TWGIT_FIRST_COMMIT_MSG" "$1" "$2")
+	processing "git commit --allow-empty -am \"$commit_msg\""
+	git commit --allow-empty -am "$commit_msg" || die "Could not make init commit!"
+}
+
+function process_remove_local_branch () {
+	local branch="$1"
+	if has $branch $(get_local_branches); then
+		processing "git branch -D $branch"
+		git branch -D $branch || die "Remove local branch '$branch' failed!"
+	else
+		processing "Local branch '$branch' not found."
+	fi
+}
+
+
+
+#^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+# Autre...
 #____________________________________________________________________
 
 function escape () {
@@ -336,19 +367,4 @@ function display_branches () {
 		info "$title$branch"
 		git show $branch --pretty=medium | grep -v '^Merge: ' | head -n4
 	done
-}
-
-function process_fetch () {
-	local option="$1"
-	if [ -z "$option" ] || ! isset_option "$option"; then
-		processing "git fetch $TWGIT_ORIGIN..."
-		git fetch $TWGIT_ORIGIN || die "Could not fetch '$TWGIT_ORIGIN'!"
-		[ ! -z "$option" ] && echo
-	fi
-}
-
-function process_first_commit () {
-	local commit_msg=$(printf "$TWGIT_FIRST_COMMIT_MSG" "$1" "$2")
-	processing "git commit --allow-empty -am \"$commit_msg\""
-	git commit --allow-empty -am "$commit_msg" || die "Could not make init commit!"
 }

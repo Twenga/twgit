@@ -141,13 +141,7 @@ function cmd_remove () {
 	[ $(get_current_branch) = "$release_fullname" ] && die "Cannot delete the release '$release_fullname' which you are currently on!"
 	
 	process_fetch
-	
-	if has $release_fullname $(get_local_branches); then
-		processing "git branch -D $release_fullname"
-		git branch -D $release_fullname || die "Remove local release '$release_fullname' failed!"
-	else
-		processing "Local release '$release_fullname' not found."
-	fi
+	process_remove_local_branch $release_fullname
 	
 	if has "$TWGIT_ORIGIN/$release_fullname" $(get_remote_branches); then
 		processing "git push $TWGIT_ORIGIN :$release_fullname"

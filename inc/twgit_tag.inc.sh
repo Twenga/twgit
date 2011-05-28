@@ -18,10 +18,8 @@ function cmd_help () {
 }
 
 function cmd_list () {
-	if [ "$1" != '-n' -a "$1" != '--no-fetch' ]; then
-		processing "git fetch $TWGIT_ORIGIN..."
-		git fetch $TWGIT_ORIGIN || die "Could not fetch '$TWGIT_ORIGIN'!"
-	fi
+	process_options "$@"
+	process_fetch 'n'
 	
 	local tags=$(get_all_tags)
 	if [ -z "$tags" ]; then

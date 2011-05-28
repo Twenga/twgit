@@ -31,9 +31,7 @@ function cmd_committers () {
 	local feature="$RETVAL"
 	local feature_fullname="$TWGIT_PREFIX_FEATURE$feature"
 	
-	processing "git fetch $TWGIT_ORIGIN..."
-	git fetch $TWGIT_ORIGIN || die "Could not fetch '$TWGIT_ORIGIN'!"
-	echo
+	process_fetch; echo
 	
 	if has "$TWGIT_ORIGIN/$feature_fullname" $(get_remote_branches); then
 		info "Committers into '$TWGIT_ORIGIN/$feature_fullname' remote feature:"
@@ -46,12 +44,7 @@ function cmd_committers () {
 
 function cmd_list () {
 	process_options "$@"
-	
-	if ! isset_option 'n'; then
-		processing "git fetch $TWGIT_ORIGIN..."
-		git fetch $TWGIT_ORIGIN || die "Could not fetch '$TWGIT_ORIGIN'!"
-		echo
-	fi
+	process_fetch 'n'
 	
 	local features=$(git branch -r --merged $TWGIT_ORIGIN/HEAD | grep "$TWGIT_ORIGIN/$TWGIT_PREFIX_FEATURE" | sed 's/^[* ]*//')
 	help "Remote features merged into master via releases:"
@@ -99,8 +92,7 @@ function cmd_start () {
 		die "Local feature '$feature_fullname' already exists! Pick another name."
 	fi
 	
-	processing "git fetch $TWGIT_ORIGIN..."
-	git fetch $TWGIT_ORIGIN || die "Could not fetch '$TWGIT_ORIGIN'!"
+	process_fetch
 	
 	processing 'Check remote features...'
 	local is_remote_exists=$(has "$TWGIT_ORIGIN/$feature_fullname" $(get_remote_branches) && echo 1 || echo 0)
@@ -138,8 +130,7 @@ function cmd_remove () {
 	processing "Check current branch..."	
 	[ $(get_current_branch) = "$feature_fullname" ] && die "Cannot delete the feature '$feature_fullname' which you are currently on!"
 	
-	processing "git fetch $TWGIT_ORIGIN..."
-	git fetch $TWGIT_ORIGIN || die "Could not fetch '$TWGIT_ORIGIN'!"
+	process_fetch
 	
 	if has $feature_fullname $(get_local_branches); then
 		processing "git branch -D $feature_fullname"

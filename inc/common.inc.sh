@@ -337,3 +337,12 @@ function display_branches () {
 		git show $branch --pretty=medium | grep -v '^Merge: ' | head -n4
 	done
 }
+
+function process_fetch () {
+	local option="$1"
+	if [ -z "$option" ] || ! isset_option "$option"; then
+		processing "git fetch $TWGIT_ORIGIN..."
+		git fetch $TWGIT_ORIGIN || die "Could not fetch '$TWGIT_ORIGIN'!"
+		[ ! -z "$option" ] && echo
+	fi
+}

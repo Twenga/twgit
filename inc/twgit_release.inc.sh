@@ -28,12 +28,7 @@ function cmd_help () {
 
 function cmd_list () {
 	process_options "$@"
-	
-	if ! isset_option 'n'; then
-		processing "git fetch $TWGIT_ORIGIN..."
-		git fetch $TWGIT_ORIGIN || die "Could not fetch '$TWGIT_ORIGIN'!"
-		echo
-	fi
+	process_fetch 'n'
 	
 	local releases=$(git branch -r --merged $TWGIT_ORIGIN/HEAD | grep "$TWGIT_ORIGIN/$TWGIT_PREFIX_RELEASE" | sed 's/^[* ]*//')
 	help "Remote releases merged into master:"
@@ -66,8 +61,7 @@ function cmd_start () {
 		die "Local release '$release_fullname' already exists! Pick another name."
 	fi
 	
-	processing "git fetch $TWGIT_ORIGIN..."
-	git fetch $TWGIT_ORIGIN || die "Could not fetch '$TWGIT_ORIGIN'!"
+	process_fetch
 	
 	processing 'Check remote releases...'
 	local is_remote_exists=$(has "$TWGIT_ORIGIN/$release_fullname" $(get_remote_branches) && echo 1 || echo 0)
@@ -106,8 +100,7 @@ function cmd_finish () {
 	
 	assert_clean_working_tree
 	
-	processing "git fetch $TWGIT_ORIGIN..."
-	git fetch $TWGIT_ORIGIN || die "Could not fetch '$TWGIT_ORIGIN'!"
+	process_fetch
 	
 	processing 'Check remote releases...'
 	local is_release_exists=$(has "$TWGIT_ORIGIN/$release_fullname" $(get_remote_branches) && echo 1 || echo 0)
@@ -149,8 +142,7 @@ function cmd_remove () {
 	processing "Check current branch..."	
 	[ $(get_current_branch) = "$release_fullname" ] && die "Cannot delete the release '$release_fullname' which you are currently on!"
 	
-	processing "git fetch $TWGIT_ORIGIN..."
-	git fetch $TWGIT_ORIGIN || die "Could not fetch '$TWGIT_ORIGIN'!"
+	process_fetch
 	
 	if has $release_fullname $(get_local_branches); then
 		processing "git branch -D $release_fullname"

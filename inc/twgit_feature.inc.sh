@@ -108,10 +108,7 @@ function cmd_start () {
 	git checkout -b $feature_fullname $last_tag || die "Could not check out tag '$last_tag'!"
 	
 	process_first_commit 'feature' "$feature_fullname"
-	
-	local git_options=$([ $is_remote_exists = '0' ] && echo '--set-upstream' || echo '')
-	processing "git push $git_options $TWGIT_ORIGIN $feature_fullname"
-	git push $git_options $TWGIT_ORIGIN $feature_fullname || die "Could not push feature '$feature_fullname'!"
+	process_push_branch $feature_fullname $is_remote_exists
 }
 
 function cmd_remove () {

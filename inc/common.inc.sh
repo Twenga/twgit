@@ -308,6 +308,14 @@ function process_first_commit () {
 	git commit --allow-empty -am "$commit_msg" || die "Could not make init commit!"
 }
 
+function process_push_branch () {
+	local branch="$1"
+	local is_remote_exists="$2"
+	local git_options=$([ $is_remote_exists = '0' ] && echo '--set-upstream' || echo '')
+	processing "git push $git_options $TWGIT_ORIGIN $branch"
+	git push $git_options $TWGIT_ORIGIN $branch || die "Could not push branch '$branch'!"
+}
+
 function remove_local_branch () {
 	local branch="$1"
 	if has $branch $(get_local_branches); then

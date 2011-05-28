@@ -77,10 +77,7 @@ function cmd_start () {
 	git checkout -b $release_fullname $last_tag || die "Could not check out tag '$last_tag'!"
 	
 	process_first_commit 'release' "$release_fullname"
-	
-	local git_options=$([ $is_remote_exists = '0' ] && echo '--set-upstream' || echo '')
-	processing "git push $git_options $TWGIT_ORIGIN $release_fullname"
-	git push $git_options $TWGIT_ORIGIN $release_fullname || die "Could not push release '$release_fullname'!"
+	process_push_branch $release_fullname $is_remote_exists
 }
 
 function cmd_finish () {

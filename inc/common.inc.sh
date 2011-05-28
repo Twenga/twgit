@@ -121,6 +121,7 @@ function get_next_version {
 	echo "$major.$minor.$build"
 }
 
+# git shortlog -nse ne comptabilise que les commits...
 function get_rank_contributors {
 	local branch="$1" author state='pre_author'
 	declare -A lines
@@ -129,7 +130,6 @@ function get_rank_contributors {
 	git log -M -C -p --no-color "$branch" > "$tmpfile"
 	while read line; do
 		if ([ "$state" = 'pre_author' ] || [ "$state" = 'post_author' ]) && [ "${line:0:8}" = 'Author: ' ]; then
-			echo "LINE=$line"
 			author=$(echo "${line:8}" | sed 's/.*<//' | sed 's/>.*//')
 			if [ "$author" != "fs3@twenga.com" ]; then
 				state='post_author'
@@ -147,9 +147,12 @@ function get_rank_contributors {
 		fi
 	done < "$tmpfile"
 	rm -f "$tmpfile"
-	echo ">>>${#lines[@]}"
-	echo ">>>${!lines[@]}"
-	echo ">>>${lines[@]}"
+	# echo ">>>${#lines[@]}"
+	echo "${!lines[@]}"
+	# echo ">>>${lines[@]}"
+	
+	# sort -t: -k 3n /etc/passwd | more
+	# Sort passwd file by 3rd field.
 }
 
 

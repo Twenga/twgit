@@ -6,6 +6,8 @@ function usage {
 	echo; help 'Usage:'
 	help_detail 'twgit feature <action>'
 	echo; help 'Available actions are:'
+	help_detail '<b>committers <featurename></b>'
+	help_detail '    List committers of the specified remote features.'; echo
 	help_detail '<b>list</b>'
 	help_detail '    List remote features. Add <b>-n</b> or <b>--no-fetch</b> to do not pre fetch.'; echo
 	help_detail '<b>start <featurename></b>'
@@ -15,11 +17,23 @@ function usage {
 	help_detail '    Remove both local and remote specified feature branch.'; echo
 	help_detail '<b>[help]</b>'
 	help_detail '    Display this help.'; echo
+	# get_rank_contributors origin/master
 }
 
 function cmd_help {
 	usage
 	exit 0
+}
+
+function cmd_committers () {
+	local feature="$1"; require_arg 'feature' "$feature"
+	local feature_fullname="$TWGIT_PREFIX_FEATURE$feature"
+	
+	if [ $(has "$TWGIT_ORIGIN/$feature_fullname" $(get_remote_branches)) = '1' ]; then
+		get_rank_contributors "$TWGIT_ORIGIN/$feature_fullname"
+	else
+		die "Unknown remote feature '$feature_fullname'."
+	fi
 }
 
 function cmd_list {

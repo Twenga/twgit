@@ -71,7 +71,5 @@ function main {
 	fi
 }
 
-get_rank_contributors origin/master
-exit
 assert_git_configured
 main "$@"

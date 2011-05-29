@@ -106,7 +106,7 @@ function cmd_finish () {
 
 	require_parameter '-'
 	local tag="$RETVAL"
-	[ -z "$tag" ] && tag="$TWGIT_PREFIX_TAG$release"
+	[ -z "$tag" ] && tag="$release"
 	local tag_fullname="$TWGIT_PREFIX_TAG$tag"
 	
 	assert_clean_working_tree
@@ -123,13 +123,15 @@ function cmd_finish () {
 	processing 'Check tags...'
 	local is_tag_exists=$(has "$tag_fullname" $(get_all_tags) && echo 1 || echo 0)
 	[ $is_tag_exists = '1' ] && die "Tag '$tag_fullname' already exists! Try: twgit tag list"
-	exit
 	
 	process_git_command "git checkout $TWGIT_MASTER" "Could not checkout '$TWGIT_ORIGIN'!"
 	process_git_command "git merge --no-ff $TWGIT_ORIGIN/$TWGIT_MASTER" "Could not merge '$TWGIT_ORIGIN/$TWGIT_MASTER' into '$TWGIT_MASTER'!"
 	process_git_command "git merge --no-ff $release_fullname" "Could not merge '$release_fullname' into '$TWGIT_MASTER'!"
 	process_git_command "git tag -a $tag_fullname -m \"${TWGIT_PREFIX_COMMIT_MSG}Release finish: $release_fullname\"" "Could not tag '$TWGIT_MASTER'!"
 	process_git_command "git push --tags $TWGIT_ORIGIN $TWGIT_MASTER" "Could not push '$TWGIT_MASTER' on '$TWGIT_ORIGIN'!"
+	
+	# TODO supprimer les features ?
+	# TODO supprimer la release
 }
 
 function cmd_remove () {

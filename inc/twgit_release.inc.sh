@@ -43,8 +43,8 @@ function cmd_list () {
 	local release=$(get_current_release_in_progress)
 	help "Remote release NOT merged into '<b>master</b>':"
 	display_branches 'Release: ' "$release" | head -n -1
-	echo 'Features:'
 	
+	echo 'Features:'
 	local features="$(get_merged_features $release)"
 	for f in $features; do echo "    - $f [merged]"; done
 	features="$(get_features merged_in_progress $release)"
@@ -108,8 +108,11 @@ function cmd_finish () {
 	local tag_fullname="$TWGIT_PREFIX_TAG$tag"
 
 	assert_clean_working_tree
-
 	process_fetch
+	
+	processing 'Check remote features...'
+	local features="$(get_features merged_in_progress $TWGIT_ORIGIN/$release_fullname)"
+	[ ! -z "$features" ] && die "Features exists that are merged into this release but yet in development: '$features'!"
 
 	processing 'Check remote releases...'
 	local is_release_exists=$(has "$TWGIT_ORIGIN/$release_fullname" $(get_remote_branches) && echo 1 || echo 0)

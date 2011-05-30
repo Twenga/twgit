@@ -155,6 +155,33 @@ function get_releases_in_progress () {
 	git branch -r --no-merged $TWGIT_ORIGIN/HEAD | grep "$TWGIT_ORIGIN/$TWGIT_PREFIX_RELEASE" | sed 's/^[* ]*//'
 }
 
+function get_features () {
+	local feature_type="$1"
+	local release="$2"
+	local features=''
+	local features_merged=$(git branch -r --merged $release | grep "$TWGIT_ORIGIN/$TWGIT_PREFIX_FEATURE" | sed 's/^[* ]*//')
+	local fs=$(git branch -r | grep "$TWGIT_ORIGIN/$TWGIT_PREFIX_FEATURE" | sed 's/^[* ]*//')
+	local head_rev=$(git rev-parse $TWGIT_ORIGIN/HEAD)
+	local release_rev=$(git rev-parse $release)
+	for f in $fs; do
+		f_rev=$(git rev-parse $f)
+		merge_base=$(git merge-base $release_rev $f_rev)
+		master_merge_base=$(git merge-base $release_rev $head_rev)
+		if [ "$merge_base" = "$f_rev" ]; then
+			if [ "$feature_type" = 'merged' ]; then
+				features="$features $f"
+			fi
+		elif [ "$merge_base" != "$master_merge_base" ]; then
+			if [ "$feature_type" = 'merged_in_progress' ]; then
+				features="$features $f"
+			fi
+		elif [ "$feature_type" = 'free' ]; then
+			features="$features $f"
+		fi
+	done
+	echo $features
+}
+
 function get_current_branch () {
 	git branch --no-color | grep '^\* ' | grep -v 'no branch' | sed 's/^* //g'
 }

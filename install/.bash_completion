@@ -3,17 +3,17 @@
 #^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 # Bash completion support for twgit.
 # Dest path: /etc/bash_completion.d/twgit
-# sudo mv /home/gaubry/twgit/conf/.bash_completion /etc/bash_completion.d/twgit
+# Install: sudo make install
 #____________________________________________________________________
 
 function _twgit () {
 	COMPREPLY=()
 	local cur="${COMP_WORDS[COMP_CWORD]}"
-	
+
 	if [ "$COMP_CWORD" = "1" ]; then
 		local opts="feature help release tag"
 		COMPREPLY=( $(compgen -W "${opts}" -- ${cur}) )
-		
+
 	elif [ "$COMP_CWORD" = "2" ]; then
 		local command="${COMP_WORDS[COMP_CWORD-1]}"
 		case "${command}" in
@@ -29,8 +29,8 @@ function _twgit () {
 				local opts="help list"
 				COMPREPLY=( $(compgen -W "${opts}" -- ${cur}) )
 				;;
-		esac	
-		
+		esac
+
 	elif [ "$COMP_CWORD" -gt "2" ]; then
 		local command="${COMP_WORDS[1]}"
 		local action="${COMP_WORDS[2]}"
@@ -49,9 +49,9 @@ function _twgit () {
 					        COMPREPLY=( $(compgen -W "${opts}" -- ${cur}) )
 					    fi
 						;;
-				esac				
+				esac
 				;;
-				
+
 			release)
 				case "${action}" in
 					finish|remove|reset)
@@ -66,7 +66,7 @@ function _twgit () {
 					        COMPREPLY=( $(compgen -W "${opts}" -- ${cur}) )
 					    fi
 						;;
-				esac				
+				esac
 				;;
 		esac
 	fi

@@ -1,11 +1,6 @@
 #!/bin/bash
 
-# /bin/bash ~/twgit/twgit
-#
-# sudo vi /usr/local/bin/twgit
-#	#!/bin/bash
-#	/bin/bash ~/twgit/twgit $@
-# sudo chmod +x /usr/local/bin/twgit
+# Install: sudo make install
 
 # TODO ne pas enchaîner les fetch
 # TODO autocomplétion des options
@@ -25,7 +20,7 @@ function usage () {
 	help_detail 'twgit <command> [<action>]'
 	help_detail '    Always provide branch names without prefix:'
 	help_detail "    - '$TWGIT_PREFIX_FEATURE', '$TWGIT_PREFIX_RELEASE', '$TWGIT_PREFIX_HOTFIX', (tag) '$TWGIT_PREFIX_TAG'"
-	
+
 	echo; help 'Available commands are:'
 	help_detail '<b>feature</b>   Manage your feature branches.'
 	help_detail '<b>release</b>   Manage your release branches.'
@@ -42,7 +37,7 @@ function main () {
 		usage
 		exit 1
 	fi
-	
+
 	# load command:
 	if [ ! -z "$1" ]; then
 		local command="$1"; shift
@@ -58,7 +53,7 @@ function main () {
 			. "$command_file"
 		fi
 	fi
-	
+
 	# run the specified action:
 	local action='help'
 	if [ ! -z "$1" ]; then

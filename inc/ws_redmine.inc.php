@@ -17,28 +17,35 @@ class Issue extends ActiveResource {
     var $extra_params = '?key=c0bb67bc6ae9b1693ac3f06a8e7fd8f5eefa425f';
 }
 
-if (isset($_GET['issue'])) {
-	$issue_id = $_GET['issue'];
-} else {
-	$argc--;
-	array_shift($argv);
-	if ($argc < 1) {
-		throw new Exception('Issue ID missing!');
-	}
-	$issue_id = $argv[0];
+$argc--;
+array_shift($argv);
+if ($argc < 1) {
+	throw new Exception('Issue ID missing!');
 }
+$issue_id = $argv[0];
+$needed_key = ($argc >= 2 ? $argv[1] : '');
 
 $issue = new Issue (array ('subject' => 'XML REST API'));
 $issue->find($issue_id);
 if ($issue->error !== false) {
 	file_put_contents('php://stderr', $issue->error . "\n" . $issue->response_headers, E_USER_ERROR);
+	exit(1);
 } else if (strcasecmp($issue_id, $issue->id) !== 0) {
 	file_put_contents('php://stderr', "Requested ID: '$issue_id'. ID found: '" . $issue->id . "'", E_USER_ERROR);
+	exit(1);
 } else {
-	echo 'ID: ' . $issue->id . "\n";
-	echo 'Parent: ' . $issue->parent . "\n";
-	echo 'Project: ' . $issue->project . "\n";
-	echo 'Subject: ' . $issue->subject . "\n";
-	echo 'Description: ' . $issue->description . "\n";
-	echo 'Assign to: ' . $issue->assigned_to->attributes()->name . "\n";
+	$data = array(
+		'id' => $issue->id,
+		'parent' => $issue->parent,
+		'project' => $issue->project,
+		'subject' => $issue->subject,
+		'description' => $issue->description,
+		'assign_to' => $issue->assigned_to->attributes()->name,
+	);
+}
+
+if ( ! empty($needed_key) && isset($data[$needed_key])) {
+	echo $data[$needed_key];
+} else {
+	echo json_encode($data);
 }

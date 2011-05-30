@@ -165,35 +165,45 @@ function get_current_release_in_progress () {
 
 function get_merged_features () {
 	local release="$1"
-	features=$(git branch -r --merged $release | grep "$TWGIT_ORIGIN/$TWGIT_PREFIX_FEATURE" | sed 's/^[* ]*//')
-	[ "$features" != "$(get_features merged $release)" ] && die "Inconsistent result about merged features!"
+	local features="$(git branch -r --merged $release | grep $TWGIT_ORIGIN/$TWGIT_PREFIX_FEATURE | sed 's/^[* ]*//' | tr '\n' ' ' | sed 's/ *$//g')"
+	local features_v2="$(get_features merged $release)"
+	[ "$features" != "$features_v2" ] && die "Inconsistent result about merged features: '$features' != '$features_v2'!"
 	echo $features
 }
 
 # $1 dans {merged, merged_in_progress, free}
 function get_features () {
-	local feature_type="$1" release="$2"
-	local return_features=''
-	
-	local features_merged=$(git branch -r --merged $release | grep "$TWGIT_ORIGIN/$TWGIT_PREFIX_FEATURE" | sed 's/^[* ]*//')
-	local features=$(git branch -r | grep "$TWGIT_ORIGIN/$TWGIT_PREFIX_FEATURE" | sed 's/^[* ]*//')
-	local head_rev=$(git rev-parse $TWGIT_ORIGIN/HEAD)
-	local release_rev=$(git rev-parse $release)
-	
-	local f_rev merge_base master_merge_base
-	for f in $features; do
-		f_rev=$(git rev-parse $f)
-		merge_base=$(git merge-base $release_rev $f_rev)
-		master_merge_base=$(git merge-base $release_rev $head_rev)
-		if [ "$merge_base" = "$f_rev" ]; then
-			[ "$feature_type" = 'merged' ] && return_features="$return_features $f"
-		elif [ "$merge_base" != "$master_merge_base" ]; then
-			[ "$feature_type" = 'merged_in_progress' ] && return_features="$return_features $f"
+	local feature_type="$1"
+	local release="$2"
+
+	if [ -z "$release" ]; then
+		if [ "$feature_type" = 'merged' ] || [ "$feature_type" = 'merged_in_progress' ]; then
+			echo ''
 		elif [ "$feature_type" = 'free' ]; then
-			return_features="$return_features $f"
+			git branch -r --no-merged $TWGIT_ORIGIN/HEAD | grep "$TWGIT_ORIGIN/$TWGIT_PREFIX_FEATURE" | sed 's/^[* ]*//' | tr '\n' ' ' | sed 's/ *$//g'
 		fi
-	done
-	echo ${return_features:1}
+	else
+		local return_features=''
+		local features_merged=$(git branch -r --merged $release | grep "$TWGIT_ORIGIN/$TWGIT_PREFIX_FEATURE" | sed 's/^[* ]*//')
+		local features=$(git branch -r | grep "$TWGIT_ORIGIN/$TWGIT_PREFIX_FEATURE" | sed 's/^[* ]*//')
+		local head_rev=$(git rev-parse $TWGIT_ORIGIN/HEAD)
+		local release_rev=$(git rev-parse $release)
+
+		local f_rev merge_base master_merge_base
+		for f in $features; do
+			f_rev=$(git rev-parse $f)
+			merge_base=$(git merge-base $release_rev $f_rev)
+			master_merge_base=$(git merge-base $release_rev $head_rev)
+			if [ "$merge_base" = "$f_rev" ]; then
+				[ "$feature_type" = 'merged' ] && return_features="$return_features $f"
+			elif [ "$merge_base" != "$master_merge_base" ]; then
+				[ "$feature_type" = 'merged_in_progress' ] && return_features="$return_features $f"
+			elif [ "$feature_type" = 'free' ]; then
+				return_features="$return_features $f"
+			fi
+		done
+		echo ${return_features:1}
+	fi
 }
 
 function get_current_branch () {
@@ -340,10 +350,13 @@ function assert_valid_tag_name () {
 	$(echo "$tag" | grep -qP '^'$TWGIT_PREFIX_TAG'[0-9]+\.[0-9]+\.[0-9]+$') || die "Unauthorized tag name: '$tag'!"
 }
 
-function assert_working_tree_is_not_to_delete_branch () {
+function assert_working_tree_is_not_on_delete_branch () {
 	local branch="$1"
 	processing "Check current branch..."
-	[ $(get_current_branch) = "$branch" ] && die "Cannot delete the branch '$branch' which you are currently on!"
+	if [ $(get_current_branch) = "$branch" ]; then
+		 processing "Cannot delete the branch '$branch' which you are currently on! So:"
+		 exec_git_command "git checkout $TWGIT_MASTER" "Could not checkout '$TWGIT_MASTER'!"
+	fi
 }
 
 function assert_tag_exists () {
@@ -361,7 +374,7 @@ function assert_tag_exists () {
 function process_fetch () {
 	local option="$1"
 	if [ -z "$option" ] || ! isset_option "$option"; then
-		exec_git_command "git fetch $TWGIT_ORIGIN" "Could not fetch '$TWGIT_ORIGIN'!"
+		exec_git_command "git fetch --prune $TWGIT_ORIGIN" "Could not fetch '$TWGIT_ORIGIN'!"
 		[ ! -z "$option" ] && echo
 	fi
 }
@@ -410,6 +423,19 @@ function remove_remote_branch () {
 	else
 		die "Remote branch '$TWGIT_ORIGIN/$branch' not found!"
 	fi
+}
+
+function remove_feature () {
+	local feature="$1"
+	local feature_fullname="$TWGIT_PREFIX_FEATURE$feature"
+
+	assert_valid_ref_name $feature
+	assert_clean_working_tree
+	assert_working_tree_is_not_on_delete_branch $feature_fullname
+
+	process_fetch
+	remove_local_branch $feature_fullname
+	remove_remote_branch $feature_fullname
 }
 
 
@@ -461,7 +487,7 @@ function compare_branches () {
 function display_branches () {
 	local title="$1"
 	local branches="$2"
-	
+
 	if [ -z "$branches" ]; then
 		info 'No such branch exists.'; echo
 	else

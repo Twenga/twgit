@@ -54,19 +54,19 @@ function cmd_list () {
 	local release=$(get_current_release_in_progress)
 	if [ -z "$release" ]; then
 		help "Remote features merged into release in progress:"
-		info 'No release branch in progress.'; echo
+		info 'No such branch exists.'; echo
 	else
 		help "Remote features merged into release in progress '<b>$release</b>':"
 		features=$(get_merged_features $release)
 		display_branches 'Feature: ' "$features"
+
+		features="$(get_features merged_in_progress $release)"
+		help "Remote features in progress, merged into '<b>$release</b>' in the past:"
+		display_branches 'Feature: ' "$features"
 	fi
-	
-	features="$(get_features merged_in_progress $release)"
-	help "Remote features in progress, merged into '<b>$release</b>' in the past:"
-	display_branches 'Feature: ' "$features"
 
 	features="$(get_features free $release)"
-	help "Remote features in progress not merged into releases:"
+	help "Remote features in progress NOT merged into releases:"
 	display_branches 'Feature: ' "$features"
 }
 
@@ -102,12 +102,5 @@ function cmd_remove () {
 	process_options "$@"
 	require_parameter 'feature'
 	local feature="$RETVAL"
-	local feature_fullname="$TWGIT_PREFIX_FEATURE$feature"
-
-	assert_valid_ref_name $feature
-	assert_working_tree_is_not_to_delete_branch $feature_fullname
-
-	process_fetch
-	remove_local_branch $feature_fullname
-	remove_remote_branch $feature_fullname
+	remove_feature "$feature"
 }

@@ -20,7 +20,7 @@ function cmd_help () {
 function cmd_list () {
 	process_options "$@"
 	process_fetch 'n'
-	
+
 	local tags=$(get_all_tags)
 	if [ -z "$tags" ]; then
 		info 'No tag exists.'
@@ -32,7 +32,7 @@ function cmd_list () {
 			info "Tag: $tag"
 			git show $tag --pretty=medium | head -n4 | tail -n +2
 			let n=$n+1
-			[ $n = '5' ] && break 
+			[ $n = '5' ] && break
 		done
 	fi
 }

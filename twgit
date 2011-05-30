@@ -3,9 +3,9 @@
 # Install: sudo make install
 
 # TODO ne pas enchaîner les fetch
-# TODO autocomplétion des options
-# TODO autoincrement [major].[minor].[revision]
 # TODO proposer Yes/No de résoudre certains pb ?
+# TODO merge d'une feature
+# TODO merge auto multi features
 
 if [ "$DEBUG" = "1" ]; then
 	set -x

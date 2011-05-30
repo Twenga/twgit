@@ -101,7 +101,7 @@ function cmd_start () {
 	local last_tag=$(get_last_tag)
 	#local short_last_tag=${last_tag:${#$TWGIT_PREFIX_TAG}}
 
-	process_git_command "git checkout -b $feature_fullname $last_tag" "Could not check out tag '$last_tag'!"
+	exec_git_command "git checkout -b $feature_fullname $last_tag" "Could not check out tag '$last_tag'!"
 
 	process_first_commit 'feature' "$feature_fullname"
 	process_push_branch $feature_fullname $is_remote_exists

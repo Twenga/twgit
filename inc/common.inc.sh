@@ -1,25 +1,26 @@
 #!/bin/bash
 
 
-#^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+#--------------------------------------------------------------------
 # User interface
-#____________________________________________________________________
+#--------------------------------------------------------------------
 
 # Map des colorations et en-têtes des messages du superviseur :
 declare -A UI
 UI=(
-	[error.header]='\033[0;33m/!\ '
+	[error.header]='\033[4;33m/!\\\033[0;37m '
 	[error.color]='\033[1;31m'
 	[info.color]='\033[1;37m'
-	[info.bold.color]='\033[1;33m'
+	[info.bold.color]='\033[1;35m'
 	[help.header]='\033[1;36m(i) '
 	[help.color]='\033[0;36m'
 	[help_detail.header]='    '
 	[help_detail.color]='\033[0;37m'
 	[help_detail.bold.color]='\033[1;37m'
 	[normal.color]='\033[0;37m'
-	[warning.header]='\033[33m/!\ '
+	[warning.header]='\033[4;33m/!\\\033[0;37m '
 	[warning.color]='\033[0;33m'
+	[question.color]='\033[1;33m'
 	[processing.color]='\033[1;30m'
 )
 
@@ -27,23 +28,27 @@ function processing () {
 	displayMsg processing "$1"
 }
 
-function info () { 
+function info () {
 	displayMsg info "$1"
 }
 
-function help () { 
+function help () {
 	displayMsg help "$1"
 }
 
-function help_detail () { 
+function help_detail () {
 	displayMsg help_detail "$1"
 }
 
-function warn () { 
+function warn () {
 	displayMsg warning "$1" >&2
 }
 
-function error () { 
+function question () {
+	displayMsg question "$1"
+}
+
+function error () {
 	displayMsg error "$1" >&2
 }
 
@@ -60,12 +65,12 @@ function die () {
 function displayMsg () {
 	local type=$1
 	local msg=$2
-	
+
 	local is_defined=`echo ${!UI[*]} | grep "\b$type\b" | wc -l`
 	[ $is_defined = 0 ] && echo "Unknown display type '$type'!" >&2 && exit 1
 	local escape_color=$(echo ${UI[$type'.color']} | sed 's/\\/\\\\/g')
 	local escape_bold_color=$(echo ${UI[$type'.bold.color']} | sed 's/\\/\\\\/g')
-	
+
 	if [ ! -z "${UI[$type'.header']}" ]; then
 		echo -en "${UI[$type'.header']}"
 	fi
@@ -74,8 +79,7 @@ function displayMsg () {
 }
 
 
-
-#^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+#--------------------------------------------------------------------
 # Gestion des paramètres (et options) des fonctions
 #
 # Les options (une lettre max) peuvent être mélangées aux paramètres.
@@ -89,7 +93,7 @@ function displayMsg () {
 #	local release="$RETVAL"
 #	...
 # }
-#____________________________________________________________________
+#--------------------------------------------------------------------
 
 FCT_OPTIONS=''
 FCT_PARAMETERS=''
@@ -126,28 +130,32 @@ function require_parameter () {
 		error "Missing argument <$name>!"
 		usage
 		exit 1
-	fi	
+	fi
 }
 
 
 
-#^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+#--------------------------------------------------------------------
 # Get
-#____________________________________________________________________
+#--------------------------------------------------------------------
 
-function get_all_branches () { 
+function get_all_branches () {
 	git branch -a --no-color | sed 's/^[* ] //'
 }
 
-function get_local_branches () { 
+function get_local_branches () {
 	git branch --no-color | sed 's/^[* ] //'
 }
 
-function get_remote_branches () { 
+function get_remote_branches () {
 	git branch -r --no-color | sed 's/^[* ] //'
 }
 
-function get_current_branch () { 
+function get_releases_in_progress () {
+	git branch -r --no-merged $TWGIT_ORIGIN/HEAD | grep "$TWGIT_ORIGIN/$TWGIT_PREFIX_RELEASE" | sed 's/^[* ]*//'
+}
+
+function get_current_branch () {
 	git branch --no-color | grep '^\* ' | grep -v 'no branch' | sed 's/^* //g'
 }
 
@@ -161,12 +169,12 @@ function get_last_tag () {
 
 function get_next_version () {
 	local change_type="$1"
-	local current_version="$2" 
-	
+	local current_version="$2"
+
 	local major=$(echo $current_version | cut -d. -f1)
 	local minor=$(echo $current_version | cut -d. -f2)
 	local revision=$(echo $current_version | cut -d. -f3)
-	
+
 	case "$change_type" in
 		major) let major++ ;;
 		minor) let minor++ ;;
@@ -180,7 +188,7 @@ function get_next_version () {
 function get_rank_contributors () {
 	local branch="$1" author state='pre_author'
 	declare -A lines
-	
+
 	local tmpfile=$(tempfile)
 	git log -M -C -p --no-color "$branch" > "$tmpfile"
 	while read line; do
@@ -196,7 +204,7 @@ function get_rank_contributors () {
 		fi
 		if [ "$state" = 'in_diff' ] && ([ "${line:0:1}" = '+' ] || [ "${line:0:1}" = '-' ]); then
 			let lines[$author]++
-		fi		
+		fi
 		if [ "$state" = 'in_diff' ] && [ "${line:0:6}" = 'commit' ]; then
 			state='pre_author'
 		fi
@@ -205,16 +213,16 @@ function get_rank_contributors () {
 	# echo ">>>${#lines[@]}"
 	echo "${!lines[@]}"
 	# echo ">>>${lines[@]}"
-	
+
 	# sort -t: -k 3n /etc/passwd | more
 	# Sort passwd file by 3rd field.
 }
 
 
 
-#^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+#--------------------------------------------------------------------
 # Assertions
-#____________________________________________________________________
+#--------------------------------------------------------------------
 
 function assert_git_configured () {
 	if ! git config --global user.name 1>/dev/null; then
@@ -235,7 +243,7 @@ function assert_branches_equal () {
 		die "Local branch '$1' does not exist and is required!"
 	elif ! has $2 $(get_remote_branches); then
 		die "Remote branch '$2' does not exist and is required!"
-	fi		
+	fi
 	compare_branches "$1" "$2"
 	local status=$?
 	if [ $status -gt 0 ]; then
@@ -261,7 +269,7 @@ function assert_clean_working_tree () {
 	processing 'Check clean working tree...'
 	if [ `git status --porcelain --ignore-submodules=all | wc -l` -ne 0 ]; then
 		error 'Untracked files or changes to be committed in your working tree!'
-		process_git_command 'git status'
+		exec_git_command 'git status'
 		exit 1
 	fi
 }
@@ -272,7 +280,7 @@ function assert_valid_ref_name () {
 	if [ $? -ne 0 ]; then
 		die "'$1' is not a valid reference name!"
 	fi
-	
+
 	echo $1 | grep -vP "^$TWGIT_PREFIX_FEATURE" \
 		| grep -vP "^$TWGIT_PREFIX_RELEASE" \
 		| grep -vP "^$TWGIT_PREFIX_HOTFIX" \
@@ -291,7 +299,7 @@ function assert_valid_tag_name () {
 
 function assert_working_tree_is_not_to_delete_branch () {
 	local branch="$1"
-	processing "Check current branch..."	
+	processing "Check current branch..."
 	[ $(get_current_branch) = "$branch" ] && die "Cannot delete the branch '$branch' which you are currently on!"
 }
 
@@ -303,31 +311,36 @@ function assert_tag_exists () {
 
 
 
-#^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+#--------------------------------------------------------------------
 # Traitements
-#____________________________________________________________________
+#--------------------------------------------------------------------
 
 function process_fetch () {
 	local option="$1"
 	if [ -z "$option" ] || ! isset_option "$option"; then
-		process_git_command "git fetch $TWGIT_ORIGIN" "Could not fetch '$TWGIT_ORIGIN'!"
+		exec_git_command "git fetch $TWGIT_ORIGIN" "Could not fetch '$TWGIT_ORIGIN'!"
 		[ ! -z "$option" ] && echo
 	fi
 }
 
 function process_first_commit () {
 	local commit_msg=$(printf "$TWGIT_FIRST_COMMIT_MSG" "$1" "$2")
-	process_git_command "git commit --allow-empty -am \"$commit_msg\"" 'Could not make initial commit!'
+	#exec_git_command "git commit --allow-empty -m \"$commit_msg\"" 'Could not make initial commit!'
+
+	processing "$TWGIT_GIT_COMMAND_PROMPTgit commit --allow-empty -m \"$commit_msg\""
+	git commit --allow-empty -m "$commit_msg" || die "$error_msg"
 }
 
 function process_push_branch () {
 	local branch="$1"
 	local is_remote_exists="$2"
 	local git_options=$([ $is_remote_exists = '0' ] && echo '--set-upstream' || echo '')
-	process_git_command "git push $git_options $TWGIT_ORIGIN $branch" "Could not push branch '$branch'!"
+	exec_git_command "git push $git_options $TWGIT_ORIGIN $branch" "Could not push branch '$branch'!"
 }
 
-function process_git_command () {
+# ne pas utiliser si des quotes sont nécessaires pour délimiter des paramètres de la commande...
+# http://mywiki.wooledge.org/BashFAQ/050
+function exec_git_command () {
 	local cmd="$1"
 	local error_msg="$2"
 	processing "$TWGIT_GIT_COMMAND_PROMPT$cmd"
@@ -337,7 +350,7 @@ function process_git_command () {
 function remove_local_branch () {
 	local branch="$1"
 	if has $branch $(get_local_branches); then
-		process_git_command "git branch -D $branch" "Remove local branch '$branch' failed!"
+		exec_git_command "git branch -D $branch" "Remove local branch '$branch' failed!"
 	else
 		processing "Local branch '$branch' not found."
 	fi
@@ -346,21 +359,21 @@ function remove_local_branch () {
 function remove_remote_branch () {
 	local branch="$1"
 	if has "$TWGIT_ORIGIN/$branch" $(get_remote_branches); then
-		process_git_command "git push $TWGIT_ORIGIN :$branch" "Delete remote branch '$TWGIT_ORIGIN/$branch' failed "
+		exec_git_command "git push $TWGIT_ORIGIN :$branch" "Delete remote branch '$TWGIT_ORIGIN/$branch' failed "
 		if [ $? -ne 0 ]; then
 			processing "Remove remote branch '$TWGIT_ORIGIN/$branch' failed! Maybe already deleted... so:"
-			process_git_command "git remote prune $TWGIT_ORIGIN" "Prune failed!"
+			exec_git_command "git remote prune $TWGIT_ORIGIN" "Prune failed!"
 		fi
 	else
 		die "Remote branch '$TWGIT_ORIGIN/$branch' not found!"
-	fi	
+	fi
 }
 
 
 
-#^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+#--------------------------------------------------------------------
 # Autre...
-#____________________________________________________________________
+#--------------------------------------------------------------------
 
 function escape () {
 	echo "$1" | sed 's/\([\.\+\$\*]\)/\\\1/g'

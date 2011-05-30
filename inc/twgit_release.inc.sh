@@ -37,21 +37,18 @@ function cmd_list () {
 	process_fetch 'f'
 
 	local releases=$(git branch -r --merged $TWGIT_ORIGIN/HEAD | grep "$TWGIT_ORIGIN/$TWGIT_PREFIX_RELEASE" | sed 's/^[* ]*//')
-	help "Remote releases merged into master:"
-	if [ -z "$releases" ]; then
-		info 'No merged release branch exists.'; echo
-	else
-		display_branches 'Release: ' "$releases"
-	fi
+	help "Remote releases merged into '<b>master</b>':"
+	display_branches 'Release: ' "$releases"
 
-	local releases=$(get_releases_in_progress)
-	help "Remote releases NOT merged into master (normally at most one):"
-	if [ -z "$releases" ]; then
-		info 'No release branch NOT merged exists.'; echo
-	else
-		[ $(echo "$releases" | wc -w) -ge 2 ] && warn "No more one release should be listed here!"
-		display_branches 'Release: ' "$releases"
-	fi
+	local release=$(get_current_release_in_progress)
+	help "Remote release NOT merged into '<b>master</b>':"
+	display_branches 'Release: ' "$release" | head -n -1
+	echo 'Features:'
+	
+	local features="$(get_merged_features $release)"
+	for f in $features; do echo "    - $f [merged]"; done
+	features="$(get_features merged_in_progress $release)"
+	for f in $features; do echo "    - $f [merged, then in progress]"; done
 }
 
 function cmd_start () {
@@ -59,8 +56,9 @@ function cmd_start () {
 	require_parameter '-'
 	local release="$RETVAL"
 	local release_fullname
+	assert_valid_ref_name $release
 
-	[[ $(get_releases_in_progress | wc -w) > 0 ]] && die "No more one release is authorized at the same time! Try: $0 release list"
+	[[ $(get_releases_in_progress | wc -w) > 0 ]] && die "No more one release is authorized at the same time! Try: twgit release list"
 	assert_tag_exists
 	local last_tag=$(get_last_tag)
 	local short_last_tag=${last_tag:${#TWGIT_PREFIX_TAG}}
@@ -81,7 +79,6 @@ function cmd_start () {
 		release_fullname="$TWGIT_PREFIX_RELEASE$release"
 	fi
 
-	assert_valid_ref_name $release
 	assert_clean_working_tree
 	assert_new_local_branch $release_fullname
 

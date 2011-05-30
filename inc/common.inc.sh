@@ -14,6 +14,7 @@ UI=(
 	[info.bold.color]='\033[1;35m'
 	[help.header]='\033[1;36m(i) '
 	[help.color]='\033[0;36m'
+	[help.bold.color]='\033[1;36m'
 	[help_detail.header]='    '
 	[help_detail.color]='\033[0;37m'
 	[help_detail.bold.color]='\033[1;37m'
@@ -155,31 +156,44 @@ function get_releases_in_progress () {
 	git branch -r --no-merged $TWGIT_ORIGIN/HEAD | grep "$TWGIT_ORIGIN/$TWGIT_PREFIX_RELEASE" | sed 's/^[* ]*//'
 }
 
+function get_current_release_in_progress () {
+	local releases="$(get_releases_in_progress)"
+	local release="$(echo $releases | cut -d' ' -f1)"
+	[[ $(echo $releases | wc -w) > 1 ]] && warn "More than one release in propress detected! Only '$release' will be treated here."
+	echo $release
+}
+
+function get_merged_features () {
+	local release="$1"
+	features=$(git branch -r --merged $release | grep "$TWGIT_ORIGIN/$TWGIT_PREFIX_FEATURE" | sed 's/^[* ]*//')
+	[ "$features" != "$(get_features merged $release)" ] && die "Inconsistent result about merged features!"
+	echo $features
+}
+
+# $1 dans {merged, merged_in_progress, free}
 function get_features () {
-	local feature_type="$1"
-	local release="$2"
-	local features=''
+	local feature_type="$1" release="$2"
+	local return_features=''
+	
 	local features_merged=$(git branch -r --merged $release | grep "$TWGIT_ORIGIN/$TWGIT_PREFIX_FEATURE" | sed 's/^[* ]*//')
-	local fs=$(git branch -r | grep "$TWGIT_ORIGIN/$TWGIT_PREFIX_FEATURE" | sed 's/^[* ]*//')
+	local features=$(git branch -r | grep "$TWGIT_ORIGIN/$TWGIT_PREFIX_FEATURE" | sed 's/^[* ]*//')
 	local head_rev=$(git rev-parse $TWGIT_ORIGIN/HEAD)
 	local release_rev=$(git rev-parse $release)
-	for f in $fs; do
+	
+	local f_rev merge_base master_merge_base
+	for f in $features; do
 		f_rev=$(git rev-parse $f)
 		merge_base=$(git merge-base $release_rev $f_rev)
 		master_merge_base=$(git merge-base $release_rev $head_rev)
 		if [ "$merge_base" = "$f_rev" ]; then
-			if [ "$feature_type" = 'merged' ]; then
-				features="$features $f"
-			fi
+			[ "$feature_type" = 'merged' ] && return_features="$return_features $f"
 		elif [ "$merge_base" != "$master_merge_base" ]; then
-			if [ "$feature_type" = 'merged_in_progress' ]; then
-				features="$features $f"
-			fi
+			[ "$feature_type" = 'merged_in_progress' ] && return_features="$return_features $f"
 		elif [ "$feature_type" = 'free' ]; then
-			features="$features $f"
+			return_features="$return_features $f"
 		fi
 	done
-	echo $features
+	echo ${return_features:1}
 }
 
 function get_current_branch () {
@@ -306,6 +320,8 @@ function assert_valid_ref_name () {
 	git check-ref-format --branch "$1" 1>/dev/null 2>&1
 	if [ $? -ne 0 ]; then
 		die "'$1' is not a valid reference name!"
+	elif  echo "$1" | grep -q ' '; then
+		die "'$1' is not a valid reference name: whitespaces not allowed!"
 	fi
 
 	echo $1 | grep -vP "^$TWGIT_PREFIX_FEATURE" \
@@ -445,8 +461,13 @@ function compare_branches () {
 function display_branches () {
 	local title="$1"
 	local branches="$2"
-	for branch in $branches; do
-		info "$title$branch"
-		git show $branch --pretty=medium | grep -v '^Merge: ' | head -n4
-	done
+	
+	if [ -z "$branches" ]; then
+		info 'No such branch exists.'; echo
+	else
+		for branch in $branches; do
+			info "$title$branch"
+			git show $branch --pretty=medium | grep -v '^Merge: ' | head -n4
+		done
+	fi
 }

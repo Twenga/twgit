@@ -45,61 +45,29 @@ function cmd_committers () {
 function cmd_list () {
 	process_options "$@"
 	process_fetch 'f'
+	local features
 
-	local features=$(git branch -r --merged $TWGIT_ORIGIN/HEAD | grep "$TWGIT_ORIGIN/$TWGIT_PREFIX_FEATURE" | sed 's/^[* ]*//')
+	features=$(git branch -r --merged $TWGIT_ORIGIN/HEAD | grep "$TWGIT_ORIGIN/$TWGIT_PREFIX_FEATURE" | sed 's/^[* ]*//')
 	help "Remote features merged into master via releases:"
-	if [ -z "$features" ]; then
-		info 'No feature branch exists.'; echo
-	else
-		display_branches 'Feature: ' "$features"
-	fi
+	display_branches 'Feature: ' "$features"
 
-	local releases=$(git branch -r --no-merged $TWGIT_ORIGIN/HEAD | grep "$TWGIT_ORIGIN/$TWGIT_PREFIX_RELEASE" | sed 's/^[* ]*//')
-	local release="$(echo $releases | cut -d' ' -f1)"
-	if [ -z "$releases" ]; then
-		help "Remote features merged into releases in progress:"
+	local release=$(get_current_release_in_progress)
+	if [ -z "$release" ]; then
+		help "Remote features merged into release in progress:"
 		info 'No release branch in progress.'; echo
 	else
-		[[ $(echo $releases | wc -w) > 1 ]] && warn "More than one release in propress detected! Only '$release' will be treated here."
-		help "Remote features merged into release in progress '$release':"
-		local features=$(git branch -r --merged $release | grep "$TWGIT_ORIGIN/$TWGIT_PREFIX_FEATURE" | sed 's/^[* ]*//')
-		if [ -z "$features" ]; then
-			info 'No feature branch exists.'; echo
-		else
-			display_branches 'Feature: ' "$features"
-		fi
-	fi
-
-	local features=$(git branch -r | grep "$TWGIT_ORIGIN/$TWGIT_PREFIX_FEATURE" | sed 's/^[* ]*//')
-	help "Remote features in progress not merged into releases:"
-	if [ -z "$features" ]; then
-		info 'No feature branch exists.'; echo
-	else
+		help "Remote features merged into release in progress '<b>$release</b>':"
+		features=$(get_merged_features $release)
 		display_branches 'Feature: ' "$features"
 	fi
+	
+	features="$(get_features merged_in_progress $release)"
+	help "Remote features in progress, merged into '<b>$release</b>' in the past:"
+	display_branches 'Feature: ' "$features"
 
-	help "Remote features in progress merged into releases in the past:"
-	local features_merged=$(git branch -r --merged origin/release-test | grep "origin/feature-" | sed 's/^[* ]*//')
-	local fs=$(git branch -r | grep "$TWGIT_ORIGIN/$TWGIT_PREFIX_FEATURE" | sed 's/^[* ]*//')
-	local head_rev=$(git rev-parse origin/HEAD)
-	local release_rev=$(git rev-parse origin/release-test)
-	for f in $fs; do
-		f_rev=$(git rev-parse $f)
-		merge_base=$(git merge-base $release_rev $f_rev)
-		master_merge_base=$(git merge-base $release_rev $head_rev)
-		echo "f=$f"
-		echo "f_rev=$f_rev"
-		echo "release_rev=$release_rev"
-		echo "merge_base=$merge_base"
-		echo "master_merge_base=$master_merge_base"
-		[ "$merge_base" = "$f_rev" ] && echo "MERGED" || (\
-		[ "$merge_base" != "$master_merge_base" ] && echo "MERGED AND IN PROGRESS" || echo "OUT" )
-		echo
-	done
-
-	echo "merged>>>$(get_features merged $release)<"
-	echo "merged in progress>>>$(get_features merged_in_progress $release)<"
-	echo "free>>>$(get_features free $release)<"
+	features="$(get_features free $release)"
+	help "Remote features in progress not merged into releases:"
+	display_branches 'Feature: ' "$features"
 }
 
 function cmd_start () {

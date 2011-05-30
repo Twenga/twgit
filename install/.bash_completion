@@ -45,7 +45,7 @@ function _twgit () {
 						;;
 					list)
 					    if [[ ${cur} == -* ]] ; then
-							local opts="-n"
+							local opts="-f"
 					        COMPREPLY=( $(compgen -W "${opts}" -- ${cur}) )
 					    fi
 						;;
@@ -62,7 +62,7 @@ function _twgit () {
 						;;
 					list)
 					    if [[ ${cur} == -* ]] ; then
-							local opts="-n"
+							local opts="-f"
 					        COMPREPLY=( $(compgen -W "${opts}" -- ${cur}) )
 					    fi
 						;;

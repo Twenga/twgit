@@ -387,12 +387,13 @@ function update () {
 	cd "$TWGIT_ROOT_DIR"
 	if git rev-parse --git-dir 1>/dev/null 2>&1; then
 		[ ! -f "$TWGIT_UPDATE_PATH" ] && touch "$TWGIT_UPDATE_PATH"
-		local time_elapsing=$(( ($(date -u +%s) - $(date -r "$TWGIT_UPDATE_PATH" +%s)) ))
+		local elapsed_time=$(( ($(date -u +%s) - $(date -r "$TWGIT_UPDATE_PATH" +%s)) ))
 		echo "#$time_elapsing" #ee
-		if [ $time_elapsing -gt 10 ]; then
-			[ $time_elapsing -gt 1000 ] && echo "[1000]"
-			[ $time_elapsing -gt 10000 ] && echo "[10000]"
-			processing "fetch twgit..."
+
+		local interval=$(( $TWGIT_UPDATE_NB_DAYS * 86400 ))
+		echo "interval=$interval"
+		if [ $elapsed_time -gt 10 ]; then
+			processing "Fetch twgit..."
 			git fetch
 			echo "master=$(git rev-parse master)"
 			echo "origin/master=$(git rev-parse origin/master)"
@@ -405,6 +406,11 @@ function update () {
 			fi
 			echo "#touch"
 			#touch "$TWGIT_UPDATE_PATH"
+
+			local remaining_days=$(( ($interval - $elapsed_time)/86400 ))
+			processing "$remaining_days days before next auto-update test of twgit."
+		else
+			:
 		fi
 	fi
 	cd - 1>/dev/null

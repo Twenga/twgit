@@ -389,13 +389,13 @@ function update () {
 		[ ! -f "$TWGIT_UPDATE_PATH" ] && touch "$TWGIT_UPDATE_PATH"
 		local time_elapsing=$(( ($(date -u +%s) - $(date -r "$TWGIT_UPDATE_PATH" +%s)) ))
 		echo "#$time_elapsing" #ee
-		if [[ $time_elapsing > 10 ]]; then
-			[[ $time_elapsing > 1000 ]] && echo "[1000]"
-			[[ $time_elapsing > 10000 ]] && echo "[10000]"
+		if [ $time_elapsing -gt 10 ]; then
+			[ $time_elapsing -gt 1000 ] && echo "[1000]"
+			[ $time_elapsing -gt 10000 ] && echo "[10000]"
+			processing "fetch twgit..."
 			git fetch
 			echo "master=$(git rev-parse master)"
 			echo "origin/master=$(git rev-parse origin/master)"
-			processing "fetch twgit..."
 			compare_branches 'master' 'origin/master'
 			local status=$?
 			echo "status=$status"

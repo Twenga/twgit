@@ -386,7 +386,7 @@ function update () {
 	if git rev-parse --git-dir 1>/dev/null 2>&1; then
 		[ ! -f "$TWGIT_UPDATE_PATH" ] && touch "$TWGIT_UPDATE_PATH"
 		local time_elapsing=$(( ($(date -u +%s) - $(date -r "$TWGIT_UPDATE_PATH" +%s)) ))
-		echo "#$time_elapsing"
+		echo "#$time_elapsing" #ee
 		if [[ $time_elapsing > 10 ]]; then
 			echo "master=$(git rev-parse master)"
 			echo "origin/master=$(git rev-parse origin/master)"

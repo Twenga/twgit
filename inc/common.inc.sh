@@ -388,12 +388,12 @@ function update () {
 	if git rev-parse --git-dir 1>/dev/null 2>&1; then
 		[ ! -f "$TWGIT_UPDATE_PATH" ] && touch "$TWGIT_UPDATE_PATH"
 		local elapsed_time=$(( ($(date -u +%s) - $(date -r "$TWGIT_UPDATE_PATH" +%s)) ))
-		echo "#$time_elapsing" #ee
+		echo "#$elapsed_time"
 
 		local interval=$(( $TWGIT_UPDATE_NB_DAYS * 86400 ))
 		echo "interval=$interval"
 		if [ $elapsed_time -gt 10 ]; then
-			processing "Fetch twgit..."
+			processing "Fetch twgit for auto-update test..."
 			git fetch
 			echo "master=$(git rev-parse master)"
 			echo "origin/master=$(git rev-parse origin/master)"
@@ -402,13 +402,16 @@ function update () {
 			echo "status=$status"
 			if [ "$status" = "1" ]; then
 				warn "Une mise à jour est disponible."
-				# si MAJ alors git pull
+				echo -n $(question 'Do you want to update twgit (twgit update)? [Y/N] '); read answer
+				if [ "$answer" = "Y" ] || [ "$answer" = "y" ]; then
+					# si MAJ alors git pull
+				fi
 			fi
 			echo "#touch"
 			#touch "$TWGIT_UPDATE_PATH"
 
-			local remaining_days=$(( ($interval - $elapsed_time)/86400 ))
-			processing "$remaining_days days before next auto-update test of twgit."
+			local remaining_days=$(( 1 + ($interval - $elapsed_time)/86400 ))
+			processing "$remaining_days day(s) before next auto-update test of twgit."
 		else
 			:
 		fi

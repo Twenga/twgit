@@ -10,6 +10,7 @@
 # TODO couplage options_handler::require_parameter() avec usage()
 # TODO ui.inc.sh pas assez sûr niveau collision de noms...
 # camelCase et autre_notation en même temps...
+# TODO créer une branche stable ?
 
 if [ "$DEBUG" = "1" ]; then
 	set -x

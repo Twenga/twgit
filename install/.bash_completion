@@ -11,7 +11,7 @@ function _twgit () {
 	local cur="${COMP_WORDS[COMP_CWORD]}"
 
 	if [ "$COMP_CWORD" = "1" ]; then
-		local opts="feature help release tag"
+		local opts="feature help hotfix release tag"
 		COMPREPLY=( $(compgen -W "${opts}" -- ${cur}) )
 
 	elif [ "$COMP_CWORD" = "2" ]; then
@@ -19,6 +19,10 @@ function _twgit () {
 		case "${command}" in
 			feature)
 				local opts="committers help list remove start"
+				COMPREPLY=( $(compgen -W "${opts}" -- ${cur}) )
+				;;
+			hotfix)
+				local opts="finish help list remove start"
 				COMPREPLY=( $(compgen -W "${opts}" -- ${cur}) )
 				;;
 			release)
@@ -52,6 +56,23 @@ function _twgit () {
 				esac
 				;;
 
+			hotfix)
+				case "${action}" in
+					finish|remove)
+				 		if [[ ${cur} != -* ]] ; then
+							local opts=$((git branch -r | grep "hotfix-" | sed 's/^[* ]*//' | sed 's#^origin/hotfix-##' | tr '\n' ' ') 2>/dev/null)
+							COMPREPLY=( $(compgen -W "${opts}" -- ${cur}) )
+						fi
+						;;
+					list)
+					    if [[ ${cur} == -* ]] ; then
+							local opts="-f"
+					        COMPREPLY=( $(compgen -W "${opts}" -- ${cur}) )
+					    fi
+						;;
+				esac
+				;;
+
 			release)
 				case "${action}" in
 					finish|remove|reset)
@@ -63,6 +84,12 @@ function _twgit () {
 					list)
 					    if [[ ${cur} == -* ]] ; then
 							local opts="-f"
+					        COMPREPLY=( $(compgen -W "${opts}" -- ${cur}) )
+					    fi
+						;;
+					start)
+					    if [[ ${cur} == -* ]] ; then
+							local opts="-M -m"
 					        COMPREPLY=( $(compgen -W "${opts}" -- ${cur}) )
 					    fi
 						;;

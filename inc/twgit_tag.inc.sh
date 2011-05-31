@@ -30,18 +30,18 @@ function cmd_list () {
 	process_options "$@"
 	process_fetch 'f'
 
+	local max='5'
 	local tags=$(get_all_tags)
+	help "List $max last tags:"
 	if [ -z "$tags" ]; then
-		info 'No tag exists.'
-		echo
+		info 'No tag exists.'; echo
 	else
-		local tag
 		local n=0
 		for tag in $tags; do
 			info "Tag: $tag"
 			git show $tag --pretty=medium | head -n4 | tail -n +2
 			let n=$n+1
-			[ $n = '5' ] && break
+			[ "$n" = "$max" ] && break
 		done
 	fi
 }

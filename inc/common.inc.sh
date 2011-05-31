@@ -9,8 +9,8 @@
 # Get
 #--------------------------------------------------------------------
 
-function get_all_branches () {
-	git branch -a --no-color | sed 's/^[* ] //'
+function get_last_hotfixes () {
+	git branch -r --no-color | grep $TWGIT_ORIGIN/$TWGIT_PREFIX_HOTFIX | sed 's/^[* ] //' | sort -n | tail -n $1
 }
 
 function get_local_branches () {
@@ -23,6 +23,10 @@ function get_remote_branches () {
 
 function get_releases_in_progress () {
 	git branch -r --no-merged $TWGIT_ORIGIN/HEAD | grep "$TWGIT_ORIGIN/$TWGIT_PREFIX_RELEASE" | sed 's/^[* ]*//'
+}
+
+function get_hotfixes_in_progress () {
+	git branch -r --no-merged $TWGIT_ORIGIN/HEAD | grep "$TWGIT_ORIGIN/$TWGIT_PREFIX_HOTFIX" | sed 's/^[* ]*//'
 }
 
 function get_current_release_in_progress () {
@@ -85,6 +89,18 @@ function get_all_tags () {
 
 function get_last_tag () {
 	git tag | sort -rn | head -n1
+}
+
+function get_tags_not_merged_into_release () {
+	local release_rev=$(git rev-parse $TWGIT_ORIGIN/$TWGIT_PREFIX_RELEASE$release)
+	local tag_rev merge_base
+	local tags=''
+	for t in $(get_all_tags); do
+		tag_rev=$(git rev-list $t | head -n 1)
+		merge_base=$(git merge-base $release_rev $tag_rev)
+		[ "$tag_rev" != "$merge_base" ] && tags="$tags $t"
+	done
+	echo ${tags:1}
 }
 
 function get_next_version () {
@@ -252,7 +268,7 @@ function process_first_commit () {
 	local commit_msg=$(printf "$TWGIT_FIRST_COMMIT_MSG" "$1" "$2")
 	#exec_git_command "git commit --allow-empty -m \"$commit_msg\"" 'Could not make initial commit!'
 
-	processing "$TWGIT_GIT_COMMAND_PROMPTgit commit --allow-empty -m \"$commit_msg\""
+	processing "${TWGIT_GIT_COMMAND_PROMPT}git commit --allow-empty -m \"$commit_msg\""
 	git commit --allow-empty -m "$commit_msg" || die "$error_msg"
 }
 

@@ -18,14 +18,13 @@ function usage () {
 	help_detail '    Remove both local and remote specified release branch.'; echo
 	help_detail '<b>reset <releasename></b>'
 	help_detail '    Call remove <releasename> and start <releasename>'; echo
-	help_detail '<b>start [<releasename>] [-M|-m|-r]</b>'
+	help_detail '<b>start [<releasename>] [-M|-m]</b>'
 	help_detail '    Create both a new local and remote release,'
 	help_detail '    or fetch the remote release if <releasename> exists on remote repository.'
 	help_detail "    Prefix '$TWGIT_PREFIX_RELEASE' will be added to the specified <releasename>."
 	help_detail '    If no <releasename> is specified, a name will be generated from last tag:'
 	help_detail '        <b>-M</b> for a new major version'
-	help_detail '        <b>-m</b> for a new minor version (default)'
-	help_detail '        <b>-r</b> for a new revision version'; echo
+	help_detail '        <b>-m</b> for a new minor version (default)'; echo
 	help_detail '<b>[help]</b>'
 	help_detail '    Display this help.'; echo
 }
@@ -67,7 +66,7 @@ function cmd_list () {
 # Crée une nouvelle release à partir du dernier tag.
 # Si le nom n'est pas spécifié, un nom sera généré automatiquement à partir du dernier tag
 # en incrémentant par défaut d'une version mineure. Ce comportement est modifiable via les
-# options -M (major), -m (minor) ou -r (revision).
+# options -M (major) ou -m (minor).
 # Rappel : une version c'est major.minor.revision
 #
 # @param string $1 nom court optionnel de la nouvelle release.
@@ -86,8 +85,6 @@ function cmd_start () {
 	if [ -z $release ]; then
 		local type
 		if isset_option 'M'; then type='major'
-		elif isset_option 'm'; then type='minor'
-		elif isset_option 'r'; then type='revision'
 		else type='minor'
 		fi
 		release=$(get_next_version $type $short_last_tag)
@@ -138,6 +135,14 @@ function cmd_finish () {
 	assert_clean_working_tree
 	process_fetch
 
+	# Détection hotfixes en cours :
+	local hotfix="$(get_hotfixes_in_progress)"
+	[ ! -z "$hotfix" ] && die "Close a release while hotfix in progress is forbidden! Hotfix '$hotfix' must be treated first."
+
+	# Détection tags (via hotfixes) réalisés entre temps :
+	tags_not_merged="$(get_tags_not_merged_into_release $release | sed 's/ /, /g')"
+	[ ! -z "$tags_not_merged" ] && die "You must merge following tag(s) before close this release: $tags_not_merged"
+
 	processing 'Check remote features...'
 	local features="$(get_features merged_in_progress $TWGIT_ORIGIN/$release_fullname)"
 	[ ! -z "$features" ] && die "Features exists that are merged into this release but yet in development: '$features'!"
@@ -157,7 +162,7 @@ function cmd_finish () {
 	exec_git_command "git merge --no-ff $TWGIT_ORIGIN/$TWGIT_MASTER" "Could not merge '$TWGIT_ORIGIN/$TWGIT_MASTER' into '$TWGIT_MASTER'!"
 	exec_git_command "git merge --no-ff $release_fullname" "Could not merge '$release_fullname' into '$TWGIT_MASTER'!"
 
-	processing "$TWGIT_GIT_COMMAND_PROMPTgit tag -a $tag_fullname -m \"${TWGIT_PREFIX_COMMIT_MSG}Release finish: $release_fullname\""
+	processing "${TWGIT_GIT_COMMAND_PROMPT}git tag -a $tag_fullname -m \"${TWGIT_PREFIX_COMMIT_MSG}Release finish: $release_fullname\""
 	git tag -a $tag_fullname -m "${TWGIT_PREFIX_COMMIT_MSG}Release finish: $release_fullname" || die "$error_msg"
 
 	exec_git_command "git push --tags $TWGIT_ORIGIN $TWGIT_MASTER" "Could not push '$TWGIT_MASTER' on '$TWGIT_ORIGIN'!"

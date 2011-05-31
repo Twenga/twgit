@@ -2,24 +2,33 @@
 
 assert_git_repository
 
+##
+# Affiche l'aide de la commande tag.
+#
 function usage () {
 	echo; help 'Usage:'
 	help_detail 'twgit tag <action>'
 	echo; help 'Available actions are:'
 	help_detail '<b>list</b>'
-	help_detail '    List 5 last tags. Add <b>-n</b> or <b>--no-fetch</b> to do not pre fetch.'; echo
+	help_detail '    List 5 last tags. Add <b>-f</b> to do not make fetch.'; echo
 	help_detail '<b>[help]</b>'
 	help_detail '    Display this help.'; echo
 }
 
+##
+# Action déclenchant l'affichage de l'aide.
+#
 function cmd_help () {
-	usage
-	exit 0
+	usage;
 }
 
+##
+# Liste les tags.
+# Gère l'option '-f' permettant d'éviter le fetch.
+#
 function cmd_list () {
 	process_options "$@"
-	process_fetch 'n'
+	process_fetch 'f'
 
 	local tags=$(get_all_tags)
 	if [ -z "$tags" ]; then

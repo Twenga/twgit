@@ -2,6 +2,9 @@
 
 assert_git_repository
 
+##
+# Affiche l'aide de la commande tag.
+#
 function usage () {
 	echo; help 'Usage:'
 	help_detail 'twgit release <action>'
@@ -27,11 +30,17 @@ function usage () {
 	help_detail '    Display this help.'; echo
 }
 
+##
+# Action déclenchant l'affichage de l'aide.
+#
 function cmd_help () {
-	usage
-	exit 0
+	usage;
 }
 
+##
+# Liste les releases ainsi que leurs éventuelles features associées.
+# Gère l'option '-f' permettant d'éviter le fetch.
+#
 function cmd_list () {
 	process_options "$@"
 	process_fetch 'f'
@@ -54,6 +63,15 @@ function cmd_list () {
 	fi
 }
 
+##
+# Crée une nouvelle release à partir du dernier tag.
+# Si le nom n'est pas spécifié, un nom sera généré automatiquement à partir du dernier tag
+# en incrémentant par défaut d'une version mineure. Ce comportement est modifiable via les
+# options -M (major), -m (minor) ou -r (revision).
+# Rappel : une version c'est major.minor.revision
+#
+# @param string $1 nom court optionnel de la nouvelle release.
+#
 function cmd_start () {
 	process_options "$@"
 	require_parameter '-'
@@ -99,6 +117,13 @@ function cmd_start () {
 	process_push_branch $release_fullname $is_remote_exists
 }
 
+##
+# Merge la release à la branche stable et crée un tag portant son nom s'il est compatible (major.minor.revision)
+# ou récupère celui spécifié en paramètre.
+#
+# @param string $1 nom court de la release
+# @param string $2 nom court optionnel du tag
+#
 function cmd_finish () {
 	process_options "$@"
 	require_parameter 'release'
@@ -148,6 +173,11 @@ function cmd_finish () {
 	cmd_remove $release
 }
 
+##
+# Supprime la release spécifiée.
+#
+# @param string $1 nom court de la release
+#
 function cmd_remove () {
 	process_options "$@"
 	require_parameter 'release'
@@ -163,6 +193,12 @@ function cmd_remove () {
 	remove_remote_branch $release_fullname
 }
 
+##
+# Supprime la release spécifiée et en recrée une nouvelle de même nom.
+# Pour se sortir des releases non viables.
+#
+# @param string $1 nom court de la release.
+#
 function cmd_reset () {
 	process_options "$@"
 	require_parameter 'release'

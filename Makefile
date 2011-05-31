@@ -1,5 +1,7 @@
 #!/bin/sh
 
+# Install: sudo make install
+
 ROOT_DIR="`pwd`"
 
 all:

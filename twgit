@@ -6,6 +6,10 @@
 # TODO proposer Yes/No de résoudre certains pb ?
 # TODO merge d'une feature
 # TODO merge auto multi features
+# TODO doc author ?
+# TODO couplage options_handler::require_parameter() avec usage()
+# TODO ui.inc.sh pas assez sûr niveau collision de noms...
+# camelCase et autre_notation en même temps...
 
 if [ "$DEBUG" = "1" ]; then
 	set -x
@@ -15,6 +19,9 @@ fi
 . `dirname $0`/conf/config.inc.sh
 . $TWGIT_INC_DIR/common.inc.sh
 
+##
+# Affiche l'aide
+#
 function usage () {
 	echo; help 'Usage:'
 	help_detail 'twgit <command> [<action>]'
@@ -32,6 +39,13 @@ function usage () {
 	echo
 }
 
+##
+# Appelle l'action demandée ("cmd_$2") sur la commande spécifiée ($1).
+# Les paramètres surnumérères sont passés à la commande.
+#
+# @param string $1 commande demandée
+# @param string $2 nom de l'action demandée, 'help' par défaut
+#
 function main () {
 	if [ $# -lt 1 ]; then
 		usage

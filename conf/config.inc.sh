@@ -1,5 +1,7 @@
 #!/bin/bash
 
+# Fichier de configuration inclus par twgit.
+
 TWGIT_ROOT_DIR=$(dirname "$0")
 TWGIT_INC_DIR="$TWGIT_ROOT_DIR/inc"
 TWGIT_CONF_DIR="$TWGIT_ROOT_DIR/conf"

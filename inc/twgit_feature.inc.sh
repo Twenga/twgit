@@ -2,6 +2,9 @@
 
 assert_git_repository
 
+##
+# Affiche l'aide de la commande tag.
+#
 function usage () {
 	echo; help 'Usage:'
 	help_detail 'twgit feature <action>'
@@ -20,11 +23,18 @@ function usage () {
 	# get_rank_contributors origin/master
 }
 
+##
+# Action déclenchant l'affichage de l'aide.
+#
 function cmd_help () {
 	usage
-	exit 0
 }
 
+##
+# Liste les personnes ayant committé sur la feature.
+#
+# @param string $1 nom court de la feature
+#
 function cmd_committers () {
 	process_options "$@"
 	require_parameter 'feature'
@@ -42,6 +52,10 @@ function cmd_committers () {
 	fi
 }
 
+##
+# Liste les features et leur statut par rapport aux releases.
+# Gère l'option '-f' permettant d'éviter le fetch.
+#
 function cmd_list () {
 	process_options "$@"
 	process_fetch 'f'
@@ -70,6 +84,11 @@ function cmd_list () {
 	display_branches 'Feature: ' "$features"
 }
 
+##
+# Crée une nouvelle feature à partir du dernier tag.
+#
+# @param string $1 nom court de la nouvelle feature.
+#
 function cmd_start () {
 	process_options "$@"
 	require_parameter 'feature'
@@ -98,6 +117,11 @@ function cmd_start () {
 	process_push_branch $feature_fullname $is_remote_exists
 }
 
+##
+# Suppression de la feature spécifiée.
+#
+# @param string $1 nom court de la feature à supprimer
+#
 function cmd_remove () {
 	process_options "$@"
 	require_parameter 'feature'

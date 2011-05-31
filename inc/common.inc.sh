@@ -1,138 +1,7 @@
 #!/bin/bash
 
-
-#--------------------------------------------------------------------
-# User interface
-#--------------------------------------------------------------------
-
-# Map des colorations et en-têtes des messages du superviseur :
-declare -A UI
-UI=(
-	[error.header]='\033[4;33m/!\\\033[0;37m '
-	[error.color]='\033[1;31m'
-	[info.color]='\033[1;37m'
-	[info.bold.color]='\033[1;35m'
-	[help.header]='\033[1;36m(i) '
-	[help.color]='\033[0;36m'
-	[help.bold.color]='\033[1;36m'
-	[help_detail.header]='    '
-	[help_detail.color]='\033[0;37m'
-	[help_detail.bold.color]='\033[1;37m'
-	[normal.color]='\033[0;37m'
-	[warning.header]='\033[4;33m/!\\\033[0;37m '
-	[warning.color]='\033[0;33m'
-	[question.color]='\033[1;33m'
-	[processing.color]='\033[1;30m'
-)
-
-function processing () {
-	displayMsg processing "$1"
-}
-
-function info () {
-	displayMsg info "$1"
-}
-
-function help () {
-	displayMsg help "$1"
-}
-
-function help_detail () {
-	displayMsg help_detail "$1"
-}
-
-function warn () {
-	displayMsg warning "$1" >&2
-}
-
-function question () {
-	displayMsg question "$1"
-}
-
-function error () {
-	displayMsg error "$1" >&2
-}
-
-function die () {
-	error "$1"
-	echo
-	exit 1
-}
-
-# Affiche un message dans la couleur et avec l'en-tête correspondant au type spécifié.
-#
-# @param string $1 type de message à afficher : conditionne l'éventuelle en-tête et la couleur
-# @ parma string $2 message à afficher
-function displayMsg () {
-	local type=$1
-	local msg=$2
-
-	local is_defined=`echo ${!UI[*]} | grep "\b$type\b" | wc -l`
-	[ $is_defined = 0 ] && echo "Unknown display type '$type'!" >&2 && exit 1
-	local escape_color=$(echo ${UI[$type'.color']} | sed 's/\\/\\\\/g')
-	local escape_bold_color=$(echo ${UI[$type'.bold.color']} | sed 's/\\/\\\\/g')
-
-	if [ ! -z "${UI[$type'.header']}" ]; then
-		echo -en "${UI[$type'.header']}"
-	fi
-	msg=$(echo "$msg" | sed "s/<b>/$escape_bold_color/g" | sed "s#</b>#$escape_color#g")
-	echo -e "${UI[$type'.color']}$msg${UI['normal.color']}"
-}
-
-
-#--------------------------------------------------------------------
-# Gestion des paramètres (et options) des fonctions
-#
-# Les options (une lettre max) peuvent être mélangées aux paramètres.
-# Syntaxe admises (6 options ici) : -a -b-c -def
-#
-# Usage :
-# function f () {
-#	process_options "$@"
-#	isset_option 'f' && echo "OK" || echo "NOK"
-#	require_parameter 'my_name'
-#	local release="$RETVAL"
-#	...
-# }
-#--------------------------------------------------------------------
-
-FCT_OPTIONS=''
-FCT_PARAMETERS=''
-RETVAL='' # to avoid subshell
-function process_options {
-	local param
-	while [ $# -gt 0 ]; do
-		# PB qd echo "-n"... : param=`echo "$1" | grep -P '^-[^-]' | sed s/-//g`
-		[ ${#1} -gt 1 ] && [ ${1:0:1} = '-' ] && [ ${1:1:1} != '-' ] && param="${1:1}" || param=''
-		param=$(echo "$param" | sed s/-//g)
-		if [ ! -z "$param" ]; then
-			FCT_OPTIONS="$FCT_OPTIONS $(echo $param | sed 's/\(.\)/\1 /g')"
-		else
-			FCT_PARAMETERS="$FCT_PARAMETERS $1"
-		fi
-		shift
-	done
-	FCT_PARAMETERS=${FCT_PARAMETERS:1}
-}
-
-function isset_option () {
-	has $1 "$FCT_OPTIONS"
-}
-
-function require_parameter () {
-	local name=$1
-	local param="${FCT_PARAMETERS%% *}"
-	FCT_PARAMETERS="${FCT_PARAMETERS:$((${#param}+1))}"
-	if [ ! -z "$param" ]; then
-		RETVAL=$param
-	elif [ "$name" = '-' ]; then
-		RETVAL=''
-	else
-		error "Missing argument <$name>!"
-		usage
-		exit 1
-	fi
-}
+. $TWGIT_INC_DIR/options_handler.inc.sh
+. $TWGIT_INC_DIR/ui.inc.sh
 
 
 
@@ -451,8 +320,6 @@ function escape () {
 function has () {
 	local item=$1; shift
 	echo " $@ " | grep -q " $(escape $item) "
-	#local n=$(echo " $@ " | grep " $(escape $item) " | wc -l)
-	#[ $n = '0' ] && echo 0 || echo 1
 }
 
 

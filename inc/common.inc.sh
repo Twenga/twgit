@@ -390,12 +390,18 @@ function update () {
 		if [[ $time_elapsing > 10 ]]; then
 			echo "master=$(git rev-parse master)"
 			echo "origin/master=$(git rev-parse origin/master)"
+			processing "fetch twgit..."
+			git fetch
 			compare_branches "master" "origin/master"
 			local status=$?
 			echo "status=$status"
+			if [ "$status" = "1" ]; then
+				warn "Une msie à jour est disponible."
+				# si MAJ alors git pull
+			fi
+			echo "#touch"
+			touch "$TWGIT_UPDATE_PATH"
 		fi
-		#warn "Une msie à jour est disponible."
-		# si MAJ alors git pull
 	fi
 	cd - 1>/dev/null
 }

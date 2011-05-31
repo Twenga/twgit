@@ -380,3 +380,19 @@ function display_branches () {
 		done
 	fi
 }
+
+function update () {
+	cd "$TWGIT_ROOT_DIR"
+	if git rev-parse --git-dir 1>/dev/null 2>&1; then
+		[ ! -f "$TWGIT_UPDATE_PATH" ] && touch "$TWGIT_UPDATE_PATH"
+		local time_elapsing=$(( ($(date -u +%s) - $(date -r "$TWGIT_UPDATE_PATH" +%s)) ))
+		echo "#$time_elapsing"
+		if [[ $time_elapsing > 10 ]]; then
+			compare_branches "master" "origin/master"
+			local status=$?
+			echo "status=$status"
+		fi
+		#warn "Une msie à jour est disponible."
+	fi
+	cd - 1>/dev/null
+}

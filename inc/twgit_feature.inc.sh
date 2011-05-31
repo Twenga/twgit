@@ -20,7 +20,6 @@ function usage () {
 	help_detail "    Prefix '$TWGIT_PREFIX_FEATURE' will be added to the specified <featurename>."; echo
 	help_detail '<b>[help]</b>'
 	help_detail '    Display this help.'; echo
-	# get_rank_contributors origin/master
 }
 
 ##

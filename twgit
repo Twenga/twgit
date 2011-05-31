@@ -1,8 +1,11 @@
 #!/bin/bash
 
+# git clone git@git.twenga.com:aa/twgit.git [path]
+# cd [path]
 # Install: sudo make install
+# ou /bin/bash [path]/twgit
 
-# TODO ne pas enchaîner les fetch
+# TODO ne pas enchaîner les fetch ?
 # TODO proposer Yes/No de résoudre certains pb ?
 # TODO merge d'une feature
 # TODO merge auto multi features
@@ -11,6 +14,9 @@
 # TODO ui.inc.sh pas assez sûr niveau collision de noms...
 # camelCase et autre_notation en même temps...
 # TODO créer une branche stable ?
+# TODO sujet des redmine ticket/tickets du projet/surticket+soustickets
+# TODO est-ce que la liste des committers d'une branche ne remonterait pas trop loin ?
+# TODO auto-update (ou avec warn)
 
 if [ "$DEBUG" = "1" ]; then
 	set -x
@@ -84,5 +90,6 @@ function main () {
 	fi
 }
 
+update
 assert_git_configured
 main "$@"

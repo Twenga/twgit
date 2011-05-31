@@ -388,6 +388,8 @@ function update () {
 		local time_elapsing=$(( ($(date -u +%s) - $(date -r "$TWGIT_UPDATE_PATH" +%s)) ))
 		echo "#$time_elapsing"
 		if [[ $time_elapsing > 10 ]]; then
+			echo "master=$(git rev-parse master)"
+			echo "origin/master=$(git rev-parse origin/master)"
 			compare_branches "master" "origin/master"
 			local status=$?
 			echo "status=$status"

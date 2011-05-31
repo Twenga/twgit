@@ -4,6 +4,8 @@
 # cd [path]
 # Install: sudo make install
 # ou /bin/bash [path]/twgit
+#
+# Sur le modèle de http://github.com/nvie/gitflow
 
 # TODO ne pas enchaîner les fetch ?
 # TODO proposer Yes/No de résoudre certains pb ?

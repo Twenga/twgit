@@ -338,15 +338,17 @@ function has () {
 	echo " $@ " | grep -q " $(escape $item) "
 }
 
-
+##
 # Tests whether branches and their "origin" counterparts have diverged and need
 # merging first. It returns error codes to provide more detail, like so:
 #
-# 0    Branch heads point to the same commit
-# 1    First given branch needs fast-forwarding
-# 2    Second given branch needs fast-forwarding
-# 3    Branch needs a real merge
-# 4    There is no merge base, i.e. the branches have no common ancestors
+# @return int
+#    0    Branch heads point to the same commit
+#    1    First given branch needs fast-forwarding
+#    2    Second given branch needs fast-forwarding
+#    3    Branch needs a real merge
+#    4    There is no merge base, i.e. the branches have no common ancestors
+# @author http://github.com/nvie/gitflow
 #
 function compare_branches () {
 	local commit1=$(git rev-parse "$1")
@@ -388,19 +390,21 @@ function update () {
 		local time_elapsing=$(( ($(date -u +%s) - $(date -r "$TWGIT_UPDATE_PATH" +%s)) ))
 		echo "#$time_elapsing" #ee
 		if [[ $time_elapsing > 10 ]]; then
+			[[ $time_elapsing > 1000 ]] && echo "[1000]"
+			[[ $time_elapsing > 10000 ]] && echo "[10000]"
+			git fetch
 			echo "master=$(git rev-parse master)"
 			echo "origin/master=$(git rev-parse origin/master)"
 			processing "fetch twgit..."
-			git fetch
-			compare_branches "master" "origin/master"
+			compare_branches 'master' 'origin/master'
 			local status=$?
 			echo "status=$status"
 			if [ "$status" = "1" ]; then
-				warn "Une msie à jour est disponible."
+				warn "Une mise à jour est disponible."
 				# si MAJ alors git pull
 			fi
 			echo "#touch"
-			touch "$TWGIT_UPDATE_PATH"
+			#touch "$TWGIT_UPDATE_PATH"
 		fi
 	fi
 	cd - 1>/dev/null

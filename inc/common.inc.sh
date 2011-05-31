@@ -395,6 +395,7 @@ function update () {
 			echo "status=$status"
 		fi
 		#warn "Une msie à jour est disponible."
+		# si MAJ alors git pull
 	fi
 	cd - 1>/dev/null
 }

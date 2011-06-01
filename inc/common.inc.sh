@@ -408,9 +408,6 @@ function autoupdate () {
 			fi
 			processing "Next auto-update check in $TWGIT_UPDATE_NB_DAYS days."
 			touch "$TWGIT_UPDATE_PATH"
-
-			#local remaining_days=$(( 1 + ($interval - $elapsed_time)/86400 ))
-			#processing "$remaining_days day(s) before next auto-update test of twgit."
 		fi
 	fi
 	cd - 1>/dev/null

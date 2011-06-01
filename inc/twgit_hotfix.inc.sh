@@ -10,7 +10,7 @@ function usage () {
 	help_detail 'twgit hotfix <action>'
 	echo; help 'Available actions are:'
 	help_detail '<b>finish <hotfixname></b>'
-	help_detail '    Merge specified hotfix branch into master, create a new tag and push.'; echo
+	help_detail "    Merge specified hotfix branch into '$TWGIT_STABLE', create a new tag and push."; echo
 	help_detail '<b>list</b>'
 	help_detail '    List 5 last hotfixes. Add <b>-f</b> to do not make fetch.'; echo
 	help_detail '<b>remove <hotfixname></b>'
@@ -122,14 +122,14 @@ function cmd_finish () {
 	local is_tag_exists=$(has "$tag_fullname" $(get_all_tags) && echo 1 || echo 0)
 	[ $is_tag_exists = '1' ] && die "Tag '$tag_fullname' already exists! Try: twgit tag list"
 
-	exec_git_command "git checkout $TWGIT_MASTER" "Could not checkout '$TWGIT_MASTER'!"
-	exec_git_command "git merge --no-ff $TWGIT_ORIGIN/$TWGIT_MASTER" "Could not merge '$TWGIT_ORIGIN/$TWGIT_MASTER' into '$TWGIT_MASTER'!"
-	exec_git_command "git merge --no-ff $hotfix_fullname" "Could not merge '$hotfix_fullname' into '$TWGIT_MASTER'!"
+	exec_git_command "git checkout $TWGIT_STABLE" "Could not checkout '$TWGIT_STABLE'!"
+	exec_git_command "git merge --no-ff $TWGIT_ORIGIN/$TWGIT_STABLE" "Could not merge '$TWGIT_ORIGIN/$TWGIT_STABLE' into '$TWGIT_STABLE'!"
+	exec_git_command "git merge --no-ff $hotfix_fullname" "Could not merge '$hotfix_fullname' into '$TWGIT_STABLE'!"
 
 	processing "${TWGIT_GIT_COMMAND_PROMPT}git tag -a $tag_fullname -m \"${TWGIT_PREFIX_COMMIT_MSG}Hotfix finish: $hotfix_fullname\""
 	git tag -a $tag_fullname -m "${TWGIT_PREFIX_COMMIT_MSG}Hotfix finish: $hotfix_fullname" || die "$error_msg"
 
-	exec_git_command "git push --tags $TWGIT_ORIGIN $TWGIT_MASTER" "Could not push '$TWGIT_MASTER' on '$TWGIT_ORIGIN'!"
+	exec_git_command "git push --tags $TWGIT_ORIGIN $TWGIT_STABLE" "Could not push '$TWGIT_STABLE' on '$TWGIT_ORIGIN'!"
 
 	# Suppression de la branche :
 	cmd_remove $hotfix

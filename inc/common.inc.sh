@@ -22,11 +22,11 @@ function get_remote_branches () {
 }
 
 function get_releases_in_progress () {
-	git branch -r --no-merged $TWGIT_ORIGIN/HEAD | grep "$TWGIT_ORIGIN/$TWGIT_PREFIX_RELEASE" | sed 's/^[* ]*//'
+	git branch -r --no-merged $TWGIT_ORIGIN/$TWGIT_STABLE | grep "$TWGIT_ORIGIN/$TWGIT_PREFIX_RELEASE" | sed 's/^[* ]*//'
 }
 
 function get_hotfixes_in_progress () {
-	git branch -r --no-merged $TWGIT_ORIGIN/HEAD | grep "$TWGIT_ORIGIN/$TWGIT_PREFIX_HOTFIX" | sed 's/^[* ]*//'
+	git branch -r --no-merged $TWGIT_ORIGIN/$TWGIT_STABLE | grep "$TWGIT_ORIGIN/$TWGIT_PREFIX_HOTFIX" | sed 's/^[* ]*//'
 }
 
 function get_current_release_in_progress () {
@@ -53,13 +53,13 @@ function get_features () {
 		if [ "$feature_type" = 'merged' ] || [ "$feature_type" = 'merged_in_progress' ]; then
 			echo ''
 		elif [ "$feature_type" = 'free' ]; then
-			git branch -r --no-merged $TWGIT_ORIGIN/HEAD | grep "$TWGIT_ORIGIN/$TWGIT_PREFIX_FEATURE" | sed 's/^[* ]*//' | tr '\n' ' ' | sed 's/ *$//g'
+			git branch -r --no-merged $TWGIT_ORIGIN/$TWGIT_STABLE | grep "$TWGIT_ORIGIN/$TWGIT_PREFIX_FEATURE" | sed 's/^[* ]*//' | tr '\n' ' ' | sed 's/ *$//g'
 		fi
 	else
 		local return_features=''
 		local features_merged=$(git branch -r --merged $release | grep "$TWGIT_ORIGIN/$TWGIT_PREFIX_FEATURE" | sed 's/^[* ]*//')
 		local features=$(git branch -r | grep "$TWGIT_ORIGIN/$TWGIT_PREFIX_FEATURE" | sed 's/^[* ]*//')
-		local head_rev=$(git rev-parse $TWGIT_ORIGIN/HEAD)
+		local head_rev=$(git rev-parse $TWGIT_ORIGIN/$TWGIT_STABLE)
 		local release_rev=$(git rev-parse $release)
 
 		local f_rev merge_base master_merge_base
@@ -88,7 +88,7 @@ function get_all_tags () {
 }
 
 function get_last_tag () {
-	git tag | sort -rn | head -n1
+	git tag | sort -rn | head -n 1
 }
 
 function get_tags_not_merged_into_release () {
@@ -240,7 +240,7 @@ function assert_working_tree_is_not_on_delete_branch () {
 	processing "Check current branch..."
 	if [ $(get_current_branch) = "$branch" ]; then
 		 processing "Cannot delete the branch '$branch' which you are currently on! So:"
-		 exec_git_command "git checkout $TWGIT_MASTER" "Could not checkout '$TWGIT_MASTER'!"
+		 exec_git_command "git checkout $TWGIT_STABLE" "Could not checkout '$TWGIT_STABLE'!"
 	fi
 }
 
@@ -378,7 +378,7 @@ function display_branches () {
 	else
 		for branch in $branches; do
 			info "$title$branch"
-			git show $branch --pretty=medium | grep -v '^Merge: ' | head -n4
+			git show $branch --pretty=medium | grep -v '^Merge: ' | head -n 4
 		done
 	fi
 }

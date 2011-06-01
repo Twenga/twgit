@@ -12,7 +12,7 @@ function usage () {
 	help_detail '<b>list</b>'
 	help_detail '    List remote releases. Add <b>-f</b> to do not make fetch.'; echo
 	help_detail '<b>finish <releasename> [<tagname>]</b>'
-	help_detail '    Merge specified release branch into master, create a new tag and push.'
+	help_detail "    Merge specified release branch into '$TWGIT_STABLE', create a new tag and push."
 	help_detail '    If no <tagname> is specified then <releasename> will be used.'; echo
 	help_detail '<b>remove <releasename></b>'
 	help_detail '    Remove both local and remote specified release branch.'; echo
@@ -44,12 +44,12 @@ function cmd_list () {
 	process_options "$@"
 	process_fetch 'f'
 
-	local releases=$(git branch -r --merged $TWGIT_ORIGIN/HEAD | grep "$TWGIT_ORIGIN/$TWGIT_PREFIX_RELEASE" | sed 's/^[* ]*//')
-	help "Remote releases merged into '<b>master</b>':"
+	local releases=$(git branch -r --merged $TWGIT_ORIGIN/$TWGIT_STABLE | grep "$TWGIT_ORIGIN/$TWGIT_PREFIX_RELEASE" | sed 's/^[* ]*//')
+	help "Remote releases merged into '<b>$TWGIT_STABLE</b>':"
 	display_branches 'Release: ' "$releases"
 
 	local release=$(get_current_release_in_progress)
-	help "Remote release NOT merged into '<b>master</b>':"
+	help "Remote release NOT merged into '<b>$TWGIT_STABLE</b>':"
 	display_branches 'Release: ' "$release" | head -n -1
 	if [ -z "$release" ]; then
 		echo
@@ -158,14 +158,14 @@ function cmd_finish () {
 	local is_tag_exists=$(has "$tag_fullname" $(get_all_tags) && echo 1 || echo 0)
 	[ $is_tag_exists = '1' ] && die "Tag '$tag_fullname' already exists! Try: twgit tag list"
 
-	exec_git_command "git checkout $TWGIT_MASTER" "Could not checkout '$TWGIT_MASTER'!"
-	exec_git_command "git merge --no-ff $TWGIT_ORIGIN/$TWGIT_MASTER" "Could not merge '$TWGIT_ORIGIN/$TWGIT_MASTER' into '$TWGIT_MASTER'!"
-	exec_git_command "git merge --no-ff $release_fullname" "Could not merge '$release_fullname' into '$TWGIT_MASTER'!"
+	exec_git_command "git checkout $TWGIT_STABLE" "Could not checkout '$TWGIT_STABLE'!"
+	exec_git_command "git merge --no-ff $TWGIT_ORIGIN/$TWGIT_STABLE" "Could not merge '$TWGIT_ORIGIN/$TWGIT_STABLE' into '$TWGIT_STABLE'!"
+	exec_git_command "git merge --no-ff $release_fullname" "Could not merge '$release_fullname' into '$TWGIT_STABLE'!"
 
 	processing "${TWGIT_GIT_COMMAND_PROMPT}git tag -a $tag_fullname -m \"${TWGIT_PREFIX_COMMIT_MSG}Release finish: $release_fullname\""
 	git tag -a $tag_fullname -m "${TWGIT_PREFIX_COMMIT_MSG}Release finish: $release_fullname" || die "$error_msg"
 
-	exec_git_command "git push --tags $TWGIT_ORIGIN $TWGIT_MASTER" "Could not push '$TWGIT_MASTER' on '$TWGIT_ORIGIN'!"
+	exec_git_command "git push --tags $TWGIT_ORIGIN $TWGIT_STABLE" "Could not push '$TWGIT_STABLE' on '$TWGIT_ORIGIN'!"
 
 	# Suppression des features associées :
 	features="$(get_merged_features $TWGIT_ORIGIN/$release_fullname)"

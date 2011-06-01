@@ -60,8 +60,8 @@ function cmd_list () {
 	process_fetch 'f'
 	local features
 
-	features=$(git branch -r --merged $TWGIT_ORIGIN/HEAD | grep "$TWGIT_ORIGIN/$TWGIT_PREFIX_FEATURE" | sed 's/^[* ]*//')
-	help "Remote features merged into master via releases:"
+	features=$(git branch -r --merged $TWGIT_ORIGIN/$TWGIT_STABLE | grep "$TWGIT_ORIGIN/$TWGIT_PREFIX_FEATURE" | sed 's/^[* ]*//')
+	help "Remote features merged into '<b>$TWGIT_STABLE</b>' via releases:"
 	display_branches 'Feature: ' "$features"
 
 	local release=$(get_current_release_in_progress)

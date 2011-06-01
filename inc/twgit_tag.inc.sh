@@ -39,7 +39,7 @@ function cmd_list () {
 		local n=0
 		for tag in $tags; do
 			info "Tag: $tag"
-			git show $tag --pretty=medium | head -n4 | tail -n +2
+			git show $tag --pretty=medium | head -n 4 | tail -n +2
 			let n=$n+1
 			[ "$n" = "$max" ] && break
 		done

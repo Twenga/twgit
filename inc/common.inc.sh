@@ -405,8 +405,8 @@ function autoupdate () {
 				echo -n $(question 'Update available! Do you want to update twgit (or manually: twgit update)? [Y/N] ');
 				read answer
 				if [ "$answer" = "Y" ] || [ "$answer" = "y" ]; then
-					# si MAJ alors git pull
-					:
+					processing "Update in progress..."
+					git pull
 				fi
 			else
 				processing "Twgit already up-to-date."

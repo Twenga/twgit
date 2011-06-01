@@ -384,41 +384,33 @@ function display_branches () {
 }
 
 function autoupdate () {
+	local is_forced="$1"
 	cd "$TWGIT_ROOT_DIR"
 	if git rev-parse --git-dir 1>/dev/null 2>&1; then
 		[ ! -f "$TWGIT_UPDATE_PATH" ] && touch "$TWGIT_UPDATE_PATH"
 		local elapsed_time=$(( ($(date -u +%s) - $(date -r "$TWGIT_UPDATE_PATH" +%s)) ))
-		#echo "#$elapsed_time"
-
 		local interval=$(( $TWGIT_UPDATE_NB_DAYS * 86400 ))
-		#echo "interval=$interval"
-		if [ "$elapsed_time" -gt "$interval" ]; then
+
+		if [ "$elapsed_time" -gt "$interval" ] || [ ! -z "$is_forced" ]; then
 			processing "Fetch twgit repository for auto-update check..."
 			git fetch
-			#echo "master=$(git rev-parse master)"
-			#echo "origin/master=$(git rev-parse origin/master)"
 			compare_branches 'master' 'origin/master'
 			local status=$?
-			#echo "status=$status"
 			if [ "$status" = "1" ]; then
-				#warn "Une mise à jour est disponible."
 				echo -n $(question 'Update available! Do you want to update twgit (or manually: twgit update)? [Y/N] ');
 				read answer
 				if [ "$answer" = "Y" ] || [ "$answer" = "y" ]; then
-					processing "Update in progress..."
+					processing 'Update in progress...'
 					git pull
 				fi
 			else
-				processing "Twgit already up-to-date."
+				processing 'Twgit already up-to-date.'
 			fi
 			processing "Next auto-update check in $TWGIT_UPDATE_NB_DAYS days."
-			#echo "#touch"
 			touch "$TWGIT_UPDATE_PATH"
 
 			#local remaining_days=$(( 1 + ($interval - $elapsed_time)/86400 ))
 			#processing "$remaining_days day(s) before next auto-update test of twgit."
-		#else
-#			:
 		fi
 	fi
 	cd - 1>/dev/null

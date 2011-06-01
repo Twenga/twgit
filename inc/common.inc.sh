@@ -390,10 +390,10 @@ function autoupdate () {
 		local elapsed_time=$(( ($(date -u +%s) - $(date -r "$TWGIT_UPDATE_PATH" +%s)) ))
 		echo "#$elapsed_time"
 
-		local interval=$(( $TWGIT_UPDATE_NB_DAYS * 86400 / 10 ))
+		local interval=$(( $TWGIT_UPDATE_NB_DAYS * 86400 ))
 		echo "interval=$interval"
 		if [ "$elapsed_time" -gt "$interval" ]; then
-			processing "Fetch twgit repository for auto-update test..."
+			processing "Fetch twgit repository for auto-update check..."
 			git fetch
 			echo "master=$(git rev-parse master)"
 			echo "origin/master=$(git rev-parse origin/master)"

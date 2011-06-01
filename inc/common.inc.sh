@@ -383,7 +383,7 @@ function display_branches () {
 	fi
 }
 
-function update () {
+function autoupdate () {
 	cd "$TWGIT_ROOT_DIR"
 	if git rev-parse --git-dir 1>/dev/null 2>&1; then
 		[ ! -f "$TWGIT_UPDATE_PATH" ] && touch "$TWGIT_UPDATE_PATH"
@@ -392,8 +392,8 @@ function update () {
 
 		local interval=$(( $TWGIT_UPDATE_NB_DAYS * 86400 ))
 		echo "interval=$interval"
-		if [ $elapsed_time -gt 10 ]; then
-			processing "Fetch twgit for auto-update test..."
+		if [ "$elapsed_time" -gt "10" ]; then
+			processing "Fetch twgit repository for auto-update test..."
 			git fetch
 			echo "master=$(git rev-parse master)"
 			echo "origin/master=$(git rev-parse origin/master)"
@@ -407,6 +407,8 @@ function update () {
 					# si MAJ alors git pull
 					:
 				fi
+			else
+				processing "Twgit already up-to-date. Next check in $TWGIT_UPDATE_NB_DAYS days."
 			fi
 			echo "#touch"
 			#touch "$TWGIT_UPDATE_PATH"

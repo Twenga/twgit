@@ -390,9 +390,9 @@ function autoupdate () {
 		local elapsed_time=$(( ($(date -u +%s) - $(date -r "$TWGIT_UPDATE_PATH" +%s)) ))
 		echo "#$elapsed_time"
 
-		local interval=$(( $TWGIT_UPDATE_NB_DAYS * 86400 ))
+		local interval=$(( $TWGIT_UPDATE_NB_DAYS * 86400 / 10 ))
 		echo "interval=$interval"
-		if [ "$elapsed_time" -gt "10" ]; then
+		if [ "$elapsed_time" -gt "$interval" ]; then
 			processing "Fetch twgit repository for auto-update test..."
 			git fetch
 			echo "master=$(git rev-parse master)"
@@ -401,8 +401,9 @@ function autoupdate () {
 			local status=$?
 			echo "status=$status"
 			if [ "$status" = "1" ]; then
-				warn "Une mise à jour est disponible."
-				echo -n $(question 'Do you want to update twgit (twgit update)? [Y/N] '); read answer
+				#warn "Une mise à jour est disponible."
+				echo -n $(question 'Update available! Do you want to update twgit (manually: twgit update)? [Y/N] ');
+				read answer
 				if [ "$answer" = "Y" ] || [ "$answer" = "y" ]; then
 					# si MAJ alors git pull
 					:

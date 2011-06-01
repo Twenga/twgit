@@ -410,10 +410,10 @@ function update () {
 			echo "#touch"
 			#touch "$TWGIT_UPDATE_PATH"
 
-			local remaining_days=$(( 1 + ($interval - $elapsed_time)/86400 ))
-			processing "$remaining_days day(s) before next auto-update test of twgit."
-		else
-			:
+			#local remaining_days=$(( 1 + ($interval - $elapsed_time)/86400 ))
+			#processing "$remaining_days day(s) before next auto-update test of twgit."
+		#else
+#			:
 		fi
 	fi
 	cd - 1>/dev/null

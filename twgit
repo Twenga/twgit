@@ -2,7 +2,7 @@
 
 # git clone git@git.twenga.com:aa/twgit.git [path]
 # cd [path]
-# Install: sudo make install
+# Install: sudo make install --always-make
 # ou /bin/bash [path]/twgit
 #
 # Sur le modèle de http://github.com/nvie/gitflow

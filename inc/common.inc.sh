@@ -171,6 +171,14 @@ function assert_git_configured () {
 function assert_git_repository () {
 	local errormsg=$(git rev-parse --git-dir 2>&1 1>/dev/null)
 	[ ! -z "$errormsg" ] && die "[Git error msg] $errormsg"
+
+	local stable="$TWGIT_ORIGIN/$TWGIT_STABLE"
+	if ! has $stable $(get_remote_branches); then
+		process_fetch
+		if ! has $stable $(get_remote_branches); then
+			die "Remote stable branch not found: '$TWGIT_ORIGIN/$TWGIT_STABLE'!"
+		fi
+	fi
 }
 
 function assert_branches_equal () {
@@ -197,7 +205,9 @@ function assert_branches_equal () {
 
 function assert_new_local_branch () {
 	if has $1 $(get_local_branches); then
-		die "Local branch '$1' already exists! Pick another name."
+		warn "Local branch '$1' already exists!"
+		exec_git_command "git checkout $1" "Could not checkout '$1'!"
+		exit 0
 	fi
 }
 

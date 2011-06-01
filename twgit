@@ -94,6 +94,6 @@ function main () {
 	fi
 }
 
-autoupdate
+[ "$1" != "update" ] && autoupdate
 assert_git_configured
 main "$@"

@@ -92,6 +92,6 @@ function main () {
 	fi
 }
 
-autoupdate
+autoupdate #rr
 assert_git_configured
 main "$@"

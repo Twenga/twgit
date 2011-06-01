@@ -405,6 +405,7 @@ function update () {
 				echo -n $(question 'Do you want to update twgit (twgit update)? [Y/N] '); read answer
 				if [ "$answer" = "Y" ] || [ "$answer" = "y" ]; then
 					# si MAJ alors git pull
+					:
 				fi
 			fi
 			echo "#touch"

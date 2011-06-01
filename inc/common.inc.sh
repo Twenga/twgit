@@ -411,7 +411,7 @@ function autoupdate () {
 			else
 				processing "Twgit already up-to-date."
 			fi
-			processing "Next check in $TWGIT_UPDATE_NB_DAYS days."
+			processing "Next auto-update check in $TWGIT_UPDATE_NB_DAYS days."
 			#echo "#touch"
 			#touch "$TWGIT_UPDATE_PATH"
 

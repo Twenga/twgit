@@ -390,7 +390,7 @@ function autoupdate () {
 		local elapsed_time=$(( ($(date -u +%s) - $(date -r "$TWGIT_UPDATE_PATH" +%s)) ))
 		#echo "#$elapsed_time"
 
-		local interval=$(( $TWGIT_UPDATE_NB_DAYS * 86400 / 10 ))
+		local interval=$(( $TWGIT_UPDATE_NB_DAYS * 86400 ))
 		#echo "interval=$interval"
 		if [ "$elapsed_time" -gt "$interval" ]; then
 			processing "Fetch twgit repository for auto-update check..."
@@ -402,7 +402,7 @@ function autoupdate () {
 			#echo "status=$status"
 			if [ "$status" = "1" ]; then
 				#warn "Une mise à jour est disponible."
-				echo -n $(question 'Update available! Do you want to update twgit (manually: twgit update)? [Y/N] ');
+				echo -n $(question 'Update available! Do you want to update twgit (or manually: twgit update)? [Y/N] ');
 				read answer
 				if [ "$answer" = "Y" ] || [ "$answer" = "y" ]; then
 					# si MAJ alors git pull
@@ -413,7 +413,7 @@ function autoupdate () {
 			fi
 			processing "Next auto-update check in $TWGIT_UPDATE_NB_DAYS days."
 			#echo "#touch"
-			#touch "$TWGIT_UPDATE_PATH"
+			touch "$TWGIT_UPDATE_PATH"
 
 			#local remaining_days=$(( 1 + ($interval - $elapsed_time)/86400 ))
 			#processing "$remaining_days day(s) before next auto-update test of twgit."

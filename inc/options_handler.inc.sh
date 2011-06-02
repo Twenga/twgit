@@ -5,7 +5,7 @@
 #
 # Les options (une lettre max) peuvent être mélangées aux paramètres.
 # Syntaxe admises :
-#     - 6 options dans cet exemple, les X sont les paramètres standards et sont tous optionnels) :
+#     - 6 options dans cet exemple, les X sont des paramètres standards facultatifs :
 #     [X] -a [X] -b-c [X] -def [X]
 #
 # Usage :

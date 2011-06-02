@@ -61,8 +61,11 @@ function cmd_list () {
 	local features
 
 	features=$(git branch -r --merged $TWGIT_ORIGIN/$TWGIT_STABLE | grep "$TWGIT_ORIGIN/$TWGIT_PREFIX_FEATURE" | sed 's/^[* ]*//')
-	help "Remote features merged into '<b>$TWGIT_STABLE</b>' via releases:"
-	display_branches 'Feature: ' "$features"
+	if [ ! -z "$features" ]; then
+		help "Remote features merged into '<b>$TWGIT_STABLE</b>' via releases:"
+		warn 'They would not exists!'
+		display_branches 'Feature: ' "$features"
+	fi
 
 	local release=$(get_current_release_in_progress)
 	if [ -z "$release" ]; then
@@ -79,7 +82,7 @@ function cmd_list () {
 	fi
 
 	features="$(get_features free $release)"
-	help "Remote features in progress NOT merged into releases:"
+	help "Remote free features:"
 	display_branches 'Feature: ' "$features"
 }
 

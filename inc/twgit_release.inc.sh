@@ -51,15 +51,14 @@ function cmd_list () {
 	local release=$(get_current_release_in_progress)
 	help "Remote release NOT merged into '<b>$TWGIT_STABLE</b>':"
 	display_branches 'Release: ' "$release" | head -n -1
-	if [ -z "$release" ]; then
-		echo
-	else
+	if [ ! -z "$release" ]; then
 		echo 'Features:'
 		local features="$(get_merged_features $release)"
 		for f in $features; do echo "    - $f [merged]"; done
 		features="$(get_features merged_in_progress $release)"
 		for f in $features; do echo "    - $f [merged, then in progress]"; done
 	fi
+	echo
 }
 
 ##
@@ -80,14 +79,13 @@ function cmd_start () {
 	[[ $(get_releases_in_progress | wc -w) > 0 ]] && die "No more one release is authorized at the same time! Try: twgit release list"
 	assert_tag_exists
 	local last_tag=$(get_last_tag)
-	local short_last_tag=${last_tag:${#TWGIT_PREFIX_TAG}}
 
 	if [ -z $release ]; then
 		local type
 		if isset_option 'M'; then type='major'
 		else type='minor'
 		fi
-		release=$(get_next_version $type $short_last_tag)
+		release=$(get_next_version $type)
 		release_fullname="$TWGIT_PREFIX_RELEASE$release"
 		echo "Release: $release_fullname"
 		echo -n $(question 'Do you want to continue? [Y/N] '); read answer
@@ -140,8 +138,8 @@ function cmd_finish () {
 	[ ! -z "$hotfix" ] && die "Close a release while hotfix in progress is forbidden! Hotfix '$hotfix' must be treated first."
 
 	# Détection tags (via hotfixes) réalisés entre temps :
-	tags_not_merged="$(get_tags_not_merged_into_release $release | sed 's/ /, /g')"
-	[ ! -z "$tags_not_merged" ] && die "You must merge following tag(s) before close this release: $tags_not_merged"
+	tags_not_merged="$(get_tags_not_merged_into_release $TWGIT_ORIGIN/$release_fullname | sed 's/ /, /g')"
+	[ ! -z "$tags_not_merged" ] && die "You must merge following tag(s) into this release before close it: $tags_not_merged"
 
 	processing 'Check remote features...'
 	local features="$(get_features merged_in_progress $TWGIT_ORIGIN/$release_fullname)"

@@ -15,9 +15,10 @@
 # TODO couplage options_handler::require_parameter() avec usage()
 # TODO ui.inc.sh pas assez sûr niveau collision de noms...
 # camelCase et autre_notation en même temps...
-# TODO créer une branche stable ?
 # TODO sujet des redmine ticket/tickets du projet/surticket+soustickets
 # TODO est-ce que la liste des committers d'une branche ne remonterait pas trop loin ?
+# TODO hotfix finish sans param
+# TODO release finish sans param
 
 if [ "$DEBUG" = "1" ]; then
 	set -x

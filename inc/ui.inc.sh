@@ -3,7 +3,7 @@
 
 
 #--------------------------------------------------------------------
-# User interface
+# User interface.
 # @author Geoffroy Aubry
 #--------------------------------------------------------------------
 
@@ -62,7 +62,10 @@ function die () {
 }
 
 ##
-# Affiche un message dans la couleur et avec l'en-tête correspondant au type spécifié.
+# Affiche un message dans la couleur du type spécifié ("$type.color").
+# S'il existe un en-tête "$type.header" dans la map UI, alors il viendra préfixer le message spécifié.
+# Enfin s'il existe un en-tête "$type.bold.color" dans la map UI, alors le texte encadré de balises <b> et </b> sera
+# dans cette couleur. Dans tous les cas ces balises seront supprimées de la sortie.
 #
 # @param string $1 type de message à afficher : conditionne l'éventuelle en-tête et la couleur
 # @param string $2 message à afficher

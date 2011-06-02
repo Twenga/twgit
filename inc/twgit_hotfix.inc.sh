@@ -52,8 +52,7 @@ function cmd_start () {
 	[ ! -z "$(get_hotfixes_in_progress)" ] && die "No more one hotfix is authorized at the same time! Try: twgit hotfix list"
 	assert_tag_exists
 	local last_tag=$(get_last_tag)
-	local short_last_tag=${last_tag:${#TWGIT_PREFIX_TAG}}
-	local hotfix=$(get_next_version 'revision' $short_last_tag)
+	local hotfix=$(get_next_version 'revision')
 	local hotfix_fullname="$TWGIT_PREFIX_HOTFIX$hotfix"
 
 	assert_valid_ref_name $hotfix
@@ -135,6 +134,6 @@ function cmd_finish () {
 	cmd_remove $hotfix
 
 	local current_release="$(get_current_release_in_progress)"
-	[ ! -z "$current_release" ] && warn "Do not forget to merge '$tag_fullname' tag into '$current_release' release before close them!"
+	[ ! -z "$current_release" ] && warn "Do not forget to merge '$tag_fullname' tag into '$current_release' release before close it!"
 }
 

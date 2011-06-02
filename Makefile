@@ -1,6 +1,6 @@
 #!/bin/sh
 
-# Install: sudo make install
+# Install: sudo make install --always-make
 
 ROOT_DIR="`pwd`"
 
@@ -9,7 +9,8 @@ all:
 	@echo "       make uninstall"
 
 install:
-	@echo -e "#!/bin/bash\n/bin/bash \"${ROOT_DIR}/twgit\" "'$$@' > /usr/local/bin/twgit
+	echo '#!/bin/bash' > /usr/local/bin/twgit
+	echo '/bin/bash "'${ROOT_DIR}'/twgit" $$@' >> /usr/local/bin/twgit
 	chmod 0755 /usr/local/bin/twgit
 	cp -f ${ROOT_DIR}/install/.bash_completion /etc/bash_completion.d/twgit
 

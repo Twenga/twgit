@@ -98,8 +98,8 @@ function cmd_start () {
 	local feature_fullname="$TWGIT_PREFIX_FEATURE$feature"
 
 	assert_valid_ref_name $feature
-	assert_clean_working_tree
 	assert_new_local_branch $feature_fullname
+	assert_clean_working_tree
 
 	process_fetch
 

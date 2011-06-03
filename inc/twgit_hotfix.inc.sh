@@ -49,28 +49,35 @@ function cmd_list () {
 # Son nom est le dernier tag en incrémentant le numéro de révision : major.minor.(revision+1)
 #
 function cmd_start () {
-	[ ! -z "$(get_hotfixes_in_progress)" ] && die "No more one hotfix is authorized at the same time! Try: twgit hotfix list"
-	assert_tag_exists
-	local last_tag=$(get_last_tag)
-	local hotfix=$(get_next_version 'revision')
-	local hotfix_fullname="$TWGIT_PREFIX_HOTFIX$hotfix"
+	#[ ! -z "$(get_hotfixes_in_progress)" ] && die "No more one hotfix is authorized at the same time! Try: twgit hotfix list"
 
-	assert_valid_ref_name $hotfix
 	assert_clean_working_tree
-	assert_new_local_branch $hotfix_fullname
-
 	process_fetch
 
 	processing 'Check remote hotfixes...'
-	local is_remote_exists=$(has "$TWGIT_ORIGIN/$hotfix_fullname" $(get_remote_branches) && echo 1 || echo 0)
-	if [ $is_remote_exists = '1' ]; then
-		processing "Remote hotfix '$hotfix_fullname' detected."
+	local remote_hotfix="$(get_hotfixes_in_progress)"
+	local hotfix
+	if [ -z "$remote_hotfix" ]; then
+		assert_tag_exists
+		local last_tag=$(get_last_tag)
+		hotfix=$(get_next_version 'revision')
+	else
+		local prefix="$TWGIT_ORIGIN/$TWGIT_PREFIX_HOTFIX"
+		hotfix="${remote_hotfix:${#prefix}}"
+		processing "Remote hotfix '$TWGIT_PREFIX_HOTFIX$hotfix' detected."
 	fi
 
-	exec_git_command "git checkout -b $hotfix_fullname $last_tag" "Could not check out tag '$last_tag'!"
+	local hotfix_fullname="$TWGIT_PREFIX_HOTFIX$hotfix"
+	assert_valid_ref_name $hotfix
+	assert_new_local_branch $hotfix_fullname
 
-	process_first_commit 'hotfix' "$hotfix_fullname"
-	process_push_branch $hotfix_fullname $is_remote_exists
+	if [ -z "$remote_hotfix" ]; then
+		exec_git_command "git checkout --track -b $hotfix_fullname $last_tag" "Could not check out tag '$last_tag'!"
+		process_first_commit 'hotfix' "$hotfix_fullname"
+		process_push_branch $hotfix_fullname '0'
+	else
+		exec_git_command "git checkout --track -b $hotfix_fullname $remote_hotfix" "Could not check out hotfix '$remote_hotfix'!"
+	fi
 }
 
 ##

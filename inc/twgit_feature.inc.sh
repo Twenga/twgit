@@ -104,8 +104,7 @@ function cmd_start () {
 	process_fetch
 
 	processing 'Check remote features...'
-	local is_remote_exists=$(has "$TWGIT_ORIGIN/$feature_fullname" $(get_remote_branches) && echo 1 || echo 0)
-	if [ $is_remote_exists = '1' ]; then
+	if has "$TWGIT_ORIGIN/$feature_fullname" $(get_remote_branches); then
 		processing "Remote feature '$feature_fullname' detected."
 		exec_git_command "git checkout --track -b $feature_fullname $TWGIT_ORIGIN/$feature_fullname" "Could not check out feature '$TWGIT_ORIGIN/$feature_fullname'!"
 	else

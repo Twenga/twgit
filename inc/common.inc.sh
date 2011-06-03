@@ -277,6 +277,7 @@ function assert_branches_equal () {
 # @param string $1 nom complet d'une branche locale
 #
 function assert_new_local_branch () {
+	processing 'Check local branches...'
 	if has $1 $(get_local_branches); then
 		warn "Local branch '$1' already exists!"
 		exec_git_command "git checkout $1" "Could not checkout '$1'!"

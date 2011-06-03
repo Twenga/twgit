@@ -107,16 +107,14 @@ function cmd_start () {
 	local is_remote_exists=$(has "$TWGIT_ORIGIN/$feature_fullname" $(get_remote_branches) && echo 1 || echo 0)
 	if [ $is_remote_exists = '1' ]; then
 		processing "Remote feature '$feature_fullname' detected."
+		exec_git_command "git checkout --track -b $feature_fullname $TWGIT_ORIGIN/$feature_fullname" "Could not check out feature '$TWGIT_ORIGIN/$feature_fullname'!"
+	else
+		assert_tag_exists
+		local last_tag=$(get_last_tag)
+		exec_git_command "git checkout --track -b $feature_fullname $last_tag" "Could not check out tag '$last_tag'!"
+		process_first_commit 'feature' "$feature_fullname"
+		process_push_branch $feature_fullname '0'
 	fi
-
-	assert_tag_exists
-	local last_tag=$(get_last_tag)
-	#local short_last_tag=${last_tag:${#$TWGIT_PREFIX_TAG}}
-
-	exec_git_command "git checkout -b $feature_fullname $last_tag" "Could not check out tag '$last_tag'!"
-
-	process_first_commit 'feature' "$feature_fullname"
-	process_push_branch $feature_fullname $is_remote_exists
 }
 
 ##

@@ -61,21 +61,17 @@ function cmd_start () {
 		assert_tag_exists
 		local last_tag=$(get_last_tag)
 		hotfix=$(get_next_version 'revision')
-	else
-		local prefix="$TWGIT_ORIGIN/$TWGIT_PREFIX_HOTFIX"
-		hotfix="${remote_hotfix:${#prefix}}"
-		processing "Remote hotfix '$TWGIT_PREFIX_HOTFIX$hotfix' detected."
-	fi
-
-	local hotfix_fullname="$TWGIT_PREFIX_HOTFIX$hotfix"
-	assert_valid_ref_name $hotfix
-	assert_new_local_branch $hotfix_fullname
-
-	if [ -z "$remote_hotfix" ]; then
+		local hotfix_fullname="$TWGIT_PREFIX_HOTFIX$hotfix"
 		exec_git_command "git checkout --track -b $hotfix_fullname $last_tag" "Could not check out tag '$last_tag'!"
 		process_first_commit 'hotfix' "$hotfix_fullname"
 		process_push_branch $hotfix_fullname '0'
 	else
+		local prefix="$TWGIT_ORIGIN/$TWGIT_PREFIX_HOTFIX"
+		hotfix="${remote_hotfix:${#prefix}}"
+		processing "Remote hotfix '$TWGIT_PREFIX_HOTFIX$hotfix' detected."
+		assert_valid_ref_name $hotfix
+		local hotfix_fullname="$TWGIT_PREFIX_HOTFIX$hotfix"
+		assert_new_local_branch $hotfix_fullname
 		exec_git_command "git checkout --track -b $hotfix_fullname $remote_hotfix" "Could not check out hotfix '$remote_hotfix'!"
 	fi
 }

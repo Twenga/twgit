@@ -19,6 +19,7 @@
 # TODO est-ce que la liste des committers d'une branche ne remonterait pas trop loin ?
 # TODO hotfix finish sans param
 # TODO release finish sans param
+# TODO comment gérer les branches locales fermées à partir d'un autre dépôt ?
 
 if [ "$DEBUG" = "1" ]; then
 	set -x

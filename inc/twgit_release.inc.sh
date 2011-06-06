@@ -16,8 +16,8 @@ function usage () {
 	help_detail '    If no <tagname> is specified then <releasename> will be used.'; echo
 	help_detail '<b>remove <releasename></b>'
 	help_detail '    Remove both local and remote specified release branch.'; echo
-	help_detail '<b>reset <releasename></b>'
-	help_detail '    Call remove <releasename> and start <releasename>'; echo
+	help_detail '<b>reset</b>'
+	help_detail '    Call remove and start on current release.'; echo
 	help_detail '<b>start [<releasename>] [-M|-m]</b>'
 	help_detail '    Create both a new local and remote release,'
 	help_detail '    or fetch the remote release if exists on remote repository,'
@@ -210,8 +210,12 @@ function cmd_remove () {
 # @param string $1 nom court de la release.
 #
 function cmd_reset () {
-	process_options "$@"
-	require_parameter 'release'
-	local release="$RETVAL"
-	cmd_remove $release && cmd_start $release
+	local prefix="$TWGIT_ORIGIN/$TWGIT_PREFIX_RELEASE"
+	local current_release=$(get_current_release_in_progress)
+	current_release="${current_release:${#prefix}}"
+	if [ -z "$current_release" ]; then
+		die "No release in progress!"
+	else
+		cmd_remove "$current_release" && cmd_start "$current_release"
+	fi
 }

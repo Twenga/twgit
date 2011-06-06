@@ -20,6 +20,7 @@
 # TODO hotfix finish sans param
 # TODO release finish sans param
 # TODO comment gérer les branches locales fermées à partir d'un autre dépôt ?
+# TODO créer une fonction d'init ?
 
 if [ "$DEBUG" = "1" ]; then
 	set -x

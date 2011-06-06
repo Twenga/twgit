@@ -53,7 +53,7 @@ function get_hotfixes_in_progress () {
 function get_current_release_in_progress () {
 	local releases="$(get_releases_in_progress)"
 	local release="$(echo $releases | cut -d' ' -f1)"
-	[[ $(echo $releases | wc -w) > 1 ]] && warn "More than one release in propress detected! Only '$release' will be treated here."
+	[[ $(echo $releases | wc -w) > 1 ]] && warn "More than one release in propress detected: $(echo $releases | sed 's/ /, /g')! Only '$release' will be treated here."
 	echo $release
 }
 
@@ -391,13 +391,10 @@ function process_first_commit () {
 # Réalise un push de la branche locale spécifiée sur $TWGIT_ORIGIN.
 #
 # @param string $1 nom complet de la branche locale à pousser
-# @param int $2 précise si oui ou non la branche distante existe déjà (0 pour absente)
 #
 function process_push_branch () {
 	local branch="$1"
-	local is_remote_exists="$2"
-	local git_options=$([ $is_remote_exists = '0' ] && echo '--set-upstream' || echo '')
-	exec_git_command "git push $git_options $TWGIT_ORIGIN $branch" "Could not push branch '$branch'!"
+	exec_git_command "git push --set-upstream $TWGIT_ORIGIN $branch" "Could not push branch '$branch'!"
 }
 
 ##

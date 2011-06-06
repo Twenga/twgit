@@ -16,7 +16,8 @@ function usage () {
 	help_detail '<b>remove <hotfixname></b>'
 	help_detail '    Remove both local and remote specified hotfix branch.'; echo
 	help_detail '<b>start</b>'
-	help_detail '    Create both a new local and remote hotfix, or fetch the remote hotfix.'
+	help_detail '    Create both a new local and remote hotfix, or fetch the remote hotfix,'
+	help_detail '    or checkout the local hotfix.'
 	help_detail '    Hotfix name will be: major.minor.(revision+1)'
 	help_detail "    Prefix '$TWGIT_PREFIX_HOTFIX' will be added to the specified <hotfixname>."; echo
 	help_detail '<b>[help]</b>'
@@ -64,7 +65,7 @@ function cmd_start () {
 		local hotfix_fullname="$TWGIT_PREFIX_HOTFIX$hotfix"
 		exec_git_command "git checkout --track -b $hotfix_fullname $last_tag" "Could not check out tag '$last_tag'!"
 		process_first_commit 'hotfix' "$hotfix_fullname"
-		process_push_branch $hotfix_fullname '0'
+		process_push_branch $hotfix_fullname
 	else
 		local prefix="$TWGIT_ORIGIN/$TWGIT_PREFIX_HOTFIX"
 		hotfix="${remote_hotfix:${#prefix}}"

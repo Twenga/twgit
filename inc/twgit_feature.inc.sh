@@ -16,7 +16,8 @@ function usage () {
 	help_detail '<b>remove <featurename></b>'
 	help_detail '    Remove both local and remote specified feature branch.'; echo
 	help_detail '<b>start <featurename></b>'
-	help_detail '    Create both a new local and remote feature, or fetch the remote feature.'
+	help_detail '    Create both a new local and remote feature, or fetch the remote feature,'
+	help_detail '    or checkout the local feature.'
 	help_detail "    Prefix '$TWGIT_PREFIX_FEATURE' will be added to the specified <featurename>."; echo
 	help_detail '<b>[help]</b>'
 	help_detail '    Display this help.'; echo
@@ -112,7 +113,7 @@ function cmd_start () {
 		local last_tag=$(get_last_tag)
 		exec_git_command "git checkout --track -b $feature_fullname $last_tag" "Could not check out tag '$last_tag'!"
 		process_first_commit 'feature' "$feature_fullname"
-		process_push_branch $feature_fullname '0'
+		process_push_branch $feature_fullname
 	fi
 }
 

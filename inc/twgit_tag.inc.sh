@@ -31,17 +31,14 @@ function cmd_list () {
 	process_fetch 'f'
 
 	local max='5'
-	local tags=$(get_all_tags)
+	local tags=$(get_all_tags $max)
 	help "List $max last tags:"
 	if [ -z "$tags" ]; then
 		info 'No tag exists.'; echo
 	else
-		local n=0
 		for tag in $tags; do
 			info "Tag: $tag"
 			git show $tag --pretty=medium | head -n 4 | tail -n +2
-			let n=$n+1
-			[ "$n" = "$max" ] && break
 		done
 	fi
 }

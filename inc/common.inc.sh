@@ -123,8 +123,15 @@ function get_current_branch () {
 ##
 # Affiche la liste des tags (nom complet) triés par ordre croissant, à raison d'un par ligne.
 #
+# @param int $1 si renseigné alors limite la liste aux $1 derniers tags
+#
 function get_all_tags () {
-	git tag | sort -n
+	local n="$1"
+	if [ -z "$n" ]; then
+		git tag | sort -n
+	else
+		git tag | sort -n | tail -n $n
+	fi
 }
 
 ##

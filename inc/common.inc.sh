@@ -558,6 +558,8 @@ function display_branches () {
 # Tous les $TWGIT_UPDATE_NB_DAYS jours un fetch sera exécuté afin de proposer à l'utilisateur une
 # éventuelle MAJ. Qu'il décline ou non, le prochain passage aura lieu dans à nouveau $TWGIT_UPDATE_NB_DAYS jours.
 #
+# A des fins de test : "touch -mt 1105200101 .lastupdate"
+#
 # @param string $1 Si non vide, force la vérification de la présence d'une MAJ même si $TWGIT_UPDATE_NB_DAYS jours
 #    ne se sont pas écoulés depuis le dernier test.
 #
@@ -568,6 +570,7 @@ function autoupdate () {
 		[ ! -f "$TWGIT_UPDATE_PATH" ] && touch "$TWGIT_UPDATE_PATH"
 		local elapsed_time=$(( ($(date -u +%s) - $(date -r "$TWGIT_UPDATE_PATH" +%s)) ))
 		local interval=$(( $TWGIT_UPDATE_NB_DAYS * 86400 ))
+		local answer=''
 
 		if [ "$elapsed_time" -gt "$interval" ] || [ ! -z "$is_forced" ]; then
 			processing "Fetch twgit repository for auto-update check..."
@@ -581,13 +584,13 @@ function autoupdate () {
 					processing 'Update in progress...'
 					git pull
 					[ -z "$is_forced" ] && echo 'Thank you for re-enter your request.'
-					exit 0
 				fi
 			else
 				processing 'Twgit already up-to-date.'
 			fi
 			processing "Next auto-update check in $TWGIT_UPDATE_NB_DAYS days."
 			touch "$TWGIT_UPDATE_PATH"
+			([ "$answer" = "Y" ] || [ "$answer" = "y" ]) && exit 0
 		fi
 	elif [ ! -z "$is_forced" ]; then
 		warn 'Git repositoy not found!'

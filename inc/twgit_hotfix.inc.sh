@@ -111,6 +111,7 @@ function cmd_finish () {
 	local hotfix_fullname="$TWGIT_PREFIX_HOTFIX$hotfix"
 	processing "Remote hotfix '$hotfix_fullname' detected."
 
+	processing "Check local branch '$hotfix_fullname'..."
 	if has $hotfix_fullname $(get_local_branches); then
 		assert_branches_equal "$hotfix_fullname" "$TWGIT_ORIGIN/$hotfix_fullname"
 	else

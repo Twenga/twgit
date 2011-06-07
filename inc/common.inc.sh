@@ -257,7 +257,7 @@ function assert_git_repository () {
 # @param string $2 nom complet d'une branche distante
 #
 function assert_branches_equal () {
-	processing 'Compare remote and local branches...'
+	processing "Compare branches '$1' with '$2'..."
 	if ! has $1 $(get_local_branches); then
 		die "Local branch '$1' does not exist and is required!"
 	elif ! has $2 $(get_remote_branches); then

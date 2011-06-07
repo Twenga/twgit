@@ -11,9 +11,9 @@ function usage () {
 	echo; help 'Available actions are:'
 	help_detail '<b>list</b>'
 	help_detail '    List remote releases. Add <b>-f</b> to do not make fetch.'; echo
-	help_detail '<b>finish <releasename> [<tagname>]</b>'
-	help_detail "    Merge specified release branch into '$TWGIT_STABLE', create a new tag and push."
-	help_detail '    If no <tagname> is specified then <releasename> will be used.'; echo
+	help_detail '<b>finish [<tagname>]</b>'
+	help_detail "    Merge current release branch into '$TWGIT_STABLE', create a new tag and push."
+	help_detail '    If no <tagname> is specified then release name will be used.'; echo
 	help_detail '<b>remove <releasename></b>'
 	help_detail '    Remove both local and remote specified release branch.'; echo
 	help_detail '<b>reset</b>'
@@ -128,42 +128,51 @@ function cmd_start () {
 #
 function cmd_finish () {
 	process_options "$@"
-	require_parameter 'release'
-	local release="$RETVAL"
-	local release_fullname="$TWGIT_PREFIX_RELEASE$release"
-
 	require_parameter '-'
 	local tag="$RETVAL"
-	[ -z "$tag" ] && tag="$release"
-	local tag_fullname="$TWGIT_PREFIX_TAG$tag"
 
 	assert_clean_working_tree
 	process_fetch
 
+	# Récupération de la release en cours :
+	processing 'Check remote release...'
+	local prefix="$TWGIT_ORIGIN/$TWGIT_PREFIX_RELEASE"
+	local release=$(get_current_release_in_progress)
+	release="${release:${#prefix}}"
+	[ -z "$release" ] && die 'No release in progress!'
+	local release_fullname="$TWGIT_PREFIX_RELEASE$release"
+	processing "Remote release '$release_fullname' detected."
+
+	# Calcul du nom du potentiel tag :
+	[ -z "$tag" ] && tag="$release"
+	local tag_fullname="$TWGIT_PREFIX_TAG$tag"
+	assert_valid_tag_name $tag_fullname
+	processing "Check whether tag '$tag_fullname' already exists..."
+	has "$tag_fullname" $(get_all_tags) && die "Tag '$tag_fullname' already exists! Try: twgit tag list"
+
 	# Détection hotfixes en cours :
+	processing 'Check hotfix in progress...'
 	local hotfix="$(get_hotfixes_in_progress)"
 	[ ! -z "$hotfix" ] && die "Close a release while hotfix in progress is forbidden! Hotfix '$hotfix' must be treated first."
 
 	# Détection tags (via hotfixes) réalisés entre temps :
+	processing 'Check tags not merged...'
 	tags_not_merged="$(get_tags_not_merged_into_release $TWGIT_ORIGIN/$release_fullname | sed 's/ /, /g')"
 	[ ! -z "$tags_not_merged" ] && die "You must merge following tag(s) into this release before close it: $tags_not_merged"
 
 	processing 'Check remote features...'
 	local features="$(get_features merged_in_progress $TWGIT_ORIGIN/$release_fullname)"
-	[ ! -z "$features" ] && die "Features exists that are merged into this release but yet in development: '$features'!"
+	[ ! -z "$features" ] && die "Features exists that are merged into this release but yet in development: $(echo $features | sed 's/ /, /g')!"
 
-	processing 'Check remote releases...'
-	local is_release_exists=$(has "$TWGIT_ORIGIN/$release_fullname" $(get_remote_branches) && echo 1 || echo 0)
-	[ $is_release_exists = '0' ] && die "Unknown '$release_fullname' remote release! Try: twgit release list"
-
-	has $release_fullname $(get_local_branches) && assert_branches_equal "$release_fullname" "$TWGIT_ORIGIN/$release_fullname"
-
-	assert_valid_tag_name $tag_fullname
-	processing 'Check tags...'
-	has "$tag_fullname" $(get_all_tags) && die "Tag '$tag_fullname' already exists! Try: twgit tag list"
+	processing "Check local branch '$release_fullname'..."
+	if has $release_fullname $(get_local_branches); then
+		assert_branches_equal "$release_fullname" "$TWGIT_ORIGIN/$release_fullname"
+	else
+		exec_git_command "git checkout --track -b $release_fullname $TWGIT_ORIGIN/$release_fullname" "Could not check out hotfix '$TWGIT_ORIGIN/$hotfix_fullname'!"
+	fi
 
 	exec_git_command "git checkout $TWGIT_STABLE" "Could not checkout '$TWGIT_STABLE'!"
-	exec_git_command "git merge --no-ff $TWGIT_ORIGIN/$TWGIT_STABLE" "Could not merge '$TWGIT_ORIGIN/$TWGIT_STABLE' into '$TWGIT_STABLE'!"
+	exec_git_command "git merge $TWGIT_ORIGIN/$TWGIT_STABLE" "Could not merge '$TWGIT_ORIGIN/$TWGIT_STABLE' into '$TWGIT_STABLE'!"
 	exec_git_command "git merge --no-ff $release_fullname" "Could not merge '$release_fullname' into '$TWGIT_STABLE'!"
 
 	processing "${TWGIT_GIT_COMMAND_PROMPT}git tag -a $tag_fullname -m \"${TWGIT_PREFIX_COMMIT_MSG}Release finish: $release_fullname\""

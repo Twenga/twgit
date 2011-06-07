@@ -583,14 +583,16 @@ function autoupdate () {
 				if [ "$answer" = "Y" ] || [ "$answer" = "y" ]; then
 					processing 'Update in progress...'
 					git pull
-					[ -z "$is_forced" ] && echo 'Thank you for re-enter your request.'
 				fi
 			else
 				processing 'Twgit already up-to-date.'
 			fi
 			processing "Next auto-update check in $TWGIT_UPDATE_NB_DAYS days."
 			touch "$TWGIT_UPDATE_PATH"
-			([ "$answer" = "Y" ] || [ "$answer" = "y" ]) && exit 0
+			if [ "$answer" = "Y" ] || [ "$answer" = "y" ]; then
+				[ -z "$is_forced" ] && echo 'Thank you for re-enter your request.'
+				exit 0
+			fi
 		fi
 	elif [ ! -z "$is_forced" ]; then
 		warn 'Git repositoy not found!'

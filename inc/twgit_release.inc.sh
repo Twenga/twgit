@@ -160,8 +160,7 @@ function cmd_finish () {
 
 	assert_valid_tag_name $tag_fullname
 	processing 'Check tags...'
-	local is_tag_exists=$(has "$tag_fullname" $(get_all_tags) && echo 1 || echo 0)
-	[ $is_tag_exists = '1' ] && die "Tag '$tag_fullname' already exists! Try: twgit tag list"
+	has "$tag_fullname" $(get_all_tags) && die "Tag '$tag_fullname' already exists! Try: twgit tag list"
 
 	exec_git_command "git checkout $TWGIT_STABLE" "Could not checkout '$TWGIT_STABLE'!"
 	exec_git_command "git merge --no-ff $TWGIT_ORIGIN/$TWGIT_STABLE" "Could not merge '$TWGIT_ORIGIN/$TWGIT_STABLE' into '$TWGIT_STABLE'!"

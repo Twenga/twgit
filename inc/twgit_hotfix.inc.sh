@@ -9,10 +9,10 @@ function usage () {
 	echo; help 'Usage:'
 	help_detail 'twgit hotfix <action>'
 	echo; help 'Available actions are:'
-	help_detail '<b>finish <hotfixname></b>'
-	help_detail "    Merge specified hotfix branch into '$TWGIT_STABLE', create a new tag and push."; echo
+	help_detail '<b>finish</b>'
+	help_detail "    Merge current hotfix branch into '$TWGIT_STABLE', create a new tag and push."; echo
 	help_detail '<b>list</b>'
-	help_detail '    List 5 last hotfixes. Add <b>-f</b> to do not make fetch.'; echo
+	help_detail '    List current hotfix. Add <b>-f</b> to do not make fetch.'; echo
 	help_detail '<b>remove <hotfixname></b>'
 	help_detail '    Remove both local and remote specified hotfix branch.'; echo
 	help_detail '<b>start</b>'
@@ -39,9 +39,8 @@ function cmd_list () {
 	process_options "$@"
 	process_fetch 'f'
 
-	local n='5'
-	local hotfixes=$(get_last_hotfixes $n)
-	help "Remote last $n hotfixes:"
+	local hotfixes=$(get_last_hotfixes 1)
+	help "Remote current hotfix:"
 	display_branches 'Hotfix: ' "$hotfixes"
 }
 
@@ -50,8 +49,6 @@ function cmd_list () {
 # Son nom est le dernier tag en incrémentant le numéro de révision : major.minor.(revision+1)
 #
 function cmd_start () {
-	#[ ! -z "$(get_hotfixes_in_progress)" ] && die "No more one hotfix is authorized at the same time! Try: twgit hotfix list"
-
 	assert_clean_working_tree
 	process_fetch
 
@@ -103,30 +100,31 @@ function cmd_remove () {
 # @param string $1 nom court du hotfix
 #
 function cmd_finish () {
-	process_options "$@"
-	require_parameter 'hotfix'
-	local hotfix="$RETVAL"
-	local hotfix_fullname="$TWGIT_PREFIX_HOTFIX$hotfix"
-
-	local tag="$hotfix"
-	local tag_fullname="$TWGIT_PREFIX_TAG$tag"
-
 	assert_clean_working_tree
 	process_fetch
 
 	processing 'Check remote hotfix...'
-	local is_hotfix_exists=$(has "$TWGIT_ORIGIN/$hotfix_fullname" $(get_remote_branches) && echo 1 || echo 0)
-	[ $is_hotfix_exists = '0' ] && die "Unknown '$hotfix_fullname' remote hotfix! Try: twgit hotfix list"
+	local remote_hotfix="$(get_hotfixes_in_progress)"
+	[ -z "$remote_hotfix" ] && die 'No hotfix in progress!'
+	local prefix="$TWGIT_ORIGIN/$TWGIT_PREFIX_HOTFIX"
+	hotfix="${remote_hotfix:${#prefix}}"
+	local hotfix_fullname="$TWGIT_PREFIX_HOTFIX$hotfix"
+	processing "Remote hotfix '$hotfix_fullname' detected."
 
-	has $hotfix_fullname $(get_local_branches) && assert_branches_equal "$hotfix_fullname" "$TWGIT_ORIGIN/$hotfix_fullname"
+	if has $hotfix_fullname $(get_local_branches); then
+		assert_branches_equal "$hotfix_fullname" "$TWGIT_ORIGIN/$hotfix_fullname"
+	else
+		exec_git_command "git checkout --track -b $hotfix_fullname $TWGIT_ORIGIN/$hotfix_fullname" "Could not check out hotfix '$TWGIT_ORIGIN/$hotfix_fullname'!"
+	fi
 
+	local tag="$hotfix"
+	local tag_fullname="$TWGIT_PREFIX_TAG$tag"
 	assert_valid_tag_name $tag_fullname
-	processing 'Check tags...'
-	local is_tag_exists=$(has "$tag_fullname" $(get_all_tags) && echo 1 || echo 0)
-	[ $is_tag_exists = '1' ] && die "Tag '$tag_fullname' already exists! Try: twgit tag list"
+	processing "Check whether tag '$tag_fullname' already exists..."
+	has "$tag_fullname" $(get_all_tags) && die "Tag '$tag_fullname' already exists! Try: twgit tag list"
 
 	exec_git_command "git checkout $TWGIT_STABLE" "Could not checkout '$TWGIT_STABLE'!"
-	exec_git_command "git merge --no-ff $TWGIT_ORIGIN/$TWGIT_STABLE" "Could not merge '$TWGIT_ORIGIN/$TWGIT_STABLE' into '$TWGIT_STABLE'!"
+	exec_git_command "git merge $TWGIT_ORIGIN/$TWGIT_STABLE" "Could not merge '$TWGIT_ORIGIN/$TWGIT_STABLE' into '$TWGIT_STABLE'!"
 	exec_git_command "git merge --no-ff $hotfix_fullname" "Could not merge '$hotfix_fullname' into '$TWGIT_STABLE'!"
 
 	processing "${TWGIT_GIT_COMMAND_PROMPT}git tag -a $tag_fullname -m \"${TWGIT_PREFIX_COMMIT_MSG}Hotfix finish: $hotfix_fullname\""

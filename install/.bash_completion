@@ -41,7 +41,7 @@ function _twgit () {
 		case "${command}" in
 			feature)
 				case "${action}" in
-					committers|remove)
+					committers)
 				 		if [[ ${cur} != -* ]] ; then
 							local opts=$((git branch -r | grep "feature-" | sed 's/^[* ]*//' | sed 's#^origin/feature-##' | tr '\n' ' ') 2>/dev/null)
 							COMPREPLY=( $(compgen -W "${opts}" -- ${cur}) )
@@ -58,7 +58,7 @@ function _twgit () {
 
 			hotfix)
 				case "${action}" in
-					finish|remove)
+					xxxxxxx)
 				 		if [[ ${cur} != -* ]] ; then
 							local opts=$((git branch -r | grep "hotfix-" | sed 's/^[* ]*//' | sed 's#^origin/hotfix-##' | tr '\n' ' ') 2>/dev/null)
 							COMPREPLY=( $(compgen -W "${opts}" -- ${cur}) )
@@ -75,7 +75,7 @@ function _twgit () {
 
 			release)
 				case "${action}" in
-					finish|remove|reset)
+					finish)
 				 		if [[ ${cur} != -* ]] ; then
 							local opts=$((git branch -r | grep "release-" | sed 's/^[* ]*//' | sed 's#^origin/release-##' | tr '\n' ' ') 2>/dev/null)
 							COMPREPLY=( $(compgen -W "${opts}" -- ${cur}) )

@@ -85,6 +85,12 @@ function cmd_list () {
 	features="$(get_features free $release)"
 	help "Remote free features:"
 	display_branches 'Feature: ' "$features"
+
+	local dissident_branches="$(get_dissident_remote_branches)"
+	if [ ! -z "$dissident_branches" ]; then
+		warn "Following branches are out of process: $(displayQuotedEnum $dissident_branches)!"
+		echo
+	fi
 }
 
 ##

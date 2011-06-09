@@ -33,6 +33,20 @@ function get_remote_branches () {
 }
 
 ##
+# Affiche la liste des branches distantes qui ne sont pas catégorisables dans le process.
+#
+function get_dissident_remote_branches () {
+	git branch -r --no-color | sed 's/^[* ] //' \
+		| grep -vP "^$TWGIT_ORIGIN/$TWGIT_PREFIX_FEATURE" \
+		| grep -vP "^$TWGIT_ORIGIN/$TWGIT_PREFIX_RELEASE" \
+		| grep -vP "^$TWGIT_ORIGIN/$TWGIT_PREFIX_HOTFIX" \
+		| grep -vP "^$TWGIT_ORIGIN/$TWGIT_PREFIX_DEMO" \
+		| grep -vP "^$TWGIT_ORIGIN/HEAD" \
+		| grep -vP "^$TWGIT_ORIGIN/master" \
+		| grep -vP "^$TWGIT_ORIGIN/$TWGIT_STABLE"
+}
+
+##
 # Affiche le nom complet des releases non encore mergées à $TWGIT_ORIGIN/$TWGIT_STABLE, à raison d'une par ligne.
 #
 function get_releases_in_progress () {
@@ -551,6 +565,19 @@ function display_branches () {
 			git show $branch --pretty=medium | grep -v '^Merge: ' | head -n 4
 		done
 	fi
+}
+
+##
+# Affiche la liste de valeurs sur une seule ligne, séparées par des virgules et chaque valeur entre simples quotes.
+#
+# @param string $@ liste de valeurs sur une ou plusieurs lignes
+#
+function displayQuotedEnum () {
+	local list="$@"
+	local one_line_list="$(echo $list | tr '\n' ' ')"
+	local trimmed_list="$(echo $one_line_list)"
+	local quoted_list="'${trimmed_list// /', '}'"
+	echo $quoted_list
 }
 
 ##

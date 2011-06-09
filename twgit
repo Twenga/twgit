@@ -7,6 +7,17 @@
 #
 # Sur le modèle de http://github.com/nvie/gitflow
 
+# Dans ~/.bash_profile :
+# function get_git_branch {
+#         local branch=$(git branch --no-color 2>/dev/null | grep -P '^\*' | sed 's/* //')
+#         if [ ! -z "$branch" ]; then
+#                 echo -n " \[\e[1;30m\]git\[\e[1;35m\]$branch"
+#                 [ `git status --porcelain --ignore-submodules=all | wc -l` -ne 0 ] && echo '*'
+#         fi
+# }
+
+export PROMPT_COMMAND='PS1="\[\e[0;32m\]\h:\w$(get_git_branch)\[\e[1;32m\]\\$\[\e[m\] "'
+
 # TODO ne pas enchaîner les fetch ?
 # TODO proposer Yes/No de résoudre certains pb ?
 # TODO merge d'une feature

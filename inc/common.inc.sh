@@ -387,7 +387,15 @@ function assert_tag_exists () {
 function assert_recent_git_version () {
 	local needed=$(echo "$1" | awk -F. '{ printf("%d%02d%02d%02d\n", $1,$2,$3,$4); }')
 	local current=$(git --version | sed 's/[^0-9.]//g' | awk -F. '{ printf("%d%02d%02d%02d\n", $1,$2,$3,$4); }')
-	[ $current -ge $needed ] || die "Please update git! Current: $(git --version | sed 's/[^0-9.]//g'). Need $1 or newer."
+	if [ $current -lt $needed ]; then
+		error "Please update git! Current: $(git --version | sed 's/[^0-9.]//g'). Need $1 or newer."
+		help 'Try:'
+		help_detail 'sudo apt-add-repository ppa:git-core/ppa'
+		help_detail 'sudo apt-get update'
+		help_detail 'sudo apt-get install git'
+		echo
+		exit
+	fi
 }
 
 

@@ -255,6 +255,8 @@ function assert_git_repository () {
 	local errormsg=$(git rev-parse --git-dir 2>&1 1>/dev/null)
 	[ ! -z "$errormsg" ] && die "[Git error msg] $errormsg"
 
+	assert_recent_git_version "$TWGIT_GIT_MIN_VERSION"
+
 	local stable="$TWGIT_ORIGIN/$TWGIT_STABLE"
 	if ! has $stable $(get_remote_branches); then
 		process_fetch
@@ -375,6 +377,17 @@ function assert_tag_exists () {
 	processing 'Get last tag...'
 	local last_tag="$(get_last_tag)"
 	[ -z "$last_tag" ] && die 'No tag exists!' || echo "Last tag: $last_tag"
+}
+
+##
+# S'assure que l'outil Git est au moins dans la version $1.
+#
+# @param string $1 version minimale requise, au format '1.2.3' ou '1.2.3.4'
+#
+function assert_recent_git_version () {
+	local needed=$(echo "$1" | awk -F. '{ printf("%d%02d%02d%02d\n", $1,$2,$3,$4); }')
+	local current=$(git --version | sed 's/[^0-9.]//g' | awk -F. '{ printf("%d%02d%02d%02d\n", $1,$2,$3,$4); }')
+	[ $current -ge $needed ] || die "Please update git! Current: $(git --version | sed 's/[^0-9.]//g'). Need $1 or newer."
 }
 
 

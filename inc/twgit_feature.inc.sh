@@ -70,15 +70,15 @@ function cmd_list () {
 
 	local release=$(get_current_release_in_progress)
 	if [ -z "$release" ]; then
-		help "Remote features merged into release in progress:"
+		help "Remote delivered features merged into release in progress:"
 		info 'No such branch exists.'; echo
 	else
-		help "Remote features merged into release in progress '<b>$release</b>':"
+		help "Remote delivered features merged into release in progress '<b>$release</b>':"
 		features=$(get_merged_features $release)
 		display_branches 'Feature: ' "$features"
 
 		features="$(get_features merged_in_progress $release)"
-		help "Remote features in progress, merged into '<b>$release</b>' in the past:"
+		help "Remote features in progress, previously merged into '<b>$release</b>':"
 		display_branches 'Feature: ' "$features"
 	fi
 

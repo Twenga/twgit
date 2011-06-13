@@ -189,8 +189,8 @@ function get_next_version () {
 	local revision=$(echo $current_version | cut -d. -f3)
 
 	case "$change_type" in
-		major) let major++ ;;
-		minor) let minor++ ;;
+		major) let major++; minor=0; revision=0 ;;
+		minor) let minor++; revision=0 ;;
 		revision) let revision++ ;;
 		*) die "Invalid version change type: '$change_type'!" ;;
 	esac

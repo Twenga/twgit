@@ -110,14 +110,16 @@ function get_features () {
 		local head_rev=$(git rev-parse $TWGIT_ORIGIN/$TWGIT_STABLE)
 		local release_rev=$(git rev-parse $release)
 
-		local f_rev merge_base master_merge_base
+		local f_rev release_merge_base stable_merge_base
 		for f in $features; do
 			f_rev=$(git rev-parse $f)
-			merge_base=$(git merge-base $release_rev $f_rev)
-			master_merge_base=$(git merge-base $release_rev $head_rev)
-			if [ "$merge_base" = "$f_rev" ]; then
+			release_merge_base=$(git merge-base $release_rev $f_rev)
+			#stable_merge_base=$(git merge-base $release_rev $head_rev)
+			stable_merge_base=$(git merge-base $release_merge_base $head_rev)
+
+			if [ "$release_merge_base" = "$f_rev" ]; then
 				[ "$feature_type" = 'merged' ] && return_features="$return_features $f"
-			elif [ "$merge_base" != "$master_merge_base" ]; then
+			elif [ "$release_merge_base" != "$stable_merge_base" ]; then
 				[ "$feature_type" = 'merged_in_progress' ] && return_features="$return_features $f"
 			elif [ "$feature_type" = 'free' ]; then
 				return_features="$return_features $f"

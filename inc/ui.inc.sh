@@ -13,7 +13,7 @@ UI=(
 	[error.header]='\033[4;33m/!\\\033[0;37m '
 	[error.color]='\033[1;31m'
 	[info.color]='\033[1;37m'
-	[info.bold.color]='\033[1;35m'
+	[redmine.color]='\033[1;34m'
 	[help.header]='\033[1;36m(i) '
 	[help.color]='\033[0;36m'
 	[help.bold.color]='\033[1;36m'
@@ -26,6 +26,8 @@ UI=(
 	[warning.bold.color]='\033[1;33m'
 	[question.color]='\033[1;33m'
 	[processing.color]='\033[1;30m'
+	[status_ok.color]='\033[0;32m'
+	[status_warning.color]='\033[0;33m'
 )
 
 function processing () {

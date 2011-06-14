@@ -1,6 +1,6 @@
 <?php
 
-// /usr/bin/php -q ~/twgit/inc/ws_redmine.inc.php 7573
+// /usr/bin/php -q ~/twgit/inc/ws_redmine.inc.php 7573 subject
 // http://localhost/TwGit/inc/ws_redmine.inc.php?issue=7573
 
 // http://redmine.twenga.com/projects/api2/issues.xml

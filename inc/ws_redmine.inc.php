@@ -43,7 +43,7 @@ foreach ($issue_ids as $issue_id) {
 			'project' => $issue->project,
 			'subject' => $issue->subject,
 			'description' => $issue->description,
-			'assign_to' => $issue->assigned_to->attributes()->name,
+			'assign_to' => ($issue->assigned_to === NULL ? '' : $issue->assigned_to->attributes()->name)
 		);
 
 		if ( ! empty($needed_key)) {

@@ -26,8 +26,7 @@ UI=(
 	[warning.bold.color]='\033[1;33m'
 	[question.color]='\033[1;33m'
 	[processing.color]='\033[1;30m'
-	[status_ok.color]='\033[0;32m'
-	[status_warning.color]='\033[0;33m'
+	[ok.color]='\033[0;32m'
 )
 
 function processing () {

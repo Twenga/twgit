@@ -49,12 +49,12 @@ function cmd_list () {
 	if [ ! -z $releases ]; then
 		help "Remote releases merged into '<b>$TWGIT_STABLE</b>':"
 		warn "A release must be deleted after merge into '<b>$TWGIT_STABLE</b>'! Following releases would not exists!"
-		display_branches 'Release: ' "$releases"
+		display_branches 'release' "$releases"
 	fi
 
 	local release=$(get_current_release_in_progress)
 	help "Remote release NOT merged into '<b>$TWGIT_STABLE</b>':"
-	display_branches 'Release: ' "$release" | head -n -1
+	display_branches 'release' "$release" | head -n -1
 	if [ ! -z "$release" ]; then
 		echo && info 'Features:'
 

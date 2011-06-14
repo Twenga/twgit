@@ -65,7 +65,7 @@ function cmd_list () {
 	if [ ! -z "$features" ]; then
 		help "Remote features merged into '<b>$TWGIT_STABLE</b>' via releases:"
 		warn 'They would not exists!'
-		display_branches 'Feature: ' "$features"
+		display_branches 'feature' "$features"
 	fi
 
 	local release=$(get_current_release_in_progress)
@@ -75,16 +75,16 @@ function cmd_list () {
 	else
 		help "Remote delivered features merged into release in progress '<b>$release</b>':"
 		features=$(get_merged_features $release)
-		display_branches 'Feature: ' "$features"
+		display_branches 'feature' "$features"
 
 		features="$(get_features merged_in_progress $release)"
 		help "Remote features in progress, previously merged into '<b>$release</b>':"
-		display_branches 'Feature: ' "$features"
+		display_branches 'feature' "$features"
 	fi
 
 	features="$(get_features free $release)"
 	help "Remote free features:"
-	display_branches 'Feature: ' "$features"
+	display_branches 'feature' "$features"
 
 	local dissident_branches="$(get_dissident_remote_branches)"
 	if [ ! -z "$dissident_branches" ]; then

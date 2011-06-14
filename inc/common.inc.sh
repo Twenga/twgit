@@ -572,20 +572,31 @@ function compare_branches () {
 #    Author: Geoffroy Aubry <geoffroy.aubry@twenga.com>
 #    Date:   Wed May 25 18:58:05 2011 +0200
 #
-# @param string $1 titre préfixant chaque en-tête de paragraphe
+# @param string $1 type type de branches affichées, parmi {'feature', 'release', 'hotfix'}
 # @param string $2 liste des branches à présenter, à raison d'une par ligne
 #
 function display_branches () {
-	local title="$1"
+	local type="$1"
 	local branches="$2"
+
+	local -A titles=(
+		[feature]='Feature: '
+		[release]='Release: '
+		[hotfix]='Hotfix: '
+	)
 
 	if [ -z "$branches" ]; then
 		info 'No such branch exists.'; echo
 	else
+		local prefix="$TWGIT_ORIGIN/$TWGIT_PREFIX_FEATURE"
 		for branch in $branches; do
-			info "$title$branch"
+			echo -n $(info "${titles[$type]}$branch ")
+
+			[ "$type" = "feature" ] && displayRedmineSubject "${branch:${#prefix}}" || echo
+
 			local tags_not_merged="$(get_tags_not_merged_into_release $branch)"
 			[ ! -z "$tags_not_merged" ] && warn "Following tags has not yet been merged into this branch: $(displayQuotedEnum $tags_not_merged)"
+
 			git show $branch --pretty=medium | grep -v '^Merge: ' | head -n 4
 		done
 	fi
@@ -623,7 +634,7 @@ function displayRedmineSubject () {
 		[ ! -z "$subject" ] && echo "$redmine;$subject" >> "$TWGIT_REDMINE_PATH"
 	fi
 
-	[ ! -z "$subject" ] && displayMsg redmine "$subject" || processing 'Unknown Redmine subject.'
+	[ ! -z "$subject" ] && displayMsg redmine "$subject" || echo #processing 'Unknown Redmine subject.'
 }
 
 ##

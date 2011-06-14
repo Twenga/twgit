@@ -57,10 +57,11 @@ function cmd_list () {
 	display_branches 'Release: ' "$release" | head -n -1
 	if [ ! -z "$release" ]; then
 		echo 'Features:'
-		local features="$(get_merged_features $release)"
-		for f in $features; do echo "    - $f [merged]"; done
-		features="$(get_features merged_in_progress $release)"
-		for f in $features; do echo "    - $f [merged, then in progress]"; done
+		local merged_features="$(get_merged_features $release)"
+		for f in $merged_features; do echo "    - $f [merged]"; done
+		local merged_in_progress_features="$(get_features merged_in_progress $release)"
+		for f in $merged_in_progress_features; do echo "    - $f [merged, then in progress]"; done
+		[ -z "$merged_features" ] && [ -z "$merged_in_progress_features" ] && info '    - No such branch exists.'
 	fi
 	echo
 }

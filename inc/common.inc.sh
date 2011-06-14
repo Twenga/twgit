@@ -66,7 +66,7 @@ function get_hotfixes_in_progress () {
 #
 function get_current_release_in_progress () {
 	local releases="$(get_releases_in_progress)"
-	local release="$(echo $releases | cut -d' ' -f1)"
+	local release="$(echo $releases | tr '\n' ' ' | cut -d' ' -f1)"
 	[[ $(echo $releases | wc -w) > 1 ]] && warn "More than one release in propress detected: $(echo $releases | sed 's/ /, /g')! Only '$release' will be treated here."
 	echo $release
 }
@@ -114,7 +114,6 @@ function get_features () {
 		for f in $features; do
 			f_rev=$(git rev-parse $f)
 			release_merge_base=$(git merge-base $release_rev $f_rev)
-			#stable_merge_base=$(git merge-base $release_rev $head_rev)
 			stable_merge_base=$(git merge-base $release_merge_base $head_rev)
 
 			if [ "$release_merge_base" = "$f_rev" ]; then

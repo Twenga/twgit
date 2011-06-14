@@ -584,6 +584,8 @@ function display_branches () {
 	else
 		for branch in $branches; do
 			info "$title$branch"
+			local tags_not_merged="$(get_tags_not_merged_into_release $branch | sed 's/ /, /g')"
+			[ ! -z "$tags_not_merged" ] && warn "Following tag(s) has not yet been merged into this branch: $tags_not_merged"
 			git show $branch --pretty=medium | grep -v '^Merge: ' | head -n 4
 		done
 	fi

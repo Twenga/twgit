@@ -117,7 +117,7 @@ function cmd_start () {
 	else
 		assert_tag_exists
 		local last_tag=$(get_last_tag)
-		exec_git_command "git checkout --track -b $feature_fullname $last_tag" "Could not check out tag '$last_tag'!"
+		exec_git_command "git checkout -b $feature_fullname $last_tag" "Could not check out tag '$last_tag'!"
 		process_first_commit 'feature' "$feature_fullname"
 		process_push_branch $feature_fullname
 	fi

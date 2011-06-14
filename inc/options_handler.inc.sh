@@ -56,6 +56,7 @@ function process_options {
 # @param string $1 valeur à rechercher
 # @return 1 si présent, 0 sinon
 # @see has()
+#
 function isset_option () {
 	#has $1 "$FCT_OPTIONS"
 	local item=$1; shift

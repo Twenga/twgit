@@ -605,6 +605,28 @@ function displayQuotedEnum () {
 }
 
 ##
+# Affiche le sujet d'un ticket Redmine
+# Le premier appel sollicite ws_redmine.inc.php qui lui-même exploite un WS Redmine,
+# les suivants bénéficieront du fichier de cache $TWGIT_REDMINE_PATH.
+#
+# @param int $1 numéro de ticket Redmine
+#
+function displayRedmineSubject () {
+	local redmine="$1"
+	local subject
+
+	[ ! -s "$TWGIT_REDMINE_PATH" ] && touch "$TWGIT_REDMINE_PATH"
+
+	subject="$(cat "$TWGIT_REDMINE_PATH" | grep -E "^$redmine;" | head -n 1 | sed 's/^.*;//')"
+	if [ -z "$subject" ]; then
+		subject="$(/usr/bin/php -q ~/twgit/inc/ws_redmine.inc.php $redmine subject 2>/dev/null || echo)"
+		[ ! -z "$subject" ] && echo "$redmine;$subject" >> "$TWGIT_REDMINE_PATH"
+	fi
+
+	[ ! -z "$subject" ] && displayMsg redmine "$subject" || processing 'Unknown Redmine subject.'
+}
+
+##
 # Permet la mise à jour automatique de l'application dans le cas où le .git est toujours présent.
 # Tous les $TWGIT_UPDATE_NB_DAYS jours un fetch sera exécuté afin de proposer à l'utilisateur une
 # éventuelle MAJ. Qu'il décline ou non, le prochain passage aura lieu dans à nouveau $TWGIT_UPDATE_NB_DAYS jours.
@@ -634,6 +656,7 @@ function autoupdate () {
 				if [ "$answer" = "Y" ] || [ "$answer" = "y" ]; then
 					processing 'Update in progress...'
 					git pull
+					> "$TWGIT_REDMINE_PATH"
 				fi
 			else
 				processing 'Twgit already up-to-date.'

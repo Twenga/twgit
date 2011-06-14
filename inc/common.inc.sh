@@ -584,8 +584,8 @@ function display_branches () {
 	else
 		for branch in $branches; do
 			info "$title$branch"
-			local tags_not_merged="$(get_tags_not_merged_into_release $branch | sed 's/ /, /g')"
-			[ ! -z "$tags_not_merged" ] && warn "Following tag(s) has not yet been merged into this branch: $tags_not_merged"
+			local tags_not_merged="$(get_tags_not_merged_into_release $branch)"
+			[ ! -z "$tags_not_merged" ] && warn "Following tags has not yet been merged into this branch: $(displayQuotedEnum $tags_not_merged)"
 			git show $branch --pretty=medium | grep -v '^Merge: ' | head -n 4
 		done
 	fi
@@ -594,13 +594,13 @@ function display_branches () {
 ##
 # Affiche la liste de valeurs sur une seule ligne, séparées par des virgules et chaque valeur entre simples quotes.
 #
-# @param string $@ liste de valeurs sur une ou plusieurs lignes
+# @param string $@ liste de valeurs sur une ou plusieurs lignes, séparées par des espaces ou des sauts de ligne
 #
 function displayQuotedEnum () {
 	local list="$@"
 	local one_line_list="$(echo $list | tr '\n' ' ')"
 	local trimmed_list="$(echo $one_line_list)"
-	local quoted_list="'${trimmed_list// /', '}'"
+	local quoted_list="'<b>${trimmed_list// /</b>', '<b>}</b>'"
 	echo $quoted_list
 }
 

@@ -23,6 +23,7 @@ UI=(
 	[normal.color]='\033[0;37m'
 	[warning.header]='\033[4;33m/!\\\033[0;37m '
 	[warning.color]='\033[0;33m'
+	[warning.bold.color]='\033[1;33m'
 	[question.color]='\033[1;33m'
 	[processing.color]='\033[1;30m'
 )

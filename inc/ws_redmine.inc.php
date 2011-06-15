@@ -20,7 +20,8 @@ class Issue extends ActiveResource {
 $argc--;
 array_shift($argv);
 if ($argc < 1) {
-	throw new Exception('Issue ID missing!');
+	file_put_contents('php://stderr', 'Issue ID missing!', E_USER_ERROR);
+	exit(1);
 }
 $issue_id = $argv[0];
 $needed_key = ($argc >= 2 ? $argv[1] : '');

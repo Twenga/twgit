@@ -1,6 +1,7 @@
 #!/bin/bash
 
 assert_git_repository
+assert_php_curl
 
 ##
 # Affiche l'aide de la commande tag.

@@ -267,6 +267,13 @@ function assert_git_repository () {
 	fi
 }
 
+function assert_php_curl () {
+	if ! php --ri curl 2>/dev/null 1>&2; then
+		warn 'PHP lib cURL not installed: Redmine subjects will not be fetched.'
+		processing 'Try: sudo apt-get install php5-curl'
+	fi
+}
+
 ##
 # S'assure que les 2 branches spécifiées sont au même niveau.
 #

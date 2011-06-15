@@ -578,7 +578,6 @@ function compare_branches () {
 function display_branches () {
 	local type="$1"
 	local branches="$2"
-
 	local -A titles=(
 		[feature]='Feature: '
 		[release]='Release: '
@@ -586,18 +585,22 @@ function display_branches () {
 	)
 
 	if [ -z "$branches" ]; then
-		info 'No such branch exists.'; echo
+		info 'No such branch exists.';
 	else
 		local prefix="$TWGIT_ORIGIN/$TWGIT_PREFIX_FEATURE"
+		local add_empty_line=0
 		for branch in $branches; do
+			if ! isset_option 'c'; then
+				[ "$add_empty_line" = "0" ] && add_empty_line=1 || echo
+			fi
 			echo -n $(info "${titles[$type]}$branch ")
 
 			[ "$type" = "feature" ] && displayRedmineSubject "${branch:${#prefix}}" || echo
 
 			local tags_not_merged="$(get_tags_not_merged_into_release $branch)"
-			[ ! -z "$tags_not_merged" ] && warn "Following tags has not yet been merged into this branch: $(displayQuotedEnum $tags_not_merged)"
+			[ ! -z "$tags_not_merged" ] && warn "Following tags has not yet been merged into this $type: $(displayQuotedEnum $tags_not_merged)"
 
-			git show $branch --pretty=medium | grep -v '^Merge: ' | head -n 4
+			! isset_option 'c' && git show $branch --pretty=medium | grep -v '^Merge: ' | head -n 3
 		done
 	fi
 }

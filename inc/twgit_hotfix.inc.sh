@@ -41,7 +41,7 @@ function cmd_list () {
 
 	local hotfixes=$(get_last_hotfixes 1)
 	help "Remote current hotfix:"
-	display_branches 'hotfix' "$hotfixes"
+	display_branches 'hotfix' "$hotfixes"; echo
 }
 
 ##

@@ -54,9 +54,9 @@ function cmd_list () {
 
 	local release=$(get_current_release_in_progress)
 	help "Remote release NOT merged into '<b>$TWGIT_STABLE</b>':"
-	display_branches 'release' "$release" | head -n -1
+	display_branches 'release' "$release" # | head -n -1
 	if [ ! -z "$release" ]; then
-		echo && info 'Features:'
+		info 'Features:'
 
 		local merged_features="$(get_merged_features $release)"
 		local prefix="$TWGIT_ORIGIN/$TWGIT_PREFIX_RELEASE"

@@ -49,7 +49,7 @@ function _twgit () {
 						;;
 					list)
 					    if [[ ${cur} == -* ]] ; then
-							local opts="-f"
+							local opts="-f -c"
 					        COMPREPLY=( $(compgen -W "${opts}" -- ${cur}) )
 					    fi
 						;;

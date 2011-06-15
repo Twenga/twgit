@@ -579,21 +579,35 @@ function compare_branches () {
 #    Author: Geoffroy Aubry <geoffroy.aubry@twenga.com>
 #    Date:   Wed May 25 18:58:05 2011 +0200
 #
-# @param string $1 titre préfixant chaque en-tête de paragraphe
+# @param string $1 type type de branches affichées, parmi {'feature', 'release', 'hotfix'}
 # @param string $2 liste des branches à présenter, à raison d'une par ligne
 #
 function display_branches () {
-	local title="$1"
+	local type="$1"
 	local branches="$2"
+	local -A titles=(
+		[feature]='Feature: '
+		[release]='Release: '
+		[hotfix]='Hotfix: '
+	)
 
 	if [ -z "$branches" ]; then
-		info 'No such branch exists.'; echo
+		info 'No such branch exists.';
 	else
+		local prefix="$TWGIT_ORIGIN/$TWGIT_PREFIX_FEATURE"
+		local add_empty_line=0
 		for branch in $branches; do
-			info "$title$branch"
+			if ! isset_option 'c'; then
+				[ "$add_empty_line" = "0" ] && add_empty_line=1 || echo
+			fi
+			echo -n $(info "${titles[$type]}$branch ")
+
+			[ "$type" = "feature" ] && displayRedmineSubject "${branch:${#prefix}}" || echo
+
 			local tags_not_merged="$(get_tags_not_merged_into_release $branch)"
-			[ ! -z "$tags_not_merged" ] && warn "Following tags has not yet been merged into this branch: $(displayQuotedEnum $tags_not_merged)"
-			git show $branch --pretty=medium | grep -v '^Merge: ' | head -n 4
+			[ ! -z "$tags_not_merged" ] && warn "Following tags has not yet been merged into this $type: $(displayQuotedEnum $tags_not_merged)"
+
+			! isset_option 'c' && git show $branch --pretty=medium | grep -v '^Merge: ' | head -n 3
 		done
 	fi
 }
@@ -609,6 +623,28 @@ function displayQuotedEnum () {
 	local trimmed_list="$(echo $one_line_list)"
 	local quoted_list="'<b>${trimmed_list// /</b>', '<b>}</b>'"
 	echo $quoted_list
+}
+
+##
+# Affiche le sujet d'un ticket Redmine
+# Le premier appel sollicite ws_redmine.inc.php qui lui-même exploite un WS Redmine,
+# les suivants bénéficieront du fichier de cache $TWGIT_REDMINE_PATH.
+#
+# @param int $1 numéro de ticket Redmine
+#
+function displayRedmineSubject () {
+	local redmine="$1"
+	local subject
+
+	[ ! -s "$TWGIT_REDMINE_PATH" ] && touch "$TWGIT_REDMINE_PATH"
+
+	subject="$(cat "$TWGIT_REDMINE_PATH" | grep -E "^$redmine;" | head -n 1 | sed 's/^.*;//')"
+	if [ -z "$subject" ]; then
+		subject="$(/usr/bin/php -q ~/twgit/inc/ws_redmine.inc.php $redmine subject 2>/dev/null || echo)"
+		[ ! -z "$subject" ] && echo "$redmine;$subject" >> "$TWGIT_REDMINE_PATH"
+	fi
+
+	[ ! -z "$subject" ] && displayMsg redmine "$subject" || echo #processing 'Unknown Redmine subject.'
 }
 
 ##
@@ -641,6 +677,7 @@ function autoupdate () {
 				if [ "$answer" = "Y" ] || [ "$answer" = "y" ]; then
 					processing 'Update in progress...'
 					git pull
+					> "$TWGIT_REDMINE_PATH"
 				fi
 			else
 				processing 'Twgit already up-to-date.'

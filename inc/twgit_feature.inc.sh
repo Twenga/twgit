@@ -13,7 +13,7 @@ function usage () {
 	help_detail '<b>committers <featurename></b>'
 	help_detail '    List committers into the specified remote feature.'; echo
 	help_detail '<b>list</b>'
-	help_detail '    List remote features. Add <b>-f</b> to do not make fetch.'; echo
+	help_detail '    List remote features. Add <b>-f</b> to do not make fetch, -c to compact display.'; echo
 	help_detail '<b>remove <featurename></b>'
 	help_detail '    Remove both local and remote specified feature branch.'; echo
 	help_detail '<b>start <featurename></b>'
@@ -56,6 +56,7 @@ function cmd_committers () {
 ##
 # Liste les features et leur statut par rapport aux releases.
 # Gère l'option '-f' permettant d'éviter le fetch.
+# Gère l'option '-c' compactant l'affichage en masquant les détails de commit auteur et date.
 #
 function cmd_list () {
 	process_options "$@"
@@ -66,7 +67,7 @@ function cmd_list () {
 	if [ ! -z "$features" ]; then
 		help "Remote features merged into '<b>$TWGIT_STABLE</b>' via releases:"
 		warn 'They would not exists!'
-		display_branches 'Feature: ' "$features"
+		display_branches 'feature' "$features"; echo
 	fi
 
 	local release=$(get_current_release_in_progress)
@@ -74,23 +75,22 @@ function cmd_list () {
 		help "Remote delivered features merged into release in progress:"
 		info 'No such branch exists.'; echo
 	else
-		help "Remote delivered features merged into release in progress '<b>$release</b>':"
 		features=$(get_merged_features $release)
-		display_branches 'Feature: ' "$features"
+		help "Remote delivered features merged into release in progress '<b>$release</b>':"
+		display_branches 'feature' "$features"; echo
 
 		features="$(get_features merged_in_progress $release)"
 		help "Remote features in progress, previously merged into '<b>$release</b>':"
-		display_branches 'Feature: ' "$features"
+		display_branches 'feature' "$features"; echo
 	fi
 
 	features="$(get_features free $release)"
 	help "Remote free features:"
-	display_branches 'Feature: ' "$features"
+	display_branches 'feature' "$features"; echo
 
 	local dissident_branches="$(get_dissident_remote_branches)"
 	if [ ! -z "$dissident_branches" ]; then
-		warn "Following branches are out of process: $(displayQuotedEnum $dissident_branches)!"
-		echo
+		warn "Following branches are out of process: $(displayQuotedEnum $dissident_branches)!"; echo
 	fi
 }
 

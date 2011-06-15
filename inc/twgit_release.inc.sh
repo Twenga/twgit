@@ -50,34 +50,28 @@ function cmd_list () {
 	if [ ! -z $releases ]; then
 		help "Remote releases merged into '<b>$TWGIT_STABLE</b>':"
 		warn "A release must be deleted after merge into '<b>$TWGIT_STABLE</b>'! Following releases would not exists!"
-		display_branches 'Release: ' "$releases"
+		display_branches 'release' "$releases"
 	fi
 
 	local release=$(get_current_release_in_progress)
 	help "Remote release NOT merged into '<b>$TWGIT_STABLE</b>':"
-	display_branches 'Release: ' "$release" | head -n -1
+	display_branches 'release' "$release" # | head -n -1
 	if [ ! -z "$release" ]; then
-		echo && info 'Features:'
+		info 'Features:'
 
 		local merged_features="$(get_merged_features $release)"
-		local subject
 		local prefix="$TWGIT_ORIGIN/$TWGIT_PREFIX_RELEASE"
-		local redmine
 		for f in $merged_features; do
 			echo -n "    - $f "
-			echo -n $(displayMsg ok '[merged]')
-			redmine="${f:${#prefix}}"
-			subject="$(/usr/bin/php -q ~/twgit/inc/ws_redmine.inc.php $redmine subject 2>/dev/null || echo)"
-			[ ! -z "$subject" ] && displayMsg redmine " $subject" || echo
+			echo -n $(displayMsg ok '[merged]')' '
+			displayRedmineSubject "${f:${#prefix}}"
 		done
 
 		local merged_in_progress_features="$(get_features merged_in_progress $release)"
 		for f in $merged_in_progress_features; do
 			echo -n "    - $f ";
-			echo -n $(displayMsg warning 'merged, then in progress.')
-			redmine="${f:${#prefix}}"
-			subject="$(/usr/bin/php -q ~/twgit/inc/ws_redmine.inc.php $redmine subject 2>/dev/null || echo)"
-			[ ! -z "$subject" ] && displayMsg redmine " $subject" || echo
+			echo -n $(displayMsg warning 'merged, then in progress.')' '
+			displayRedmineSubject "${f:${#prefix}}"
 		done
 		[ -z "$merged_features" ] && [ -z "$merged_in_progress_features" ] && info '    - No such branch exists.'
 	fi

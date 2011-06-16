@@ -267,6 +267,9 @@ function assert_git_repository () {
 	fi
 }
 
+##
+# S'assure que la lib PHP cURL est présente, afin de permettre la récupération des sujets des tickets Redmine.
+#
 function assert_php_curl () {
 	if ! php --ri curl 2>/dev/null 1>&2; then
 		warn 'PHP lib cURL not installed: Redmine subjects will not be fetched.'

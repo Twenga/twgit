@@ -30,6 +30,7 @@ export PROMPT_COMMAND='PS1="\[\e[0;32m\]\h:\w$(get_git_branch)\[\e[1;32m\]\\$\[\
 # TODO comment gérer les branches locales fermées à partir d'un autre dépôt ?
 # TODO créer une fonction d'init qui effectue la transition vers ce nouveau process ?
 # TODO bcp d'endroits ne passent pas encore par displayQuotedEnum()
+# TODO créer un alias à la place de /usr/local/bin/twgit ?
 
 if [ "$DEBUG" = "1" ]; then
 	set -x

@@ -46,7 +46,7 @@ function help_detail () {
 }
 
 function warn () {
-	displayMsg warning "$1" >&2
+	displayMsg warning "$1"
 }
 
 function question () {
@@ -54,7 +54,7 @@ function question () {
 }
 
 function error () {
-	displayMsg error "$1" >&2
+	displayMsg error "$1"
 }
 
 function die () {

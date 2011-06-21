@@ -7,9 +7,12 @@ TWGIT_INC_DIR="$TWGIT_ROOT_DIR/inc"
 TWGIT_CONF_DIR="$TWGIT_ROOT_DIR/conf"
 
 TWGIT_REDMINE_PATH="$TWGIT_ROOT_DIR/.redmine"
-TWGIT_HISTORY_PATH="$TWGIT_ROOT_DIR/.history"
 TWGIT_UPDATE_PATH="$TWGIT_ROOT_DIR/.lastupdate"
 TWGIT_UPDATE_NB_DAYS=2
+
+TWGIT_HISTORY_LOG_PATH="$TWGIT_ROOT_DIR/.history.log"
+TWGIT_HISTORY_ERROR_PATH="$TWGIT_ROOT_DIR/.history.error"
+TWGIT_HISTORY_SEPARATOR="----------------------------------------------------------------------\n[%s] %s\n"
 
 TWGIT_PREFIX_FEATURE='feature-'
 TWGIT_PREFIX_RELEASE='release-'

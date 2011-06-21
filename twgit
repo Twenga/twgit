@@ -40,6 +40,14 @@ fi
 . `dirname $0`/conf/config.inc.sh
 . $TWGIT_INC_DIR/common.inc.sh
 
+# Duplication des flux à des fins d'historisation :
+log_date="$(date "+%Y-%m-%d %H:%M:%S")"
+log_call="$0 $@"
+exec 2> >(printf -- "$TWGIT_HISTORY_SEPARATOR" "$log_date" "$log_call" >> $TWGIT_HISTORY_ERROR_PATH; tee -a $TWGIT_HISTORY_ERROR_PATH >&2)
+exec > >(printf -- "$TWGIT_HISTORY_SEPARATOR" "$log_date" "$log_call" >> $TWGIT_HISTORY_LOG_PATH; tee -a $TWGIT_HISTORY_LOG_PATH)
+
+
+
 ##
 # Affiche l'aide
 #
@@ -107,14 +115,6 @@ function main () {
 	fi
 }
 
-#exec 2> >(tee -a $TWGIT_HISTORY_PATH)
-#SRC_IFS=$IFS
-#exec 2> >(echo -en '\n['$(date "+%Y-%m-%d %H:%M:%S")'] ' >> $TWGIT_HISTORY_PATH; tee -a $TWGIT_HISTORY_PATH >&2)
-#exec > >(echo $(date "+%Y-%m-%d %H:%M:%S")";--------------------------------------------------" >> $TWGIT_HISTORY_PATH; tee -a $TWGIT_HISTORY_PATH)
-
-#exec > >(while IFS="" read line; do IFS=$SRC_IFS; echo "$line"; echo $(date "+%Y-%m-%d %H:%M:%S")"$line" | sed -r 's#\\?\\033[^m]+m##g' >> $TWGIT_HISTORY_PATH; done)
-#echo $(date "+%Y-%m-%d %H:%M:%S")";--------------------------------------------------" | sed -r 's#\\?\\033[^m]+m##g' >> $TWGIT_HISTORY_PATH
-#echo $(date "+%Y-%m-%d %H:%M:%S")";$0 $@" | sed -r 's#\\?\\033[^m]+m##g' >> $TWGIT_HISTORY_PATH
 [ "$1" != "update" ] && autoupdate
 assert_git_configured
 main "$@"

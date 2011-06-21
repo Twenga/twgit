@@ -679,7 +679,7 @@ function autoupdate () {
 				read answer
 				if [ "$answer" = "Y" ] || [ "$answer" = "y" ]; then
 					processing 'Update in progress...'
-					git pull
+					git reset --hard origin/master && git pull
 					> "$TWGIT_REDMINE_PATH"
 				fi
 			else

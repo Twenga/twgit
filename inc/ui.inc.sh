@@ -75,6 +75,7 @@ function die () {
 function displayMsg () {
 	local type=$1
 	local msg=$2
+	local header
 
 	local is_defined=`echo ${!UI[*]} | grep "\b$type\b" | wc -l`
 	[ $is_defined = 0 ] && echo "Unknown display type '$type'!" >&2 && exit 1
@@ -82,8 +83,10 @@ function displayMsg () {
 	local escape_bold_color=$(echo ${UI[$type'.bold.color']} | sed 's/\\/\\\\/g')
 
 	if [ ! -z "${UI[$type'.header']}" ]; then
-		echo -en "${UI[$type'.header']}"
+		header="${UI[$type'.header']}"
+	else
+		header=''
 	fi
 	msg=$(echo "$msg" | sed "s/<b>/$escape_bold_color/g" | sed "s#</b>#$escape_color#g")
-	echo -e "${UI[$type'.color']}$msg${UI['normal.color']}"
+	echo -e "$header${UI[$type'.color']}$msg${UI['normal.color']}"
 }

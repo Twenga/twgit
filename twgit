@@ -16,7 +16,7 @@
 #         fi
 # }
 
-export PROMPT_COMMAND='PS1="\[\e[0;32m\]\h:\w$(get_git_branch)\[\e[1;32m\]\\$\[\e[m\] "'
+#export PROMPT_COMMAND='PS1="\[\e[0;32m\]\h:\w$(get_git_branch)\[\e[1;32m\]\\$\[\e[m\] "'
 
 # TODO ne pas enchaîner les fetch à chaque commande twgit ?
 # TODO merge d'une feature
@@ -107,6 +107,14 @@ function main () {
 	fi
 }
 
+#exec 2> >(tee -a $TWGIT_HISTORY_PATH)
+#SRC_IFS=$IFS
+#exec 2> >(echo -en '\n['$(date "+%Y-%m-%d %H:%M:%S")'] ' >> $TWGIT_HISTORY_PATH; tee -a $TWGIT_HISTORY_PATH >&2)
+#exec > >(echo $(date "+%Y-%m-%d %H:%M:%S")";--------------------------------------------------" >> $TWGIT_HISTORY_PATH; tee -a $TWGIT_HISTORY_PATH)
+
+#exec > >(while IFS="" read line; do IFS=$SRC_IFS; echo "$line"; echo $(date "+%Y-%m-%d %H:%M:%S")"$line" | sed -r 's#\\?\\033[^m]+m##g' >> $TWGIT_HISTORY_PATH; done)
+#echo $(date "+%Y-%m-%d %H:%M:%S")";--------------------------------------------------" | sed -r 's#\\?\\033[^m]+m##g' >> $TWGIT_HISTORY_PATH
+#echo $(date "+%Y-%m-%d %H:%M:%S")";$0 $@" | sed -r 's#\\?\\033[^m]+m##g' >> $TWGIT_HISTORY_PATH
 [ "$1" != "update" ] && autoupdate
 assert_git_configured
 main "$@"

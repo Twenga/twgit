@@ -56,7 +56,7 @@ function error () {
 }
 
 function die () {
-	error "$1"
+	error "$1" >&2
 	echo
 	exit 1
 }

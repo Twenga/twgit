@@ -67,7 +67,7 @@ function get_hotfixes_in_progress () {
 function get_current_release_in_progress () {
 	local releases="$(get_releases_in_progress)"
 	local release="$(echo $releases | tr '\n' ' ' | cut -d' ' -f1)"
-	[[ $(echo $releases | wc -w) > 1 ]] && warn "More than one release in propress detected: $(echo $releases | sed 's/ /, /g')! Only '$release' will be treated here."
+	[[ $(echo $releases | wc -w) > 1 ]] && die "More than one release in propress detected: $(echo $releases | sed 's/ /, /g')! Only '$release' will be treated here."
 	echo $release
 }
 
@@ -315,7 +315,6 @@ function assert_new_local_branch () {
 	if has $1 $(get_local_branches); then
 		warn "Local branch '$1' already exists!"
 		exec_git_command "git checkout $1" "Could not checkout '$1'!"
-		exit 0
 	fi
 }
 

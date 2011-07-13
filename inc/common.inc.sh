@@ -232,6 +232,28 @@ function get_rank_contributors () {
 	# Sort passwd file by 3rd field.
 }
 
+##
+# Affiche le sujet d'un ticket Redmine, sans aucune coloration.
+# Le premier appel sollicite ws_redmine.inc.php qui lui-même exploite un WS Redmine,
+# les suivants bénéficieront du fichier de cache $TWGIT_REDMINE_PATH.
+#
+# @param int $1 numéro de ticket Redmine
+#
+function getRedmineSubject () {
+	local redmine="$1"
+	local subject
+
+	[ ! -s "$TWGIT_REDMINE_PATH" ] && touch "$TWGIT_REDMINE_PATH"
+
+	subject="$(cat "$TWGIT_REDMINE_PATH" | grep -E "^$redmine;" | head -n 1 | sed 's/^.*;//')"
+	if [ -z "$subject" ]; then
+		subject="$(/usr/bin/php -q ~/twgit/inc/ws_redmine.inc.php $redmine subject 2>/dev/null || echo)"
+		[ ! -z "$subject" ] && echo "$redmine;$subject" >> "$TWGIT_REDMINE_PATH"
+	fi
+
+	echo $subject
+}
+
 
 
 #--------------------------------------------------------------------
@@ -609,6 +631,7 @@ function display_branches () {
 			local tags_not_merged="$(get_tags_not_merged_into_release $branch)"
 			[ ! -z "$tags_not_merged" ] && warn "Following tags has not yet been merged into this $type: $(displayQuotedEnum $tags_not_merged)"
 
+			# Afficher les informations de commit :
 			! isset_option 'c' && git show $branch --pretty=medium | grep -v '^Merge: ' | head -n 3
 		done
 	fi
@@ -633,20 +656,26 @@ function displayQuotedEnum () {
 # les suivants bénéficieront du fichier de cache $TWGIT_REDMINE_PATH.
 #
 # @param int $1 numéro de ticket Redmine
+# @see getRedmineSubject()
 #
 function displayRedmineSubject () {
-	local redmine="$1"
-	local subject
-
-	[ ! -s "$TWGIT_REDMINE_PATH" ] && touch "$TWGIT_REDMINE_PATH"
-
-	subject="$(cat "$TWGIT_REDMINE_PATH" | grep -E "^$redmine;" | head -n 1 | sed 's/^.*;//')"
-	if [ -z "$subject" ]; then
-		subject="$(/usr/bin/php -q ~/twgit/inc/ws_redmine.inc.php $redmine subject 2>/dev/null || echo)"
-		[ ! -z "$subject" ] && echo "$redmine;$subject" >> "$TWGIT_REDMINE_PATH"
-	fi
-
+	local subject="$(getRedmineSubject "$1")"
 	[ ! -z "$subject" ] && displayMsg redmine "$subject" || echo #processing 'Unknown Redmine subject.'
+}
+
+##
+# Convertit une liste de valeurs en une ligne CSV au format suivant et l'affiche : "v1";"va""lue2";"v\'3"
+#
+# @param string $@ liste de valeurs
+#
+function convertList2CSV () {
+	local row
+	for v in $@; do
+		v=${v//'"'/'""'}
+		v=${v//"'"/"\\'"}
+		row="$row;\"$v\""
+	done
+	echo ${row:1}
 }
 
 ##

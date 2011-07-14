@@ -12,7 +12,7 @@ function usage () {
 	help_detail '<b>finish</b>'
 	help_detail "    Merge current hotfix branch into '$TWGIT_STABLE', create a new tag and push."; echo
 	help_detail '<b>list</b>'
-	help_detail '    List current hotfix. Add <b>-f</b> to do not make fetch.'; echo
+	help_detail '    List current hotfix. Add <b>-F</b> to do not make fetch.'; echo
 	help_detail '<b>remove <hotfixname></b>'
 	help_detail '    Remove both local and remote specified hotfix branch.'; echo
 	help_detail '<b>start</b>'
@@ -33,11 +33,11 @@ function cmd_help () {
 
 ##
 # Liste les derniers hotfixes.
-# Gère l'option '-f' permettant d'éviter le fetch.
+# Gère l'option '-F' permettant d'éviter le fetch.
 #
 function cmd_list () {
 	process_options "$@"
-	process_fetch 'f'
+	process_fetch 'F'
 
 	local hotfixes=$(get_last_hotfixes 1)
 	help "Remote current hotfix:"

@@ -13,8 +13,8 @@ function usage () {
 	help_detail '<b>committers <featurename></b>'
 	help_detail '    List committers into the specified remote feature.'; echo
 	help_detail '<b>list</b>'
-	help_detail '    List remote features. Add <b>-f</b> to do not make fetch, -c to compact display'
-	help_detail '    and -x (eXtremely compact) to CSV display.'; echo
+	help_detail '    List remote features. Add <b>-F</b> to do not make fetch, <b>-c</b> to compact display'
+	help_detail '    and <b>-x</b> (eXtremely compact) to CSV display.'; echo
 	help_detail '<b>remove <featurename></b>'
 	help_detail '    Remove both local and remote specified feature branch.'; echo
 	help_detail '<b>start <featurename></b>'
@@ -56,16 +56,16 @@ function cmd_committers () {
 
 ##
 # Liste les features et leur statut par rapport aux releases.
-# Gère l'option '-f' permettant d'éviter le fetch.
+# Gère l'option '-F' permettant d'éviter le fetch.
 # Gère l'option '-c' compactant l'affichage en masquant les détails de commit auteur et date.
 # Gère l'option '-x' (eXtremely compact) retournant un affichage CVS.
 #
 function cmd_list () {
 	process_options "$@"
 	if isset_option 'x'; then
-		process_fetch 'f' 1>/dev/null
+		process_fetch 'F' 1>/dev/null
 	else
-		process_fetch 'f'
+		process_fetch 'F'
 	fi
 
 	local features

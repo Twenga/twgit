@@ -11,7 +11,7 @@ function usage () {
 	help_detail 'twgit release <action>'
 	echo; help 'Available actions are:'
 	help_detail '<b>list</b>'
-	help_detail '    List remote releases. Add <b>-f</b> to do not make fetch.'; echo
+	help_detail '    List remote releases. Add <b>-F</b> to do not make fetch.'; echo
 	help_detail '<b>finish [<tagname>]</b>'
 	help_detail "    Merge current release branch into '$TWGIT_STABLE', create a new tag and push."
 	help_detail '    If no <tagname> is specified then release name will be used.'; echo
@@ -40,11 +40,11 @@ function cmd_help () {
 
 ##
 # Liste les releases ainsi que leurs éventuelles features associées.
-# Gère l'option '-f' permettant d'éviter le fetch.
+# Gère l'option '-F' permettant d'éviter le fetch.
 #
 function cmd_list () {
 	process_options "$@"
-	process_fetch 'f'
+	process_fetch 'F'
 
 	local releases=$(git branch -r --merged $TWGIT_ORIGIN/$TWGIT_STABLE | grep "$TWGIT_ORIGIN/$TWGIT_PREFIX_RELEASE" | sed 's/^[* ]*//')
 	if [ ! -z $releases ]; then

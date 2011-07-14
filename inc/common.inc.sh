@@ -596,6 +596,29 @@ function compare_branches () {
 }
 
 ##
+# Affiche une ligne CSV pour chacune des branches fournies.
+# Exemple :
+#    7278;feature-7278;merged into release;"Mail d\'alerte en cas d\'insertion KO dans Sugar"
+#
+# @param string $1 liste des branches à présenter, à raison d'une par ligne, au format 'origin/xxx'
+# @param string $2 information de sous-type de branche
+#
+function display_csv_branches () {
+	local branches="$1"
+	local subtype="$2"
+	local repo_prefix="$TWGIT_ORIGIN/"
+	local prefix="$TWGIT_ORIGIN/$TWGIT_PREFIX_FEATURE"
+
+	local subject
+	local short_name
+	for branch in $branches; do
+		short_name="${branch:${#prefix}}"
+		subject="$(getRedmineSubject "$short_name")"
+		echo "${branch:${#repo_prefix}};$short_name;$subtype;$(convertList2CSV "$subject")"
+	done
+}
+
+##
 # Affiche un court paragraphe descriptif pour chacune des branches fournies.
 # Exemple :
 #    [title]: origin/release-three
@@ -604,7 +627,7 @@ function compare_branches () {
 #    Date:   Wed May 25 18:58:05 2011 +0200
 #
 # @param string $1 type type de branches affichées, parmi {'feature', 'release', 'hotfix'}
-# @param string $2 liste des branches à présenter, à raison d'une par ligne
+# @param string $2 liste des branches à présenter, à raison d'une par ligne, au format 'origin/xxx'
 #
 function display_branches () {
 	local type="$1"
@@ -670,7 +693,7 @@ function displayRedmineSubject () {
 #
 function convertList2CSV () {
 	local row
-	for v in $@; do
+	for v in "$@"; do
 		v=${v//'"'/'""'}
 		v=${v//"'"/"\\'"}
 		row="$row;\"$v\""

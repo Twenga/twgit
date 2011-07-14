@@ -62,15 +62,17 @@ function cmd_committers () {
 #
 function cmd_list () {
 	process_options "$@"
-	process_fetch 'f'
-	local features
+	if isset_option 'x'; then
+		process_fetch 'f' 1>/dev/null
+	else
+		process_fetch 'f'
+	fi
 
+	local features
 	local prefix="$TWGIT_ORIGIN/$TWGIT_PREFIX_FEATURE"
 	features=$(git branch -r --merged $TWGIT_ORIGIN/$TWGIT_STABLE | grep "$TWGIT_ORIGIN/$TWGIT_PREFIX_FEATURE" | sed 's/^[* ]*//')
 	if isset_option 'x'; then
-		for branch in $features; do
-			echo "${branch:${#prefix}};$branch;merged into stable;\"$(getRedmineSubject "${branch:${#prefix}}")\""
-		done
+		display_csv_branches "$features" "merged into stable"
 	elif [ ! -z "$features" ]; then
 		help "Remote features merged into '<b>$TWGIT_STABLE</b>' via releases:"
 		warn 'They would not exists!'
@@ -84,32 +86,22 @@ function cmd_list () {
 			info 'No such branch exists.'; echo
 		fi
 	else
+		features_merged=$(get_merged_features $release)
+		features_in_progress="$(get_features merged_in_progress $release)"
 		if isset_option 'x'; then
-			features=$(get_merged_features $release)
-			for branch in $features; do
-				echo "${branch:${#prefix}};$branch;merged into release;\"$(getRedmineSubject "${branch:${#prefix}}")\""
-			done
-
-			features="$(get_features merged_in_progress $release)"
-			for branch in $features; do
-				echo "${branch:${#prefix}};$branch;merged into release, then in progress;\"$(getRedmineSubject "${branch:${#prefix}}")\""
-			done
+			display_csv_branches "$features_merged" "merged into release"
+			display_csv_branches "$features_in_progress" "merged into release, then in progress"
 		else
-			features=$(get_merged_features $release)
 			help "Remote delivered features merged into release in progress '<b>$release</b>':"
-			display_branches 'feature' "$features"; echo
-
-			features="$(get_features merged_in_progress $release)"
+			display_branches 'feature' "$features_merged"; echo
 			help "Remote features in progress, previously merged into '<b>$release</b>':"
-			display_branches 'feature' "$features"; echo
+			display_branches 'feature' "$features_in_progress"; echo
 		fi
 	fi
 
 	features="$(get_features free $release)"
 	if isset_option 'x'; then
-		for branch in $features; do
-			echo "${branch:${#prefix}};$branch;free;\"$(getRedmineSubject "${branch:${#prefix}}")\""
-		done
+		display_csv_branches "$features" "free"
 	else
 		help "Remote free features:"
 		display_branches 'feature' "$features"; echo

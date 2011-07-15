@@ -115,6 +115,6 @@ function main () {
 	fi
 }
 
-[ "$1" != "update" ] && autoupdate
+[ "$1" != "update" ] && [ "$TWGIT_UPDATE_AUTO" = "1" ] && autoupdate
 assert_git_configured
 main "$@"

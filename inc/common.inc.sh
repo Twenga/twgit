@@ -335,8 +335,9 @@ function assert_branches_equal () {
 function assert_new_local_branch () {
 	processing 'Check local branches...'
 	if has $1 $(get_local_branches); then
-		warn "Local branch '$1' already exists!"
+		processing "Local branch '$1' already exists!"
 		exec_git_command "git checkout $1" "Could not checkout '$1'!"
+		exit 0
 	fi
 }
 
@@ -508,7 +509,7 @@ function remove_local_branch () {
 function remove_remote_branch () {
 	local branch="$1"
 	if has "$TWGIT_ORIGIN/$branch" $(get_remote_branches); then
-		exec_git_command "git push $TWGIT_ORIGIN :$branch" "Delete remote branch '$TWGIT_ORIGIN/$branch' failed "
+		exec_git_command "git push $TWGIT_ORIGIN :$branch" "Delete remote branch '$TWGIT_ORIGIN/$branch' failed!"
 		if [ $? -ne 0 ]; then
 			processing "Remove remote branch '$TWGIT_ORIGIN/$branch' failed! Maybe already deleted... so:"
 			exec_git_command "git remote prune $TWGIT_ORIGIN" "Prune failed!"

@@ -15,6 +15,8 @@ function usage () {
 	help_detail '<b>list</b>'
 	help_detail '    List remote features. Add <b>-F</b> to do not make fetch, <b>-c</b> to compact display'
 	help_detail '    and <b>-x</b> (eXtremely compact) to CSV display.'; echo
+	help_detail '<b>migrate <oldfeaturefullname> <newfeaturename></b>'
+	help_detail '    Migrate old branch to new process.'; echo
 	help_detail '<b>remove <featurename></b>'
 	help_detail '    Remove both local and remote specified feature branch.'; echo
 	help_detail '<b>start <featurename></b>'
@@ -113,6 +115,41 @@ function cmd_list () {
 			warn "Following branches are out of process: $(displayQuotedEnum $dissident_branches)!"; echo
 		fi
 	fi
+}
+
+function cmd_migrate () {
+	process_options "$@"
+	require_parameter 'full_old_name'
+	local oldfeature_fullname="$RETVAL"
+	require_parameter 'short_new_name'
+	local feature="$RETVAL"
+	local feature_fullname="$TWGIT_PREFIX_FEATURE$feature"
+
+	assert_valid_ref_name $feature
+	assert_clean_working_tree
+
+	processing 'Check local features...'
+	if has $feature_fullname $(get_local_branches); then
+		die "Local branch '$feature_fullname' already exists!"
+	fi
+
+	process_fetch
+	processing 'Check remote features...'
+	if ! has "$TWGIT_ORIGIN/$oldfeature_fullname" $(get_remote_branches); then
+		die "Remote branch '$TWGIT_ORIGIN/$oldfeature_fullname' does not exist!"
+	elif has "$TWGIT_ORIGIN/$feature_fullname" $(get_remote_branches); then
+		die "Remote feature '$feature_fullname' already exists!"
+	fi
+
+	echo -n $(question "Are you sure to migrate '$oldfeature_fullname' to '$feature_fullname'? Branch '$oldfeature_fullname' will be deleted. [Y/N] "); read answer
+	[ "$answer" != "Y" ] && [ "$answer" != "y" ] && die 'Branch migration aborted!'
+
+	processing "Migrate '<b>$oldfeature_fullname</b>' to '<b>$feature_fullname</b>'..."
+	exec_git_command "git checkout --track -b $feature_fullname $TWGIT_ORIGIN/$oldfeature_fullname" "Could not check out feature '$TWGIT_ORIGIN/$oldfeature_fullname'!"
+	remove_local_branch "$oldfeature_fullname"
+	remove_remote_branch "$oldfeature_fullname"
+	exec_git_command "git merge --no-ff $TWGIT_STABLE" "Could not merge stable into '$feature_fullname'!"
+	process_push_branch "$feature_fullname"
 }
 
 ##

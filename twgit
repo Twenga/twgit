@@ -15,8 +15,8 @@
 #                 [ `git status --porcelain --ignore-submodules=all | wc -l` -ne 0 ] && echo '*'
 #         fi
 # }
-
-#export PROMPT_COMMAND='PS1="\[\e[0;32m\]\h:\w$(get_git_branch)\[\e[1;32m\]\\$\[\e[m\] "'
+# Puis :
+#    export PROMPT_COMMAND='PS1="\[\e[0;32m\]\h:\w$(get_git_branch)\[\e[1;32m\]\\$\[\e[m\] "'
 
 # TODO ne pas enchaîner les fetch à chaque commande twgit ?
 # TODO merge d'une feature

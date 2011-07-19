@@ -105,7 +105,7 @@ function get_features () {
 		fi
 	else
 		local return_features=''
-		local features_merged=$(git branch -r --merged $release | grep "$TWGIT_ORIGIN/$TWGIT_PREFIX_FEATURE" | sed 's/^[* ]*//')
+		#local features_merged=$(git branch -r --merged $release | grep "$TWGIT_ORIGIN/$TWGIT_PREFIX_FEATURE" | sed 's/^[* ]*//')
 		local features=$(git branch -r | grep "$TWGIT_ORIGIN/$TWGIT_PREFIX_FEATURE" | sed 's/^[* ]*//')
 		local head_rev=$(git rev-parse $TWGIT_ORIGIN/$TWGIT_STABLE)
 		local release_rev=$(git rev-parse $release)

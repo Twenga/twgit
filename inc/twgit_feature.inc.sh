@@ -12,7 +12,7 @@ function usage () {
 	echo; help 'Available actions are:'
 	help_detail '<b>committers <featurename></b>'
 	help_detail '    List committers into the specified remote feature.'; echo
-	help_detail '<b>list</b>'
+	help_detail '<b>list [-c|-F|-x]</b>'
 	help_detail '    List remote features. Add <b>-F</b> to do not make fetch, <b>-c</b> to compact display'
 	help_detail '    and <b>-x</b> (eXtremely compact) to CSV display.'; echo
 	help_detail '<b>migrate <oldfeaturefullname> <newfeaturename></b>'

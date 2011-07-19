@@ -11,7 +11,7 @@ function usage () {
 	echo; help 'Available actions are:'
 	help_detail '<b>finish</b>'
 	help_detail "    Merge current hotfix branch into '$TWGIT_STABLE', create a new tag and push."; echo
-	help_detail '<b>list</b>'
+	help_detail '<b>list [-F]</b>'
 	help_detail '    List current hotfix. Add <b>-F</b> to do not make fetch.'; echo
 	help_detail '<b>remove <hotfixname></b>'
 	help_detail '    Remove both local and remote specified hotfix branch.'; echo

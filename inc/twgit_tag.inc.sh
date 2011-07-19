@@ -9,7 +9,7 @@ function usage () {
 	echo; help 'Usage:'
 	help_detail 'twgit tag <action>'
 	echo; help 'Available actions are:'
-	help_detail '<b>list</b>'
+	help_detail '<b>list [-F]</b>'
 	help_detail '    List 5 last tags. Add <b>-F</b> to do not make fetch.'; echo
 	help_detail '<b>[help]</b>'
 	help_detail '    Display this help.'; echo

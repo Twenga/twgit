@@ -73,6 +73,7 @@ function cmd_start () {
 		assert_new_local_branch $hotfix_fullname
 		exec_git_command "git checkout --track -b $hotfix_fullname $remote_hotfix" "Could not check out hotfix '$remote_hotfix'!"
 	fi
+	echo
 }
 
 ##
@@ -93,6 +94,7 @@ function cmd_remove () {
 	process_fetch
 	remove_local_branch $hotfix_fullname
 	remove_remote_branch $hotfix_fullname
+	echo
 }
 
 ##
@@ -139,6 +141,7 @@ function cmd_finish () {
 	cmd_remove $hotfix
 
 	local current_release="$(get_current_release_in_progress)"
-	[ ! -z "$current_release" ] && warn "Do not forget to merge '$tag_fullname' tag into '$current_release' release before close it! Try on release: git merge $tag_fullname"
+	[ ! -z "$current_release" ] && warn "Do not forget to merge '$tag_fullname' tag into '$current_release' release before close it! Try on release: git merge --no-ff $tag_fullname"
+	echo
 }
 

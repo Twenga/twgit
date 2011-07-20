@@ -157,12 +157,12 @@ function get_last_tag () {
 }
 
 ##
-# Affiche le nom complet des tags réalisés depuis la création de la release $1 (sans doute via hotfixes), et qui n'y sont pas mergés.
+# Affiche le nom complet des tags réalisés depuis la création de la branche $1 (via hotfixes ou releases), et qui n'y sont pas mergés.
 # Sur une seule ligne, séparés par des espaces.
 #
-# @param string $1 nom complet de la release
+# @param string $1 nom complet de la branche, locale ou distante
 #
-function get_tags_not_merged_into_release () {
+function get_tags_not_merged_into_branch () {
 	local release_rev=$(git rev-parse $1)
 	local tag_rev merge_base
 	local tags=''
@@ -658,13 +658,23 @@ function display_branches () {
 
 			[ "$type" = "feature" ] && displayRedmineSubject "${branch:${#prefix}}" || echo
 
-			local tags_not_merged="$(get_tags_not_merged_into_release $branch)"
-			[ ! -z "$tags_not_merged" ] && warn "Following tags has not yet been merged into this $type: $(displayQuotedEnum $tags_not_merged)"
+			alert_old_branch "$branch"
 
 			# Afficher les informations de commit :
 			! isset_option 'c' && git show $branch --pretty=medium | grep -v '^Merge: ' | head -n 3
 		done
 	fi
+}
+
+##
+# Affiche un warning si des tags ne sont pas présents dans la branche spécifiée.
+#
+# @param string $1 nom complet de la branche, locale ou distante
+#
+function alert_old_branch () {
+	local tags_not_merged="$(get_tags_not_merged_into_branch "$1")"
+	[ ! -z "$tags_not_merged" ] && \
+		warn "Following tags has not yet been merged into this branch: $(displayQuotedEnum $tags_not_merged)"
 }
 
 ##

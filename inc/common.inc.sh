@@ -301,6 +301,7 @@ function assert_php_curl () {
 
 ##
 # S'assure que les 2 branches spécifiées sont au même niveau.
+# Gère l'option '-I' permettant de répondre automatiquement (mode non interactif) oui à la demande de pull.
 #
 # @param string $1 nom complet d'une branche locale
 # @param string $2 nom complet d'une branche distante
@@ -318,8 +319,10 @@ function assert_branches_equal () {
 		warn "Branches '$1' and '$2' have diverged."
 		if [ $status -eq 1 ]; then
 			warn "And local branch '$1' may be fast-forwarded!"
-			echo -n $(question "Pull '$1'? [Y/N] "); read answer
-			[ "$answer" != "Y" ] && [ "$answer" != "y" ] && die "Pull aborted! You must make a 'git pull $TWGIT_ORIGIN $1' to continue."
+			if ! isset_option 'I'; then
+				echo -n $(question "Pull '$1'? [Y/N] "); read answer
+				[ "$answer" != "Y" ] && [ "$answer" != "y" ] && die "Pull aborted! You must make a 'git pull $TWGIT_ORIGIN $1' to continue."
+			fi
 			exec_git_command "git pull $TWGIT_ORIGIN $1" "Could not pull '$TWGIT_ORIGIN/$1'!"
 		elif [ $status -eq 2 ]; then
 			# Warn here, since there is no harm in being ahead

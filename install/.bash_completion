@@ -64,6 +64,12 @@ function _twgit () {
 							COMPREPLY=( $(compgen -W "${opts}" -- ${cur}) )
 						fi
 						;;
+						finish)
+					    if [[ ${cur} == -* ]] ; then
+							local opts="-I"
+					        COMPREPLY=( $(compgen -W "${opts}" -- ${cur}) )
+					    fi
+						;;
 					list)
 					    if [[ ${cur} == -* ]] ; then
 							local opts="-F"
@@ -79,6 +85,9 @@ function _twgit () {
 				 		if [[ ${cur} != -* ]] ; then
 							local opts=$((git branch -r | grep "release-" | sed 's/^[* ]*//' | sed 's#^origin/release-##' | tr '\n' ' ') 2>/dev/null)
 							COMPREPLY=( $(compgen -W "${opts}" -- ${cur}) )
+						else
+							local opts="-I"
+					        COMPREPLY=( $(compgen -W "${opts}" -- ${cur}) )
 						fi
 						;;
 					list)

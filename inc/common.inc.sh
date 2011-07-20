@@ -726,7 +726,7 @@ function clean_branches () {
 	local locales="$(get_local_branches)"
 	for branch in $locales; do
 		if ! has $branch $tracked; then
-			echo -n $(question "Branch '$branch' is not tracked. Remove? [Y/N] ")
+			echo -n $(question "Local branch '$branch' is not tracked. Remove? [Y/N] ")
 			read answer
 			if [ "$answer" = "Y" ] || [ "$answer" = "y" ]; then
 				exec_git_command "git branch -D $branch" "Remove local branch '$branch' failed!"

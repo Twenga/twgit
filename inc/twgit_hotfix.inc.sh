@@ -9,8 +9,9 @@ function usage () {
 	echo; help 'Usage:'
 	help_detail 'twgit hotfix <action>'
 	echo; help 'Available actions are:'
-	help_detail '<b>finish</b>'
-	help_detail "    Merge current hotfix branch into '$TWGIT_STABLE', create a new tag and push."; echo
+	help_detail '<b>finish [-I]</b>'
+	help_detail "    Merge current hotfix branch into '$TWGIT_STABLE', create a new tag and push."
+	help_detail '    Add <b>-I</b> to run in non-interactive mode (always say yes).'; echo
 	help_detail '<b>list [-F]</b>'
 	help_detail '    List current hotfix. Add <b>-F</b> to do not make fetch.'; echo
 	help_detail '<b>remove <hotfixname></b>'
@@ -96,6 +97,7 @@ function cmd_remove () {
 
 ##
 # Merge le hotfix à la branche stable et crée un tag portant son nom.
+# Gère l'option '-I' permettant de répondre automatiquement (mode non interactif) oui à la demande de pull.
 #
 # @param string $1 nom court du hotfix
 #

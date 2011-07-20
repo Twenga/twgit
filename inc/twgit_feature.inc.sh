@@ -180,6 +180,8 @@ function cmd_start () {
 		process_first_commit 'feature' "$feature_fullname"
 		process_push_branch $feature_fullname
 	fi
+	alert_old_branch $TWGIT_ORIGIN/$feature_fullname
+	echo
 }
 
 ##
@@ -192,4 +194,5 @@ function cmd_remove () {
 	require_parameter 'feature'
 	local feature="$RETVAL"
 	remove_feature "$feature"
+	echo
 }

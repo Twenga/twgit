@@ -135,6 +135,9 @@ function cmd_start () {
 		process_first_commit 'release' "$release_fullname"
 		process_push_branch $release_fullname
 	fi
+
+	alert_old_branch $TWGIT_ORIGIN/$release_fullname
+	echo
 }
 
 ##
@@ -208,6 +211,7 @@ function cmd_finish () {
 
 	# Suppression de la branche :
 	cmd_remove $release
+	echo
 }
 
 ##
@@ -228,6 +232,7 @@ function cmd_remove () {
 	process_fetch
 	remove_local_branch $release_fullname
 	remove_remote_branch $release_fullname
+	echo
 }
 
 ##

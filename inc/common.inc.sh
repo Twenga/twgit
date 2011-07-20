@@ -719,6 +719,23 @@ function convertList2CSV () {
 }
 
 ##
+# Propose de supprimer une à une les branches qui ne sont plus trackées.
+#
+function clean_branches () {
+	local tracked="$(git fetch --all -v --dry-run 2>&1 | grep '\->' | sed -r 's/^.* +([^ ]+) +\-> +.*$/\1/')"
+	local locales="$(get_local_branches)"
+	for branch in $locales; do
+		if ! has $branch $tracked; then
+			echo -n $(question "Branch '$branch' is not tracked. Remove? [Y/N] ")
+			read answer
+			if [ "$answer" = "Y" ] || [ "$answer" = "y" ]; then
+				exec_git_command "git branch -D $branch" "Remove local branch '$branch' failed!"
+			fi
+		fi
+	done
+}
+
+##
 # Permet la mise à jour automatique de l'application dans le cas où le .git est toujours présent.
 # Tous les $TWGIT_UPDATE_NB_DAYS jours un fetch sera exécuté afin de proposer à l'utilisateur une
 # éventuelle MAJ. Qu'il décline ou non, le prochain passage aura lieu dans à nouveau $TWGIT_UPDATE_NB_DAYS jours.
@@ -743,7 +760,7 @@ function autoupdate () {
 			compare_branches 'master' 'origin/master'
 			local status=$?
 			if [ "$status" = "1" ]; then
-				echo -n $(question 'Update available! Do you want to update twgit (or manually: twgit update)? [Y/N] ');
+				echo -n $(question 'Update available! Do you want to update twgit (or manually: twgit update)? [Y/N] ')
 				read answer
 				if [ "$answer" = "Y" ] || [ "$answer" = "y" ]; then
 					processing 'Update in progress...'

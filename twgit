@@ -63,6 +63,7 @@ function usage () {
 	help_detail '<b>hotfix</b>    Manage your hotfix branches.'
 	help_detail '<b>tag</b>       Manage your tags.'
 	echo
+	help_detail '<b>clean</b>     Help to remove branches no longer tracked.'
 	help_detail '<b>update</b>    Force update twgit check.'
 	help_detail '<b>[help]</b>    Display this help.'
 	echo; help 'See also:'
@@ -91,6 +92,8 @@ function main () {
 			usage; exit 0
 		elif [ "$command" = 'update' ]; then
 			autoupdate 'force'; exit 0
+		elif [ "$command" = 'clean' ]; then
+			clean_branches; exit 0
 		elif [ ! -e "$command_file" ]; then
 			error "Command not found: '$command'"
 			usage

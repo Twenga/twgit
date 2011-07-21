@@ -61,7 +61,7 @@ function get_hotfixes_in_progress () {
 }
 
 ##
-# Affiche la release courante (nom complet), c.-à-d. celle normallement unique à ne pas avoir été encore mergée à $TWGIT_ORIGIN/$TWGIT_STABLE.
+# Affiche la release courante (nom complet + origin), c.-à-d. celle normallement unique à ne pas avoir été encore mergée à $TWGIT_ORIGIN/$TWGIT_STABLE.
 # Chaîne vide sinon.
 #
 function get_current_release_in_progress () {

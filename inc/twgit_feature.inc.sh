@@ -200,6 +200,58 @@ function cmd_start () {
 	echo
 }
 
+function cmd_merge-into-release () {
+	process_options "$@"
+	require_parameter 'feature'
+	local feature="$RETVAL"
+	local feature_fullname="$TWGIT_PREFIX_FEATURE$feature"
+
+	# Récupération de la release en cours :
+	local release=$(get_current_release_in_progress)
+	local prefix="$TWGIT_ORIGIN/$TWGIT_PREFIX_RELEASE"
+	release="${release:${#prefix}}"
+	local release_fullname="$TWGIT_PREFIX_RELEASE$release"
+
+	# Tests préliminaires :
+	process_fetch
+	processing 'Check remote release...'
+	[ -z "$release" ] && die 'No release in progress!'
+	processing 'Check remote feature...'
+	if ! has "$TWGIT_ORIGIN/$feature_fullname" $(get_remote_branches); then
+		die "Remote feature '$TWGIT_ORIGIN/$feature_fullname' not found!"
+	fi
+
+	# Merge :
+	local cmds="twgit feature start $feature
+git pull $TWGIT_ORIGIN $feature_fullname
+twgit release start
+git pull $TWGIT_ORIGIN $release_fullname
+git merge --no-ff $feature_fullname
+git push $TWGIT_ORIGIN $release_fullname"
+	IFS="$(echo -e "\n\r")"
+	local error=0
+	for cmd in $cmds; do
+		if [ "$error" -ne 0 ]; then
+			help_detail "$cmd"
+		else
+			processing "shell# $cmd"
+			if ! eval $cmd; then
+				error=1
+				error "Merge '$feature_fullname' into '$release_fullname' aborted!"
+				help 'Commands not executed:'
+				help_detail "$cmd"
+				if [ "${cmd:0:10}" = "git merge " ]; then
+					help_detail "  - resolve conflicts"
+					help_detail "  - git add..."
+					help_detail "  - git commit..."
+				fi
+			fi
+		fi
+	done
+	echo
+	[ "$error" -eq 0 ] || exit 1
+}
+
 ##
 # Suppression de la feature spécifiée.
 #

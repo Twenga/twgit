@@ -180,7 +180,7 @@ function cmd_finish () {
 
 	# Détection tags (via hotfixes) réalisés entre temps :
 	processing 'Check tags not merged...'
-	tags_not_merged="$(get_tags_not_merged_into_release $TWGIT_ORIGIN/$release_fullname | sed 's/ /, /g')"
+	tags_not_merged="$(get_tags_not_merged_into_branch $TWGIT_ORIGIN/$release_fullname | sed 's/ /, /g')"
 	[ ! -z "$tags_not_merged" ] && die "You must merge following tag(s) into this release before close it: $tags_not_merged"
 
 	processing 'Check remote features...'

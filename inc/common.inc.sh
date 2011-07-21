@@ -351,6 +351,7 @@ function assert_new_local_branch () {
 			help_detail "- or force renewal if feature: twgit feature start -d xxxx"
 		else
 			exec_git_command "git checkout $branch" "Could not checkout '$branch'!"
+			warn "Keep in mind that no pull was performed. If you want: git pull $TWGIT_ORIGIN $branch"
 		fi
 		echo
 		exit 0

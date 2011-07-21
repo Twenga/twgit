@@ -20,7 +20,7 @@ function usage () {
 	help_detail '    Create both a new local and remote hotfix, or fetch the remote hotfix,'
 	help_detail '    or checkout the local hotfix.'
 	help_detail '    Hotfix name will be: major.minor.(revision+1)'
-	help_detail "    Prefix '$TWGIT_PREFIX_HOTFIX' will be added to the specified <hotfixname>."; echo
+	help_detail "    Prefix '$TWGIT_PREFIX_HOTFIX' will be added to the specified <b><hotfixname></b>."; echo
 	help_detail '<b>[help]</b>'
 	help_detail '    Display this help.'; echo
 }

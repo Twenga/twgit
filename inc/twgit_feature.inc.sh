@@ -19,10 +19,11 @@ function usage () {
 	help_detail '    Migrate old branch to new process.'; echo
 	help_detail '<b>remove <featurename></b>'
 	help_detail '    Remove both local and remote specified feature branch.'; echo
-	help_detail '<b>start <featurename></b>'
+	help_detail '<b>start <featurename> [-d]</b>'
 	help_detail '    Create both a new local and remote feature, or fetch the remote feature,'
-	help_detail '    or checkout the local feature.'
-	help_detail "    Prefix '$TWGIT_PREFIX_FEATURE' will be added to the specified <featurename>."; echo
+	help_detail '    or checkout the local feature. Add <b>-d</b> to delete beforehand local feature'
+	help_detail '    if exists.'
+	help_detail "    Prefix '$TWGIT_PREFIX_FEATURE' will be added to the specified <b><featurename></b>."; echo
 	help_detail '<b>[help]</b>'
 	help_detail '    Display this help.'; echo
 }
@@ -117,6 +118,13 @@ function cmd_list () {
 	fi
 }
 
+##
+# Migre une branche de dév de l'ancien workflow dans le présent, tout en préservant l'historique.
+# Typiquement : rmxxxx => feature-xxxx
+#
+# @param string $1 nom complet de la branche de dév à migrer
+# @param string $2 nom court de la future feature (c.-à-d. sans le préfix 'feature-')
+#
 function cmd_migrate () {
 	process_options "$@"
 	require_parameter 'full_old_name'
@@ -154,6 +162,7 @@ function cmd_migrate () {
 
 ##
 # Crée une nouvelle feature à partir du dernier tag.
+# Gère l'option '-d' supprimant préalablement la feature locale, afin de forcer le récréation de la branche.
 #
 # @param string $1 nom court de la nouvelle feature.
 #
@@ -164,7 +173,14 @@ function cmd_start () {
 	local feature_fullname="$TWGIT_PREFIX_FEATURE$feature"
 
 	assert_valid_ref_name $feature
-	assert_new_local_branch $feature_fullname
+	if isset_option 'd'; then
+		if has $feature_fullname $(get_local_branches); then
+			assert_working_tree_is_not_on_delete_branch $feature_fullname
+			remove_local_branch $feature_fullname
+		fi
+	else
+		assert_new_local_branch $feature_fullname
+	fi
 	assert_clean_working_tree
 
 	process_fetch

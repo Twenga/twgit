@@ -336,13 +336,23 @@ function assert_branches_equal () {
 ##
 # S'assure que la branche spécifiée n'existe pas déjà en local, sinon effectue un checkout dessus.
 #
-# @param string $1 nom complet d'une branche locale
+# @param string $1 nom complet d'une branche potentiellement locale
 #
 function assert_new_local_branch () {
+	local branch="$1"
 	processing 'Check local branches...'
-	if has $1 $(get_local_branches); then
-		processing "Local branch '$1' already exists!"
-		exec_git_command "git checkout $1" "Could not checkout '$1'!"
+	if has $branch $(get_local_branches); then
+		processing "Local branch '$branch' already exists!"
+		if ! has "$TWGIT_ORIGIN/$branch" $(get_remote_branches); then
+			error "Remote feature '$TWGIT_ORIGIN/$branch' not found!"
+			help 'Perhaps:'
+			help_detail "- check the name of your branch"
+			help_detail "- delete this out of process branch: git branch -D $branch"
+			help_detail "- or force renewal if feature: twgit feature start -d xxxx"
+		else
+			exec_git_command "git checkout $branch" "Could not checkout '$branch'!"
+		fi
+		echo
 		exit 0
 	fi
 }
@@ -354,7 +364,7 @@ function assert_clean_working_tree () {
 	processing 'Check clean working tree...'
 	if [ `git status --porcelain --ignore-submodules=all | wc -l` -ne 0 ]; then
 		error 'Untracked files or changes to be committed in your working tree!'
-		exec_git_command 'git status'
+		exec_git_command 'git status' 'Git status failed!'
 		exit 1
 	fi
 }

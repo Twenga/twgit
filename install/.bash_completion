@@ -53,6 +53,12 @@ function _twgit () {
 					        COMPREPLY=( $(compgen -W "${opts}" -- ${cur}) )
 					    fi
 						;;
+					start)
+					    if [[ ${cur} == -* ]] ; then
+							local opts="-d"
+					        COMPREPLY=( $(compgen -W "${opts}" -- ${cur}) )
+					    fi
+						;;
 				esac
 				;;
 

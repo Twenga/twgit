@@ -220,6 +220,7 @@ function cmd_merge-into-release () {
 	local release_fullname="$TWGIT_PREFIX_RELEASE$release"
 
 	# Tests préliminaires :
+	assert_clean_working_tree
 	process_fetch
 	processing 'Check remote release...'
 	[ -z "$release" ] && die 'No release in progress!'

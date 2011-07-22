@@ -324,7 +324,8 @@ function assert_branches_equal () {
 				echo -n $(question "Pull '$1'? [Y/N] "); read answer
 				[ "$answer" != "Y" ] && [ "$answer" != "y" ] && die "Pull aborted! You must make a 'git pull $TWGIT_ORIGIN $1' to continue."
 			fi
-			exec_git_command "git checkout $1 && git merge $2" "Pull '$1' failed!"
+			exec_git_command "git checkout $1" "Checkout '$1' failed!"
+			exec_git_command "git merge $2" "Update '$1' failed!"
 		elif [ $status -eq 2 ]; then
 			# Warn here (not die), since there is no harm in being ahead:
 			warn "And local branch '$1' is ahead of '$2'."

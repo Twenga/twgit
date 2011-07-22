@@ -313,6 +313,7 @@ function assert_branches_equal () {
 	elif ! has $2 $(get_remote_branches); then
 		die "Remote branch '$2' does not exist and is required!"
 	fi
+
 	compare_branches "$1" "$2"
 	local status=$?
 	if [ $status -gt 0 ]; then
@@ -323,9 +324,9 @@ function assert_branches_equal () {
 				echo -n $(question "Pull '$1'? [Y/N] "); read answer
 				[ "$answer" != "Y" ] && [ "$answer" != "y" ] && die "Pull aborted! You must make a 'git pull $TWGIT_ORIGIN $1' to continue."
 			fi
-			exec_git_command "git pull $TWGIT_ORIGIN $1" "Could not pull '$TWGIT_ORIGIN/$1'!"
+			exec_git_command "git checkout $1 && git merge $2" "Pull '$1' failed!"
 		elif [ $status -eq 2 ]; then
-			# Warn here, since there is no harm in being ahead
+			# Warn here (not die), since there is no harm in being ahead:
 			warn "And local branch '$1' is ahead of '$2'."
 		else
 			die "Branches need merging first!"

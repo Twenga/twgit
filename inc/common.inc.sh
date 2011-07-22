@@ -785,7 +785,7 @@ function clean_branches () {
 # Tous les $TWGIT_UPDATE_NB_DAYS jours un fetch sera exécuté afin de proposer à l'utilisateur une
 # éventuelle MAJ. Qu'il décline ou non, le prochain passage aura lieu dans à nouveau $TWGIT_UPDATE_NB_DAYS jours.
 #
-# A des fins de test : "touch -mt 1105200101 .lastupdate"
+# A des fins de test : "touch -mt 1105200101 ~/twgit/.lastupdate"
 #
 # @param string $1 Si non vide, force la vérification de la présence d'une MAJ même si $TWGIT_UPDATE_NB_DAYS jours
 #    ne se sont pas écoulés depuis le dernier test.
@@ -800,6 +800,7 @@ function autoupdate () {
 		local answer=''
 
 		if [ "$elapsed_time" -gt "$interval" ] || [ ! -z "$is_forced" ]; then
+			# Update Git :
 			processing "Fetch twgit repository for auto-update check..."
 			git fetch
 			compare_branches 'master' 'origin/master'
@@ -815,8 +816,18 @@ function autoupdate () {
 			else
 				processing 'Twgit already up-to-date.'
 			fi
+
+			# Prochain update :
 			processing "Next auto-update check in $TWGIT_UPDATE_NB_DAYS days."
 			touch "$TWGIT_UPDATE_PATH"
+
+			# MAJ du système d'update d'autocomplétion :
+			if [ ! -h "/etc/bash_completion.d/twgit" ]; then
+				warn "New autocompletion update system request you execute just once this line (to adapt):"
+				help_detail "sudo rm /etc/bash_completion.d/twgit && sudo ln -s ~/twgit/install/.bash_completion /etc/bash_completion.d/twgit && source ~/.bashrc"
+			fi
+
+			# Invite :
 			if [ "$answer" = "Y" ] || [ "$answer" = "y" ]; then
 				[ -z "$is_forced" ] && echo 'Thank you for re-enter your request.'
 				exit 0

@@ -336,7 +336,10 @@ function assert_branches_equal () {
 }
 
 ##
-# S'assure que la branche spécifiée n'existe pas déjà en local, sinon effectue un checkout dessus.
+# S'assure que la branche spécifiée n'existe pas déjà en local, sinon effectue un checkout dessus,
+# puis indique la fraîcheur de la branche locale vis-à-vis de la distante,
+# puis affiche un warning si des tags ne sont pas présents dans la branche spécifiée, avant exit.
+# Une erreur est affichée si la branche distante n'existe pas quand la locale existe.
 #
 # @param string $1 nom complet d'une branche potentiellement locale
 #
@@ -346,14 +349,28 @@ function assert_new_local_branch () {
 	if has $branch $(get_local_branches); then
 		processing "Local branch '$branch' already exists!"
 		if ! has "$TWGIT_ORIGIN/$branch" $(get_remote_branches); then
-			error "Remote feature '$TWGIT_ORIGIN/$branch' not found!"
+			error "Remote feature '$TWGIT_ORIGIN/$branch' not found while local one exists!"
 			help 'Perhaps:'
 			help_detail "- check the name of your branch"
-			help_detail "- delete this out of process branch: git branch -D $branch"
+			help_detail "- delete this out of process local branch: git branch -D $branch"
 			help_detail "- or force renewal if feature: twgit feature start -d xxxx"
 		else
 			exec_git_command "git checkout $branch" "Could not checkout '$branch'!"
-			warn "Keep in mind that no pull was performed. If you want: git pull $TWGIT_ORIGIN $branch"
+
+			# Informe de la fraîcheur de la branche :
+			compare_branches "$branch" "$TWGIT_ORIGIN/$branch"
+			local status=$?
+			if [ $status -eq 0 ]; then
+				help "Local branch '$branch' up-to-date."
+			elif [ $status -eq 1 ]; then
+				help "If need be: git merge $TWGIT_ORIGIN/$branch"
+			elif [ $status -eq 2 ]; then
+				help "If need be: git push $TWGIT_ORIGIN $branch"
+			else
+				warn "Branches '$branch' and '$TWGIT_ORIGIN/$branch' have diverged!"
+			fi
+
+			alert_old_branch $TWGIT_ORIGIN/$feature_fullname
 		fi
 		echo
 		exit 0
@@ -687,7 +704,22 @@ function display_branches () {
 function alert_old_branch () {
 	local tags_not_merged="$(get_tags_not_merged_into_branch "$1")"
 	[ ! -z "$tags_not_merged" ] && \
-		warn "Following tags has not yet been merged into this branch: $(displayQuotedEnum $tags_not_merged)"
+		warn "Following tags has not yet been merged into this branch: $(displayInterval "$tags_not_merged")"
+}
+
+##
+# Affiche un interval "a to z" à partir du premier et du dernier élément de la liste fournie.
+#
+# @param string $1 liste de valeurs séparées par des espaces
+#
+function displayInterval () {
+	local -a list=($@)
+	local nb_items="${#list[@]}"
+	local first_item="${list[0]}"
+	local last_item="${list[$((nb_items-1))]}"
+
+	echo -n "'<b>$first_item</b>'"
+	[ "$nb_items" -gt 1 ] && echo " to '<b>$last_item</b>'" || echo
 }
 
 ##

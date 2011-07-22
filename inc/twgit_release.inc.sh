@@ -207,6 +207,7 @@ function cmd_finish () {
 	features="$(get_merged_features $TWGIT_ORIGIN/$release_fullname)"
 	local prefix="$TWGIT_ORIGIN/$TWGIT_PREFIX_RELEASE"
 	for feature in $features; do
+		processing "Delete '$feature' feature..."
 		remove_feature "${feature:${#prefix}}"
 	done
 

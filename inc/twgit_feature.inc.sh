@@ -15,6 +15,8 @@ function usage () {
 	help_detail '<b>list [-c|-F|-x]</b>'
 	help_detail '    List remote features. Add <b>-F</b> to do not make fetch, <b>-c</b> to compact display'
 	help_detail '    and <b>-x</b> (eXtremely compact) to CSV display.'; echo
+	help_detail '<b>merge-into-release <featurename></b>'
+	help_detail '    Try to merge specified feature into current release.'; echo
 	help_detail '<b>migrate <oldfeaturefullname> <newfeaturename></b>'
 	help_detail '    Migrate old branch to new process.'; echo
 	help_detail '<b>remove <featurename></b>'
@@ -173,6 +175,9 @@ function cmd_start () {
 	local feature_fullname="$TWGIT_PREFIX_FEATURE$feature"
 
 	assert_valid_ref_name $feature
+	assert_clean_working_tree
+	process_fetch
+
 	if isset_option 'd'; then
 		if has $feature_fullname $(get_local_branches); then
 			assert_working_tree_is_not_on_delete_branch $feature_fullname
@@ -181,9 +186,6 @@ function cmd_start () {
 	else
 		assert_new_local_branch $feature_fullname
 	fi
-	assert_clean_working_tree
-
-	process_fetch
 
 	processing 'Check remote features...'
 	if has "$TWGIT_ORIGIN/$feature_fullname" $(get_remote_branches); then
@@ -200,6 +202,11 @@ function cmd_start () {
 	echo
 }
 
+##
+# Merge la feature spécifiée dans la release en cours.
+#
+# @param string $1 la feature à merger dans la release en cours
+#
 function cmd_merge-into-release () {
 	process_options "$@"
 	require_parameter 'feature'

@@ -370,7 +370,7 @@ function assert_new_local_branch () {
 				warn "Branches '$branch' and '$TWGIT_ORIGIN/$branch' have diverged!"
 			fi
 
-			alert_old_branch $TWGIT_ORIGIN/$feature_fullname
+			alert_old_branch $TWGIT_ORIGIN/$branch
 		fi
 		echo
 		exit 0

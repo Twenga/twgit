@@ -238,11 +238,13 @@ git merge --no-ff $feature_fullname
 git push $TWGIT_ORIGIN $release_fullname"
 	IFS="$(echo -e "\n\r")"
 	local error=0
+	local prefix
 	for cmd in $cmds; do
 		if [ "$error" -ne 0 ]; then
 			help_detail "$cmd"
 		else
-			processing "shell# $cmd"
+			[ "${cmd:0:6}" = 'twgit ' ] && prefix='shell# ' || prefix="${TWGIT_GIT_COMMAND_PROMPT}"
+			processing "$prefix$cmd"
 			if ! eval $cmd; then
 				error=1
 				error "Merge '$feature_fullname' into '$release_fullname' aborted!"

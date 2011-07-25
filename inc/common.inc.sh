@@ -245,7 +245,7 @@ function getRedmineSubject () {
 
 	[ ! -s "$TWGIT_REDMINE_PATH" ] && touch "$TWGIT_REDMINE_PATH"
 
-	subject="$(cat "$TWGIT_REDMINE_PATH" | grep -E "^$redmine;" | head -n 1 | sed 's/^.*;//')"
+	subject="$(cat "$TWGIT_REDMINE_PATH" | grep -E "^$redmine;" | head -n 1 | sed 's/^[^;]*;//')"
 	if [ -z "$subject" ]; then
 		subject="$(php -q ~/twgit/inc/ws_redmine.inc.php $redmine subject 2>/dev/null || echo)"
 		[ ! -z "$subject" ] && echo "$redmine;$subject" >> "$TWGIT_REDMINE_PATH"

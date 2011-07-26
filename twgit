@@ -72,7 +72,7 @@ function usage () {
 	echo; help 'About:'
 	help_detail "<b>Contact</b>          devaa@twenga.com"
 	help_detail "<b>Git repository</b>   git@git.twenga.com:aa/twgit.git"
-	local last_update_timestamp=$(date -r "/home/gaubry/twgit/.lastupdate" +%s)
+	local last_update_timestamp=$(date -r "$TWGIT_UPDATE_PATH" +%s)
 	local last_update_date="$(date --date "1970-01-01 $last_update_timestamp sec" "+%Y-%m-%d %T")"
 	local next_update_timestamp=$(( $last_update_timestamp + $TWGIT_UPDATE_NB_DAYS * 86400 ))
 	local next_update_date="$(date --date "1970-01-01 $next_update_timestamp sec" "+%Y-%m-%d %T")"

@@ -142,18 +142,15 @@ function get_current_branch () {
 #
 function get_all_tags () {
 	local n="$1"
-	if [ -z "$n" ]; then
-		git tag | sort -n
-	else
-		git tag | sort -n | tail -n $n
-	fi
+	[ -z "$n" ] && n=10000	# pour tout retourner
+	git tag | sed 's/v//' | sed 's/\./;/g' | sort --field-separator=";" -k1n -k2n -k3n | sed 's/;/./g' | sed 's/^/v/' | tail -n $n
 }
 
 ##
 # Affiche le nom complet du tag le plus récent.
 #
 function get_last_tag () {
-	git tag | sort -rn | head -n 1
+	get_all_tags 1
 }
 
 ##

@@ -198,7 +198,7 @@ function cmd_start () {
 		process_first_commit 'feature' "$feature_fullname"
 		process_push_branch $feature_fullname
 	fi
-	alert_old_branch $TWGIT_ORIGIN/$feature_fullname
+	alert_old_branch $TWGIT_ORIGIN/$feature_fullname with-help
 	echo
 }
 

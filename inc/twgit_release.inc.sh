@@ -137,7 +137,7 @@ function cmd_start () {
 		process_push_branch $release_fullname
 	fi
 
-	alert_old_branch $TWGIT_ORIGIN/$release_fullname
+	alert_old_branch $TWGIT_ORIGIN/$release_fullname with-help
 	echo
 }
 

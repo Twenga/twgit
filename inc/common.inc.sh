@@ -367,7 +367,7 @@ function assert_new_local_branch () {
 				warn "Branches '$branch' and '$TWGIT_ORIGIN/$branch' have diverged!"
 			fi
 
-			alert_old_branch $TWGIT_ORIGIN/$branch
+			alert_old_branch $TWGIT_ORIGIN/$branch with-help
 		fi
 		echo
 		exit 0
@@ -697,11 +697,19 @@ function display_branches () {
 # Affiche un warning si des tags ne sont pas présents dans la branche spécifiée.
 #
 # @param string $1 nom complet de la branche, locale ou distante
+# @param string $2 si présent et vaut 'with-help', alors une suggestion de merge sera proposée
 #
 function alert_old_branch () {
 	local tags_not_merged="$(get_tags_not_merged_into_branch "$1")"
-	[ ! -z "$tags_not_merged" ] && \
-		warn "Following tags has not yet been merged into this branch: $(displayInterval "$tags_not_merged")"
+	if [ ! -z "$tags_not_merged" ]; then
+		local msg='Tag'
+		if echo "$tags_not_merged" | grep -q ' '; then
+			msg="${msg}s"
+		fi
+		msg="${msg} not merged into this branch: $(displayInterval "$tags_not_merged")."
+		[ "$2" = 'with-help' ] && msg="${msg} If need be: git merge --no-ff $(get_last_tag)"
+		warn "$msg"
+	fi
 }
 
 ##

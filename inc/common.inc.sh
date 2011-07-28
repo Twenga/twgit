@@ -358,7 +358,7 @@ function assert_new_local_branch () {
 			compare_branches "$branch" "$TWGIT_ORIGIN/$branch"
 			local status=$?
 			if [ $status -eq 0 ]; then
-				help "Local branch '$branch' up-to-date."
+				help "Local branch '$branch' up-to-date with remote '$TWGIT_ORIGIN/$branch'."
 			elif [ $status -eq 1 ]; then
 				help "If need be: git merge $TWGIT_ORIGIN/$branch"
 			elif [ $status -eq 2 ]; then

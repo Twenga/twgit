@@ -49,9 +49,9 @@ function cmd_list () {
 	process_fetch 'F'
 
 	local releases=$(git branch -r --merged $TWGIT_ORIGIN/$TWGIT_STABLE | grep "$TWGIT_ORIGIN/$TWGIT_PREFIX_RELEASE" | sed 's/^[* ]*//')
-	if [ ! -z $releases ]; then
+	if [ ! -z "$releases" ]; then
 		help "Remote releases merged into '<b>$TWGIT_STABLE</b>':"
-		warn "A release must be deleted after merge into '<b>$TWGIT_STABLE</b>'! Following releases would not exists!"
+		warn "A release must be deleted after merge into '<b>$TWGIT_STABLE</b>'! Following releases should not exists!"
 		display_branches 'release' "$releases"
 		echo
 	fi

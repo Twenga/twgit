@@ -430,7 +430,7 @@ function assert_valid_tag_name () {
 function assert_working_tree_is_not_on_delete_branch () {
 	local branch="$1"
 	processing "Check current branch..."
-	if [ $(get_current_branch) = "$branch" ]; then
+	if [ "$(get_current_branch)" = "$branch" ]; then
 		processing "Cannot delete the branch '$branch' which you are currently on! So:"
 		exec_git_command "git checkout $TWGIT_STABLE" "Could not checkout '$TWGIT_STABLE'!"
 	fi

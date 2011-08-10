@@ -115,10 +115,10 @@ function get_features () {
 			f_rev=$(git rev-parse $f)
 			release_merge_base=$(git merge-base $release_rev $f_rev)
 			stable_merge_base=$(git merge-base $release_merge_base $head_rev)
-
-			if [ "$release_merge_base" = "$f_rev" ]; then
+			check_merge=$(git branch -r --merged $release_rev | grep $f)
+			if [ "$release_merge_base" = "$f_rev" ] && [ -n "$check_merge" ]; then
 				[ "$feature_type" = 'merged' ] && return_features="$return_features $f"
-			elif [ "$release_merge_base" != "$stable_merge_base" ]; then
+			elif [ "$release_merge_base" != "$stable_merge_base" ] && [ -n "$check_merge" ]; then
 				[ "$feature_type" = 'merged_in_progress' ] && return_features="$return_features $f"
 			elif [ "$feature_type" = 'free' ]; then
 				return_features="$return_features $f"

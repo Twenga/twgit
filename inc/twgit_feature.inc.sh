@@ -84,22 +84,22 @@ function cmd_list () {
 		display_branches 'feature' "$features"; echo
 	fi
 
-	local release=$(get_current_release_in_progress)
+	local release="$(get_current_release_in_progress)"
 	if [ -z "$release" ]; then
 		if ! isset_option 'x'; then
 			help "Remote delivered features merged into release in progress:"
 			info 'No such branch exists.'; echo
 		fi
 	else
-		features_merged=$(get_merged_features $release)
+		features_merged="$(get_merged_features $release)"
 		features_in_progress="$(get_features merged_in_progress $release)"
 		if isset_option 'x'; then
 			display_csv_branches "$features_merged" "merged into release"
 			display_csv_branches "$features_in_progress" "merged into release, then in progress"
 		else
-			help "Remote delivered features merged into release in progress '<b>$release</b>':"
+			help "Remote delivered features merged into release in progress '<b>$TWGIT_ORIGIN/$release</b>':"
 			display_branches 'feature' "$features_merged"; echo
-			help "Remote features in progress, previously merged into '<b>$release</b>':"
+			help "Remote features in progress, previously merged into '<b>$TWGIT_ORIGIN/$release</b>':"
 			display_branches 'feature' "$features_in_progress"; echo
 		fi
 	fi
@@ -214,10 +214,8 @@ function cmd_merge-into-release () {
 	local feature_fullname="$TWGIT_PREFIX_FEATURE$feature"
 
 	# Récupération de la release en cours :
-	local release=$(get_current_release_in_progress)
-	local prefix="$TWGIT_ORIGIN/$TWGIT_PREFIX_RELEASE"
-	release="${release:${#prefix}}"
-	local release_fullname="$TWGIT_PREFIX_RELEASE$release"
+	local release_fullname=$(get_current_release_in_progress)
+	local release="${release_fullname:${#TWGIT_PREFIX_RELEASE}}"
 
 	# Tests préliminaires :
 	assert_clean_working_tree

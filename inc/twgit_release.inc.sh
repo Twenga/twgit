@@ -56,14 +56,14 @@ function cmd_list () {
 		echo
 	fi
 
-	local release=$(get_current_release_in_progress)
+	local release="$(get_current_release_in_progress)"
 	help "Remote release NOT merged into '<b>$TWGIT_STABLE</b>':"
-	display_branches 'release' "$release" # | head -n -1
+	display_branches 'release' "$TWGIT_ORIGIN/$release" # | head -n -1
 	if [ ! -z "$release" ]; then
 		info 'Features:'
 
 		local merged_features="$(get_merged_features $release)"
-		local prefix="$TWGIT_ORIGIN/$TWGIT_PREFIX_RELEASE"
+		local prefix="$TWGIT_ORIGIN/$TWGIT_PREFIX_FEATURE"
 		for f in $merged_features; do
 			echo -n "    - $f "
 			echo -n $(displayMsg ok '[merged]')' '
@@ -101,9 +101,8 @@ function cmd_start () {
 	process_fetch
 	assert_tag_exists
 
-	local prefix="$TWGIT_ORIGIN/$TWGIT_PREFIX_RELEASE"
 	local current_release=$(get_current_release_in_progress)
-	current_release="${current_release:${#prefix}}"
+	current_release="${current_release:${#TWGIT_PREFIX_RELEASE}}"
 
 	if [ -z $release ]; then
 		if [ ! -z "$current_release" ]; then
@@ -159,11 +158,9 @@ function cmd_finish () {
 
 	# Récupération de la release en cours :
 	processing 'Check remote release...'
-	local prefix="$TWGIT_ORIGIN/$TWGIT_PREFIX_RELEASE"
-	local release=$(get_current_release_in_progress)
-	release="${release:${#prefix}}"
-	[ -z "$release" ] && die 'No release in progress!'
-	local release_fullname="$TWGIT_PREFIX_RELEASE$release"
+	local release_fullname="$(get_current_release_in_progress)"
+	[ -z "$release_fullname" ] && die 'No release in progress!'
+	local release="${release:${#TWGIT_PREFIX_RELEASE}}"
 	processing "Remote release '$release_fullname' detected."
 
 	# Calcul du nom du potentiel tag :
@@ -184,7 +181,7 @@ function cmd_finish () {
 	[ ! -z "$tags_not_merged" ] && die "You must merge following tag(s) into this release before close it: $tags_not_merged"
 
 	processing 'Check remote features...'
-	local features="$(get_features merged_in_progress $TWGIT_ORIGIN/$release_fullname)"
+	local features="$(get_features merged_in_progress $release_fullname)"
 	[ ! -z "$features" ] && die "Features exists that are merged into this release but yet in development: $(echo $features | sed 's/ /, /g')!"
 
 	processing "Check local branch '$release_fullname'..."
@@ -204,7 +201,7 @@ function cmd_finish () {
 	exec_git_command "git push --tags $TWGIT_ORIGIN $TWGIT_STABLE" "Could not push '$TWGIT_STABLE' on '$TWGIT_ORIGIN'!"
 
 	# Suppression des features associées :
-	features="$(get_merged_features $TWGIT_ORIGIN/$release_fullname)"
+	features="$(get_merged_features $release_fullname)"
 	local prefix="$TWGIT_ORIGIN/$TWGIT_PREFIX_RELEASE"
 	for feature in $features; do
 		processing "Delete '$feature' feature..."
@@ -244,9 +241,9 @@ function cmd_remove () {
 # @param string $1 nom court de la release.
 #
 function cmd_reset () {
-	local prefix="$TWGIT_ORIGIN/$TWGIT_PREFIX_RELEASE"
 	local current_release=$(get_current_release_in_progress)
-	current_release="${current_release:${#prefix}}"
+	current_release="${current_release:${#TWGIT_PREFIX_RELEASE}}"
+
 	if [ -z "$current_release" ]; then
 		die "No release in progress!"
 	else

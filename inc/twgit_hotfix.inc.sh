@@ -141,7 +141,7 @@ function cmd_finish () {
 	cmd_remove $hotfix
 
 	local current_release="$(get_current_release_in_progress)"
-	[ ! -z "$current_release" ] && warn "Do not forget to merge '$tag_fullname' tag into '$current_release' release before close it! Try on release: git merge --no-ff $tag_fullname"
+	[ ! -z "$current_release" ] && warn "Do not forget to merge '$tag_fullname' tag into '$TWGIT_ORIGIN/$current_release' release before close it! Try on release: git merge --no-ff $tag_fullname"
 	echo
 }
 

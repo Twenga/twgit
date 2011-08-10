@@ -47,7 +47,7 @@ function get_dissident_remote_branches () {
 }
 
 ##
-# Affiche le nom complet des releases non encore mergées à $TWGIT_ORIGIN/$TWGIT_STABLE, à raison d'une par ligne.
+# Affiche le nom complet des releases distantes (avec "$TWGIT_ORIGIN/") non encore mergées à $TWGIT_ORIGIN/$TWGIT_STABLE, à raison d'une par ligne.
 #
 function get_releases_in_progress () {
 	git branch -r --no-merged $TWGIT_ORIGIN/$TWGIT_STABLE | grep "$TWGIT_ORIGIN/$TWGIT_PREFIX_RELEASE" | sed 's/^[* ]*//'
@@ -61,41 +61,41 @@ function get_hotfixes_in_progress () {
 }
 
 ##
-# Affiche la release courante (nom complet + origin), c.-à-d. celle normallement unique à ne pas avoir été encore mergée à $TWGIT_ORIGIN/$TWGIT_STABLE.
+# Affiche la release distante courante (nom complet sans "$TWGIT_ORIGIN/"), c.-à-d. celle normalement unique à ne pas avoir été encore mergée à $TWGIT_ORIGIN/$TWGIT_STABLE.
 # Chaîne vide sinon.
 #
 function get_current_release_in_progress () {
 	local releases="$(get_releases_in_progress)"
 	local release="$(echo $releases | tr '\n' ' ' | cut -d' ' -f1)"
 	[[ $(echo $releases | wc -w) > 1 ]] && die "More than one release in propress detected: $(echo $releases | sed 's/ /, /g')! Only '$release' will be treated here."
-	echo $release
+	echo ${release:((${#TWGIT_ORIGIN}+1))}	# supprime le préfixe 'origin/'
 }
 
 ##
-# Affiche la liste locale des features distantes (nom complet) mergées à la release $1, sur une seule ligne séparées par des espaces.
+# Affiche la liste locale des features distantes (nom complet avec "$TWGIT_ORIGIN/") mergées à la release distante $1, sur une seule ligne séparées par des espaces.
 #
-# @param string $1 nom complet d'une release
+# @param string $1 nom complet d'une release distante, sans "$TWGIT_ORIGIN/"
 #
 function get_merged_features () {
 	local release="$1"
-	local features="$(git branch -r --merged $release | grep $TWGIT_ORIGIN/$TWGIT_PREFIX_FEATURE | sed 's/^[* ]*//' | tr '\n' ' ' | sed 's/ *$//g')"
+	local features="$(git branch -r --merged $TWGIT_ORIGIN/$release | grep $TWGIT_ORIGIN/$TWGIT_PREFIX_FEATURE | sed 's/^[* ]*//' | tr '\n' ' ' | sed 's/ *$//g')"
 	local features_v2="$(get_features merged $release)"
 	[ "$features" != "$features_v2" ] && die "Inconsistent result about merged features: '$features' != '$features_v2'!"
 	echo $features
 }
 
 ##
-# Affiche la liste des features (nom complet) de relation de type $1 avec la release $2, sur une seule ligne séparées par des espaces.
+# Affiche la liste des features (nom complet) de relation de type $1 avec la release distante $2, sur une seule ligne séparées par des espaces.
 #
 # @param string $1 Type de relation avec la release $2 :
 #    - 'merged' pour lister les features mergées dans la release $2 et restées telle quelle depuis.
 #    - 'merged_in_progress' pour lister les features mergées dans la release $2 et dont le développement à continué.
 #    - 'free' pour lister celles n'ayant aucun rapport avec la release $2
-# @param string $2 nom complet d'une release
+# @param string $2 nom complet d'une release distante, sans "$TWGIT_ORIGIN/"
 #
 function get_features () {
 	local feature_type="$1"
-	local release="$2"
+	local release="$TWGIT_ORIGIN/$2"
 
 	if [ -z "$release" ]; then
 		if [ "$feature_type" = 'merged' ] || [ "$feature_type" = 'merged_in_progress' ]; then
@@ -105,20 +105,21 @@ function get_features () {
 		fi
 	else
 		local return_features=''
-		#local features_merged=$(git branch -r --merged $release | grep "$TWGIT_ORIGIN/$TWGIT_PREFIX_FEATURE" | sed 's/^[* ]*//')
 		local features=$(git branch -r | grep "$TWGIT_ORIGIN/$TWGIT_PREFIX_FEATURE" | sed 's/^[* ]*//')
 		local head_rev=$(git rev-parse $TWGIT_ORIGIN/$TWGIT_STABLE)
 		local release_rev=$(git rev-parse $release)
 
-		local f_rev release_merge_base stable_merge_base
+		local f_rev release_merge_base stable_merge_base check_merge has_dependency
 		for f in $features; do
 			f_rev=$(git rev-parse $f)
 			release_merge_base=$(git merge-base $release_rev $f_rev)
 			stable_merge_base=$(git merge-base $release_merge_base $head_rev)
-			check_merge=$(git branch -r --merged $release_rev | grep $f)
+			check_merge=$(git branch -r --merged $release | grep $f)
+			has_dependency="$(git rev-list $f_rev ^$release_merge_base --parents --merges | grep $release_merge_base | wc -l)"
+
 			if [ "$release_merge_base" = "$f_rev" ] && [ -n "$check_merge" ]; then
 				[ "$feature_type" = 'merged' ] && return_features="$return_features $f"
-			elif [ "$release_merge_base" != "$stable_merge_base" ] && [ -n "$check_merge" ]; then
+			elif [ "$release_merge_base" != "$stable_merge_base" ] && [ "$has_dependency" -eq 0 ]; then
 				[ "$feature_type" = 'merged_in_progress' ] && return_features="$return_features $f"
 			elif [ "$feature_type" = 'free' ]; then
 				return_features="$return_features $f"

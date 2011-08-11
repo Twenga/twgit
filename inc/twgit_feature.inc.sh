@@ -19,7 +19,7 @@ function usage () {
 	help_detail '<b>merge-into-release <featurename></b>'
 	help_detail '    Try to merge specified feature into current release.'; echo
 	help_detail '<b>migrate <oldfeaturefullname> <newfeaturename></b>'
-	help_detail '    Migrate old branch to new process.'; echo
+	help_detail '    Migrate old branch to new process. For example: "twgit migrate rm7880 7880"'; echo
 	help_detail '<b>remove <featurename></b>'
 	help_detail '    Remove both local and remote specified feature branch.'; echo
 	help_detail '<b>start <featurename> [-d]</b>'

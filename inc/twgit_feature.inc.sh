@@ -10,8 +10,9 @@ function usage () {
 	echo; help 'Usage:'
 	help_detail 'twgit feature <action>'
 	echo; help 'Available actions are:'
-	help_detail '<b>committers <featurename></b>'
-	help_detail '    List committers into the specified remote feature.'; echo
+	help_detail '<b>committers <featurename> [<max>] [-F]</b>'
+	help_detail '    List first <b><max></b> committers into the specified remote feature.'
+	help_detail "    Default value of <b><max></b>: $TWGIT_DEFAULT_NB_COMMITTERS. Add <b>-F</b> to do not make fetch."; echo
 	help_detail '<b>list [-c|-F|-x]</b>'
 	help_detail '    List remote features. Add <b>-F</b> to do not make fetch, <b>-c</b> to compact display'
 	help_detail '    and <b>-x</b> (eXtremely compact) to CSV display.'; echo
@@ -38,22 +39,26 @@ function cmd_help () {
 }
 
 ##
-# Liste les personnes ayant committé sur la feature.
+# Liste les personnes ayant le plus committé sur la feature spécifiée.
+# Gère l'option '-F' permettant d'éviter le fetch.
 #
 # @param string $1 nom court de la feature
+# @param int $2 nombre de committers à afficher au maximum, optionnel
 #
 function cmd_committers () {
 	process_options "$@"
+
 	require_parameter 'feature'
 	local feature="$RETVAL"
 	local feature_fullname="$TWGIT_PREFIX_FEATURE$feature"
 
-	process_fetch; echo
+	require_parameter '-'
+	local max="$RETVAL"
+
+	process_fetch 'F'
 
 	if has "$TWGIT_ORIGIN/$feature_fullname" $(get_remote_branches); then
-		info "Committers into '$TWGIT_ORIGIN/$feature_fullname' remote feature:"
-		get_rank_contributors "$TWGIT_ORIGIN/$feature_fullname"
-		echo
+		display_rank_contributors "$feature_fullname" "$max"
 	else
 		die "Unknown remote feature '$feature_fullname'."
 	fi

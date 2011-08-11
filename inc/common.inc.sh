@@ -196,38 +196,21 @@ function get_next_version () {
 	echo "$major.$minor.$revision"
 }
 
-# git shortlog -nse ne comptabilise que les commits...
-function get_rank_contributors () {
-	local branch="$1" author state='pre_author'
-	declare -A lines
-
-	local tmpfile=$(tempfile)
-	git log -M -C -p --no-color "$branch" > "$tmpfile"
-	while read line; do
-		if ([ "$state" = 'pre_author' ] || [ "$state" = 'post_author' ]) && [ "${line:0:8}" = 'Author: ' ]; then
-			author=$(echo "${line:8}" | sed 's/.*<//' | sed 's/>.*//')
-			if [ "$author" != "fs3@twenga.com" ]; then
-				state='post_author'
-				let lines[$author]=0
-			fi
-		fi
-		if [ "$state" = 'post_author' ] && [ "${line:0:3}" = '+++' ]; then
-			state='in_diff'
-		fi
-		if [ "$state" = 'in_diff' ] && ([ "${line:0:1}" = '+' ] || [ "${line:0:1}" = '-' ]); then
-			let lines[$author]++
-		fi
-		if [ "$state" = 'in_diff' ] && [ "${line:0:6}" = 'commit' ]; then
-			state='pre_author'
-		fi
-	done < "$tmpfile"
-	rm -f "$tmpfile"
-	# echo ">>>${#lines[@]}"
-	echo "${!lines[@]}"
-	# echo ">>>${lines[@]}"
-
-	# sort -t: -k 3n /etc/passwd | more
-	# Sort passwd file by 3rd field.
+##
+# Calcul et retourne la liste des emails des N committeurs les plus significatifs (en nombre de commits)
+# de la branche distante spécifiée, à raison d'un par ligne.
+# Filtre les committeurs sans email ainsi que 'devaa@twenga.com'.
+#
+# @param string $1 nom complet de branche distante, sans le "$TWGIT_ORIGIN/"
+# @param int $2 nombre maximum de committers à afficher
+# @see display_rank_contributors()
+#
+function get_contributors () {
+	local branch="$TWGIT_ORIGIN/$1"
+	local max="$2"
+	git shortlog -nse $TWGIT_ORIGIN/$TWGIT_STABLE..$branch \
+		| grep -v 'devaa@twenga.com' | grep -E '@twenga.com>$' \
+		| head -n $max | sed -r 's/^.*? <(.*@twenga.com)>$/\1/'
 }
 
 ##
@@ -784,6 +767,25 @@ function clean_branches () {
 			fi
 		fi
 	done
+}
+
+##
+# Affiche la liste des emails des N committeurs les plus significatifs (en nombre de commits)
+# de la branche distante spécifiée, à raison d'un par ligne.
+# Filtre les committeurs sans email ainsi que 'devaa@twenga.com'.
+#
+# @param string $1 nom complet de branche distante, sans le "$TWGIT_ORIGIN/"
+# @param int $2 nombre maximum de committers à afficher, optionnel (vaut $TWGIT_DEFAULT_NB_COMMITTERS par défaut)
+#
+function display_rank_contributors () {
+	local branch_fullname="$1"
+	local max="$2"
+	[ -z "$max" ] && max=$TWGIT_DEFAULT_NB_COMMITTERS
+
+	info "First $max committers into '$TWGIT_ORIGIN/$branch_fullname' remote branch:"
+	local contributors="$(get_contributors "$branch_fullname" $max)"
+	[ -z "$contributors" ] && echo 'nobody' || echo $contributors | tr ' ' '\n'
+	echo
 }
 
 ##

@@ -10,6 +10,9 @@ function usage () {
 	echo; help 'Usage:'
 	help_detail 'twgit release <action>'
 	echo; help 'Available actions are:'
+	help_detail '<b>committers [<max>] [-F]</b>'
+	help_detail '    List first <b><max></b> committers into the current release.'
+	help_detail "    Default value of <b><max></b>: $TWGIT_DEFAULT_NB_COMMITTERS. Add <b>-F</b> to do not make fetch."; echo
 	help_detail '<b>list [-F]</b>'
 	help_detail '    List remote releases. Add <b>-F</b> to do not make fetch.'; echo
 	help_detail '<b>finish [<tagname>] [-I]</b>'
@@ -38,6 +41,24 @@ function usage () {
 #
 function cmd_help () {
 	usage;
+}
+
+##
+# Liste les personnes ayant le plus committé sur l'éventuelle release en cours.
+# Gère l'option '-F' permettant d'éviter le fetch.
+#
+# @param int $1 nombre de committers à afficher au maximum, optionnel
+#
+function cmd_committers () {
+	process_options "$@"
+	require_parameter '-'
+	local max="$RETVAL"
+	process_fetch 'F'
+
+	local branch_fullname="$(get_current_release_in_progress)"
+	[ -z "$branch_fullname" ] && die 'No release in progress!'
+
+	display_rank_contributors "$branch_fullname" "$max"
 }
 
 ##

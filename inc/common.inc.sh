@@ -117,6 +117,7 @@ function get_features () {
 			check_merge=$(git branch -r --merged $release | grep $f)
 			has_dependency="$(git rev-list $f_rev ^$release_merge_base --parents --merges | grep $release_merge_base | wc -l)"
 
+			# le test [ "$release_merge_base" = "$f_rev" ] n'est peut-être pas nécessaire :
 			if [ "$release_merge_base" = "$f_rev" ] && [ -n "$check_merge" ]; then
 				[ "$feature_type" = 'merged' ] && return_features="$return_features $f"
 			elif [ "$release_merge_base" != "$stable_merge_base" ] && [ "$has_dependency" -eq 0 ]; then

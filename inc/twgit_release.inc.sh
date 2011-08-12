@@ -79,8 +79,8 @@ function cmd_list () {
 
 	local release="$(get_current_release_in_progress)"
 	help "Remote release NOT merged into '<b>$TWGIT_STABLE</b>':"
-	display_branches 'release' "$TWGIT_ORIGIN/$release" # | head -n -1
 	if [ ! -z "$release" ]; then
+		display_branches 'release' "$TWGIT_ORIGIN/$release" # | head -n -1
 		info 'Features:'
 
 		local merged_features="$(get_merged_features $release)"
@@ -98,6 +98,8 @@ function cmd_list () {
 			displayRedmineSubject "${f:${#prefix}}"
 		done
 		[ -z "$merged_features" ] && [ -z "$merged_in_progress_features" ] && info '    - No such branch exists.'
+	else
+		display_branches 'release' ''
 	fi
 	echo
 }

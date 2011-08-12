@@ -181,7 +181,7 @@ function cmd_finish () {
 	processing 'Check remote release...'
 	local release_fullname="$(get_current_release_in_progress)"
 	[ -z "$release_fullname" ] && die 'No release in progress!'
-	local release="${release:${#TWGIT_PREFIX_RELEASE}}"
+	local release="${release_fullname:${#TWGIT_PREFIX_RELEASE}}"
 	processing "Remote release '$release_fullname' detected."
 
 	# Calcul du nom du potentiel tag :

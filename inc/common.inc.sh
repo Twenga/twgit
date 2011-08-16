@@ -838,7 +838,7 @@ function autoupdate () {
 
 			# Invite :
 			if [ "$answer" = "Y" ] || [ "$answer" = "y" ]; then
-				[ -z "$is_forced" ] && echo 'Thank you for re-enter your request.'
+				[ -z "$is_forced" ] && echo 'Thank you for re-entering your request.'
 				exit 0
 			fi
 		fi

@@ -95,7 +95,7 @@ function get_merged_features () {
 #
 function get_features () {
 	local feature_type="$1"
-	local release="$TWGIT_ORIGIN/$2"
+	local release="$2"
 
 	if [ -z "$release" ]; then
 		if [ "$feature_type" = 'merged' ] || [ "$feature_type" = 'merged_in_progress' ]; then
@@ -104,6 +104,7 @@ function get_features () {
 			git branch -r --no-merged $TWGIT_ORIGIN/$TWGIT_STABLE | grep "$TWGIT_ORIGIN/$TWGIT_PREFIX_FEATURE" | sed 's/^[* ]*//' | tr '\n' ' ' | sed 's/ *$//g'
 		fi
 	else
+		release="$TWGIT_ORIGIN/$release"
 		local return_features=''
 		local features=$(git branch -r | grep "$TWGIT_ORIGIN/$TWGIT_PREFIX_FEATURE" | sed 's/^[* ]*//')
 		local head_rev=$(git rev-parse $TWGIT_ORIGIN/$TWGIT_STABLE)

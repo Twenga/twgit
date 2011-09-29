@@ -24,6 +24,9 @@ function usage () {
 	help_detail '    For example: "twgit feature migrate rm7880 7880"'; echo
 	help_detail '<b>remove <featurename></b>'
 	help_detail '    Remove both local and remote specified feature branch.'; echo
+	help_detail '<b>show-modified-files [<featurename>]</b>'
+	help_detail '    List created/modified/deleted files of the current feature branch since'
+	help_detail '    its creation. If no <b><featurename></b> is specified, then use current feature.'; echo
 	help_detail '<b>start <featurename> [-d]</b>'
 	help_detail '    Create both a new local and remote feature, or fetch the remote feature,'
 	help_detail '    or checkout the local feature. Add <b>-d</b> to delete beforehand local feature'
@@ -212,7 +215,7 @@ function cmd_start () {
 ##
 # Merge la feature spécifiée dans la release en cours.
 #
-# @param string $1 la feature à merger dans la release en cours
+# @param string $1 l'éventuelle feature à merger dans la release en cours, sinon la feature courante est utilisée
 #
 function cmd_merge-into-release () {
 	process_options "$@"
@@ -296,4 +299,48 @@ function cmd_remove () {
 	local feature="$RETVAL"
 	remove_feature "$feature"
 	echo
+}
+
+##
+# Liste les fichiers créés, modifiés ou supprimés dans la feature spécifiée depuis sa création.
+#
+# @param string $1 l'éventuelle feature à analyser, sinon la feature courante sera utilisée
+#
+function cmd_show-modified-files () {
+	process_options "$@"
+	require_parameter '-'
+	local feature="$RETVAL"
+
+	if [ ! -z "$feature" ]; then
+		feature_fullname="$TWGIT_PREFIX_FEATURE$feature"
+		processing 'Check remote feature...'
+		if ! has "$TWGIT_ORIGIN/$feature_fullname" $(get_remote_branches); then
+			die "Remote feature '$TWGIT_ORIGIN/$feature_fullname' not found!"
+		fi
+		twgit feature start $feature
+	else
+		local all_features=$(git branch -r --no-merged $TWGIT_ORIGIN/$TWGIT_STABLE | grep "$TWGIT_ORIGIN/$TWGIT_PREFIX_FEATURE" | sed 's/^[* ]*//' | tr '\n' ' ' | sed 's/ *$//g')
+		local current_branch=$(get_current_branch)
+		if ! has "$TWGIT_ORIGIN/$current_branch" $all_features; then
+			die "You must be in a feature if you don't specified one!"
+		fi
+		feature_fullname="$current_branch"
+		feature="${feature_fullname:${#TWGIT_PREFIX_FEATURE}}"
+	fi
+
+	local commit_msg=$(printf "$TWGIT_FIRST_COMMIT_MSG" "feature" "$feature_fullname")
+	local start_sha1=$(git log --fixed-strings --grep="$commit_msg" --pretty="format:%H")
+	local modified_files="$(git show --pretty="format:" --name-only $start_sha1..HEAD | sort | uniq | sed '/^$/d')"
+	local count="$(echo "$modified_files" | sed '/^$/d' | wc -l)"
+
+	info "SHA1 of creation of '$feature_fullname':"
+	echo $start_sha1; echo
+
+	info "Number of created/modified/deleted files of '$feature_fullname' since its creation:"
+	echo "$count"; echo
+
+	if [ "$count" != '0' ]; then
+		info "List of these files:"
+		echo "$modified_files"; echo
+	fi
 }

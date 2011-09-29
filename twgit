@@ -18,16 +18,6 @@
 # Puis :
 #    export PROMPT_COMMAND='PS1="\[\e[0;32m\]\h:\w$(get_git_branch)\[\e[1;32m\]\\$\[\e[m\] "'
 
-# TODO merge auto multi features
-# TODO couplage options_handler::require_parameter() avec usage()
-# TODO ui.inc.sh pas assez sûr niveau collision de noms...
-# TODO camelCase et autre_notation en même temps...
-# TODO sujet des redmine ticket/tickets du projet/surticket+soustickets
-# TODO est-ce que la liste des committers d'une branche ne remonterait pas trop loin ?
-# TODO bcp d'endroits ne passent pas encore par displayQuotedEnum()
-# TODO créer un alias à la place de /usr/local/bin/twgit ?
-# TODO MAJ auto-complétion
-
 if [ "$DEBUG" = "1" ]; then
 	set -x
 fi

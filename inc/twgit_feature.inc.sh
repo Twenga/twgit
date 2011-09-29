@@ -16,8 +16,9 @@ function usage () {
 	help_detail '<b>list [-c|-F|-x]</b>'
 	help_detail '    List remote features. Add <b>-F</b> to do not make fetch, <b>-c</b> to compact display'
 	help_detail '    and <b>-x</b> (eXtremely compact) to CSV display.'; echo
-	help_detail '<b>merge-into-release <featurename></b>'
-	help_detail '    Try to merge specified feature into current release.'; echo
+	help_detail '<b>merge-into-release [<featurename>]</b>'
+	help_detail '    Try to merge specified feature into current release.'
+	help_detail '    If no <b><featurename></b> is specified, then ask to use current feature.'; echo
 	help_detail '<b>migrate <oldfeaturefullname> <newfeaturename></b>'
 	help_detail '    Migrate old branch to new process.'
 	help_detail '    For example: "twgit feature migrate rm7880 7880"'; echo
@@ -215,9 +216,8 @@ function cmd_start () {
 #
 function cmd_merge-into-release () {
 	process_options "$@"
-	require_parameter 'feature'
+	require_parameter '-'
 	local feature="$RETVAL"
-	local feature_fullname="$TWGIT_PREFIX_FEATURE$feature"
 
 	# Récupération de la release en cours :
 	local release_fullname=$(get_current_release_in_progress)
@@ -228,6 +228,25 @@ function cmd_merge-into-release () {
 	process_fetch
 	processing 'Check remote release...'
 	[ -z "$release" ] && die 'No release in progress!'
+
+	# Si feature non spécifiée, récupérer la courante :
+	local feature_fullname
+	if [ -z "$feature" ]; then
+		local all_features=$(git branch -r --no-merged $TWGIT_ORIGIN/$TWGIT_STABLE | grep "$TWGIT_ORIGIN/$TWGIT_PREFIX_FEATURE" | sed 's/^[* ]*//' | tr '\n' ' ' | sed 's/ *$//g')
+		local current_branch=$(get_current_branch)
+		if ! has "$TWGIT_ORIGIN/$current_branch" $all_features; then
+			die "You must be in a feature if you don't specified one!"
+		else
+			echo -n $(question "Are you sure to merge '$TWGIT_ORIGIN/$current_branch' into '$TWGIT_ORIGIN/$release_fullname'? [Y/N] "); read answer
+			[ "$answer" != "Y" ] && [ "$answer" != "y" ] && die 'Merge into current release aborted!'
+		fi
+		feature_fullname="$current_branch"
+		feature="${feature_fullname:${#TWGIT_PREFIX_FEATURE}}"
+	else
+		feature_fullname="$TWGIT_PREFIX_FEATURE$feature"
+	fi
+
+	# Autres tests :
 	processing 'Check remote feature...'
 	if ! has "$TWGIT_ORIGIN/$feature_fullname" $(get_remote_branches); then
 		die "Remote feature '$TWGIT_ORIGIN/$feature_fullname' not found!"

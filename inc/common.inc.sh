@@ -139,14 +139,14 @@ function get_current_branch () {
 }
 
 ##
-# Affiche la liste des tags (nom complet) triés par ordre croissant, à raison d'un par ligne.
+# Affiche la liste des tags gérés par le workflow (nom complet) triés par ordre croissant, à raison d'un par ligne.
 #
 # @param int $1 si renseigné alors limite la liste aux $1 derniers tags
 #
 function get_all_tags () {
 	local n="$1"
 	[ -z "$n" ] && n=10000	# pour tout retourner
-	git tag | sed 's/v//' | sed 's/\./;/g' | sort --field-separator=";" -k1n -k2n -k3n | sed 's/;/./g' | sed 's/^/v/' | tail -n $n
+	git tag | grep -E '^v[0-9]+\.[0-9]+\.[0-9]+$' | sed 's/v//' | sed 's/\./;/g' | sort --field-separator=";" -k1n -k2n -k3n | sed 's/;/./g' | sed 's/^/v/' | tail -n $n
 }
 
 ##
@@ -353,7 +353,7 @@ function assert_new_local_branch () {
 				warn "Branches '$branch' and '$TWGIT_ORIGIN/$branch' have diverged!"
 			fi
 
-			alert_old_branch $TWGIT_ORIGIN/$branch with-help
+			alert_old_branch "$TWGIT_ORIGIN/$branch" 'with-help'
 		fi
 		echo
 		exit 0
@@ -396,7 +396,7 @@ function assert_valid_ref_name () {
 }
 
 ##
-# S'assure que la référence fournie est un nom syntaxiquement correct de tag potentiel.
+# S'assure que la référence fournie est un nom syntaxiquement correct de tag potentiel et qu'il est disponible.
 #
 # @param string $1 référence de branche
 #
@@ -405,6 +405,8 @@ function assert_valid_tag_name () {
 	assert_valid_ref_name "$tag"
 	processing 'Check valid tag name...'
 	$(echo "$tag" | grep -qP '^'$TWGIT_PREFIX_TAG'[0-9]+\.[0-9]+\.[0-9]+$') || die "Unauthorized tag name: '$tag'!"
+	processing "Check whether tag '$tag' already exists..."
+	has "$tag" $(get_all_tags) && die "Tag '$tag' already exists! Try: twgit tag list"
 }
 
 ##
@@ -554,6 +556,24 @@ function remove_feature () {
 	process_fetch
 	remove_local_branch $feature_fullname
 	remove_remote_branch $feature_fullname
+}
+
+##
+# Crée un tag sur la branche courante puis le pousse.
+#
+# @param string $1 nom complet du tag
+# @param string $2 message du commit du tag, qui sera préfixé par $TWGIT_PREFIX_COMMIT_MSG
+#
+function create_and_push_tag () {
+	local tag_fullname="$1"
+	local commit_msg="$2"
+
+	# Create tag:
+	processing "${TWGIT_GIT_COMMAND_PROMPT}git tag -a $tag_fullname -m \"${TWGIT_PREFIX_COMMIT_MSG}$commit_msg\""
+	git tag -a $tag_fullname -m "${TWGIT_PREFIX_COMMIT_MSG}$commit_msg" || die "Could not create tag '$tag_fullname'!"
+
+	# Push tags:
+	exec_git_command "git push --tags $TWGIT_ORIGIN $TWGIT_STABLE" "Could not push '$TWGIT_STABLE' on '$TWGIT_ORIGIN'!"
 }
 
 

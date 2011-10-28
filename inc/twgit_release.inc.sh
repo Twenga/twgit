@@ -186,12 +186,10 @@ function cmd_finish () {
 	local release="${release_fullname:${#TWGIT_PREFIX_RELEASE}}"
 	processing "Remote release '$release_fullname' detected."
 
-	# Calcul du nom du potentiel tag :
+	# Gestion du tag :
 	[ -z "$tag" ] && tag="$release"
 	local tag_fullname="$TWGIT_PREFIX_TAG$tag"
 	assert_valid_tag_name $tag_fullname
-	processing "Check whether tag '$tag_fullname' already exists..."
-	has "$tag_fullname" $(get_all_tags) && die "Tag '$tag_fullname' already exists! Try: twgit tag list"
 
 	# Détection hotfixes en cours :
 	processing 'Check hotfix in progress...'
@@ -217,11 +215,7 @@ function cmd_finish () {
 	exec_git_command "git checkout $TWGIT_STABLE" "Could not checkout '$TWGIT_STABLE'!"
 	exec_git_command "git merge $TWGIT_ORIGIN/$TWGIT_STABLE" "Could not merge '$TWGIT_ORIGIN/$TWGIT_STABLE' into '$TWGIT_STABLE'!"
 	exec_git_command "git merge --no-ff $release_fullname" "Could not merge '$release_fullname' into '$TWGIT_STABLE'!"
-
-	processing "${TWGIT_GIT_COMMAND_PROMPT}git tag -a $tag_fullname -m \"${TWGIT_PREFIX_COMMIT_MSG}Release finish: $release_fullname\""
-	git tag -a $tag_fullname -m "${TWGIT_PREFIX_COMMIT_MSG}Release finish: $release_fullname" || die "$error_msg"
-
-	exec_git_command "git push --tags $TWGIT_ORIGIN $TWGIT_STABLE" "Could not push '$TWGIT_STABLE' on '$TWGIT_ORIGIN'!"
+	create_and_push_tag "$tag_fullname" "Release finish: $release_fullname"
 
 	# Suppression des features associées :
 	features="$(get_merged_features $release_fullname)"
@@ -232,7 +226,8 @@ function cmd_finish () {
 	done
 
 	# Suppression de la branche :
-	cmd_remove $release
+	remove_local_branch $release_fullname
+	remove_remote_branch $release_fullname
 	echo
 }
 
@@ -246,14 +241,22 @@ function cmd_remove () {
 	require_parameter 'release'
 	local release="$RETVAL"
 	local release_fullname="$TWGIT_PREFIX_RELEASE$release"
+	local tag_fullname="$TWGIT_PREFIX_TAG$release"
 
 	assert_valid_ref_name $release
 	assert_clean_working_tree
-	assert_working_tree_is_not_on_delete_branch $release_fullname
 
 	process_fetch
+	assert_valid_tag_name $tag_fullname
+
+	# Suppression de la branche :
+	exec_git_command "git checkout $TWGIT_STABLE" "Could not checkout '$TWGIT_STABLE'!"
+	exec_git_command "git merge $TWGIT_ORIGIN/$TWGIT_STABLE" "Could not merge '$TWGIT_ORIGIN/$TWGIT_STABLE' into '$TWGIT_STABLE'!"
 	remove_local_branch $release_fullname
 	remove_remote_branch $release_fullname
+
+	# Gestion du tag :
+	create_and_push_tag "$tag_fullname" "Release remove: $release_fullname"
 	echo
 }
 

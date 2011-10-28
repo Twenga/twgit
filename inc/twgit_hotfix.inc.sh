@@ -86,14 +86,23 @@ function cmd_remove () {
 	require_parameter 'hotfix'
 	local hotfix="$RETVAL"
 	local hotfix_fullname="$TWGIT_PREFIX_HOTFIX$hotfix"
+	local tag_fullname="$TWGIT_PREFIX_TAG$hotfix"
 
 	assert_valid_ref_name $hotfix
 	assert_clean_working_tree
 	assert_working_tree_is_not_on_delete_branch $hotfix_fullname
 
 	process_fetch
+	assert_valid_tag_name $tag_fullname
+
+	# Suppression de la branche :
+	exec_git_command "git checkout $TWGIT_STABLE" "Could not checkout '$TWGIT_STABLE'!"
+	exec_git_command "git merge $TWGIT_ORIGIN/$TWGIT_STABLE" "Could not merge '$TWGIT_ORIGIN/$TWGIT_STABLE' into '$TWGIT_STABLE'!"
 	remove_local_branch $hotfix_fullname
 	remove_remote_branch $hotfix_fullname
+
+	# Gestion du tag :
+	create_and_push_tag "$tag_fullname" "Hotfix remove: $hotfix_fullname"
 	echo
 }
 
@@ -122,23 +131,19 @@ function cmd_finish () {
 		exec_git_command "git checkout --track -b $hotfix_fullname $TWGIT_ORIGIN/$hotfix_fullname" "Could not check out hotfix '$TWGIT_ORIGIN/$hotfix_fullname'!"
 	fi
 
+	# Gestion du tag :
 	local tag="$hotfix"
 	local tag_fullname="$TWGIT_PREFIX_TAG$tag"
 	assert_valid_tag_name $tag_fullname
-	processing "Check whether tag '$tag_fullname' already exists..."
-	has "$tag_fullname" $(get_all_tags) && die "Tag '$tag_fullname' already exists! Try: twgit tag list"
 
 	exec_git_command "git checkout $TWGIT_STABLE" "Could not checkout '$TWGIT_STABLE'!"
 	exec_git_command "git merge $TWGIT_ORIGIN/$TWGIT_STABLE" "Could not merge '$TWGIT_ORIGIN/$TWGIT_STABLE' into '$TWGIT_STABLE'!"
 	exec_git_command "git merge --no-ff $hotfix_fullname" "Could not merge '$hotfix_fullname' into '$TWGIT_STABLE'!"
-
-	processing "${TWGIT_GIT_COMMAND_PROMPT}git tag -a $tag_fullname -m \"${TWGIT_PREFIX_COMMIT_MSG}Hotfix finish: $hotfix_fullname\""
-	git tag -a $tag_fullname -m "${TWGIT_PREFIX_COMMIT_MSG}Hotfix finish: $hotfix_fullname" || die "$error_msg"
-
-	exec_git_command "git push --tags $TWGIT_ORIGIN $TWGIT_STABLE" "Could not push '$TWGIT_STABLE' on '$TWGIT_ORIGIN'!"
+	create_and_push_tag "$tag_fullname" "Hotfix finish: $hotfix_fullname"
 
 	# Suppression de la branche :
-	cmd_remove $hotfix
+	remove_local_branch $hotfix_fullname
+	remove_remote_branch $hotfix_fullname
 
 	local current_release="$(get_current_release_in_progress)"
 	[ ! -z "$current_release" ] && warn "Do not forget to merge '$tag_fullname' tag into '$TWGIT_ORIGIN/$current_release' release before close it! Try on release: git merge --no-ff $tag_fullname"

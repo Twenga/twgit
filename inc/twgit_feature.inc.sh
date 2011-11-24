@@ -317,7 +317,7 @@ function cmd_show-modified-files () {
 		if ! has "$TWGIT_ORIGIN/$feature_fullname" $(get_remote_branches); then
 			die "Remote feature '$TWGIT_ORIGIN/$feature_fullname' not found!"
 		fi
-		twgit feature start $feature
+		$TWGIT_EXEC feature start $feature || die "Unable to start '$feature' feature!"
 	else
 		local all_features=$(git branch -r --no-merged $TWGIT_ORIGIN/$TWGIT_STABLE | grep "$TWGIT_ORIGIN/$TWGIT_PREFIX_FEATURE" | sed 's/^[* ]*//' | tr '\n' ' ' | sed 's/ *$//g')
 		local current_branch=$(get_current_branch)

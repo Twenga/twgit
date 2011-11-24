@@ -72,20 +72,118 @@ function get_current_release_in_progress () {
 }
 
 ##
-# Affiche la liste locale des features distantes (nom complet avec "$TWGIT_ORIGIN/") mergées à la release distante $1, sur une seule ligne séparées par des espaces.
+# Calcule la liste locale des features distantes (nom complet avec "$TWGIT_ORIGIN/") mergées à la release distante $1,
+# sur une seule ligne séparées par des espaces,
+# et enregistre le résultat dans la globale GET_MERGED_FEATURES_RETURN_VALUE afin d'éviter les subshells.
 #
 # @param string $1 nom complet d'une release distante, sans "$TWGIT_ORIGIN/"
 #
 function get_merged_features () {
 	local release="$1"
-	local features="$(git branch -r --merged $TWGIT_ORIGIN/$release | grep $TWGIT_ORIGIN/$TWGIT_PREFIX_FEATURE | sed 's/^[* ]*//' | tr '\n' ' ' | sed 's/ *$//g')"
-	local features_v2="$(get_features merged $release)"
+
+	get_git_merged_branches $TWGIT_ORIGIN/$release
+	local merged_branches="${MERGED_BRANCHES[$TWGIT_ORIGIN/$release]}"
+
+	local features="$(echo "$merged_branches" | grep $TWGIT_ORIGIN/$TWGIT_PREFIX_FEATURE | sed 's/^[* ]*//' | tr '\n' ' ' | sed 's/ *$//g')"
+
+	get_features merged $release
+	local features_v2="$GET_FEATURES_RETURN_VALUE"
+
 	[ "$features" != "$features_v2" ] && die "Inconsistent result about merged features: '$features' != '$features_v2'!"
-	echo $features
+	GET_MERGED_FEATURES_RETURN_VALUE="$features"
 }
 
 ##
-# Affiche la liste des features (nom complet) de relation de type $1 avec la release distante $2, sur une seule ligne séparées par des espaces.
+# Tableau associatif de mise en cache des appels à git rev-parse.
+#
+# @var array tableau associatif
+# @see get_git_rev_parse()
+#
+declare -A REV_PARSE
+
+##
+# Calcule si non déjà fait le git rev-parse de la branche spécifiée
+# et met en cache le résultat dans la globale REV_PARSE.
+#
+# Ex. :
+#     branch='feature-123'
+#     get_git_rev_parse "$branch"
+#     rev="${REV_PARSE[$branch]}"
+#
+# @param string $1 nom complet d'une branche
+# @see REV_PARSE
+#
+function get_git_rev_parse () {
+	local key="$1"
+	if [ -z "${REV_PARSE[$key]}" ]; then
+		REV_PARSE[$key]="$(git rev-parse $key)"
+	fi
+}
+
+##
+# Tableau associatif de mise en cache des appels à git merge-base.
+#
+# @var array tableau associatif
+# @see get_git_merge_base()
+#
+declare -A MERGE_BASE
+
+##
+# Calcule si non déjà fait le git merge-base des 2 références (SHA1) spécifiées
+# et met en cache le résultat dans la globale MERGE_BASE.
+#
+# La clé de cache est "$1|$2".
+#
+# Ex. :
+#     rev1='fafc000ac57ef285f7de7326c6cf8859ffd36996'
+#     rev2='e7326c6cf57ef285f7d8859ffd36996fafc000ac'
+#     get_git_merge_base "$rev1" "$rev2"
+#     result="${MERGE_BASE[$rev1|$rev2]}"
+#
+# @param string $1 référence (SHA1) git
+# @param string $2 référence (SHA1) git
+# @see MERGE_BASE
+#
+function get_git_merge_base () {
+	local rev1="$1"
+	local rev2="$2"
+	local key="$rev1|$rev2"
+	if [ -z "${MERGE_BASE[$key]}" ]; then
+		MERGE_BASE[$key]="$(git merge-base $rev1 $rev2)"
+	fi
+}
+
+##
+# Tableau associatif de mise en cache des appels (très coûteux) à git branch -r --merged.
+#
+# @var array tableau associatif
+# @see get_git_merged_branches()
+#
+declare -A MERGED_BRANCHES
+
+##
+# Calcule si non déjà fait le git branch -r --merged de la branche spécifiée
+# et met en cache le résultat dans la globale MERGED_BRANCHES.
+#
+# Ex. :
+#     branch='release-1.2.3'
+#     get_git_merged_branches "$branch"
+#     merged_branches="${MERGED_BRANCHES[$branch]}"
+#
+# @param string $1 nom complet d'une branche
+# @see MERGED_BRANCHES
+#
+function get_git_merged_branches () {
+	local rev="$1"
+	if [ -z "${MERGED_BRANCHES[$rev]}" ]; then
+		MERGED_BRANCHES[$rev]="$(git branch -r --merged $rev)"
+	fi
+}
+
+##
+# Calcule la liste des features (nom complet) de relation de type $1 avec la release distante $2,
+# sur une seule ligne séparées par des espaces, et enregistre le résultat dans la globale GET_FEATURES_RETURN_VALUE
+# afin d'éviter les subshells.
 #
 # @param string $1 Type de relation avec la release $2 :
 #    - 'merged' pour lister les features mergées dans la release $2 et restées telle quelle depuis.
@@ -99,7 +197,7 @@ function get_features () {
 
 	if [ -z "$release" ]; then
 		if [ "$feature_type" = 'merged' ] || [ "$feature_type" = 'merged_in_progress' ]; then
-			echo ''
+			GET_FEATURES_RETURN_VALUE=''
 		elif [ "$feature_type" = 'free' ]; then
 			git branch -r --no-merged $TWGIT_ORIGIN/$TWGIT_STABLE | grep "$TWGIT_ORIGIN/$TWGIT_PREFIX_FEATURE" | sed 's/^[* ]*//' | tr '\n' ' ' | sed 's/ *$//g'
 		fi
@@ -107,27 +205,42 @@ function get_features () {
 		release="$TWGIT_ORIGIN/$release"
 		local return_features=''
 		local features=$(git branch -r | grep "$TWGIT_ORIGIN/$TWGIT_PREFIX_FEATURE" | sed 's/^[* ]*//')
-		local head_rev=$(git rev-parse $TWGIT_ORIGIN/$TWGIT_STABLE)
-		local release_rev=$(git rev-parse $release)
+
+		get_git_rev_parse "$TWGIT_ORIGIN/$TWGIT_STABLE"
+		local head_rev="${REV_PARSE[$TWGIT_ORIGIN/$TWGIT_STABLE]}"
+
+		get_git_rev_parse $release
+		local release_rev="${REV_PARSE[$release]}"
 
 		local f_rev release_merge_base stable_merge_base check_merge has_dependency
-		for f in $features; do
-			f_rev=$(git rev-parse $f)
-			release_merge_base=$(git merge-base $release_rev $f_rev)
-			stable_merge_base=$(git merge-base $release_merge_base $head_rev)
-			check_merge=$(git branch -r --merged $release | grep $f)
-			has_dependency="$(git rev-list $f_rev ^$release_merge_base --parents --merges | grep $release_merge_base | wc -l)"
 
-			# le test [ "$release_merge_base" = "$f_rev" ] n'est peut-être pas nécessaire :
-			if [ "$release_merge_base" = "$f_rev" ] && [ -n "$check_merge" ]; then
+		get_git_merged_branches $release
+		local merged_branches="${MERGED_BRANCHES[$release]}"
+
+		for f in $features; do
+			get_git_rev_parse $f
+			f_rev="${REV_PARSE[$f]}"
+
+			get_git_merge_base $release_rev $f_rev
+			release_merge_base="${MERGE_BASE[$release_rev|$f_rev]}"
+
+			if [ "$release_merge_base" = "$f_rev" ] && [ -n "$(echo "$merged_branches" | grep $f)" ]; then
 				[ "$feature_type" = 'merged' ] && return_features="$return_features $f"
-			elif [ "$release_merge_base" != "$stable_merge_base" ] && [ "$has_dependency" -eq 0 ]; then
-				[ "$feature_type" = 'merged_in_progress' ] && return_features="$return_features $f"
-			elif [ "$feature_type" = 'free' ]; then
-				return_features="$return_features $f"
+			else
+				get_git_merge_base $release_merge_base $head_rev
+				stable_merge_base="${MERGE_BASE[$release_merge_base|$head_rev]}"
+
+				#has_dependency="$(git rev-list $f_rev ^$release_merge_base --parents --merges | grep $release_merge_base | wc -l)"
+				if [ "$release_merge_base" != "$stable_merge_base" ] && \
+						[ "$(git rev-list $f_rev ^$release_merge_base --parents --merges | grep $release_merge_base | wc -l)" -eq 0 ]; then
+					[ "$feature_type" = 'merged_in_progress' ] && return_features="$return_features $f"
+				elif [ "$feature_type" = 'free' ]; then
+					return_features="$return_features $f"
+				fi
 			fi
 		done
-		echo ${return_features:1}
+
+		GET_FEATURES_RETURN_VALUE="${return_features:1}"
 	fi
 }
 
@@ -157,21 +270,43 @@ function get_last_tag () {
 }
 
 ##
-# Affiche le nom complet des tags réalisés depuis la création de la branche $1 (via hotfixes ou releases), et qui n'y sont pas mergés.
-# Sur une seule ligne, séparés par des espaces.
+# Concatène le nom complet de tous les tags réalisés depuis la création de la branche $1 (via hotfixes ou releases)
+# et qui n'y sont pas mergés, sur une seule ligne, séparés par des espaces,
+# et enregistre le résultat dans la globale GET_TAGS_NOT_MERGED_INTO_BRANCH_RETURN_VALUE afin d'éviter les subshells.
+#
+# Par de l'hypothèse que si un tag est mergé dans une branche, alors tous les tags plus anciens le sont également.
 #
 # @param string $1 nom complet de la branche, locale ou distante
 #
 function get_tags_not_merged_into_branch () {
-	local release_rev=$(git rev-parse $1)
+	get_git_rev_parse "$1"
+	local release_rev="${REV_PARSE[$1]}"
+
 	local tag_rev merge_base
-	local tags=''
-	for t in $(get_all_tags); do
+	local tags_not_merged=''
+	local inverted_tags_not_merged=''
+
+	local all_tags="$(get_all_tags)"
+	local inverted_all_tags
+	for t in $all_tags; do
+		inverted_all_tags="$t $inverted_all_tags"
+	done
+
+	for t in $inverted_all_tags; do
 		tag_rev=$(git rev-list $t | head -n 1)
 		merge_base=$(git merge-base $release_rev $tag_rev)
-		[ "$tag_rev" != "$merge_base" ] && tags="$tags $t"
+		if [ "$tag_rev" != "$merge_base" ]; then
+			inverted_tags_not_merged="$inverted_tags_not_merged $t"
+		else
+			break
+		fi
 	done
-	echo ${tags:1}
+
+	for t in $inverted_tags_not_merged; do
+		tags_not_merged="$t $tags_not_merged"
+	done
+
+	GET_TAGS_NOT_MERGED_INTO_BRANCH_RETURN_VALUE="${tags_not_merged:1}"
 }
 
 ##
@@ -230,7 +365,7 @@ function getRedmineSubject () {
 
 	subject="$(cat "$TWGIT_REDMINE_PATH" | grep -E "^$redmine;" | head -n 1 | sed 's/^[^;]*;//')"
 	if [ -z "$subject" ]; then
-		subject="$(php -q ~/twgit/inc/ws_redmine.inc.php $redmine subject 2>/dev/null || echo)"
+		subject="$(php -q $TWGIT_INC_DIR/ws_redmine.inc.php $redmine subject 2>/dev/null || echo)"
 		[ ! -z "$subject" ] && echo "$redmine;$subject" >> "$TWGIT_REDMINE_PATH"
 	fi
 
@@ -706,7 +841,9 @@ function display_branches () {
 # @param string $2 si présent et vaut 'with-help', alors une suggestion de merge sera proposée
 #
 function alert_old_branch () {
-	local tags_not_merged="$(get_tags_not_merged_into_branch "$1")"
+	get_tags_not_merged_into_branch "$1"
+	local tags_not_merged="$GET_TAGS_NOT_MERGED_INTO_BRANCH_RETURN_VALUE"
+
 	if [ ! -z "$tags_not_merged" ]; then
 		local msg='Tag'
 		if echo "$tags_not_merged" | grep -q ' '; then

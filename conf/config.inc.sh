@@ -2,9 +2,12 @@
 
 # Fichier de configuration inclus par twgit.
 
-TWGIT_ROOT_DIR=$(dirname "$0")
+TWGIT_ROOT_DIR="$(dirname "$0")"
 TWGIT_INC_DIR="$TWGIT_ROOT_DIR/inc"
 TWGIT_CONF_DIR="$TWGIT_ROOT_DIR/conf"
+
+TWGIT_BASH_EXEC="/bin/bash"
+TWGIT_EXEC="$TWGIT_BASH_EXEC $TWGIT_ROOT_DIR/twgit"
 
 TWGIT_REDMINE_PATH="$TWGIT_ROOT_DIR/.redmine"
 TWGIT_UPDATE_PATH="$TWGIT_ROOT_DIR/.lastupdate"

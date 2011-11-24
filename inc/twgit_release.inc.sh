@@ -83,7 +83,9 @@ function cmd_list () {
 		display_branches 'release' "$TWGIT_ORIGIN/$release" # | head -n -1
 		info 'Features:'
 
-		local merged_features="$(get_merged_features $release)"
+		get_merged_features $release
+		local merged_features="$GET_MERGED_FEATURES_RETURN_VALUE"
+
 		local prefix="$TWGIT_ORIGIN/$TWGIT_PREFIX_FEATURE"
 		for f in $merged_features; do
 			echo -n "    - $f "
@@ -91,7 +93,9 @@ function cmd_list () {
 			displayRedmineSubject "${f:${#prefix}}"
 		done
 
-		local merged_in_progress_features="$(get_features merged_in_progress $release)"
+		get_features merged_in_progress $release
+		local merged_in_progress_features="$GET_FEATURES_RETURN_VALUE"
+
 		for f in $merged_in_progress_features; do
 			echo -n "    - $f ";
 			echo -n $(displayMsg warning 'merged, then in progress.')' '
@@ -198,7 +202,9 @@ function cmd_finish () {
 
 	# Détection tags (via hotfixes) réalisés entre temps :
 	processing 'Check tags not merged...'
-	tags_not_merged="$(get_tags_not_merged_into_branch $TWGIT_ORIGIN/$release_fullname | sed 's/ /, /g')"
+	get_tags_not_merged_into_branch "$TWGIT_ORIGIN/$release_fullname"
+	tags_not_merged="$(echo "$GET_TAGS_NOT_MERGED_INTO_BRANCH_RETURN_VALUE" | sed 's/ /, /g')"
+
 	[ ! -z "$tags_not_merged" ] && die "You must merge following tag(s) into this release before close it: $tags_not_merged"
 
 	processing 'Check remote features...'

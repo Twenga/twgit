@@ -208,7 +208,9 @@ function cmd_finish () {
 	[ ! -z "$tags_not_merged" ] && die "You must merge following tag(s) into this release before close it: $tags_not_merged"
 
 	processing 'Check remote features...'
-	local features="$(get_features merged_in_progress $release_fullname)"
+	get_features merged_in_progress $release_fullname
+	local features="$GET_FEATURES_RETURN_VALUE"
+
 	[ ! -z "$features" ] && die "Features exists that are merged into this release but yet in development: $(echo $features | sed 's/ /, /g')!"
 
 	processing "Check local branch '$release_fullname'..."
@@ -224,7 +226,9 @@ function cmd_finish () {
 	create_and_push_tag "$tag_fullname" "Release finish: $release_fullname"
 
 	# Suppression des features associées :
-	features="$(get_merged_features $release_fullname)"
+	get_merged_features $release_fullname
+	features="$GET_MERGED_FEATURES_RETURN_VALUE"
+
 	local prefix="$TWGIT_ORIGIN/$TWGIT_PREFIX_RELEASE"
 	for feature in $features; do
 		processing "Delete '$feature' feature..."

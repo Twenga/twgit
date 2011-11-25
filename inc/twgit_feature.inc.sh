@@ -101,8 +101,12 @@ function cmd_list () {
 			info 'No such branch exists.'; echo
 		fi
 	else
-		features_merged="$(get_merged_features $release)"
-		features_in_progress="$(get_features merged_in_progress $release)"
+		get_merged_features $release
+		local features_merged="$GET_MERGED_FEATURES_RETURN_VALUE"
+
+		get_features merged_in_progress $release
+		local features_in_progress="$GET_FEATURES_RETURN_VALUE"
+
 		if isset_option 'x'; then
 			display_csv_branches "$features_merged" "merged into release"
 			display_csv_branches "$features_in_progress" "merged into release, then in progress"
@@ -114,7 +118,9 @@ function cmd_list () {
 		fi
 	fi
 
-	features="$(get_features free $release)"
+	get_features free $release
+	features="$GET_FEATURES_RETURN_VALUE"
+
 	if isset_option 'x'; then
 		display_csv_branches "$features" "free"
 	else

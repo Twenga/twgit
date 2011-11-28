@@ -113,12 +113,14 @@ function cmd_remove () {
 # @param string $1 nom court du hotfix
 #
 function cmd_finish () {
+	process_options "$@"
 	assert_clean_working_tree
 	process_fetch
 
 	processing 'Check remote hotfix...'
 	local remote_hotfix="$(get_hotfixes_in_progress)"
 	[ -z "$remote_hotfix" ] && die 'No hotfix in progress!'
+
 	local prefix="$TWGIT_ORIGIN/$TWGIT_PREFIX_HOTFIX"
 	hotfix="${remote_hotfix:${#prefix}}"
 	local hotfix_fullname="$TWGIT_PREFIX_HOTFIX$hotfix"

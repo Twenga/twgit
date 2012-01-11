@@ -1,8 +1,10 @@
 
-#--------------------------------------------------------------------
+##
 # Customize prompt.
 # Copy into ~/.bash_profile
-#--------------------------------------------------------------------
+#
+
+
 
 function get_git_branch () {
 	local branch=$(git branch --no-color 2>/dev/null | grep -P '^\*' | sed 's/* //')

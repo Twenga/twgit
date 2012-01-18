@@ -30,6 +30,7 @@
 # or send a letter to Creative Commons, 444 Castro Street, Suite 900, Mountain View, California, 94041, USA.
 #
 # @copyright 2011 Twenga SA
+# @copyright 2012 Geoffroy Aubry <geoffroy.aubry@free.fr>
 # @license http://creativecommons.org/licenses/by-nc-sa/3.0/
 #
 
@@ -73,8 +74,8 @@ function usage () {
 	help_detail "Try 'twgit <command> [help]' for more details."
 
 	echo; help 'About:'
-	help_detail "<b>Contact</b>          devaa@twenga.com"
-	help_detail "<b>Git repository</b>   git@git.twenga.com:aa/twgit.git"
+	help_detail "<b>Contact</b>          https://github.com/Twenga/twgit"
+	help_detail "<b>Git repository</b>   git@github.com:Twenga/twgit.git"
 	local last_update_timestamp=$(date -r "$TWGIT_UPDATE_PATH" +%s)
 	local last_update_date="$(date --date "1970-01-01 $last_update_timestamp sec" "+%Y-%m-%d %T")"
 	local next_update_timestamp=$(( $last_update_timestamp + $TWGIT_UPDATE_NB_DAYS * 86400 ))

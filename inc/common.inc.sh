@@ -212,7 +212,7 @@ function get_features () {
 		if [ "$feature_type" = 'merged' ] || [ "$feature_type" = 'merged_in_progress' ]; then
 			GET_FEATURES_RETURN_VALUE=''
 		elif [ "$feature_type" = 'free' ]; then
-			git branch -r --no-merged $TWGIT_ORIGIN/$TWGIT_STABLE | grep "$TWGIT_ORIGIN/$TWGIT_PREFIX_FEATURE" | sed 's/^[* ]*//' | tr '\n' ' ' | sed 's/ *$//g'
+			GET_FEATURES_RETURN_VALUE="$(git branch -r --no-merged $TWGIT_ORIGIN/$TWGIT_STABLE | grep "$TWGIT_ORIGIN/$TWGIT_PREFIX_FEATURE" | sed 's/^[* ]*//' | tr '\n' ' ' | sed 's/ *$//g')"
 		fi
 	else
 		release="$TWGIT_ORIGIN/$release"
@@ -989,14 +989,17 @@ function autoupdate () {
 			# Update Git :
 			processing "Fetch twgit repository for auto-update check..."
 			git fetch
-			compare_branches 'master' 'origin/master'
-			local status=$?
-			if [ "$status" = "1" ]; then
-				echo -n $(question 'Update available! Do you want to update twgit (or manually: twgit update)? [Y/N] ')
+
+			assert_tag_exists
+			local current_tag="$(git describe)"
+			local last_tag="$(get_last_tag)"
+			if [ "$current_tag" != "$last_tag" ]; then
+				echo -n $(question "Update $last_tag available! Do you want to update twgit (or manually: twgit update)? [Y/N] ")
 				read answer
 				if [ "$answer" = "Y" ] || [ "$answer" = "y" ]; then
 					processing 'Update in progress...'
-					git reset --hard && git pull
+					exec_git_command 'git reset --hard' 'Hard reset failed!'
+					exec_git_command "git checkout tags/$last_tag" "Could not check out tag '$last_tag'!"
 					> "$TWGIT_REDMINE_PATH"
 				fi
 			else

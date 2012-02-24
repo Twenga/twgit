@@ -11,4 +11,7 @@ Coming soon...
 [French documentation](https://github.com/Twenga/twgit/wiki) is available in wiki, waiting English translation...
 
 ## Copyrights & licensing
-See LICENSE file for details.
+See [LICENSE](https://github.com/Twenga/twgit/blob/stable/LICENSE.md) file for details.
+
+## ChangeLog
+See [CHANGELOG](https://github.com/Twenga/twgit/blob/stable/CHANGELOG.md) file for details.

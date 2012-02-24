@@ -4,7 +4,8 @@
  * Collection des statuts possibles pour un chemin du système de fichiers.
  *
  * @package Lib
- * @author Geoffroy AUBRY <geoffroy.aubry@free.fr>
+ * @copyright 2012 Geoffroy Aubry <geoffroy.aubry@free.fr>
+ * @license http://creativecommons.org/licenses/by-nc-sa/3.0/
  * @see Shell_Interface::getPathStatus()
  */
 final class Shell_PathStatus

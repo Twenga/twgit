@@ -15,7 +15,8 @@
  * TODO shutdown function pour fatals ?
  *
  * @package Lib
- * @author Geoffroy AUBRY <geoffroy.aubry@free.fr>
+ * @copyright 2012 Geoffroy Aubry <geoffroy.aubry@free.fr>
+ * @license http://creativecommons.org/licenses/by-nc-sa/3.0/
  */
 class ErrorHandler
 {

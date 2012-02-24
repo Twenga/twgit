@@ -8,7 +8,8 @@
  *  - https://gist.github.com/221634
  *
  * @package Lib
- * @author Geoffroy Aubry <geoffroy.aubry@free.fr>
+ * @copyright 2012 Geoffroy Aubry <geoffroy.aubry@free.fr>
+ * @license http://creativecommons.org/licenses/by-nc-sa/3.0/
  */
 class ClassLoader
 {

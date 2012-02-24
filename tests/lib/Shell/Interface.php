@@ -4,7 +4,8 @@
  * Pour faciliter l'exécution des commandes shell.
  *
  * @package Lib
- * @author Geoffroy AUBRY <geoffroy.aubry@free.fr>
+ * @copyright 2012 Geoffroy Aubry <geoffroy.aubry@free.fr>
+ * @license http://creativecommons.org/licenses/by-nc-sa/3.0/
  */
 interface Shell_Interface
 {

@@ -1,6 +1,8 @@
 TwGit
 ==========
 
+[![Build Status](https://secure.travis-ci.org/geoffroy-aubry/twgit.png)](http://travis-ci.org/geoffroy-aubry/twgit)
+
 ## Description
 Coming soon...
 

@@ -37,7 +37,7 @@
 
 
 if [ "$DEBUG" = "1" ]; then
-	set -x
+    set -x
 fi
 
 # Includes :
@@ -56,35 +56,35 @@ exec > >(printf -- "$TWGIT_HISTORY_SEPARATOR" "$log_date" "$log_call" >> $TWGIT_
 # Affiche l'aide
 #
 function usage () {
-	echo; help 'Usage:'
-	help_detail '<b>twgit <command> [<action>]</b>'
-	help_detail '    Always provide branch names without prefix:'
-	help_detail "    - '$TWGIT_PREFIX_FEATURE', '$TWGIT_PREFIX_RELEASE', '$TWGIT_PREFIX_HOTFIX', (tag) '$TWGIT_PREFIX_TAG'"
+    echo; help 'Usage:'
+    help_detail '<b>twgit <command> [<action>]</b>'
+    help_detail '    Always provide branch names without prefix:'
+    help_detail "    - '$TWGIT_PREFIX_FEATURE', '$TWGIT_PREFIX_RELEASE', '$TWGIT_PREFIX_HOTFIX', (tag) '$TWGIT_PREFIX_TAG'"
 
-	echo; help 'Available commands are:'
-	help_detail '<b>feature</b>   Manage your feature branches.'
-	help_detail '<b>release</b>   Manage your release branches.'
-	help_detail '<b>hotfix</b>    Manage your hotfix branches.'
-	help_detail '<b>tag</b>       Manage your tags.'
-	echo
-	help_detail '<b>clean</b>     Help to remove branches no longer tracked.'
-	help_detail '<b>update</b>    Force update twgit check.'
-	help_detail '<b>[help]</b>    Display this help.'
-	echo; help 'See also:'
-	help_detail "Try 'twgit <command> [help]' for more details."
+    echo; help 'Available commands are:'
+    help_detail '<b>feature</b>   Manage your feature branches.'
+    help_detail '<b>release</b>   Manage your release branches.'
+    help_detail '<b>hotfix</b>    Manage your hotfix branches.'
+    help_detail '<b>tag</b>       Manage your tags.'
+    echo
+    help_detail '<b>clean</b>     Help to remove branches no longer tracked.'
+    help_detail '<b>update</b>    Force update twgit check.'
+    help_detail '<b>[help]</b>    Display this help.'
+    echo; help 'See also:'
+    help_detail "Try 'twgit <command> [help]' for more details."
 
-	echo; help 'About:'
-	help_detail "<b>Contact</b>          https://github.com/Twenga/twgit"
-	help_detail "<b>Git repository</b>   git@github.com:Twenga/twgit.git"
-	local version=$(git describe)
-	help_detail "<b>Version</b>          $version"
-	local last_update_timestamp=$(date -r "$TWGIT_UPDATE_PATH" +%s)
-	local last_update_date="$(date --date "1970-01-01 $last_update_timestamp sec" "+%Y-%m-%d %T")"
-	local next_update_timestamp=$(( $last_update_timestamp + $TWGIT_UPDATE_NB_DAYS * 86400 ))
-	local next_update_date="$(date --date "1970-01-01 $next_update_timestamp sec" "+%Y-%m-%d %T")"
-	help_detail "<b>Last update</b>      $last_update_date"
-	help_detail "<b>Next update</b>      $next_update_date"
-	echo
+    echo; help 'About:'
+    help_detail "<b>Contact</b>          https://github.com/Twenga/twgit"
+    help_detail "<b>Git repository</b>   git@github.com:Twenga/twgit.git"
+    local version=$(cd $TWGIT_ROOT_DIR && git describe)
+    help_detail "<b>Version</b>          $version"
+    local last_update_timestamp=$(date -r "$TWGIT_UPDATE_PATH" +%s)
+    local last_update_date="$(date --date "1970-01-01 $last_update_timestamp sec" "+%Y-%m-%d %T")"
+    local next_update_timestamp=$(( $last_update_timestamp + $TWGIT_UPDATE_NB_DAYS * 86400 ))
+    local next_update_date="$(date --date "1970-01-01 $next_update_timestamp sec" "+%Y-%m-%d %T")"
+    help_detail "<b>Last update</b>      $last_update_date"
+    help_detail "<b>Next update</b>      $next_update_date"
+    echo
 }
 
 ##
@@ -95,43 +95,43 @@ function usage () {
 # @param string $2 nom de l'action demandée, 'help' par défaut
 #
 function main () {
-	if [ $# -lt 1 ]; then
-		usage
-		exit 1
-	fi
+    if [ $# -lt 1 ]; then
+        usage
+        exit 1
+    fi
 
-	# load command:
-	if [ ! -z "$1" ]; then
-		local command="$1"; shift
-		local command_file="$TWGIT_INC_DIR/twgit_$command.inc.sh";
-		if [ "$command" = 'help' ]; then
-			usage; exit 0
-		elif [ "$command" = 'update' ]; then
-			autoupdate 'force'; exit 0
-		elif [ "$command" = 'clean' ]; then
-			clean_branches; exit 0
-		elif [ ! -e "$command_file" ]; then
-			error "Command not found: '$command'"
-			usage
-			exit 1
-		else
-			. "$command_file"
-		fi
-	fi
+    # load command:
+    if [ ! -z "$1" ]; then
+        local command="$1"; shift
+        local command_file="$TWGIT_INC_DIR/twgit_$command.inc.sh";
+        if [ "$command" = 'help' ]; then
+            usage; exit 0
+        elif [ "$command" = 'update' ]; then
+            autoupdate 'force'; exit 0
+        elif [ "$command" = 'clean' ]; then
+            clean_branches; exit 0
+        elif [ ! -e "$command_file" ]; then
+            error "Command not found: '$command'"
+            usage
+            exit 1
+        else
+            . "$command_file"
+        fi
+    fi
 
-	# run the specified action:
-	local action='help'
-	if [ ! -z "$1" ]; then
-		action="$1"; shift
-	fi
-	local action_func_name="cmd_$action"
-	if ! type "$action_func_name" >/dev/null 2>&1; then
-		error "Unknown action: '$action'"
-		usage
-		exit 1
-	else
-		$action_func_name "$@"
-	fi
+    # run the specified action:
+    local action='help'
+    if [ ! -z "$1" ]; then
+        action="$1"; shift
+    fi
+    local action_func_name="cmd_$action"
+    if ! type "$action_func_name" >/dev/null 2>&1; then
+        error "Unknown action: '$action'"
+        usage
+        exit 1
+    else
+        $action_func_name "$@"
+    fi
 }
 
 [ "$1" != "update" ] && [ "$TWGIT_UPDATE_AUTO" = "1" ] && autoupdate

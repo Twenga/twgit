@@ -56,6 +56,9 @@ class TwgitInitTest extends PHPUnit_Framework_TestCase
         $this->_oShell = NULL;
     }
 
+    /**
+     * @shcovers inc/common.inc.sh::assert_git_configured
+     */
     public function testInitOrigin_ThrowExcpetionWhenUnknownUsername ()
     {
         $this->setExpectedException('RuntimeException', 'Unknown user.name!');
@@ -64,6 +67,7 @@ class TwgitInitTest extends PHPUnit_Framework_TestCase
 
     /**
      * @depends testInitOrigin_ThrowExcpetionWhenUnknownUsername
+     * @shcovers inc/common.inc.sh::assert_git_configured
      */
     public function testInitOrigin_ThrowExcpetionWhenUnknownUserEmail ()
     {

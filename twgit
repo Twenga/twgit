@@ -88,6 +88,13 @@ function usage () {
 }
 
 ##
+# Action déclenchant l'affichage de l'aide.
+#
+function cmd_help () {
+    usage;
+}
+
+##
 # Appelle l'action demandée ("cmd_$2") sur la commande spécifiée ($1).
 # Les paramètres surnumérères sont passés à la commande.
 #
@@ -95,11 +102,6 @@ function usage () {
 # @param string $2 nom de l'action demandée, 'help' par défaut
 #
 function main () {
-    if [ $# -lt 1 ]; then
-        usage
-        exit 1
-    fi
-
     # load command:
     if [ ! -z "$1" ]; then
         local command="$1"; shift

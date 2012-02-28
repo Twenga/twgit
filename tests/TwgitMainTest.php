@@ -72,7 +72,7 @@ git config --global user.email 'firstname.lastname@xyz.com'");
      */
     public function testInit_ThrowExceptionWhenURLNeeded ()
     {
-        $this->setExpectedException('RuntimeException', "Remote 'origin' repository url missing!");
+        $this->setExpectedException('RuntimeException', "Remote 'origin' repository url required!");
         $aResult = $this->_oShell->exec('cd ' . TWGIT_REPOSITORY_LOCAL_DIR . ' && ' . TWGIT_EXEC . ' init 1.2.3');
     }
 
@@ -81,7 +81,7 @@ git config --global user.email 'firstname.lastname@xyz.com'");
      */
     public function testInit_ThrowExceptionWhenBadRemoteRepository ()
     {
-        $this->setExpectedException('RuntimeException', "Could not push 'stable' local branch on 'origin'!");
+        $this->setExpectedException('RuntimeException', "Could not fetch 'origin'!");
         $aResult = $this->_oShell->exec('cd ' . TWGIT_REPOSITORY_LOCAL_DIR . ' && ' . TWGIT_EXEC . ' init 1.2.3 /tmp/origin');
     }
 
@@ -98,9 +98,12 @@ git config --global user.email 'firstname.lastname@xyz.com'");
         $this->assertNotContains("Check clean working tree...", $sMsg);
 
         $this->assertContains("git remote add origin /tmp/origin", $sMsg);
-        $this->assertNotContains("git fetch --prune origin", $sMsg);
 
         $this->assertContains("git branch -m stable", $sMsg);
+        $this->assertNotContains("git checkout -b stable master", $sMsg);
+        $this->assertNotContains("git checkout -b stable origin/master", $sMsg);
+        $this->assertNotContains("git checkout --track -b stable origin/stable", $sMsg);
+
         $this->assertContains('git tag -a v1.2.3 -m "[twgit] First tag."', $sMsg);
     }
 
@@ -118,9 +121,12 @@ git config --global user.email 'firstname.lastname@xyz.com'");
         $this->assertContains("Check clean working tree...", $sMsg);
 
         $this->assertContains("git remote add origin /tmp/origin", $sMsg);
-        $this->assertNotContains("git fetch --prune origin", $sMsg);
 
         $this->assertContains("git branch -m stable", $sMsg);
+        $this->assertNotContains("git checkout -b stable master", $sMsg);
+        $this->assertNotContains("git checkout -b stable origin/master", $sMsg);
+        $this->assertNotContains("git checkout --track -b stable origin/stable", $sMsg);
+
         $this->assertContains('git tag -a v1.2.3 -m "[twgit] First tag."', $sMsg);
     }
 
@@ -139,9 +145,12 @@ git config --global user.email 'firstname.lastname@xyz.com'");
         $this->assertContains("Check clean working tree...", $sMsg);
 
         $this->assertNotContains("git remote add origin /tmp/origin", $sMsg);
-        $this->assertContains("git fetch --prune origin", $sMsg);
 
         $this->assertContains("git branch -m stable", $sMsg);
+        $this->assertNotContains("git checkout -b stable master", $sMsg);
+        $this->assertNotContains("git checkout -b stable origin/master", $sMsg);
+        $this->assertNotContains("git checkout --track -b stable origin/stable", $sMsg);
+
         $this->assertContains('git tag -a v1.2.3 -m "[twgit] First tag."', $sMsg);
     }
 
@@ -153,8 +162,126 @@ git config --global user.email 'firstname.lastname@xyz.com'");
         $this->_oShell->exec('cd ' . TWGIT_REPOSITORY_ORIGIN_DIR . ' && git init');
         $this->_oShell->exec('cd ' . TWGIT_REPOSITORY_LOCAL_DIR . ' && git init');
         $this->_oShell->exec('cd ' . TWGIT_REPOSITORY_LOCAL_DIR . ' && touch .gitignore');
-        $this->_oShell->exec('git add .');
-        $this->_oShell->exec("git commit -m 'initial commit'");
+        $this->_oShell->exec('cd ' . TWGIT_REPOSITORY_LOCAL_DIR . ' && git add .');
+        $this->_oShell->exec("cd " . TWGIT_REPOSITORY_LOCAL_DIR . " && git commit -m 'initial commit'");
+
+        $aResult = $this->_oShell->exec('cd ' . TWGIT_REPOSITORY_LOCAL_DIR . ' && ' . TWGIT_EXEC . ' init 1.2.3 /tmp/origin');
+        $sMsg = preg_replace('/\x1B\[([0-9]{1,2}(;[0-9]{1,2})?)?[m|K]/', '', implode("\n", $aResult));
+
+        $this->assertNotContains("Initialized empty Git repository in /tmp/local/.git/", $sMsg);
+        $this->assertContains("Check clean working tree...", $sMsg);
+
+        $this->assertContains("git remote add origin /tmp/origin", $sMsg);
+
+        $this->assertNotContains("git branch -m stable", $sMsg);
+        $this->assertContains("git checkout -b stable master", $sMsg);
+        $this->assertNotContains("git checkout -b stable origin/master", $sMsg);
+        $this->assertNotContains("git checkout --track -b stable origin/stable", $sMsg);
+
+        $this->assertContains('git tag -a v1.2.3 -m "[twgit] First tag."', $sMsg);
+    }
+
+    /**
+     * @shcovers inc/common.inc.sh::init
+     */
+    public function testInit_WithRemoteMaster ()
+    {
+        $this->_oShell->exec('cd ' . TWGIT_REPOSITORY_ORIGIN_DIR . ' && git init');
+        $this->_oShell->exec('cd ' . TWGIT_REPOSITORY_ORIGIN_DIR . ' && touch .gitignore');
+        $this->_oShell->exec('cd ' . TWGIT_REPOSITORY_ORIGIN_DIR . ' && git add .');
+        $this->_oShell->exec("cd " . TWGIT_REPOSITORY_ORIGIN_DIR . " && git commit -m 'initial commit'");
+
+        $aResult = $this->_oShell->exec('cd ' . TWGIT_REPOSITORY_LOCAL_DIR . ' && ' . TWGIT_EXEC . ' init 1.2.3 /tmp/origin');
+        $sMsg = preg_replace('/\x1B\[([0-9]{1,2}(;[0-9]{1,2})?)?[m|K]/', '', implode("\n", $aResult));
+
+        $this->assertContains("Initialized empty Git repository in /tmp/local/.git/", $sMsg);
+        $this->assertNotContains("Check clean working tree...", $sMsg);
+
+        $this->assertContains("git remote add origin /tmp/origin", $sMsg);
+
+        $this->assertNotContains("git branch -m stable", $sMsg);
+        $this->assertNotContains("git checkout -b stable master", $sMsg);
+        $this->assertContains("git checkout -b stable origin/master", $sMsg);
+        $this->assertNotContains("git checkout --track -b stable origin/stable", $sMsg);
+
+        $this->assertContains('git tag -a v1.2.3 -m "[twgit] First tag."', $sMsg);
+    }
+
+    /**
+    * @shcovers inc/common.inc.sh::init
+    */
+    public function testInit_WithLocalStable ()
+    {
+        $this->_oShell->exec('cd ' . TWGIT_REPOSITORY_ORIGIN_DIR . ' && git init');
+        $this->_oShell->exec('cd ' . TWGIT_REPOSITORY_LOCAL_DIR . ' && git init');
+        $this->_oShell->exec('cd ' . TWGIT_REPOSITORY_LOCAL_DIR . ' && touch .gitignore');
+        $this->_oShell->exec('cd ' . TWGIT_REPOSITORY_LOCAL_DIR . ' && git add .');
+        $this->_oShell->exec("cd " . TWGIT_REPOSITORY_LOCAL_DIR . " && git commit -m 'initial commit'");
+        $this->_oShell->exec("cd " . TWGIT_REPOSITORY_LOCAL_DIR . " && git branch -m stable");
+
+        $aResult = $this->_oShell->exec('cd ' . TWGIT_REPOSITORY_LOCAL_DIR . ' && ' . TWGIT_EXEC . ' init 1.2.3 /tmp/origin');
+        $sMsg = preg_replace('/\x1B\[([0-9]{1,2}(;[0-9]{1,2})?)?[m|K]/', '', implode("\n", $aResult));
+
+                $this->assertNotContains("Initialized empty Git repository in /tmp/local/.git/", $sMsg);
+        $this->assertContains("Check clean working tree...", $sMsg);
+
+        $this->assertContains("git remote add origin /tmp/origin", $sMsg);
+
+        $this->assertNotContains("git branch -m stable", $sMsg);
+        $this->assertNotContains("git checkout -b stable master", $sMsg);
+        $this->assertNotContains("git checkout -b stable origin/master", $sMsg);
+        $this->assertContains("git push --set-upstream origin stable", $sMsg);
+        $this->assertNotContains("git checkout --track -b stable origin/stable", $sMsg);
+
+        $this->assertContains('git tag -a v1.2.3 -m "[twgit] First tag."', $sMsg);
+    }
+
+    /**
+    * @shcovers inc/common.inc.sh::init
+    */
+    public function testInit_WithLocalAndRemoteStable ()
+    {
+        $this->_oShell->exec('cd ' . TWGIT_REPOSITORY_ORIGIN_DIR . ' && git init');
+        $this->_oShell->exec('cd ' . TWGIT_REPOSITORY_LOCAL_DIR . ' && git init');
+        $this->_oShell->exec('cd ' . TWGIT_REPOSITORY_LOCAL_DIR . ' && touch .gitignore');
+        $this->_oShell->exec('cd ' . TWGIT_REPOSITORY_LOCAL_DIR . ' && git add .');
+        $this->_oShell->exec("cd " . TWGIT_REPOSITORY_LOCAL_DIR . " && git commit -m 'initial commit'");
+        $this->_oShell->exec("cd " . TWGIT_REPOSITORY_LOCAL_DIR . " && git branch -m stable");
+        $this->_oShell->exec('cd ' . TWGIT_REPOSITORY_LOCAL_DIR . ' && git remote add origin /tmp/origin');
+        $this->_oShell->exec("cd " . TWGIT_REPOSITORY_LOCAL_DIR . " && git push --set-upstream origin stable");
+
+        $aResult = $this->_oShell->exec('cd ' . TWGIT_REPOSITORY_LOCAL_DIR . ' && ' . TWGIT_EXEC . ' init 1.2.3 /tmp/origin');
+        $sMsg = preg_replace('/\x1B\[([0-9]{1,2}(;[0-9]{1,2})?)?[m|K]/', '', implode("\n", $aResult));
+
+                $this->assertNotContains("Initialized empty Git repository in /tmp/local/.git/", $sMsg);
+        $this->assertContains("Check clean working tree...", $sMsg);
+
+        $this->assertNotContains("git remote add origin /tmp/origin", $sMsg);
+
+        $this->assertNotContains("git branch -m stable", $sMsg);
+        $this->assertNotContains("git checkout -b stable master", $sMsg);
+        $this->assertNotContains("git checkout -b stable origin/master", $sMsg);
+        $this->assertNotContains("git push --set-upstream origin stable", $sMsg);
+        $this->assertNotContains("git checkout --track -b stable origin/stable", $sMsg);
+
+        $this->assertContains('git tag -a v1.2.3 -m "[twgit] First tag."', $sMsg);
+    }
+
+    /**
+    * @shcovers inc/common.inc.sh::init
+    */
+    public function testInit_WithRemoteStable ()
+    {
+        $this->_oShell->exec('cd ' . TWGIT_REPOSITORY_ORIGIN_DIR . ' && git init');
+        $this->_oShell->exec('cd ' . TWGIT_REPOSITORY_LOCAL_DIR . ' && git init');
+        $this->_oShell->exec('cd ' . TWGIT_REPOSITORY_LOCAL_DIR . ' && touch .gitignore');
+        $this->_oShell->exec('cd ' . TWGIT_REPOSITORY_LOCAL_DIR . ' && git add .');
+        $this->_oShell->exec("cd " . TWGIT_REPOSITORY_LOCAL_DIR . " && git commit -m 'initial commit'");
+        $this->_oShell->exec("cd " . TWGIT_REPOSITORY_LOCAL_DIR . " && git branch -m stable");
+        $this->_oShell->exec('cd ' . TWGIT_REPOSITORY_LOCAL_DIR . ' && git remote add origin /tmp/origin');
+        $this->_oShell->exec("cd " . TWGIT_REPOSITORY_LOCAL_DIR . " && git push --set-upstream origin stable");
+        $this->_oShell->exec("cd " . TWGIT_REPOSITORY_LOCAL_DIR . " && git checkout -b foo");
+        $this->_oShell->exec("cd " . TWGIT_REPOSITORY_LOCAL_DIR . " && git branch -D stable");
 
         $aResult = $this->_oShell->exec('cd ' . TWGIT_REPOSITORY_LOCAL_DIR . ' && ' . TWGIT_EXEC . ' init 1.2.3 /tmp/origin');
         $sMsg = preg_replace('/\x1B\[([0-9]{1,2}(;[0-9]{1,2})?)?[m|K]/', '', implode("\n", $aResult));
@@ -163,9 +290,13 @@ git config --global user.email 'firstname.lastname@xyz.com'");
         $this->assertContains("Check clean working tree...", $sMsg);
 
         $this->assertNotContains("git remote add origin /tmp/origin", $sMsg);
-        $this->assertContains("git fetch --prune origin", $sMsg);
 
-        $this->assertContains("git branch -m stable", $sMsg);
+        $this->assertNotContains("git branch -m stable", $sMsg);
+        $this->assertNotContains("git checkout -b stable master", $sMsg);
+        $this->assertNotContains("git checkout -b stable origin/master", $sMsg);
+        $this->assertNotContains("git push --set-upstream origin stable", $sMsg);
+        $this->assertContains("git checkout --track -b stable origin/stable", $sMsg);
+
         $this->assertContains('git tag -a v1.2.3 -m "[twgit] First tag."', $sMsg);
     }
 }

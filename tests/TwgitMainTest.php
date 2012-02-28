@@ -151,6 +151,7 @@ git config --global user.email 'firstname.lastname@xyz.com'");
     public function testInit_WithLocalMaster ()
     {
         $this->_oShell->exec('cd ' . TWGIT_REPOSITORY_ORIGIN_DIR . ' && git init');
+        $this->_oShell->exec('cd ' . TWGIT_REPOSITORY_LOCAL_DIR . ' && git init');
         $this->_oShell->exec('cd ' . TWGIT_REPOSITORY_LOCAL_DIR . ' && touch .gitignore');
         $this->_oShell->exec('git add .');
         $this->_oShell->exec("git commit -m 'initial commit'");

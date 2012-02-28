@@ -110,6 +110,8 @@ function main () {
             autoupdate 'force'; exit 0
         elif [ "$command" = 'clean' ]; then
             clean_branches; exit 0
+        elif [ "$command" = 'init' ]; then
+            init "$@"; exit 0
         elif [ ! -e "$command_file" ]; then
             error "Command not found: '$command'"
             usage

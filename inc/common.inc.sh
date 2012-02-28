@@ -424,7 +424,7 @@ function assert_git_repository () {
         process_fetch
     fi
     if ! has $stable $(get_remote_branches); then
-        die "Remote stable branch not found: '$TWGIT_ORIGIN/$TWGIT_STABLE'!"
+        die "Remote $TWGIT_STABLE branch not found: '$TWGIT_ORIGIN/$TWGIT_STABLE'!"
     fi
     [ -z "$(get_last_tag)" ] && die "No tag found with format: '${TWGIT_PREFIX_TAG}X.Y.Z'!"
 }
@@ -647,7 +647,7 @@ function process_first_commit () {
 #
 function process_push_branch () {
     local branch="$1"
-    exec_git_command "git push --set-upstream $TWGIT_ORIGIN $branch" "Could not push branch '$branch'!"
+    exec_git_command "git push --set-upstream $TWGIT_ORIGIN $branch" "Could not push '$branch' local branch on '$TWGIT_ORIGIN'!"
 }
 
 ##
@@ -951,6 +951,66 @@ function clean_branches () {
             fi
         fi
     done
+}
+
+# @tested_by TwgitMainTest
+function init () {
+    process_options "$@"
+    require_parameter 'tag'
+    local tag="$RETVAL"
+    local remote_url="$2"
+    local tag_fullname="$TWGIT_PREFIX_TAG$tag"
+
+    processing "Check need for git init..."
+    if [ ! -z "$(git rev-parse --git-dir 2>&1 1>/dev/null)" ]; then
+        # @tested_by TwgitMainTest::testInit_Empty
+        exec_git_command 'git init' 'Initialization of git repository failed!'
+    else
+        # @tested_by TwgitMainTest::testInit_WithGitInit
+        assert_clean_working_tree
+    fi
+
+    assert_valid_tag_name $tag_fullname
+
+    processing "Check presence of remote '$TWGIT_ORIGIN' repository..."
+    if [ "$(git remote | grep -R "^$TWGIT_ORIGIN$" | wc -l)" -ne 1 ]; then
+        # @tested_by TwgitMainTest::testInit_Empty
+        [ -z "$remote_url" ] && die "Remote '$TWGIT_ORIGIN' repository url missing!"
+        exec_git_command "git remote add origin $remote_url" 'Add remote repository failed!'
+    else
+        # @tested_by TwgitMainTest::testInit_WithGitInitAndAddRemote
+        process_fetch
+    fi
+
+    processing "Check presence of remote '$TWGIT_STABLE' branch..."
+    if has $TWGIT_STABLE $(get_local_branches); then
+        processing "Local '$TWGIT_STABLE' detected."
+        if has $TWGIT_ORIGIN/$TWGIT_STABLE $(get_remote_branches); then
+            processing "Remote '$TWGIT_ORIGIN/$TWGIT_STABLE' detected."
+            # @todo MAJ ?
+        else
+            exec_git_command "git push --set-upstream $TWGIT_ORIGIN $TWGIT_STABLE" 'Git push failed!'
+        fi
+    elif has $TWGIT_ORIGIN/$TWGIT_STABLE $(get_remote_branches); then
+        processing "Remote '$TWGIT_ORIGIN/$TWGIT_STABLE' detected."
+        exec_git_command "git checkout --track -b $TWGIT_STABLE $TWGIT_ORIGIN/$TWGIT_STABLE"
+                         "Could not check out '$TWGIT_ORIGIN/$TWGIT_STABLE'!"
+    else
+        if has master $(get_local_branches); then
+            exec_git_command "git checkout master && git pull origin master && git checkout -b $TWGIT_STABLE master" \
+                             "Create local '$TWGIT_STABLE' branch failed!"
+        elif has $TWGIT_ORIGIN/master $(get_remote_branches); then
+            exec_git_command "git checkout -b $TWGIT_STABLE $TWGIT_ORIGIN/master" "Could not check out '$TWGIT_ORIGIN/master'!"
+        else
+            # @todo pas d'autre branche ?
+            # @tested_by TwgitMainTest::testInit_Empty
+            process_first_commit branch stable
+            exec_git_command "git branch -m $TWGIT_STABLE" "Rename of master branch failed!"
+        fi
+        process_push_branch $TWGIT_STABLE
+    fi
+
+    create_and_push_tag "$tag_fullname" "First tag."
 }
 
 ##

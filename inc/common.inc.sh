@@ -368,22 +368,36 @@ function get_contributors () {
 }
 
 ##
-# Affiche le sujet d'un ticket Redmine, sans aucune coloration.
-# Le premier appel sollicite ws_redmine.inc.php qui lui-même exploite un WS Redmine,
-# les suivants bénéficieront du fichier de cache $TWGIT_REDMINE_PATH.
+# Affiche le sujet d'une feature (sans aucune coloration) en le récupérant
+# d'une plate-forme Redmine, Github ou autre via le connecteur défini
+# par TWGIT_FEATURE_SUBJECT_CONNECTOR.
 #
-# @param int $1 numéro de ticket Redmine
+# Le premier appel sollicite le connecteur concerné,
+# les suivants bénéficieront du fichier de cache $TWGIT_FEATURES_SUBJECT_PATH.
 #
-function getRedmineSubject () {
-    local redmine="$1"
+# Le fichier associé au connecteur est défini par $TWGIT_FEATURE_SUBJECT_CONNECTOR_PATH.
+#
+# @param int $1 nom court de la feature
+#
+function getFeatureSubject () {
+    local short_name="$1"
     local subject
 
-    [ ! -s "$TWGIT_REDMINE_PATH" ] && touch "$TWGIT_REDMINE_PATH"
+    [ ! -s "$TWGIT_FEATURES_SUBJECT_PATH" ] && touch "$TWGIT_FEATURES_SUBJECT_PATH"
 
-    subject="$(cat "$TWGIT_REDMINE_PATH" | grep -E "^$redmine;" | head -n 1 | sed 's/^[^;]*;//')"
-    if [ -z "$subject" ]; then
-        subject="$(php -q $TWGIT_INC_DIR/ws_redmine.inc.php $redmine subject 2>/dev/null || echo)"
-        [ ! -z "$subject" ] && echo "$redmine;$subject" >> "$TWGIT_REDMINE_PATH"
+    subject="$(cat "$TWGIT_FEATURES_SUBJECT_PATH" | grep -E "^$short_name;" | head -n 1 | sed 's/^[^;]*;//')"
+    if [ -z "$subject" ] && [ ! -z "$TWGIT_FEATURE_SUBJECT_CONNECTOR" ]; then
+        local connector="$(printf "$TWGIT_FEATURE_SUBJECT_CONNECTOR_PATH" "$TWGIT_FEATURE_SUBJECT_CONNECTOR")"
+        if [ ! -f "$connector" ]; then
+            warn "'$TWGIT_FEATURE_SUBJECT_CONNECTOR' connector not found!"
+        else
+            subject="$(. $connector $short_name 2>/dev/null)"
+            if [ $? -ne 0 ]; then
+                error "'$TWGIT_FEATURE_SUBJECT_CONNECTOR' connector failed!"
+            elif [ ! -z "$subject" ]; then
+                echo "$short_name;$subject" >> "$TWGIT_FEATURES_SUBJECT_PATH"
+            fi
+        fi
     fi
 
     echo $subject
@@ -427,16 +441,6 @@ function assert_git_repository () {
         die "Remote $TWGIT_STABLE branch not found: '$TWGIT_ORIGIN/$TWGIT_STABLE'!"
     fi
     [ -z "$(get_last_tag)" ] && die "No tag found with format: '${TWGIT_PREFIX_TAG}X.Y.Z'!"
-}
-
-##
-# S'assure que la lib PHP cURL est présente, afin de permettre la récupération des sujets des tickets Redmine.
-#
-function assert_php_curl () {
-    if ! php --ri curl 2>/dev/null 1>&2; then
-        warn 'PHP lib cURL not installed: Redmine subjects will not be fetched.'
-        processing 'Try: sudo apt-get install php5-curl'
-    fi
 }
 
 ##
@@ -555,7 +559,7 @@ function assert_valid_ref_name () {
 ##
 # S'assure que la référence fournie est un nom syntaxiquement correct de tag potentiel et qu'il est disponible.
 #
-# @param string $1 référence de tag au format \d+.\d+.\d+
+# @param string $1 référence de tag au format court \d+.\d+.\d+
 #
 function assert_valid_tag_name () {
     local tag="$1"
@@ -810,7 +814,7 @@ function display_csv_branches () {
     local short_name
     for branch in $branches; do
         short_name="${branch:${#prefix}}"
-        subject="$(getRedmineSubject "$short_name")"
+        subject="$(getFeatureSubject "$short_name")"
         echo "${branch:${#repo_prefix}};$short_name;$subtype;$(convertList2CSV "$subject")"
     done
 }
@@ -846,7 +850,7 @@ function display_branches () {
             fi
             echo -n $(info "${titles[$type]}$branch ")
 
-            [ "$type" = "feature" ] && displayRedmineSubject "${branch:${#prefix}}" || echo
+            [ "$type" = "feature" ] && displayFeatureSubject "${branch:${#prefix}}" || echo
 
             alert_old_branch "$branch"
 
@@ -909,16 +913,16 @@ function displayQuotedEnum () {
 }
 
 ##
-# Affiche le sujet d'un ticket Redmine
+# Affiche le sujet d'une feature (ticket Redmine, issue Github, ...)
 # Le premier appel sollicite ws_redmine.inc.php qui lui-même exploite un WS Redmine,
-# les suivants bénéficieront du fichier de cache $TWGIT_REDMINE_PATH.
+# les suivants bénéficieront du fichier de cache $TWGIT_FEATURES_SUBJECT_PATH.
 #
-# @param int $1 numéro de ticket Redmine
-# @see getRedmineSubject()
+# @param int $1 nom court de la feature
+# @see getFeatureSubject()
 #
-function displayRedmineSubject () {
-    local subject="$(getRedmineSubject "$1")"
-    [ ! -z "$subject" ] && displayMsg redmine "$subject" || echo #processing 'Unknown Redmine subject.'
+function displayFeatureSubject () {
+    local subject="$(getFeatureSubject "$1")"
+    [ ! -z "$subject" ] && displayMsg feature_subject "$subject" || echo
 }
 
 ##
@@ -1067,7 +1071,7 @@ function autoupdate () {
                     processing 'Update in progress...'
                     exec_git_command 'git reset --hard' 'Hard reset failed!'
                     exec_git_command "git checkout tags/$last_tag" "Could not check out tag '$last_tag'!"
-                    > "$TWGIT_REDMINE_PATH"
+                    > "$TWGIT_FEATURES_SUBJECT_PATH"
                 fi
             else
                 processing 'Twgit already up-to-date.'

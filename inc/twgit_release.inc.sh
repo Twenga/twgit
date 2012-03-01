@@ -10,11 +10,11 @@
 # or send a letter to Creative Commons, 444 Castro Street, Suite 900, Mountain View, California, 94041, USA.
 #
 # @copyright 2011 Twenga SA
+# @copyright 2012 Geoffroy Aubry <geoffroy.aubry@free.fr>
 # @license http://creativecommons.org/licenses/by-nc-sa/3.0/
 #
 
 assert_git_repository
-assert_php_curl
 
 ##
 # Affiche l'aide de la commande tag.
@@ -103,7 +103,7 @@ function cmd_list () {
         for f in $merged_features; do
             echo -n "    - $f "
             echo -n $(displayMsg ok '[merged]')' '
-            displayRedmineSubject "${f:${#prefix}}"
+            displayFeatureSubject "${f:${#prefix}}"
         done
 
         get_features merged_in_progress $release
@@ -112,7 +112,7 @@ function cmd_list () {
         for f in $merged_in_progress_features; do
             echo -n "    - $f ";
             echo -n $(displayMsg warning 'merged, then in progress.')' '
-            displayRedmineSubject "${f:${#prefix}}"
+            displayFeatureSubject "${f:${#prefix}}"
         done
         [ -z "$merged_features" ] && [ -z "$merged_in_progress_features" ] && info '    - No such branch exists.'
     else

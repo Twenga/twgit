@@ -23,7 +23,8 @@ grep -E '^\s*\*\s*@shcovers\s+.+::.' --ignore-case -r --no-filename --include=*T
 
 iSum="$(grep -f $rCovers $rStats | awk -F: 'BEGIN {sum=0} {sum+=$5} END {print sum}')"
 iTotal="$(tail -n 1 $rStats)"
-fPercent="$(echo "scale=1; $iSum*100/$iTotal" | bc -l)"
+sPhpCmd="echo round($iSum*100/$iTotal, 1);"
+fPercent="$(php -r "$sPhpCmd")"
 
 # Example: (i) Estimated Bash code coverage: .4% (6 of 1334 lines).
 echo -e "\n\033[1;33m(i) Estimated Bash code coverage: $fPercent% ($iSum of $iTotal lines)."

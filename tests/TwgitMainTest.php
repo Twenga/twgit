@@ -70,7 +70,7 @@ git config --global user.email 'firstname.lastname@xyz.com'");
     /**
      * @shcovers inc/common.inc.sh::init
      */
-    public function xtestInit_ThrowExceptionWhenURLNeeded ()
+    public function testInit_ThrowExceptionWhenURLNeeded ()
     {
         $this->setExpectedException('RuntimeException', "Remote 'origin' repository url required!");
         $aResult = $this->_oShell->exec('cd ' . TWGIT_REPOSITORY_LOCAL_DIR . ' && ' . TWGIT_EXEC . ' init 1.2.3');

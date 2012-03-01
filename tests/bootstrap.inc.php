@@ -23,3 +23,5 @@ $GLOBALS['oErrorHandler'] = new ErrorHandler(
     TWGIT_ERROR_LEVEL,
     TWGIT_AUTH_ERROR_SUPPR_OP
 );
+
+touch(TWGIT_ROOT_DIR . '/.lastupdate');

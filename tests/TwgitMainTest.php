@@ -70,7 +70,7 @@ git config --global user.email 'firstname.lastname@xyz.com'");
     /**
      * @shcovers inc/common.inc.sh::init
      */
-    public function testInit_ThrowExceptionWhenURLNeeded ()
+    public function xtestInit_ThrowExceptionWhenURLNeeded ()
     {
         $this->setExpectedException('RuntimeException', "Remote 'origin' repository url required!");
         $aResult = $this->_oShell->exec('cd ' . TWGIT_REPOSITORY_LOCAL_DIR . ' && ' . TWGIT_EXEC . ' init 1.2.3');
@@ -79,7 +79,7 @@ git config --global user.email 'firstname.lastname@xyz.com'");
     /**
      * @shcovers inc/common.inc.sh::init
      */
-    public function testInit_ThrowExceptionWhenBadRemoteRepository ()
+    public function xtestInit_ThrowExceptionWhenBadRemoteRepository ()
     {
         $this->setExpectedException('RuntimeException', "Could not fetch 'origin'!");
         $aResult = $this->_oShell->exec('cd ' . TWGIT_REPOSITORY_LOCAL_DIR . ' && ' . TWGIT_EXEC . ' init 1.2.3 /tmp/origin');
@@ -88,7 +88,7 @@ git config --global user.email 'firstname.lastname@xyz.com'");
     /**
      * @shcovers inc/common.inc.sh::init
      */
-    public function testInit_Empty ()
+    public function xtestInit_Empty ()
     {
         $this->_oShell->exec('cd ' . TWGIT_REPOSITORY_ORIGIN_DIR . ' && git init');
         $aResult = $this->_oShell->exec('cd ' . TWGIT_REPOSITORY_LOCAL_DIR . ' && ' . TWGIT_EXEC . ' init 1.2.3 /tmp/origin');
@@ -110,7 +110,7 @@ git config --global user.email 'firstname.lastname@xyz.com'");
     /**
      * @shcovers inc/common.inc.sh::init
      */
-    public function testInit_WithGitInit ()
+    public function xtestInit_WithGitInit ()
     {
         $this->_oShell->exec('cd ' . TWGIT_REPOSITORY_ORIGIN_DIR . ' && git init');
         $this->_oShell->exec('cd ' . TWGIT_REPOSITORY_LOCAL_DIR . ' && git init');
@@ -133,7 +133,7 @@ git config --global user.email 'firstname.lastname@xyz.com'");
     /**
      * @shcovers inc/common.inc.sh::init
      */
-    public function testInit_WithGitInitAndAddRemote ()
+    public function xtestInit_WithGitInitAndAddRemote ()
     {
         $this->_oShell->exec('cd ' . TWGIT_REPOSITORY_ORIGIN_DIR . ' && git init');
         $this->_oShell->exec('cd ' . TWGIT_REPOSITORY_LOCAL_DIR . ' && git init');
@@ -157,7 +157,7 @@ git config --global user.email 'firstname.lastname@xyz.com'");
     /**
      * @shcovers inc/common.inc.sh::init
      */
-    public function testInit_WithLocalMaster ()
+    public function xtestInit_WithLocalMaster ()
     {
         $this->_oShell->exec('cd ' . TWGIT_REPOSITORY_ORIGIN_DIR . ' && git init');
         $this->_oShell->exec('cd ' . TWGIT_REPOSITORY_LOCAL_DIR . ' && git init');
@@ -184,7 +184,7 @@ git config --global user.email 'firstname.lastname@xyz.com'");
     /**
      * @shcovers inc/common.inc.sh::init
      */
-    public function testInit_WithRemoteMaster ()
+    public function xtestInit_WithRemoteMaster ()
     {
         $this->_oShell->exec('cd ' . TWGIT_REPOSITORY_ORIGIN_DIR . ' && git init');
         $this->_oShell->exec('cd ' . TWGIT_REPOSITORY_ORIGIN_DIR . ' && touch .gitignore');
@@ -210,7 +210,7 @@ git config --global user.email 'firstname.lastname@xyz.com'");
     /**
     * @shcovers inc/common.inc.sh::init
     */
-    public function testInit_WithLocalStable ()
+    public function xtestInit_WithLocalStable ()
     {
         $this->_oShell->exec('cd ' . TWGIT_REPOSITORY_ORIGIN_DIR . ' && git init');
         $this->_oShell->exec('cd ' . TWGIT_REPOSITORY_LOCAL_DIR . ' && git init');
@@ -239,7 +239,7 @@ git config --global user.email 'firstname.lastname@xyz.com'");
     /**
     * @shcovers inc/common.inc.sh::init
     */
-    public function testInit_WithLocalAndRemoteStable ()
+    public function xtestInit_WithLocalAndRemoteStable ()
     {
         $this->_oShell->exec('cd ' . TWGIT_REPOSITORY_ORIGIN_DIR . ' && git init');
         $this->_oShell->exec('cd ' . TWGIT_REPOSITORY_LOCAL_DIR . ' && git init');
@@ -270,7 +270,7 @@ git config --global user.email 'firstname.lastname@xyz.com'");
     /**
     * @shcovers inc/common.inc.sh::init
     */
-    public function testInit_WithRemoteStable ()
+    public function xtestInit_WithRemoteStable ()
     {
         $this->_oShell->exec('cd ' . TWGIT_REPOSITORY_ORIGIN_DIR . ' && git init');
         $this->_oShell->exec('cd ' . TWGIT_REPOSITORY_LOCAL_DIR . ' && git init');

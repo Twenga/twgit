@@ -16,7 +16,7 @@
 >
     <testsuites>
         <testsuite name="Twgit">
-            <directory suffix="SetupTest.php">../tests</directory>
+            <directory suffix="MainTest.php">../tests</directory>
         </testsuite>
     </testsuites>
 </phpunit>

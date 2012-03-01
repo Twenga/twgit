@@ -4,7 +4,7 @@
  * @package Tests
  * @author Geoffroy AUBRY <geoffroy.aubry@hi-media.com>
  */
-class TwgitInitTest extends PHPUnit_Framework_TestCase
+class TwgitSetupTest extends PHPUnit_Framework_TestCase
 {
 
     /**
@@ -59,17 +59,17 @@ class TwgitInitTest extends PHPUnit_Framework_TestCase
     /**
      * @shcovers inc/common.inc.sh::assert_git_configured
      */
-    public function testInitOrigin_ThrowExcpetionWhenUnknownUsername ()
+    public function testAssertGitConfigured_ThrowExcpetionWhenUnknownUsername ()
     {
         $this->setExpectedException('RuntimeException', 'Unknown user.name!');
         $aResult = $this->_oShell->exec('cd ' . TWGIT_REPOSITORY_LOCAL_DIR . ' && ' . TWGIT_EXEC . ' tag list');
     }
 
     /**
-     * @depends testInitOrigin_ThrowExcpetionWhenUnknownUsername
+     * @depends testAssertGitConfigured_ThrowExcpetionWhenUnknownUsername
      * @shcovers inc/common.inc.sh::assert_git_configured
      */
-    public function testInitOrigin_ThrowExcpetionWhenUnknownUserEmail ()
+    public function testAssertGitConfigured_ThrowExcpetionWhenUnknownUserEmail ()
     {
         $this->_oShell->exec("git config --global user.name 'Firstname Lastname'");
         $this->setExpectedException('RuntimeException', 'Unknown user.email!');
@@ -77,30 +77,73 @@ class TwgitInitTest extends PHPUnit_Framework_TestCase
     }
 
     /**
-     * @depends testInitOrigin_ThrowExcpetionWhenUnknownUserEmail
+     * @depends testAssertGitConfigured_ThrowExcpetionWhenUnknownUserEmail
+     * @shcovers inc/common.inc.sh::assert_git_repository
      */
-    public function testInitOrigin_ThrowExcpetionWhenNotGitRepository ()
+    public function testAssertGitRepository_ThrowExcpetionWhenNotGitRepository ()
     {
         $this->_oShell->exec("git config --global user.email 'firstname.lastname@xyz.com'");
         $this->setExpectedException('RuntimeException', '[Git error msg] fatal: Not a git repository');
         $aResult = $this->_oShell->exec('cd ' . TWGIT_REPOSITORY_LOCAL_DIR . ' && ' . TWGIT_EXEC . ' tag list');
     }
 
+
     /**
-     * @depends testInitOrigin_ThrowExcpetionWhenNotGitRepository
+     * @depends testAssertGitRepository_ThrowExcpetionWhenNotGitRepository
+     * @shcovers inc/common.inc.sh::assert_git_repository
      */
-    public function testInitOrigin_OK ()
+    public function testAssertGitRepository_ThrowExcpetionWhenNoRemoteRepository ()
     {
-        $sCmd = 'cd ' . TWGIT_REPOSITORY_ORIGIN_DIR . " && \\
-git init && \\
-cd " . TWGIT_REPOSITORY_LOCAL_DIR . " && \\
-git init && \\
-git remote add origin " . TWGIT_REPOSITORY_ORIGIN_DIR . " && \\
+        $this->_oShell->exec('cd ' . TWGIT_REPOSITORY_LOCAL_DIR . ' && git init');
+        $this->setExpectedException('RuntimeException', "No remote 'origin' repository specified!");
+        $aResult = $this->_oShell->exec('cd ' . TWGIT_REPOSITORY_LOCAL_DIR . ' && ' . TWGIT_EXEC . ' tag list');
+    }
+
+    /**
+     * @depends testAssertGitRepository_ThrowExcpetionWhenNoRemoteRepository
+     * @shcovers inc/common.inc.sh::process_fetch
+     */
+    public function testProcessFetch_ThrowExcpetionWhenBadRemoteRepository ()
+    {
+        $this->_oShell->exec('cd ' . TWGIT_REPOSITORY_LOCAL_DIR . ' && git remote add origin ' . TWGIT_REPOSITORY_ORIGIN_DIR);
+        $this->setExpectedException('RuntimeException', "Could not fetch 'origin'!");
+        $aResult = $this->_oShell->exec('cd ' . TWGIT_REPOSITORY_LOCAL_DIR . ' && ' . TWGIT_EXEC . ' tag list');
+    }
+
+    /**
+     * @depends testProcessFetch_ThrowExcpetionWhenBadRemoteRepository
+     * @shcovers inc/common.inc.sh::assert_git_repository
+     */
+    public function testAssertGitRepository_ThrowExcpetionWhenStableBranchNotFound ()
+    {
+        $this->_oShell->exec('cd ' . TWGIT_REPOSITORY_ORIGIN_DIR . ' && git init');
+        $this->setExpectedException('RuntimeException', 'Remote stable branch not found');
+        $aResult = $this->_oShell->exec('cd ' . TWGIT_REPOSITORY_LOCAL_DIR . ' && ' . TWGIT_EXEC . ' tag list');
+    }
+
+    /**
+     * @depends testAssertGitRepository_ThrowExcpetionWhenStableBranchNotFound
+     * @shcovers inc/common.inc.sh::assert_git_repository
+     */
+    public function testAssertGitRepository_ThrowExcpetionWhenNoTagFound ()
+    {
+        $this->_oShell->exec('cd ' . TWGIT_REPOSITORY_LOCAL_DIR . " && \\
 touch .gitignore && \\
 git add . && \\
 git commit -m 'initial commit' && \\
 git branch -m stable && \\
-git push --set-upstream origin stable && \\
+git push --set-upstream origin stable");
+        $this->setExpectedException('RuntimeException', 'No tag found');
+        $aResult = $this->_oShell->exec('cd ' . TWGIT_REPOSITORY_LOCAL_DIR . ' && ' . TWGIT_EXEC . ' tag list');
+    }
+
+    /**
+     * @depends testAssertGitRepository_ThrowExcpetionWhenNoTagFound
+     * @shcovers inc/common.inc.sh::assert_git_repository
+     */
+    public function testAssertGitRepository_OK ()
+    {
+        $sCmd = 'cd ' . TWGIT_REPOSITORY_LOCAL_DIR . " && \\
 git tag -a v1.0.0 -m 'first tag' && \\
 git push --tags origin stable";
         $this->_oShell->exec($sCmd);

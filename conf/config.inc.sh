@@ -37,7 +37,7 @@ TWGIT_PREFIX_HOTFIX='hotfix-'
 TWGIT_PREFIX_TAG='v'
 TWGIT_PREFIX_DEMO='demo-'
 
-TWGIT_ORIGIN=$(git remote show -n 2>/dev/null | head -n 1)
+TWGIT_ORIGIN='origin'
 TWGIT_STABLE='stable'
 
 TWGIT_PREFIX_COMMIT_MSG='[twgit] '

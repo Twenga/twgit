@@ -6,3 +6,6 @@
 /.history.error
 /.history.log
 /.features_subject
+/conf/phpunit.xml
+/conf/phpunit.php
+/conf/twgit.sh

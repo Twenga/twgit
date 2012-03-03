@@ -48,12 +48,12 @@ TWGIT_GIT_MIN_VERSION='1.7.2.0'
 
 TWGIT_DEFAULT_NB_COMMITTERS='3'
 
-TWGIT_EMAIL_DOMAIN_NAME='hi-media.com'
+TWGIT_EMAIL_DOMAIN_NAME=''	# e.g. twenga.com
 
 TWGIT_MAX_RETRIEVE_TAGS_NOT_MERGED=3
 
-TWGIT_FEATURE_SUBJECT_CONNECTOR='redmine'	# in {'', 'github', 'redmine'}
+TWGIT_FEATURE_SUBJECT_CONNECTOR=''	# in {'', 'github', 'redmine'}
 TWGIT_FEATURE_SUBJECT_CONNECTOR_PATH="$TWGIT_INC_DIR/connectors/feature_subject_%s.sh"	# où %s est un $TWGIT_FEATURE_SUBJECT_CONNECTOR
-TWGIT_FEATURE_SUBJECT_REDMINE_API_KEY='019e20149609230b49f296d900d082b1f24597c1'
-TWGIT_FEATURE_SUBJECT_REDMINE_URL="https://redmine.hi-media-techno.com/issues/%s.json?key=$TWGIT_FEATURE_SUBJECT_REDMINE_API_KEY"	# où %s est le nom court d'une feature
-TWGIT_FEATURE_SUBJECT_GITHUB_URL='https://github.com/api/v2/json/issues/show/Twenga/twgit/%s'	# où %s est le nom court d'une feature
+TWGIT_FEATURE_SUBJECT_REDMINE_API_KEY=''	# API key is a 40-byte hexadecimal string.
+TWGIT_FEATURE_SUBJECT_REDMINE_URL="https://[domain]/issues/%s.json?key=$TWGIT_FEATURE_SUBJECT_REDMINE_API_KEY"	# où %s est le nom court d'une feature
+TWGIT_FEATURE_SUBJECT_GITHUB_URL='https://github.com/api/v2/json/issues/show/[user]/[repo]/%s'	# où %s est le nom court d'une feature

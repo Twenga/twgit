@@ -5,7 +5,7 @@ php:
   - 5.3
 
 before_script:
-  - cp /conf/twgit-dist.sh /conf/twgit.sh
+  - cp conf/twgit-dist.sh conf/twgit.sh
 script: phpunit --configuration conf/phpunit-dist.xml
 after_script:
   - /bin/bash tests/inc/codeCoverage.sh

@@ -1,11 +1,14 @@
+# See: http://about.travis-ci.org/docs/user/build-configuration/
+
 language: php
 php:
   - 5.3
 
+before_script:
+  - cp /conf/twgit-dist.sh /conf/twgit.sh
+script: phpunit --configuration conf/phpunit-dist.xml
 after_script:
   - /bin/bash tests/inc/codeCoverage.sh
-
-script: phpunit --configuration conf/phpunit-dist.xml
 
 notifications:
   on_success: always

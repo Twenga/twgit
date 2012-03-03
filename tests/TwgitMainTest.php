@@ -4,13 +4,8 @@
  * @package Tests
  * @author Geoffroy AUBRY <geoffroy.aubry@hi-media.com>
  */
-class TwgitMainTest extends PHPUnit_Framework_TestCase
+class TwgitMainTest extends TwgitTestCase
 {
-
-    /**
-     * @var Shell_Adapter
-     */
-    private $_oShell;
 
     /**
     * This method is called before the first test of this test class is run.
@@ -19,10 +14,11 @@ class TwgitMainTest extends PHPUnit_Framework_TestCase
     */
     public static function setUpBeforeClass ()
     {
-        $oShell = new Shell_Adapter();
-        $oShell->exec("touch \$HOME/.gitconfig && mv \$HOME/.gitconfig \$HOME/.gitconfig.BAK && \\
-git config --global user.name 'Firstname Lastname' && \\
-git config --global user.email 'firstname.lastname@xyz.com'");
+        self::_rawExec(
+            "touch \$HOME/.gitconfig && mv \$HOME/.gitconfig \$HOME/.gitconfig.BAK && \\
+            git config --global user.name 'Firstname Lastname' && \\
+            git config --global user.email 'firstname.lastname@xyz.com'"
+        );
     }
 
     /**
@@ -32,8 +28,7 @@ git config --global user.email 'firstname.lastname@xyz.com'");
      */
     public static function tearDownAfterClass ()
     {
-        $oShell = new Shell_Adapter();
-        $oShell->exec('mv $HOME/.gitconfig.BAK $HOME/.gitconfig');
+        self::_rawExec('mv $HOME/.gitconfig.BAK $HOME/.gitconfig');
     }
 
     /**
@@ -42,20 +37,11 @@ git config --global user.email 'firstname.lastname@xyz.com'");
      */
     public function setUp ()
     {
-        $this->_oShell = new Shell_Adapter();
-        $this->_oShell->remove(TWGIT_REPOSITORY_ORIGIN_DIR);
-        $this->_oShell->remove(TWGIT_REPOSITORY_LOCAL_DIR);
-        $this->_oShell->mkdir(TWGIT_REPOSITORY_ORIGIN_DIR, '0777');
-        $this->_oShell->mkdir(TWGIT_REPOSITORY_LOCAL_DIR, '0777');
-    }
-
-    /**
-     * Tears down the fixture, for example, close a network connection.
-     * This method is called after a test is executed.
-     */
-    public function tearDown ()
-    {
-        $this->_oShell = NULL;
+        $o = self::_getShellInstance();
+        $o->remove(TWGIT_REPOSITORY_ORIGIN_DIR);
+        $o->remove(TWGIT_REPOSITORY_LOCAL_DIR);
+        $o->mkdir(TWGIT_REPOSITORY_ORIGIN_DIR, '0777');
+        $o->mkdir(TWGIT_REPOSITORY_LOCAL_DIR, '0777');
     }
 
     /**
@@ -64,7 +50,7 @@ git config --global user.email 'firstname.lastname@xyz.com'");
     public function testInit_ThrowExceptionWhenTagParameterMissing ()
     {
         $this->setExpectedException('RuntimeException', 'Missing argument <tag>!');
-        $aResult = $this->_oShell->exec('cd ' . TWGIT_REPOSITORY_LOCAL_DIR . ' && ' . TWGIT_EXEC . ' init');
+        $this->_localExec(TWGIT_EXEC . ' init');
     }
 
     /**
@@ -73,7 +59,7 @@ git config --global user.email 'firstname.lastname@xyz.com'");
     public function testInit_ThrowExceptionWhenURLNeeded ()
     {
         $this->setExpectedException('RuntimeException', "Remote 'origin' repository url required!");
-        $aResult = $this->_oShell->exec('cd ' . TWGIT_REPOSITORY_LOCAL_DIR . ' && ' . TWGIT_EXEC . ' init 1.2.3');
+        $this->_localExec(TWGIT_EXEC . ' init 1.2.3');
     }
 
     /**
@@ -82,7 +68,7 @@ git config --global user.email 'firstname.lastname@xyz.com'");
     public function testInit_ThrowExceptionWhenBadRemoteRepository ()
     {
         $this->setExpectedException('RuntimeException', "Could not fetch 'origin'!");
-        $aResult = $this->_oShell->exec('cd ' . TWGIT_REPOSITORY_LOCAL_DIR . ' && ' . TWGIT_EXEC . ' init 1.2.3 /tmp/origin');
+        $this->_localExec(TWGIT_EXEC . ' init 1.2.3 /tmp/origin');
     }
 
     /**
@@ -90,9 +76,8 @@ git config --global user.email 'firstname.lastname@xyz.com'");
      */
     public function testInit_Empty ()
     {
-        $this->_oShell->exec('cd ' . TWGIT_REPOSITORY_ORIGIN_DIR . ' && git init');
-        $aResult = $this->_oShell->exec('cd ' . TWGIT_REPOSITORY_LOCAL_DIR . ' && ' . TWGIT_EXEC . ' init 1.2.3 /tmp/origin');
-        $sMsg = preg_replace('/\x1B\[([0-9]{1,2}(;[0-9]{1,2})?)?[m|K]/', '', implode("\n", $aResult));
+        $this->_remoteExec('git init');
+        $sMsg = $this->_localExec(TWGIT_EXEC . ' init 1.2.3 /tmp/origin');
 
         $this->assertContains("Initialized empty Git repository in /tmp/local/.git/", $sMsg);
         $this->assertNotContains("Check clean working tree...", $sMsg);
@@ -112,10 +97,9 @@ git config --global user.email 'firstname.lastname@xyz.com'");
      */
     public function testInit_WithGitInit ()
     {
-        $this->_oShell->exec('cd ' . TWGIT_REPOSITORY_ORIGIN_DIR . ' && git init');
-        $this->_oShell->exec('cd ' . TWGIT_REPOSITORY_LOCAL_DIR . ' && git init');
-        $aResult = $this->_oShell->exec('cd ' . TWGIT_REPOSITORY_LOCAL_DIR . ' && ' . TWGIT_EXEC . ' init 1.2.3 /tmp/origin');
-        $sMsg = preg_replace('/\x1B\[([0-9]{1,2}(;[0-9]{1,2})?)?[m|K]/', '', implode("\n", $aResult));
+        $this->_remoteExec('git init');
+        $this->_localExec('git init');
+        $sMsg = $this->_localExec(TWGIT_EXEC . ' init 1.2.3 /tmp/origin');
 
         $this->assertNotContains("Initialized empty Git repository in /tmp/local/.git/", $sMsg);
         $this->assertContains("Check clean working tree...", $sMsg);
@@ -135,11 +119,9 @@ git config --global user.email 'firstname.lastname@xyz.com'");
      */
     public function testInit_WithGitInitAndAddRemote ()
     {
-        $this->_oShell->exec('cd ' . TWGIT_REPOSITORY_ORIGIN_DIR . ' && git init');
-        $this->_oShell->exec('cd ' . TWGIT_REPOSITORY_LOCAL_DIR . ' && git init');
-        $this->_oShell->exec('cd ' . TWGIT_REPOSITORY_LOCAL_DIR . ' && git remote add origin /tmp/origin');
-        $aResult = $this->_oShell->exec('cd ' . TWGIT_REPOSITORY_LOCAL_DIR . ' && ' . TWGIT_EXEC . ' init 1.2.3');
-        $sMsg = preg_replace('/\x1B\[([0-9]{1,2}(;[0-9]{1,2})?)?[m|K]/', '', implode("\n", $aResult));
+        $this->_remoteExec('git init');
+        $this->_localExec('git init && git remote add origin /tmp/origin');
+        $sMsg = $this->_localExec(TWGIT_EXEC . ' init 1.2.3');
 
         $this->assertNotContains("Initialized empty Git repository in /tmp/local/.git/", $sMsg);
         $this->assertContains("Check clean working tree...", $sMsg);
@@ -159,14 +141,15 @@ git config --global user.email 'firstname.lastname@xyz.com'");
      */
     public function testInit_WithLocalMaster ()
     {
-        $this->_oShell->exec('cd ' . TWGIT_REPOSITORY_ORIGIN_DIR . ' && git init');
-        $this->_oShell->exec('cd ' . TWGIT_REPOSITORY_LOCAL_DIR . ' && git init');
-        $this->_oShell->exec('cd ' . TWGIT_REPOSITORY_LOCAL_DIR . ' && touch .gitignore');
-        $this->_oShell->exec('cd ' . TWGIT_REPOSITORY_LOCAL_DIR . ' && git add .');
-        $this->_oShell->exec("cd " . TWGIT_REPOSITORY_LOCAL_DIR . " && git commit -m 'initial commit'");
+        $this->_remoteExec('git init');
+        $this->_localExec(
+            "git init && \\
+            touch .gitignore && \\
+            git add . && \\
+            git commit -m 'initial commit'"
+        );
 
-        $aResult = $this->_oShell->exec('cd ' . TWGIT_REPOSITORY_LOCAL_DIR . ' && ' . TWGIT_EXEC . ' init 1.2.3 /tmp/origin');
-        $sMsg = preg_replace('/\x1B\[([0-9]{1,2}(;[0-9]{1,2})?)?[m|K]/', '', implode("\n", $aResult));
+        $sMsg = $this->_localExec(TWGIT_EXEC . ' init 1.2.3 /tmp/origin');
 
         $this->assertNotContains("Initialized empty Git repository in /tmp/local/.git/", $sMsg);
         $this->assertContains("Check clean working tree...", $sMsg);
@@ -186,13 +169,14 @@ git config --global user.email 'firstname.lastname@xyz.com'");
      */
     public function testInit_WithRemoteMaster ()
     {
-        $this->_oShell->exec('cd ' . TWGIT_REPOSITORY_ORIGIN_DIR . ' && git init');
-        $this->_oShell->exec('cd ' . TWGIT_REPOSITORY_ORIGIN_DIR . ' && touch .gitignore');
-        $this->_oShell->exec('cd ' . TWGIT_REPOSITORY_ORIGIN_DIR . ' && git add .');
-        $this->_oShell->exec("cd " . TWGIT_REPOSITORY_ORIGIN_DIR . " && git commit -m 'initial commit'");
+        $this->_remoteExec(
+            "git init && \\
+            touch .gitignore && \\
+            git add . && \\
+            git commit -m 'initial commit'"
+        );
 
-        $aResult = $this->_oShell->exec('cd ' . TWGIT_REPOSITORY_LOCAL_DIR . ' && ' . TWGIT_EXEC . ' init 1.2.3 /tmp/origin');
-        $sMsg = preg_replace('/\x1B\[([0-9]{1,2}(;[0-9]{1,2})?)?[m|K]/', '', implode("\n", $aResult));
+        $sMsg = $this->_localExec(TWGIT_EXEC . ' init 1.2.3 /tmp/origin');
 
         $this->assertContains("Initialized empty Git repository in /tmp/local/.git/", $sMsg);
         $this->assertNotContains("Check clean working tree...", $sMsg);
@@ -212,17 +196,18 @@ git config --global user.email 'firstname.lastname@xyz.com'");
     */
     public function testInit_WithLocalStable ()
     {
-        $this->_oShell->exec('cd ' . TWGIT_REPOSITORY_ORIGIN_DIR . ' && git init');
-        $this->_oShell->exec('cd ' . TWGIT_REPOSITORY_LOCAL_DIR . ' && git init');
-        $this->_oShell->exec('cd ' . TWGIT_REPOSITORY_LOCAL_DIR . ' && touch .gitignore');
-        $this->_oShell->exec('cd ' . TWGIT_REPOSITORY_LOCAL_DIR . ' && git add .');
-        $this->_oShell->exec("cd " . TWGIT_REPOSITORY_LOCAL_DIR . " && git commit -m 'initial commit'");
-        $this->_oShell->exec("cd " . TWGIT_REPOSITORY_LOCAL_DIR . " && git branch -m stable");
+        $this->_remoteExec('git init');
+        $this->_localExec(
+            "git init && \\
+            touch .gitignore && \\
+            git add . && \\
+            git commit -m 'initial commit' && \\
+            git branch -m stable"
+        );
 
-        $aResult = $this->_oShell->exec('cd ' . TWGIT_REPOSITORY_LOCAL_DIR . ' && ' . TWGIT_EXEC . ' init 1.2.3 /tmp/origin');
-        $sMsg = preg_replace('/\x1B\[([0-9]{1,2}(;[0-9]{1,2})?)?[m|K]/', '', implode("\n", $aResult));
+        $sMsg = $this->_localExec(TWGIT_EXEC . ' init 1.2.3 /tmp/origin');
 
-                $this->assertNotContains("Initialized empty Git repository in /tmp/local/.git/", $sMsg);
+        $this->assertNotContains("Initialized empty Git repository in /tmp/local/.git/", $sMsg);
         $this->assertContains("Check clean working tree...", $sMsg);
 
         $this->assertContains("git remote add origin /tmp/origin", $sMsg);
@@ -241,19 +226,20 @@ git config --global user.email 'firstname.lastname@xyz.com'");
     */
     public function testInit_WithLocalAndRemoteStable ()
     {
-        $this->_oShell->exec('cd ' . TWGIT_REPOSITORY_ORIGIN_DIR . ' && git init');
-        $this->_oShell->exec('cd ' . TWGIT_REPOSITORY_LOCAL_DIR . ' && git init');
-        $this->_oShell->exec('cd ' . TWGIT_REPOSITORY_LOCAL_DIR . ' && touch .gitignore');
-        $this->_oShell->exec('cd ' . TWGIT_REPOSITORY_LOCAL_DIR . ' && git add .');
-        $this->_oShell->exec("cd " . TWGIT_REPOSITORY_LOCAL_DIR . " && git commit -m 'initial commit'");
-        $this->_oShell->exec("cd " . TWGIT_REPOSITORY_LOCAL_DIR . " && git branch -m stable");
-        $this->_oShell->exec('cd ' . TWGIT_REPOSITORY_LOCAL_DIR . ' && git remote add origin /tmp/origin');
-        $this->_oShell->exec("cd " . TWGIT_REPOSITORY_LOCAL_DIR . " && git push --set-upstream origin stable");
+        $this->_remoteExec('git init');
+        $this->_localExec(
+            "git init && \\
+            touch .gitignore && \\
+            git add . && \\
+            git commit -m 'initial commit' && \\
+            git branch -m stable && \\
+            git remote add origin /tmp/origin && \\
+            git push --set-upstream origin stable"
+        );
 
-        $aResult = $this->_oShell->exec('cd ' . TWGIT_REPOSITORY_LOCAL_DIR . ' && ' . TWGIT_EXEC . ' init 1.2.3 /tmp/origin');
-        $sMsg = preg_replace('/\x1B\[([0-9]{1,2}(;[0-9]{1,2})?)?[m|K]/', '', implode("\n", $aResult));
+        $sMsg = $this->_localExec(TWGIT_EXEC . ' init 1.2.3 /tmp/origin');
 
-                $this->assertNotContains("Initialized empty Git repository in /tmp/local/.git/", $sMsg);
+        $this->assertNotContains("Initialized empty Git repository in /tmp/local/.git/", $sMsg);
         $this->assertContains("Check clean working tree...", $sMsg);
 
         $this->assertNotContains("git remote add origin /tmp/origin", $sMsg);
@@ -272,19 +258,20 @@ git config --global user.email 'firstname.lastname@xyz.com'");
     */
     public function testInit_WithRemoteStable ()
     {
-        $this->_oShell->exec('cd ' . TWGIT_REPOSITORY_ORIGIN_DIR . ' && git init');
-        $this->_oShell->exec('cd ' . TWGIT_REPOSITORY_LOCAL_DIR . ' && git init');
-        $this->_oShell->exec('cd ' . TWGIT_REPOSITORY_LOCAL_DIR . ' && touch .gitignore');
-        $this->_oShell->exec('cd ' . TWGIT_REPOSITORY_LOCAL_DIR . ' && git add .');
-        $this->_oShell->exec("cd " . TWGIT_REPOSITORY_LOCAL_DIR . " && git commit -m 'initial commit'");
-        $this->_oShell->exec("cd " . TWGIT_REPOSITORY_LOCAL_DIR . " && git branch -m stable");
-        $this->_oShell->exec('cd ' . TWGIT_REPOSITORY_LOCAL_DIR . ' && git remote add origin /tmp/origin');
-        $this->_oShell->exec("cd " . TWGIT_REPOSITORY_LOCAL_DIR . " && git push --set-upstream origin stable");
-        $this->_oShell->exec("cd " . TWGIT_REPOSITORY_LOCAL_DIR . " && git checkout -b foo");
-        $this->_oShell->exec("cd " . TWGIT_REPOSITORY_LOCAL_DIR . " && git branch -D stable");
+        $this->_remoteExec('git init');
+        $this->_localExec(
+            "git init && \\
+            touch .gitignore && \\
+            git add . && \\
+            git commit -m 'initial commit' && \\
+            git branch -m stable && \\
+            git remote add origin /tmp/origin && \\
+            git push --set-upstream origin stable && \\
+            git checkout -b foo && \\
+            git branch -D stable"
+        );
 
-        $aResult = $this->_oShell->exec('cd ' . TWGIT_REPOSITORY_LOCAL_DIR . ' && ' . TWGIT_EXEC . ' init 1.2.3 /tmp/origin');
-        $sMsg = preg_replace('/\x1B\[([0-9]{1,2}(;[0-9]{1,2})?)?[m|K]/', '', implode("\n", $aResult));
+        $sMsg = $this->_localExec(TWGIT_EXEC . ' init 1.2.3 /tmp/origin');
 
         $this->assertNotContains("Initialized empty Git repository in /tmp/local/.git/", $sMsg);
         $this->assertContains("Check clean working tree...", $sMsg);

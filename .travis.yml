@@ -3,6 +3,6 @@ php:
   - 5.3
 
 after_script:
-  - /bin/bash tests/codeCoverage.sh
+  - /bin/bash tests/inc/codeCoverage.sh
 
 script: phpunit --configuration conf/phpunit-dist.xml

@@ -19,6 +19,8 @@ assert_git_repository
 ##
 # Affiche l'aide de la commande tag.
 #
+# @testedby TwgitHelpTest
+#
 function usage () {
     echo; help 'Usage:'
     help_detail '<b>twgit release <action></b>'
@@ -51,6 +53,8 @@ function usage () {
 
 ##
 # Action déclenchant l'affichage de l'aide.
+#
+# @testedby TwgitHelpTest
 #
 function cmd_help () {
     usage;

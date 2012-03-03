@@ -10,6 +10,7 @@ define('TWGIT_ROOT_DIR', realpath(__DIR__ . '/..'));
 define('TWGIT_TMP_DIR', '/tmp');
 define('TWGIT_TESTS_DIR', TWGIT_ROOT_DIR . '/tests');
 define('TWGIT_TESTS_LIB_DIR', TWGIT_TESTS_DIR . '/lib');
+define('TWGIT_TESTS_INC_DIR', TWGIT_TESTS_DIR . '/inc');
 
 // Error handler
 define('TWGIT_DISPLAY_ERRORS', true);

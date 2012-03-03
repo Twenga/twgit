@@ -1,5 +1,11 @@
 #!/bin/bash
 
+##
+# @author Geoffroy AUBRY <geoffroy.aubry@hi-media.com>
+#
+
+
+
 rStats="$(tempfile)"
 rCovers="$(tempfile)"
 

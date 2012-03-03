@@ -24,6 +24,7 @@
 # or send a letter to Creative Commons, 444 Castro Street, Suite 900, Mountain View, California, 94041, USA.
 #
 # @copyright 2011 Twenga SA
+# @copyright 2012 Geoffroy Aubry <geoffroy.aubry@free.fr>
 # @license http://creativecommons.org/licenses/by-nc-sa/3.0/
 #
 
@@ -37,37 +38,37 @@ RETVAL=''			# global to avoid subshell...
 # Rempli les tableaux globaux $FCT_OPTIONS et $FCT_PARAMETERS.
 #
 # @param string $@ liste de paramètres à analyser
+# @testedby TwgitOptionsHandlerTest
 #
 function process_options {
-	local param
-	while [ $# -gt 0 ]; do
-		# PB pour récupérer la lettre option quand echo "-n"...
-		# Du coup ceci ne fonctionne pas : param=`echo "$1" | grep -P '^-[^-]' | sed s/-//g`
-		# Parade :
-		[ ${#1} -gt 1 ] && [ ${1:0:1} = '-' ] && [ ${1:1:1} != '-' ] && param="${1:1}" || param=''
+    local param
+    while [ $# -gt 0 ]; do
+        # PB pour récupérer la lettre option quand echo "-n"...
+        # Du coup ceci ne fonctionne pas : param=`echo "$1" | grep -P '^-[^-]' | sed s/-//g`
+        # Parade :
+        [ ${#1} -gt 1 ] && [ ${1:0:1} = '-' ] && [ ${1:1:1} != '-' ] && param="${1:1}" || param=''
 
-		param=$(echo "$param" | sed s/-//g)
-		if [ ! -z "$param" ]; then
-			FCT_OPTIONS="$FCT_OPTIONS $(echo $param | sed 's/\(.\)/\1 /g')"
-		else
-			FCT_PARAMETERS="$FCT_PARAMETERS $1"
-		fi
-		shift
-	done
-	FCT_PARAMETERS=${FCT_PARAMETERS:1}
+        param=$(echo "$param" | sed s/-//g)
+        if [ ! -z "$param" ]; then
+            FCT_OPTIONS="$FCT_OPTIONS $(echo $param | sed 's/\(.\)/\1 /g')"
+        else
+            FCT_PARAMETERS="$FCT_PARAMETERS $1"
+        fi
+        shift
+    done
+    FCT_PARAMETERS=${FCT_PARAMETERS:1}
 }
 
 ##
 # Est-ce que lavaleur spécifiée fait partie de $FCT_OPTIONS ?
 #
 # @param string $1 valeur à rechercher
-# @return 1 si présent, 0 sinon
-# @see has()
+# @return 0 si présent, 1 sinon
+# @testedby TwgitOptionsHandlerTest
 #
 function isset_option () {
-	#has $1 "$FCT_OPTIONS"
-	local item=$1; shift
-	echo " $FCT_OPTIONS " | grep -q " $(echo "$item" | sed 's/\([\.\+\$\*]\)/\\\1/g') "
+    local item=$1; shift
+    echo " $FCT_OPTIONS " | grep -q " $(echo "$item" | sed 's/\([\.\+\$\*]\)/\\\1/g') "
 }
 
 ##
@@ -77,21 +78,21 @@ function isset_option () {
 # Si le nom vaut '-' alors le paramètre est considéré comme optionnel.
 #
 function require_parameter () {
-	local name=$1
+    local name=$1
 
-	# On extrait le pâté de paramètres le plus à gauche :
-	local param="${FCT_PARAMETERS%% *}"
+    # On extrait le pâté de paramètres le plus à gauche :
+    local param="${FCT_PARAMETERS%% *}"
 
-	# On met à jour les paramètres restant à traiter :
-	FCT_PARAMETERS="${FCT_PARAMETERS:$((${#param}+1))}"
+    # On met à jour les paramètres restant à traiter :
+    FCT_PARAMETERS="${FCT_PARAMETERS:$((${#param}+1))}"
 
-	if [ ! -z "$param" ]; then
-		RETVAL=$param
-	elif [ "$name" = '-' ]; then
-		RETVAL=''
-	else
-		error "Missing argument <$name>!"
-		usage
-		exit 1
-	fi
+    if [ ! -z "$param" ]; then
+        RETVAL=$param
+    elif [ "$name" = '-' ]; then
+        RETVAL=''
+    else
+        error "Missing argument <$name>!"
+        usage
+        exit 1
+    fi
 }

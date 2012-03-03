@@ -363,8 +363,8 @@ function get_contributors () {
     local branch="$TWGIT_ORIGIN/$1"
     local max="$2"
     git shortlog -nse $TWGIT_ORIGIN/$TWGIT_STABLE..$branch \
-        | grep -v 'devaa@twenga.com' | grep -E '@twenga.com>$' \
-        | head -n $max | sed -r 's/^.*? <(.*@twenga.com)>$/\1/'
+        | grep -E "@$TWGIT_EMAIL_DOMAIN_NAME>$" \
+        | head -n $max | sed -r "s/^.*? <(.*@$TWGIT_EMAIL_DOMAIN_NAME)>$/\1/"
 }
 
 ##
@@ -412,6 +412,8 @@ function getFeatureSubject () {
 ##
 # S'assure que le client git a bien ses globales user.name et user.email de configurées.
 #
+# @testedby TwgitSetupTest
+#
 function assert_git_configured () {
     if ! git config --global user.name 1>/dev/null; then
         die "Unknown user.name! Please, do: git config --global user.name 'Firstname Lastname'"
@@ -422,6 +424,8 @@ function assert_git_configured () {
 
 ##
 # S'assure que l'utilisateur se trouve dans un dépôt git et que celui-ci possède une branche stable et au moins un tag.
+#
+# @testedby TwgitSetupTest
 #
 function assert_git_repository () {
     local errormsg=$(git rev-parse --git-dir 2>&1 1>/dev/null)
@@ -440,7 +444,9 @@ function assert_git_repository () {
     if ! has $stable $(get_remote_branches); then
         die "Remote $TWGIT_STABLE branch not found: '$TWGIT_ORIGIN/$TWGIT_STABLE'!"
     fi
-    [ -z "$(get_last_tag)" ] && die "No tag found with format: '${TWGIT_PREFIX_TAG}X.Y.Z'!"
+    if [ -z "$(get_last_tag)" ]; then
+        die "No tag found with format: '${TWGIT_PREFIX_TAG}X.Y.Z'!"
+    fi
 }
 
 ##
@@ -622,11 +628,15 @@ function assert_recent_git_version () {
 ##
 # Effectue un fetch avec prise en compte des éventuelles suppressions de branches.
 #
+# @testedby TwgitSetupTest
+#
 function process_fetch () {
     local option="$1"
     if [ -z "$option" ] || ! isset_option "$option"; then
         exec_git_command "git fetch --prune $TWGIT_ORIGIN" "Could not fetch '$TWGIT_ORIGIN'!"
-        [ ! -z "$option" ] && echo
+        if [ ! -z "$option" ]; then
+            echo
+        fi
     fi
 }
 
@@ -967,7 +977,7 @@ function clean_branches () {
 #
 # @param string $1 tag name. Format: \d+.\d+.\d+
 # @param string $2 optional url of remote repository. Used only if not already setted.
-# @tested_by TwgitMainTest
+# @testedby TwgitMainTest
 #
 function init () {
     process_options "$@"

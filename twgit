@@ -55,6 +55,8 @@ exec > >(printf -- "$TWGIT_HISTORY_SEPARATOR" "$log_date" "$log_call" >> $TWGIT_
 ##
 # Affiche l'aide
 #
+# @tested_by TwgitHelpTest
+#
 function usage () {
     echo; help 'Usage:'
     help_detail '<b>twgit <command> [<action>]</b>'
@@ -97,6 +99,8 @@ function usage () {
 
 ##
 # Action déclenchant l'affichage de l'aide.
+#
+# @tested_by TwgitHelpTest
 #
 function cmd_help () {
     usage;

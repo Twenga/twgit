@@ -29,49 +29,49 @@
 # @param int $1 nombre des derniers hotfixes à afficher
 #
 function get_last_hotfixes () {
-	git branch -r --no-color | grep $TWGIT_ORIGIN/$TWGIT_PREFIX_HOTFIX | sed 's/^[* ] //' | sort -n | tail -n $1
+    git branch -r --no-color | grep $TWGIT_ORIGIN/$TWGIT_PREFIX_HOTFIX | sed 's/^[* ] //' | sort -n | tail -n $1
 }
 
 ##
 # Affiche les branches locales (nom complet), à raison d'une par ligne.
 #
 function get_local_branches () {
-	git branch --no-color | sed 's/^[* ] //'
+    git branch --no-color | sed 's/^[* ] //'
 }
 
 ##
 # Affiche la liste locale des branches distantes (nom complet), à raison d'une par ligne.
 #
 function get_remote_branches () {
-	git branch -r --no-color | sed 's/^[* ] //'
+    git branch -r --no-color | sed 's/^[* ] //'
 }
 
 ##
 # Affiche la liste des branches distantes qui ne sont pas catégorisables dans le process.
 #
 function get_dissident_remote_branches () {
-	git branch -r --no-color | sed 's/^[* ] //' \
-		| grep -vP "^$TWGIT_ORIGIN/$TWGIT_PREFIX_FEATURE" \
-		| grep -vP "^$TWGIT_ORIGIN/$TWGIT_PREFIX_RELEASE" \
-		| grep -vP "^$TWGIT_ORIGIN/$TWGIT_PREFIX_HOTFIX" \
-		| grep -vP "^$TWGIT_ORIGIN/$TWGIT_PREFIX_DEMO" \
-		| grep -vP "^$TWGIT_ORIGIN/HEAD" \
-		| grep -vP "^$TWGIT_ORIGIN/master" \
-		| grep -vP "^$TWGIT_ORIGIN/$TWGIT_STABLE"
+    git branch -r --no-color | sed 's/^[* ] //' \
+        | grep -vP "^$TWGIT_ORIGIN/$TWGIT_PREFIX_FEATURE" \
+        | grep -vP "^$TWGIT_ORIGIN/$TWGIT_PREFIX_RELEASE" \
+        | grep -vP "^$TWGIT_ORIGIN/$TWGIT_PREFIX_HOTFIX" \
+        | grep -vP "^$TWGIT_ORIGIN/$TWGIT_PREFIX_DEMO" \
+        | grep -vP "^$TWGIT_ORIGIN/HEAD" \
+        | grep -vP "^$TWGIT_ORIGIN/master" \
+        | grep -vP "^$TWGIT_ORIGIN/$TWGIT_STABLE"
 }
 
 ##
 # Affiche le nom complet des releases distantes (avec "$TWGIT_ORIGIN/") non encore mergées à $TWGIT_ORIGIN/$TWGIT_STABLE, à raison d'une par ligne.
 #
 function get_releases_in_progress () {
-	git branch -r --no-merged $TWGIT_ORIGIN/$TWGIT_STABLE | grep "$TWGIT_ORIGIN/$TWGIT_PREFIX_RELEASE" | sed 's/^[* ]*//'
+    git branch -r --no-merged $TWGIT_ORIGIN/$TWGIT_STABLE | grep "$TWGIT_ORIGIN/$TWGIT_PREFIX_RELEASE" | sed 's/^[* ]*//'
 }
 
 ##
 # Affiche le nom complet des releases non encore mergées à $TWGIT_ORIGIN/$TWGIT_STABLE, à raison d'une par ligne.
 #
 function get_hotfixes_in_progress () {
-	git branch -r --no-merged $TWGIT_ORIGIN/$TWGIT_STABLE | grep "$TWGIT_ORIGIN/$TWGIT_PREFIX_HOTFIX" | sed 's/^[* ]*//'
+    git branch -r --no-merged $TWGIT_ORIGIN/$TWGIT_STABLE | grep "$TWGIT_ORIGIN/$TWGIT_PREFIX_HOTFIX" | sed 's/^[* ]*//'
 }
 
 ##
@@ -79,10 +79,10 @@ function get_hotfixes_in_progress () {
 # Chaîne vide sinon.
 #
 function get_current_release_in_progress () {
-	local releases="$(get_releases_in_progress)"
-	local release="$(echo $releases | tr '\n' ' ' | cut -d' ' -f1)"
-	[[ $(echo $releases | wc -w) > 1 ]] && die "More than one release in propress detected: $(echo $releases | sed 's/ /, /g')! Only '$release' will be treated here."
-	echo ${release:((${#TWGIT_ORIGIN}+1))}	# supprime le préfixe 'origin/'
+    local releases="$(get_releases_in_progress)"
+    local release="$(echo $releases | tr '\n' ' ' | cut -d' ' -f1)"
+    [[ $(echo $releases | wc -w) > 1 ]] && die "More than one release in propress detected: $(echo $releases | sed 's/ /, /g')! Only '$release' will be treated here."
+    echo ${release:((${#TWGIT_ORIGIN}+1))}	# supprime le préfixe 'origin/'
 }
 
 ##
@@ -93,18 +93,18 @@ function get_current_release_in_progress () {
 # @param string $1 nom complet d'une release distante, sans "$TWGIT_ORIGIN/"
 #
 function get_merged_features () {
-	local release="$1"
+    local release="$1"
 
-	get_git_merged_branches $TWGIT_ORIGIN/$release
-	local merged_branches="${MERGED_BRANCHES[$TWGIT_ORIGIN/$release]}"
+    get_git_merged_branches $TWGIT_ORIGIN/$release
+    local merged_branches="${MERGED_BRANCHES[$TWGIT_ORIGIN/$release]}"
 
-	local features="$(echo "$merged_branches" | grep $TWGIT_ORIGIN/$TWGIT_PREFIX_FEATURE | sed 's/^[* ]*//' | tr '\n' ' ' | sed 's/ *$//g')"
+    local features="$(echo "$merged_branches" | grep $TWGIT_ORIGIN/$TWGIT_PREFIX_FEATURE | sed 's/^[* ]*//' | tr '\n' ' ' | sed 's/ *$//g')"
 
-	get_features merged $release
-	local features_v2="$GET_FEATURES_RETURN_VALUE"
+    get_features merged $release
+    local features_v2="$GET_FEATURES_RETURN_VALUE"
 
-	[ "$features" != "$features_v2" ] && die "Inconsistent result about merged features: '$features' != '$features_v2'!"
-	GET_MERGED_FEATURES_RETURN_VALUE="$features"
+    [ "$features" != "$features_v2" ] && die "Inconsistent result about merged features: '$features' != '$features_v2'!"
+    GET_MERGED_FEATURES_RETURN_VALUE="$features"
 }
 
 ##
@@ -128,10 +128,10 @@ declare -A REV_PARSE
 # @see REV_PARSE
 #
 function get_git_rev_parse () {
-	local key="$1"
-	if [ -z "${REV_PARSE[$key]}" ]; then
-		REV_PARSE[$key]="$(git rev-parse $key)"
-	fi
+    local key="$1"
+    if [ -z "${REV_PARSE[$key]}" ]; then
+        REV_PARSE[$key]="$(git rev-parse $key)"
+    fi
 }
 
 ##
@@ -159,12 +159,12 @@ declare -A MERGE_BASE
 # @see MERGE_BASE
 #
 function get_git_merge_base () {
-	local rev1="$1"
-	local rev2="$2"
-	local key="$rev1|$rev2"
-	if [ -z "${MERGE_BASE[$key]}" ]; then
-		MERGE_BASE[$key]="$(git merge-base $rev1 $rev2)"
-	fi
+    local rev1="$1"
+    local rev2="$2"
+    local key="$rev1|$rev2"
+    if [ -z "${MERGE_BASE[$key]}" ]; then
+        MERGE_BASE[$key]="$(git merge-base $rev1 $rev2)"
+    fi
 }
 
 ##
@@ -188,10 +188,10 @@ declare -A MERGED_BRANCHES
 # @see MERGED_BRANCHES
 #
 function get_git_merged_branches () {
-	local rev="$1"
-	if [ -z "${MERGED_BRANCHES[$rev]}" ]; then
-		MERGED_BRANCHES[$rev]="$(git branch -r --merged $rev)"
-	fi
+    local rev="$1"
+    if [ -z "${MERGED_BRANCHES[$rev]}" ]; then
+        MERGED_BRANCHES[$rev]="$(git branch -r --merged $rev)"
+    fi
 }
 
 ##
@@ -206,63 +206,63 @@ function get_git_merged_branches () {
 # @param string $2 nom complet d'une release distante, sans "$TWGIT_ORIGIN/"
 #
 function get_features () {
-	local feature_type="$1"
-	local release="$2"
+    local feature_type="$1"
+    local release="$2"
 
-	if [ -z "$release" ]; then
-		if [ "$feature_type" = 'merged' ] || [ "$feature_type" = 'merged_in_progress' ]; then
-			GET_FEATURES_RETURN_VALUE=''
-		elif [ "$feature_type" = 'free' ]; then
-			GET_FEATURES_RETURN_VALUE="$(git branch -r --no-merged $TWGIT_ORIGIN/$TWGIT_STABLE | grep "$TWGIT_ORIGIN/$TWGIT_PREFIX_FEATURE" | sed 's/^[* ]*//' | tr '\n' ' ' | sed 's/ *$//g')"
-		fi
-	else
-		release="$TWGIT_ORIGIN/$release"
-		local return_features=''
-		local features=$(git branch -r | grep "$TWGIT_ORIGIN/$TWGIT_PREFIX_FEATURE" | sed 's/^[* ]*//')
+    if [ -z "$release" ]; then
+        if [ "$feature_type" = 'merged' ] || [ "$feature_type" = 'merged_in_progress' ]; then
+            GET_FEATURES_RETURN_VALUE=''
+        elif [ "$feature_type" = 'free' ]; then
+            GET_FEATURES_RETURN_VALUE="$(git branch -r --no-merged $TWGIT_ORIGIN/$TWGIT_STABLE | grep "$TWGIT_ORIGIN/$TWGIT_PREFIX_FEATURE" | sed 's/^[* ]*//' | tr '\n' ' ' | sed 's/ *$//g')"
+        fi
+    else
+        release="$TWGIT_ORIGIN/$release"
+        local return_features=''
+        local features=$(git branch -r | grep "$TWGIT_ORIGIN/$TWGIT_PREFIX_FEATURE" | sed 's/^[* ]*//')
 
-		get_git_rev_parse "$TWGIT_ORIGIN/$TWGIT_STABLE"
-		local head_rev="${REV_PARSE[$TWGIT_ORIGIN/$TWGIT_STABLE]}"
+        get_git_rev_parse "$TWGIT_ORIGIN/$TWGIT_STABLE"
+        local head_rev="${REV_PARSE[$TWGIT_ORIGIN/$TWGIT_STABLE]}"
 
-		get_git_rev_parse $release
-		local release_rev="${REV_PARSE[$release]}"
+        get_git_rev_parse $release
+        local release_rev="${REV_PARSE[$release]}"
 
-		local f_rev release_merge_base stable_merge_base check_merge has_dependency
+        local f_rev release_merge_base stable_merge_base check_merge has_dependency
 
-		get_git_merged_branches $release
-		local merged_branches="${MERGED_BRANCHES[$release]}"
+        get_git_merged_branches $release
+        local merged_branches="${MERGED_BRANCHES[$release]}"
 
-		for f in $features; do
-			get_git_rev_parse $f
-			f_rev="${REV_PARSE[$f]}"
+        for f in $features; do
+            get_git_rev_parse $f
+            f_rev="${REV_PARSE[$f]}"
 
-			get_git_merge_base $release_rev $f_rev
-			release_merge_base="${MERGE_BASE[$release_rev|$f_rev]}"
+            get_git_merge_base $release_rev $f_rev
+            release_merge_base="${MERGE_BASE[$release_rev|$f_rev]}"
 
-			if [ "$release_merge_base" = "$f_rev" ] && [ -n "$(echo "$merged_branches" | grep $f)" ]; then
-				[ "$feature_type" = 'merged' ] && return_features="$return_features $f"
-			else
-				get_git_merge_base $release_merge_base $head_rev
-				stable_merge_base="${MERGE_BASE[$release_merge_base|$head_rev]}"
+            if [ "$release_merge_base" = "$f_rev" ] && [ -n "$(echo "$merged_branches" | grep $f)" ]; then
+                [ "$feature_type" = 'merged' ] && return_features="$return_features $f"
+            else
+                get_git_merge_base $release_merge_base $head_rev
+                stable_merge_base="${MERGE_BASE[$release_merge_base|$head_rev]}"
 
-				#has_dependency="$(git rev-list $f_rev ^$release_merge_base --parents --merges | grep $release_merge_base | wc -l)"
-				if [ "$release_merge_base" != "$stable_merge_base" ] && \
-						[ "$(git rev-list $f_rev ^$release_merge_base --parents --merges | grep $release_merge_base | wc -l)" -eq 0 ]; then
-					[ "$feature_type" = 'merged_in_progress' ] && return_features="$return_features $f"
-				elif [ "$feature_type" = 'free' ]; then
-					return_features="$return_features $f"
-				fi
-			fi
-		done
+                #has_dependency="$(git rev-list $f_rev ^$release_merge_base --parents --merges | grep $release_merge_base | wc -l)"
+                if [ "$release_merge_base" != "$stable_merge_base" ] && \
+                        [ "$(git rev-list $f_rev ^$release_merge_base --parents --merges | grep $release_merge_base | wc -l)" -eq 0 ]; then
+                    [ "$feature_type" = 'merged_in_progress' ] && return_features="$return_features $f"
+                elif [ "$feature_type" = 'free' ]; then
+                    return_features="$return_features $f"
+                fi
+            fi
+        done
 
-		GET_FEATURES_RETURN_VALUE="${return_features:1}"
-	fi
+        GET_FEATURES_RETURN_VALUE="${return_features:1}"
+    fi
 }
 
 ##
 # Affiche le nom complet de la branche courante, chaîne vide sinon.
 #
 function get_current_branch () {
-	git branch --no-color | grep '^\* ' | grep -v 'no branch' | sed 's/^* //g'
+    git branch --no-color | grep '^\* ' | grep -v 'no branch' | sed 's/^* //g'
 }
 
 ##
@@ -271,16 +271,16 @@ function get_current_branch () {
 # @param int $1 si renseigné alors limite la liste aux $1 derniers tags
 #
 function get_all_tags () {
-	local n="$1"
-	[ -z "$n" ] && n=10000	# pour tout retourner
-	git tag | grep -E '^v[0-9]+\.[0-9]+\.[0-9]+$' | sed 's/v//' | sed 's/\./;/g' | sort --field-separator=";" -k1n -k2n -k3n | sed 's/;/./g' | sed 's/^/v/' | tail -n $n
+    local n="$1"
+    [ -z "$n" ] && n=10000	# pour tout retourner
+    git tag | grep -E '^v[0-9]+\.[0-9]+\.[0-9]+$' | sed 's/v//' | sed 's/\./;/g' | sort --field-separator=";" -k1n -k2n -k3n | sed 's/;/./g' | sed 's/^/v/' | tail -n $n
 }
 
 ##
 # Affiche le nom complet du tag le plus récent.
 #
 function get_last_tag () {
-	get_all_tags 1
+    get_all_tags 1
 }
 
 ##
@@ -293,37 +293,37 @@ function get_last_tag () {
 # @param string $1 nom complet de la branche, locale ou distante
 #
 function get_tags_not_merged_into_branch () {
-	get_git_rev_parse "$1"
-	local release_rev="${REV_PARSE[$1]}"
+    get_git_rev_parse "$1"
+    local release_rev="${REV_PARSE[$1]}"
 
-	local tag_rev merge_base
-	local tags_not_merged=''
-	local inverted_tags_not_merged=''
+    local tag_rev merge_base
+    local tags_not_merged=''
+    local inverted_tags_not_merged=''
 
-	local all_tags="$(get_all_tags)"
-	local inverted_all_tags
-	for t in $all_tags; do
-		inverted_all_tags="$t $inverted_all_tags"
-	done
+    local all_tags="$(get_all_tags)"
+    local inverted_all_tags
+    for t in $all_tags; do
+        inverted_all_tags="$t $inverted_all_tags"
+    done
 
-	local max_tags=$TWGIT_MAX_RETRIEVE_TAGS_NOT_MERGED
-	for t in $inverted_all_tags; do
-		tag_rev=$(git rev-list $t | head -n 1)
-		merge_base=$(git merge-base $release_rev $tag_rev)
-		if [ "$tag_rev" != "$merge_base" ]; then
-			inverted_tags_not_merged="$inverted_tags_not_merged $t"
-			let max_tags--
-			[ "$max_tags" -eq 0 ] && break
-		else
-			break
-		fi
-	done
+    local max_tags=$TWGIT_MAX_RETRIEVE_TAGS_NOT_MERGED
+    for t in $inverted_all_tags; do
+        tag_rev=$(git rev-list $t | head -n 1)
+        merge_base=$(git merge-base $release_rev $tag_rev)
+        if [ "$tag_rev" != "$merge_base" ]; then
+            inverted_tags_not_merged="$inverted_tags_not_merged $t"
+            let max_tags--
+            [ "$max_tags" -eq 0 ] && break
+        else
+            break
+        fi
+    done
 
-	for t in $inverted_tags_not_merged; do
-		tags_not_merged="$t $tags_not_merged"
-	done
+    for t in $inverted_tags_not_merged; do
+        tags_not_merged="$t $tags_not_merged"
+    done
 
-	GET_TAGS_NOT_MERGED_INTO_BRANCH_RETURN_VALUE="${tags_not_merged:1}"
+    GET_TAGS_NOT_MERGED_INTO_BRANCH_RETURN_VALUE="${tags_not_merged:1}"
 }
 
 ##
@@ -333,21 +333,21 @@ function get_tags_not_merged_into_branch () {
 # @param string $1 type d'évolution : 'major', 'minor' ou 'revision'
 #
 function get_next_version () {
-	local change_type="$1"
-	local last_tag=$(get_last_tag)
-	local current_version=${last_tag:${#TWGIT_PREFIX_TAG}}
+    local change_type="$1"
+    local last_tag=$(get_last_tag)
+    local current_version=${last_tag:${#TWGIT_PREFIX_TAG}}
 
-	local major=$(echo $current_version | cut -d. -f1)
-	local minor=$(echo $current_version | cut -d. -f2)
-	local revision=$(echo $current_version | cut -d. -f3)
+    local major=$(echo $current_version | cut -d. -f1)
+    local minor=$(echo $current_version | cut -d. -f2)
+    local revision=$(echo $current_version | cut -d. -f3)
 
-	case "$change_type" in
-		major) let major++; minor=0; revision=0 ;;
-		minor) let minor++; revision=0 ;;
-		revision) let revision++ ;;
-		*) die "Invalid version change type: '$change_type'!" ;;
-	esac
-	echo "$major.$minor.$revision"
+    case "$change_type" in
+        major) let major++; minor=0; revision=0 ;;
+        minor) let minor++; revision=0 ;;
+        revision) let revision++ ;;
+        *) die "Invalid version change type: '$change_type'!" ;;
+    esac
+    echo "$major.$minor.$revision"
 }
 
 ##
@@ -360,33 +360,47 @@ function get_next_version () {
 # @see display_rank_contributors()
 #
 function get_contributors () {
-	local branch="$TWGIT_ORIGIN/$1"
-	local max="$2"
-	git shortlog -nse $TWGIT_ORIGIN/$TWGIT_STABLE..$branch \
-		| grep -v 'devaa@twenga.com' | grep -E '@twenga.com>$' \
-		| head -n $max | sed -r 's/^.*? <(.*@twenga.com)>$/\1/'
+    local branch="$TWGIT_ORIGIN/$1"
+    local max="$2"
+    git shortlog -nse $TWGIT_ORIGIN/$TWGIT_STABLE..$branch \
+        | grep -E "@$TWGIT_EMAIL_DOMAIN_NAME>$" \
+        | head -n $max | sed -r "s/^.*? <(.*@$TWGIT_EMAIL_DOMAIN_NAME)>$/\1/"
 }
 
 ##
-# Affiche le sujet d'un ticket Redmine, sans aucune coloration.
-# Le premier appel sollicite ws_redmine.inc.php qui lui-même exploite un WS Redmine,
-# les suivants bénéficieront du fichier de cache $TWGIT_REDMINE_PATH.
+# Affiche le sujet d'une feature (sans aucune coloration) en le récupérant
+# d'une plate-forme Redmine, Github ou autre via le connecteur défini
+# par TWGIT_FEATURE_SUBJECT_CONNECTOR.
 #
-# @param int $1 numéro de ticket Redmine
+# Le premier appel sollicite le connecteur concerné,
+# les suivants bénéficieront du fichier de cache $TWGIT_FEATURES_SUBJECT_PATH.
 #
-function getRedmineSubject () {
-	local redmine="$1"
-	local subject
+# Le fichier associé au connecteur est défini par $TWGIT_FEATURE_SUBJECT_CONNECTOR_PATH.
+#
+# @param int $1 nom court de la feature
+#
+function getFeatureSubject () {
+    local short_name="$1"
+    local subject
 
-	[ ! -s "$TWGIT_REDMINE_PATH" ] && touch "$TWGIT_REDMINE_PATH"
+    [ ! -s "$TWGIT_FEATURES_SUBJECT_PATH" ] && touch "$TWGIT_FEATURES_SUBJECT_PATH"
 
-	subject="$(cat "$TWGIT_REDMINE_PATH" | grep -E "^$redmine;" | head -n 1 | sed 's/^[^;]*;//')"
-	if [ -z "$subject" ]; then
-		subject="$(php -q $TWGIT_INC_DIR/ws_redmine.inc.php $redmine subject 2>/dev/null || echo)"
-		[ ! -z "$subject" ] && echo "$redmine;$subject" >> "$TWGIT_REDMINE_PATH"
-	fi
+    subject="$(cat "$TWGIT_FEATURES_SUBJECT_PATH" | grep -E "^$short_name;" | head -n 1 | sed 's/^[^;]*;//')"
+    if [ -z "$subject" ] && [ ! -z "$TWGIT_FEATURE_SUBJECT_CONNECTOR" ]; then
+        local connector="$(printf "$TWGIT_FEATURE_SUBJECT_CONNECTOR_PATH" "$TWGIT_FEATURE_SUBJECT_CONNECTOR")"
+        if [ ! -f "$connector" ]; then
+            warn "'$TWGIT_FEATURE_SUBJECT_CONNECTOR' connector not found!"
+        else
+            subject="$(. $connector $short_name 2>/dev/null)"
+            if [ $? -ne 0 ]; then
+                error "'$TWGIT_FEATURE_SUBJECT_CONNECTOR' connector failed!"
+            elif [ ! -z "$subject" ]; then
+                echo "$short_name;$subject" >> "$TWGIT_FEATURES_SUBJECT_PATH"
+            fi
+        fi
+    fi
 
-	echo $subject
+    echo $subject
 }
 
 
@@ -398,40 +412,41 @@ function getRedmineSubject () {
 ##
 # S'assure que le client git a bien ses globales user.name et user.email de configurées.
 #
+# @testedby TwgitSetupTest
+#
 function assert_git_configured () {
-	if ! git config --global user.name 1>/dev/null; then
-		die "Unknown user.name! Please, do: git config --global user.name 'Firstname Lastname'"
-	elif ! git config --global user.email 1>/dev/null; then
-		die "Unknown user.email! Please, do: git config --global user.email 'firstname.lastname@twenga.com'"
-	fi
+    if ! git config --global user.name 1>/dev/null; then
+        die "Unknown user.name! Please, do: git config --global user.name 'Firstname Lastname'"
+    elif ! git config --global user.email 1>/dev/null; then
+        die "Unknown user.email! Please, do: git config --global user.email 'firstname.lastname@twenga.com'"
+    fi
 }
 
 ##
-# S'assure que l'utilisateur se trouve dans un dépôt git et que celui-ci possède une branche stable.
+# S'assure que l'utilisateur se trouve dans un dépôt git et que celui-ci possède une branche stable et au moins un tag.
+#
+# @testedby TwgitSetupTest
 #
 function assert_git_repository () {
-	local errormsg=$(git rev-parse --git-dir 2>&1 1>/dev/null)
-	[ ! -z "$errormsg" ] && die "[Git error msg] $errormsg"
+    local errormsg=$(git rev-parse --git-dir 2>&1 1>/dev/null)
+    [ ! -z "$errormsg" ] && die "[Git error msg] $errormsg"
 
-	assert_recent_git_version "$TWGIT_GIT_MIN_VERSION"
+    assert_recent_git_version "$TWGIT_GIT_MIN_VERSION"
 
-	local stable="$TWGIT_ORIGIN/$TWGIT_STABLE"
-	if ! has $stable $(get_remote_branches); then
-		process_fetch
-		if ! has $stable $(get_remote_branches); then
-			die "Remote stable branch not found: '$TWGIT_ORIGIN/$TWGIT_STABLE'!"
-		fi
-	fi
-}
+    if [ "$(git remote | grep -R "^$TWGIT_ORIGIN$" | wc -l)" -ne 1 ]; then
+        die "No remote '$TWGIT_ORIGIN' repository specified! Try: 'git remote add $TWGIT_ORIGIN <url>'"
+    fi
 
-##
-# S'assure que la lib PHP cURL est présente, afin de permettre la récupération des sujets des tickets Redmine.
-#
-function assert_php_curl () {
-	if ! php --ri curl 2>/dev/null 1>&2; then
-		warn 'PHP lib cURL not installed: Redmine subjects will not be fetched.'
-		processing 'Try: sudo apt-get install php5-curl'
-	fi
+    local stable="$TWGIT_ORIGIN/$TWGIT_STABLE"
+    if ! has $stable $(get_remote_branches) || [ -z "$(get_last_tag)" ]; then
+        process_fetch
+    fi
+    if ! has $stable $(get_remote_branches); then
+        die "Remote $TWGIT_STABLE branch not found: '$TWGIT_ORIGIN/$TWGIT_STABLE'!"
+    fi
+    if [ -z "$(get_last_tag)" ]; then
+        die "No tag found with format: '${TWGIT_PREFIX_TAG}X.Y.Z'!"
+    fi
 }
 
 ##
@@ -442,32 +457,32 @@ function assert_php_curl () {
 # @param string $2 nom complet d'une branche distante
 #
 function assert_branches_equal () {
-	processing "Compare branches '$1' with '$2'..."
-	if ! has $1 $(get_local_branches); then
-		die "Local branch '$1' does not exist and is required!"
-	elif ! has $2 $(get_remote_branches); then
-		die "Remote branch '$2' does not exist and is required!"
-	fi
+    processing "Compare branches '$1' with '$2'..."
+    if ! has $1 $(get_local_branches); then
+        die "Local branch '$1' does not exist and is required!"
+    elif ! has $2 $(get_remote_branches); then
+        die "Remote branch '$2' does not exist and is required!"
+    fi
 
-	compare_branches "$1" "$2"
-	local status=$?
-	if [ $status -gt 0 ]; then
-		warn "Branches '$1' and '$2' have diverged."
-		if [ $status -eq 1 ]; then
-			warn "And local branch '$1' may be fast-forwarded!"
-			if ! isset_option 'I'; then
-				echo -n $(question "Pull '$1'? [Y/N] "); read answer
-				[ "$answer" != "Y" ] && [ "$answer" != "y" ] && die "Pull aborted! You must make a 'git pull $TWGIT_ORIGIN $1' to continue."
-			fi
-			exec_git_command "git checkout $1" "Checkout '$1' failed!"
-			exec_git_command "git merge $2" "Update '$1' failed!"
-		elif [ $status -eq 2 ]; then
-			# Warn here (not die), since there is no harm in being ahead:
-			warn "And local branch '$1' is ahead of '$2'."
-		else
-			die "Branches need merging first!"
-		fi
-	fi
+    compare_branches "$1" "$2"
+    local status=$?
+    if [ $status -gt 0 ]; then
+        warn "Branches '$1' and '$2' have diverged."
+        if [ $status -eq 1 ]; then
+            warn "And local branch '$1' may be fast-forwarded!"
+            if ! isset_option 'I'; then
+                echo -n $(question "Pull '$1'? [Y/N] "); read answer
+                [ "$answer" != "Y" ] && [ "$answer" != "y" ] && die "Pull aborted! You must make a 'git pull $TWGIT_ORIGIN $1' to continue."
+            fi
+            exec_git_command "git checkout $1" "Checkout '$1' failed!"
+            exec_git_command "git merge $2" "Update '$1' failed!"
+        elif [ $status -eq 2 ]; then
+            # Warn here (not die), since there is no harm in being ahead:
+            warn "And local branch '$1' is ahead of '$2'."
+        else
+            die "Branches need merging first!"
+        fi
+    fi
 }
 
 ##
@@ -479,49 +494,49 @@ function assert_branches_equal () {
 # @param string $1 nom complet d'une branche potentiellement locale
 #
 function assert_new_local_branch () {
-	local branch="$1"
-	processing 'Check local branches...'
-	if has $branch $(get_local_branches); then
-		processing "Local branch '$branch' already exists!"
-		if ! has "$TWGIT_ORIGIN/$branch" $(get_remote_branches); then
-			error "Remote feature '$TWGIT_ORIGIN/$branch' not found while local one exists!"
-			help 'Perhaps:'
-			help_detail "- check the name of your branch"
-			help_detail "- delete this out of process local branch: git branch -D $branch"
-			help_detail "- or force renewal if feature: twgit feature start -d xxxx"
-		else
-			exec_git_command "git checkout $branch" "Could not checkout '$branch'!"
+    local branch="$1"
+    processing 'Check local branches...'
+    if has $branch $(get_local_branches); then
+        processing "Local branch '$branch' already exists!"
+        if ! has "$TWGIT_ORIGIN/$branch" $(get_remote_branches); then
+            error "Remote feature '$TWGIT_ORIGIN/$branch' not found while local one exists!"
+            help 'Perhaps:'
+            help_detail "- check the name of your branch"
+            help_detail "- delete this out of process local branch: git branch -D $branch"
+            help_detail "- or force renewal if feature: twgit feature start -d xxxx"
+        else
+            exec_git_command "git checkout $branch" "Could not checkout '$branch'!"
 
-			# Informe de la fraîcheur de la branche :
-			compare_branches "$branch" "$TWGIT_ORIGIN/$branch"
-			local status=$?
-			if [ $status -eq 0 ]; then
-				help "Local branch '$branch' up-to-date with remote '$TWGIT_ORIGIN/$branch'."
-			elif [ $status -eq 1 ]; then
-				help "If need be: git merge $TWGIT_ORIGIN/$branch"
-			elif [ $status -eq 2 ]; then
-				help "If need be: git push $TWGIT_ORIGIN $branch"
-			else
-				warn "Branches '$branch' and '$TWGIT_ORIGIN/$branch' have diverged!"
-			fi
+            # Informe de la fraîcheur de la branche :
+            compare_branches "$branch" "$TWGIT_ORIGIN/$branch"
+            local status=$?
+            if [ $status -eq 0 ]; then
+                help "Local branch '$branch' up-to-date with remote '$TWGIT_ORIGIN/$branch'."
+            elif [ $status -eq 1 ]; then
+                help "If need be: git merge $TWGIT_ORIGIN/$branch"
+            elif [ $status -eq 2 ]; then
+                help "If need be: git push $TWGIT_ORIGIN $branch"
+            else
+                warn "Branches '$branch' and '$TWGIT_ORIGIN/$branch' have diverged!"
+            fi
 
-			alert_old_branch "$TWGIT_ORIGIN/$branch" 'with-help'
-		fi
-		echo
-		exit 0
-	fi
+            alert_old_branch "$TWGIT_ORIGIN/$branch" 'with-help'
+        fi
+        echo
+        exit 0
+    fi
 }
 
 ##
 # S'assure que le dépôt git courant est dans le status 'working directory clean'.
 #
 function assert_clean_working_tree () {
-	processing 'Check clean working tree...'
-	if [ `git status --porcelain --ignore-submodules=all | wc -l` -ne 0 ]; then
-		error 'Untracked files or changes to be committed in your working tree!'
-		exec_git_command 'git status' 'Git status failed!'
-		exit 1
-	fi
+    processing 'Check clean working tree...'
+    if [ `git status --porcelain --ignore-submodules=all | wc -l` -ne 0 ]; then
+        error 'Untracked files or changes to be committed in your working tree!'
+        exec_git_command 'git status' 'Git status failed!'
+        exit 1
+    fi
 }
 
 ##
@@ -530,35 +545,35 @@ function assert_clean_working_tree () {
 # @param string $1 référence de branche
 #
 function assert_valid_ref_name () {
-	processing 'Check valid ref name...'
-	git check-ref-format --branch "$1" 1>/dev/null 2>&1
-	if [ $? -ne 0 ]; then
-		die "'$1' is not a valid reference name!"
-	elif  echo "$1" | grep -q ' '; then
-		die "'$1' is not a valid reference name: whitespaces not allowed!"
-	fi
+    processing 'Check valid ref name...'
+    git check-ref-format --branch "$1" 1>/dev/null 2>&1
+    if [ $? -ne 0 ]; then
+        die "'$1' is not a valid reference name!"
+    elif  echo "$1" | grep -q ' '; then
+        die "'$1' is not a valid reference name: whitespaces not allowed!"
+    fi
 
-	echo $1 | grep -vP "^$TWGIT_PREFIX_FEATURE" \
-		| grep -vP "^$TWGIT_PREFIX_RELEASE" \
-		| grep -vP "^$TWGIT_PREFIX_HOTFIX" \
-		| grep -vP "^$TWGIT_PREFIX_DEMO" 1>/dev/null
-	if [ $? -ne 0 ]; then
-		die 'Unauthorized reference prefix! Pick another name.'
-	fi
+    echo $1 | grep -vP "^$TWGIT_PREFIX_FEATURE" \
+        | grep -vP "^$TWGIT_PREFIX_RELEASE" \
+        | grep -vP "^$TWGIT_PREFIX_HOTFIX" \
+        | grep -vP "^$TWGIT_PREFIX_DEMO" 1>/dev/null
+    if [ $? -ne 0 ]; then
+        die 'Unauthorized reference prefix! Pick another name.'
+    fi
 }
 
 ##
 # S'assure que la référence fournie est un nom syntaxiquement correct de tag potentiel et qu'il est disponible.
 #
-# @param string $1 référence de branche
+# @param string $1 référence de tag au format court \d+.\d+.\d+
 #
 function assert_valid_tag_name () {
-	local tag="$1"
-	assert_valid_ref_name "$tag"
-	processing 'Check valid tag name...'
-	$(echo "$tag" | grep -qP '^'$TWGIT_PREFIX_TAG'[0-9]+\.[0-9]+\.[0-9]+$') || die "Unauthorized tag name: '$tag'!"
-	processing "Check whether tag '$tag' already exists..."
-	has "$tag" $(get_all_tags) && die "Tag '$tag' already exists! Try: twgit tag list"
+    local tag="$1"
+    assert_valid_ref_name "$tag"
+    processing 'Check valid tag name...'
+    $(echo "$tag" | grep -qP '^'$TWGIT_PREFIX_TAG'[0-9]+\.[0-9]+\.[0-9]+$') || die "Unauthorized tag name: '$tag'!"
+    processing "Check whether tag '$tag' already exists..."
+    has "$tag" $(get_all_tags) && die "Tag '$tag' already exists! Try: twgit tag list"
 }
 
 ##
@@ -568,21 +583,21 @@ function assert_valid_tag_name () {
 # @param string $1 nom complet de la branche locale en instance de suppression
 #
 function assert_working_tree_is_not_on_delete_branch () {
-	local branch="$1"
-	processing "Check current branch..."
-	if [ "$(get_current_branch)" = "$branch" ]; then
-		processing "Cannot delete the branch '$branch' which you are currently on! So:"
-		exec_git_command "git checkout $TWGIT_STABLE" "Could not checkout '$TWGIT_STABLE'!"
-	fi
+    local branch="$1"
+    processing "Check current branch..."
+    if [ "$(get_current_branch)" = "$branch" ]; then
+        processing "Cannot delete the branch '$branch' which you are currently on! So:"
+        exec_git_command "git checkout $TWGIT_STABLE" "Could not checkout '$TWGIT_STABLE'!"
+    fi
 }
 
 ##
 # S'assure qu'au moins un tag existe.
 #
 function assert_tag_exists () {
-	processing 'Get last tag...'
-	local last_tag="$(get_last_tag)"
-	[ -z "$last_tag" ] && die 'No tag exists!' || echo "Last tag: $last_tag"
+    processing 'Get last tag...'
+    local last_tag="$(get_last_tag)"
+    [ -z "$last_tag" ] && die 'No tag exists!' || echo "Last tag: $last_tag"
 }
 
 ##
@@ -591,17 +606,17 @@ function assert_tag_exists () {
 # @param string $1 version minimale requise, au format '1.2.3' ou '1.2.3.4'
 #
 function assert_recent_git_version () {
-	local needed=$(echo "$1" | awk -F. '{ printf("%d%02d%02d%02d\n", $1,$2,$3,$4); }')
-	local current=$(git --version | sed 's/[^0-9.]//g' | awk -F. '{ printf("%d%02d%02d%02d\n", $1,$2,$3,$4); }')
-	if [ $current -lt $needed ]; then
-		error "Please update git! Current: $(git --version | sed 's/[^0-9.]//g'). Need $1 or newer."
-		help 'Try:'
-		help_detail 'sudo apt-add-repository ppa:git-core/ppa'
-		help_detail 'sudo apt-get update'
-		help_detail 'sudo apt-get install git'
-		echo
-		exit
-	fi
+    local needed=$(echo "$1" | awk -F. '{ printf("%d%02d%02d%02d\n", $1,$2,$3,$4); }')
+    local current=$(git --version | sed 's/[^0-9.]//g' | awk -F. '{ printf("%d%02d%02d%02d\n", $1,$2,$3,$4); }')
+    if [ $current -lt $needed ]; then
+        error "Please update git! Current: $(git --version | sed 's/[^0-9.]//g'). Need $1 or newer."
+        help 'Try:'
+        help_detail 'sudo apt-add-repository ppa:git-core/ppa'
+        help_detail 'sudo apt-get update'
+        help_detail 'sudo apt-get install git'
+        echo
+        exit
+    fi
 }
 
 
@@ -613,12 +628,16 @@ function assert_recent_git_version () {
 ##
 # Effectue un fetch avec prise en compte des éventuelles suppressions de branches.
 #
+# @testedby TwgitSetupTest
+#
 function process_fetch () {
-	local option="$1"
-	if [ -z "$option" ] || ! isset_option "$option"; then
-		exec_git_command "git fetch --prune $TWGIT_ORIGIN" "Could not fetch '$TWGIT_ORIGIN'!"
-		[ ! -z "$option" ] && echo
-	fi
+    local option="$1"
+    if [ -z "$option" ] || ! isset_option "$option"; then
+        exec_git_command "git fetch --prune $TWGIT_ORIGIN" "Could not fetch '$TWGIT_ORIGIN'!"
+        if [ ! -z "$option" ]; then
+            echo
+        fi
+    fi
 }
 
 ##
@@ -630,9 +649,9 @@ function process_fetch () {
 # @see $TWGIT_FIRST_COMMIT_MSG
 #
 function process_first_commit () {
-	local commit_msg=$(printf "$TWGIT_FIRST_COMMIT_MSG" "$1" "$2")
-	processing "${TWGIT_GIT_COMMAND_PROMPT}git commit --allow-empty -m \"$commit_msg\""
-	git commit --allow-empty -m "$commit_msg" || die 'Could not make initial commit!'
+    local commit_msg=$(printf "$TWGIT_FIRST_COMMIT_MSG" "$1" "$2")
+    processing "${TWGIT_GIT_COMMAND_PROMPT}git commit --allow-empty -m \"$commit_msg\""
+    git commit --allow-empty -m "$commit_msg" || die 'Could not make initial commit!'
 }
 
 ##
@@ -641,8 +660,8 @@ function process_first_commit () {
 # @param string $1 nom complet de la branche locale à pousser
 #
 function process_push_branch () {
-	local branch="$1"
-	exec_git_command "git push --set-upstream $TWGIT_ORIGIN $branch" "Could not push branch '$branch'!"
+    local branch="$1"
+    exec_git_command "git push --set-upstream $TWGIT_ORIGIN $branch" "Could not push '$branch' local branch on '$TWGIT_ORIGIN'!"
 }
 
 ##
@@ -654,10 +673,10 @@ function process_push_branch () {
 # @param string $2 message d'erreur pour le cas où...
 #
 function exec_git_command () {
-	local cmd="$1"
-	local error_msg="$2"
-	processing "$TWGIT_GIT_COMMAND_PROMPT$cmd"
-	$cmd || die "$error_msg"
+    local cmd="$1"
+    local error_msg="$2"
+    processing "$TWGIT_GIT_COMMAND_PROMPT$cmd"
+    $cmd || die "$error_msg"
 }
 
 ##
@@ -666,12 +685,12 @@ function exec_git_command () {
 # @param string $1 nom complet de la branche locale
 #
 function remove_local_branch () {
-	local branch="$1"
-	if has $branch $(get_local_branches); then
-		exec_git_command "git branch -D $branch" "Remove local branch '$branch' failed!"
-	else
-		processing "Local branch '$branch' not found."
-	fi
+    local branch="$1"
+    if has $branch $(get_local_branches); then
+        exec_git_command "git branch -D $branch" "Remove local branch '$branch' failed!"
+    else
+        processing "Local branch '$branch' not found."
+    fi
 }
 
 ##
@@ -680,16 +699,16 @@ function remove_local_branch () {
 # @param string $1 nom de la branche distante sans le '$TWGIT_ORIGIN/'
 #
 function remove_remote_branch () {
-	local branch="$1"
-	if has "$TWGIT_ORIGIN/$branch" $(get_remote_branches); then
-		exec_git_command "git push $TWGIT_ORIGIN :$branch" "Delete remote branch '$TWGIT_ORIGIN/$branch' failed!"
-		if [ $? -ne 0 ]; then
-			processing "Remove remote branch '$TWGIT_ORIGIN/$branch' failed! Maybe already deleted... so:"
-			exec_git_command "git remote prune $TWGIT_ORIGIN" "Prune failed!"
-		fi
-	else
-		die "Remote branch '$TWGIT_ORIGIN/$branch' not found!"
-	fi
+    local branch="$1"
+    if has "$TWGIT_ORIGIN/$branch" $(get_remote_branches); then
+        exec_git_command "git push $TWGIT_ORIGIN :$branch" "Delete remote branch '$TWGIT_ORIGIN/$branch' failed!"
+        if [ $? -ne 0 ]; then
+            processing "Remove remote branch '$TWGIT_ORIGIN/$branch' failed! Maybe already deleted... so:"
+            exec_git_command "git remote prune $TWGIT_ORIGIN" "Prune failed!"
+        fi
+    else
+        die "Remote branch '$TWGIT_ORIGIN/$branch' not found!"
+    fi
 }
 
 ##
@@ -698,16 +717,16 @@ function remove_remote_branch () {
 # @param string $1 nom court de la feature
 #
 function remove_feature () {
-	local feature="$1"
-	local feature_fullname="$TWGIT_PREFIX_FEATURE$feature"
+    local feature="$1"
+    local feature_fullname="$TWGIT_PREFIX_FEATURE$feature"
 
-	assert_valid_ref_name $feature
-	assert_clean_working_tree
-	assert_working_tree_is_not_on_delete_branch $feature_fullname
+    assert_valid_ref_name $feature
+    assert_clean_working_tree
+    assert_working_tree_is_not_on_delete_branch $feature_fullname
 
-	process_fetch
-	remove_local_branch $feature_fullname
-	remove_remote_branch $feature_fullname
+    process_fetch
+    remove_local_branch $feature_fullname
+    remove_remote_branch $feature_fullname
 }
 
 ##
@@ -717,15 +736,15 @@ function remove_feature () {
 # @param string $2 message du commit du tag, qui sera préfixé par $TWGIT_PREFIX_COMMIT_MSG
 #
 function create_and_push_tag () {
-	local tag_fullname="$1"
-	local commit_msg="$2"
+    local tag_fullname="$1"
+    local commit_msg="$2"
 
-	# Create tag:
-	processing "${TWGIT_GIT_COMMAND_PROMPT}git tag -a $tag_fullname -m \"${TWGIT_PREFIX_COMMIT_MSG}$commit_msg\""
-	git tag -a $tag_fullname -m "${TWGIT_PREFIX_COMMIT_MSG}$commit_msg" || die "Could not create tag '$tag_fullname'!"
+    # Create tag:
+    processing "${TWGIT_GIT_COMMAND_PROMPT}git tag -a $tag_fullname -m \"${TWGIT_PREFIX_COMMIT_MSG}$commit_msg\""
+    git tag -a $tag_fullname -m "${TWGIT_PREFIX_COMMIT_MSG}$commit_msg" || die "Could not create tag '$tag_fullname'!"
 
-	# Push tags:
-	exec_git_command "git push --tags $TWGIT_ORIGIN $TWGIT_STABLE" "Could not push '$TWGIT_STABLE' on '$TWGIT_ORIGIN'!"
+    # Push tags:
+    exec_git_command "git push --tags $TWGIT_ORIGIN $TWGIT_STABLE" "Could not push '$TWGIT_STABLE' on '$TWGIT_ORIGIN'!"
 }
 
 
@@ -740,7 +759,7 @@ function create_and_push_tag () {
 # @param string $1 chaîne à échapper
 #
 function escape () {
-	echo "$1" | sed 's/\([\.\+\$\*]\)/\\\1/g'
+    echo "$1" | sed 's/\([\.\+\$\*]\)/\\\1/g'
 }
 
 ##
@@ -751,8 +770,8 @@ function escape () {
 # @return int 0 si la chaîne $1 est présente dans la concaténation du reste des paramètres, 1 sinon.
 #
 function has () {
-	local item=$1; shift
-	echo " $@ " | grep -q " $(escape $item) "
+    local item=$1; shift
+    echo " $@ " | grep -q " $(escape $item) "
 }
 
 ##
@@ -769,22 +788,22 @@ function has () {
 # @author http://github.com/nvie/gitflow
 #
 function compare_branches () {
-	local commit1=$(git rev-parse "$1")
-	local commit2=$(git rev-parse "$2")
-	if [ "$commit1" != "$commit2" ]; then
-		local base=$(git merge-base "$commit1" "$commit2")
-		if [ $? -ne 0 ]; then
-			return 4
-		elif [ "$commit1" = "$base" ]; then
-			return 1
-		elif [ "$commit2" = "$base" ]; then
-			return 2
-		else
-			return 3
-		fi
-	else
-		return 0
-	fi
+    local commit1=$(git rev-parse "$1")
+    local commit2=$(git rev-parse "$2")
+    if [ "$commit1" != "$commit2" ]; then
+        local base=$(git merge-base "$commit1" "$commit2")
+        if [ $? -ne 0 ]; then
+            return 4
+        elif [ "$commit1" = "$base" ]; then
+            return 1
+        elif [ "$commit2" = "$base" ]; then
+            return 2
+        else
+            return 3
+        fi
+    else
+        return 0
+    fi
 }
 
 ##
@@ -796,18 +815,18 @@ function compare_branches () {
 # @param string $2 information de sous-type de branche
 #
 function display_csv_branches () {
-	local branches="$1"
-	local subtype="$2"
-	local repo_prefix="$TWGIT_ORIGIN/"
-	local prefix="$TWGIT_ORIGIN/$TWGIT_PREFIX_FEATURE"
+    local branches="$1"
+    local subtype="$2"
+    local repo_prefix="$TWGIT_ORIGIN/"
+    local prefix="$TWGIT_ORIGIN/$TWGIT_PREFIX_FEATURE"
 
-	local subject
-	local short_name
-	for branch in $branches; do
-		short_name="${branch:${#prefix}}"
-		subject="$(getRedmineSubject "$short_name")"
-		echo "${branch:${#repo_prefix}};$short_name;$subtype;$(convertList2CSV "$subject")"
-	done
+    local subject
+    local short_name
+    for branch in $branches; do
+        short_name="${branch:${#prefix}}"
+        subject="$(getFeatureSubject "$short_name")"
+        echo "${branch:${#repo_prefix}};$short_name;$subtype;$(convertList2CSV "$subject")"
+    done
 }
 
 ##
@@ -822,33 +841,33 @@ function display_csv_branches () {
 # @param string $2 liste des branches à présenter, à raison d'une par ligne, au format 'origin/xxx'
 #
 function display_branches () {
-	local type="$1"
-	local branches="$2"
-	local -A titles=(
-		[feature]='Feature: '
-		[release]='Release: '
-		[hotfix]='Hotfix: '
-	)
+    local type="$1"
+    local branches="$2"
+    local -A titles=(
+        [feature]='Feature: '
+        [release]='Release: '
+        [hotfix]='Hotfix: '
+    )
 
-	if [ -z "$branches" ]; then
-		info 'No such branch exists.';
-	else
-		local prefix="$TWGIT_ORIGIN/$TWGIT_PREFIX_FEATURE"
-		local add_empty_line=0
-		for branch in $branches; do
-			if ! isset_option 'c'; then
-				[ "$add_empty_line" = "0" ] && add_empty_line=1 || echo
-			fi
-			echo -n $(info "${titles[$type]}$branch ")
+    if [ -z "$branches" ]; then
+        info 'No such branch exists.';
+    else
+        local prefix="$TWGIT_ORIGIN/$TWGIT_PREFIX_FEATURE"
+        local add_empty_line=0
+        for branch in $branches; do
+            if ! isset_option 'c'; then
+                [ "$add_empty_line" = "0" ] && add_empty_line=1 || echo
+            fi
+            echo -n $(info "${titles[$type]}$branch ")
 
-			[ "$type" = "feature" ] && displayRedmineSubject "${branch:${#prefix}}" || echo
+            [ "$type" = "feature" ] && displayFeatureSubject "${branch:${#prefix}}" || echo
 
-			alert_old_branch "$branch"
+            alert_old_branch "$branch"
 
-			# Afficher les informations de commit :
-			! isset_option 'c' && git show $branch --pretty=medium | grep -v '^Merge: ' | head -n 3
-		done
-	fi
+            # Afficher les informations de commit :
+            ! isset_option 'c' && git show $branch --pretty=medium | grep -v '^Merge: ' | head -n 3
+        done
+    fi
 }
 
 ##
@@ -858,21 +877,21 @@ function display_branches () {
 # @param string $2 si présent et vaut 'with-help', alors une suggestion de merge sera proposée
 #
 function alert_old_branch () {
-	get_tags_not_merged_into_branch "$1"
-	local tags_not_merged="$GET_TAGS_NOT_MERGED_INTO_BRANCH_RETURN_VALUE"
-	local nb_tags_no_merged="$(echo "$tags_not_merged" | wc -w)"
+    get_tags_not_merged_into_branch "$1"
+    local tags_not_merged="$GET_TAGS_NOT_MERGED_INTO_BRANCH_RETURN_VALUE"
+    local nb_tags_no_merged="$(echo "$tags_not_merged" | wc -w)"
 
-	if [ ! -z "$tags_not_merged" ]; then
-		local msg='Tag'
-		if echo "$tags_not_merged" | grep -q ' '; then
-			msg="${msg}s"
-		fi
-		msg="${msg} not merged into this branch:"
-		[ "$nb_tags_no_merged" -eq "$TWGIT_MAX_RETRIEVE_TAGS_NOT_MERGED" ] && msg="${msg} at least"
-		msg="${msg} $(displayInterval "$tags_not_merged")."
-		[ "$2" = 'with-help' ] && msg="${msg} If need be: git merge --no-ff $(get_last_tag)"
-		warn "$msg"
-	fi
+    if [ ! -z "$tags_not_merged" ]; then
+        local msg='Tag'
+        if echo "$tags_not_merged" | grep -q ' '; then
+            msg="${msg}s"
+        fi
+        msg="${msg} not merged into this branch:"
+        [ "$nb_tags_no_merged" -eq "$TWGIT_MAX_RETRIEVE_TAGS_NOT_MERGED" ] && msg="${msg} at least"
+        msg="${msg} $(displayInterval "$tags_not_merged")."
+        [ "$2" = 'with-help' ] && msg="${msg} If need be: git merge --no-ff $(get_last_tag)"
+        warn "$msg"
+    fi
 }
 
 ##
@@ -881,13 +900,13 @@ function alert_old_branch () {
 # @param string $1 liste de valeurs séparées par des espaces
 #
 function displayInterval () {
-	local -a list=($@)
-	local nb_items="${#list[@]}"
-	local first_item="${list[0]}"
-	local last_item="${list[$((nb_items-1))]}"
+    local -a list=($@)
+    local nb_items="${#list[@]}"
+    local first_item="${list[0]}"
+    local last_item="${list[$((nb_items-1))]}"
 
-	echo -n "'<b>$first_item</b>'"
-	[ "$nb_items" -gt 1 ] && echo " to '<b>$last_item</b>'" || echo
+    echo -n "'<b>$first_item</b>'"
+    [ "$nb_items" -gt 1 ] && echo " to '<b>$last_item</b>'" || echo
 }
 
 ##
@@ -896,24 +915,24 @@ function displayInterval () {
 # @param string $@ liste de valeurs sur une ou plusieurs lignes, séparées par des espaces ou des sauts de ligne
 #
 function displayQuotedEnum () {
-	local list="$@"
-	local one_line_list="$(echo $list | tr '\n' ' ')"
-	local trimmed_list="$(echo $one_line_list)"
-	local quoted_list="'<b>${trimmed_list// /</b>', '<b>}</b>'"
-	echo $quoted_list
+    local list="$@"
+    local one_line_list="$(echo $list | tr '\n' ' ')"
+    local trimmed_list="$(echo $one_line_list)"
+    local quoted_list="'<b>${trimmed_list// /</b>', '<b>}</b>'"
+    echo $quoted_list
 }
 
 ##
-# Affiche le sujet d'un ticket Redmine
+# Affiche le sujet d'une feature (ticket Redmine, issue Github, ...)
 # Le premier appel sollicite ws_redmine.inc.php qui lui-même exploite un WS Redmine,
-# les suivants bénéficieront du fichier de cache $TWGIT_REDMINE_PATH.
+# les suivants bénéficieront du fichier de cache $TWGIT_FEATURES_SUBJECT_PATH.
 #
-# @param int $1 numéro de ticket Redmine
-# @see getRedmineSubject()
+# @param int $1 nom court de la feature
+# @see getFeatureSubject()
 #
-function displayRedmineSubject () {
-	local subject="$(getRedmineSubject "$1")"
-	[ ! -z "$subject" ] && displayMsg redmine "$subject" || echo #processing 'Unknown Redmine subject.'
+function displayFeatureSubject () {
+    local subject="$(getFeatureSubject "$1")"
+    [ ! -z "$subject" ] && displayMsg feature_subject "$subject" || echo
 }
 
 ##
@@ -922,30 +941,91 @@ function displayRedmineSubject () {
 # @param string $@ liste de valeurs
 #
 function convertList2CSV () {
-	local row
-	for v in "$@"; do
-		v=${v//'"'/'""'}
-		v=${v//"'"/"\\'"}
-		row="$row;\"$v\""
-	done
-	echo ${row:1}
+    local row
+    for v in "$@"; do
+        v=${v//'"'/'""'}
+        v=${v//"'"/"\\'"}
+        row="$row;\"$v\""
+    done
+    echo ${row:1}
 }
 
 ##
 # Propose de supprimer une à une les branches qui ne sont plus trackées.
 #
 function clean_branches () {
-	local tracked="$(git fetch --all -v --dry-run 2>&1 | grep '\->' | sed -r 's/^.* +([^ ]+) +\-> +.*$/\1/')"
-	local locales="$(get_local_branches)"
-	for branch in $locales; do
-		if ! has $branch $tracked; then
-			echo -n $(question "Local branch '$branch' is not tracked. Remove? [Y/N] ")
-			read answer
-			if [ "$answer" = "Y" ] || [ "$answer" = "y" ]; then
-				exec_git_command "git branch -D $branch" "Remove local branch '$branch' failed!"
-			fi
-		fi
-	done
+    local tracked="$(git fetch --all -v --dry-run 2>&1 | grep '\->' | sed -r 's/^.* +([^ ]+) +\-> +.*$/\1/')"
+    local locales="$(get_local_branches)"
+    for branch in $locales; do
+        if ! has $branch $tracked; then
+            echo -n $(question "Local branch '$branch' is not tracked. Remove? [Y/N] ")
+            read answer
+            if [ "$answer" = "Y" ] || [ "$answer" = "y" ]; then
+                exec_git_command "git branch -D $branch" "Remove local branch '$branch' failed!"
+            fi
+        fi
+    done
+}
+
+##
+# Git init for Twgit:
+#  - git init if necessary
+#  - add remote origin if necessary
+#  - create a stable branch if not exists or pull origin/stable branch if exists
+#  - create a tag on HEAD of stable
+# A remote repository must exists.
+#
+# @param string $1 tag name. Format: \d+.\d+.\d+
+# @param string $2 optional url of remote repository. Used only if not already setted.
+# @testedby TwgitMainTest
+#
+function init () {
+    process_options "$@"
+    require_parameter 'tag'
+    local tag="$RETVAL"
+    local remote_url="$2"
+    local tag_fullname="$TWGIT_PREFIX_TAG$tag"
+
+    processing "Check need for git init..."
+    if [ ! -z "$(git rev-parse --git-dir 2>&1 1>/dev/null)" ]; then
+        exec_git_command 'git init' 'Initialization of git repository failed!'
+    else
+        assert_clean_working_tree
+    fi
+
+    assert_valid_tag_name $tag_fullname
+
+    processing "Check presence of remote '$TWGIT_ORIGIN' repository..."
+    if [ "$(git remote | grep -R "^$TWGIT_ORIGIN$" | wc -l)" -ne 1 ]; then
+        [ -z "$remote_url" ] && die "Remote '$TWGIT_ORIGIN' repository url required!"
+        exec_git_command "git remote add origin $remote_url" 'Add remote repository failed!'
+    fi
+    process_fetch
+
+    processing "Check presence of '$TWGIT_STABLE' branch..."
+    if has $TWGIT_STABLE $(get_local_branches); then
+        processing "Local '$TWGIT_STABLE' detected."
+        if ! has $TWGIT_ORIGIN/$TWGIT_STABLE $(get_remote_branches); then
+            exec_git_command "git push --set-upstream $TWGIT_ORIGIN $TWGIT_STABLE" 'Git push failed!'
+        fi
+    elif has $TWGIT_ORIGIN/$TWGIT_STABLE $(get_remote_branches); then
+        processing "Remote '$TWGIT_ORIGIN/$TWGIT_STABLE' detected."
+        exec_git_command "git checkout --track -b $TWGIT_STABLE $TWGIT_ORIGIN/$TWGIT_STABLE" \
+                         "Could not check out '$TWGIT_ORIGIN/$TWGIT_STABLE'!"
+    else
+        if has $TWGIT_ORIGIN/master $(get_remote_branches); then
+            exec_git_command "git checkout -b $TWGIT_STABLE $TWGIT_ORIGIN/master" "Could not check out '$TWGIT_ORIGIN/master'!"
+        elif has master $(get_local_branches); then
+            exec_git_command "git checkout -b $TWGIT_STABLE master" "Create local '$TWGIT_STABLE' branch failed!"
+        else
+            # @todo pas d'autre branche ?
+            process_first_commit branch stable
+            exec_git_command "git branch -m $TWGIT_STABLE" "Rename of master branch failed!"
+        fi
+        process_push_branch $TWGIT_STABLE
+    fi
+
+    create_and_push_tag "$tag_fullname" "First tag."
 }
 
 ##
@@ -957,14 +1037,14 @@ function clean_branches () {
 # @param int $2 nombre maximum de committers à afficher, optionnel (vaut $TWGIT_DEFAULT_NB_COMMITTERS par défaut)
 #
 function display_rank_contributors () {
-	local branch_fullname="$1"
-	local max="$2"
-	[ -z "$max" ] && max=$TWGIT_DEFAULT_NB_COMMITTERS
+    local branch_fullname="$1"
+    local max="$2"
+    [ -z "$max" ] && max=$TWGIT_DEFAULT_NB_COMMITTERS
 
-	info "First $max committers into '$TWGIT_ORIGIN/$branch_fullname' remote branch:"
-	local contributors="$(get_contributors "$branch_fullname" $max)"
-	[ -z "$contributors" ] && echo 'nobody' || echo $contributors | tr ' ' '\n'
-	echo
+    info "First $max committers into '$TWGIT_ORIGIN/$branch_fullname' remote branch:"
+    local contributors="$(get_contributors "$branch_fullname" $max)"
+    [ -z "$contributors" ] && echo 'nobody' || echo $contributors | tr ' ' '\n'
+    echo
 }
 
 ##
@@ -978,53 +1058,53 @@ function display_rank_contributors () {
 #    ne se sont pas écoulés depuis le dernier test.
 #
 function autoupdate () {
-	local is_forced="$1"
-	cd "$TWGIT_ROOT_DIR"
-	if git rev-parse --git-dir 1>/dev/null 2>&1; then
-		[ ! -f "$TWGIT_UPDATE_PATH" ] && touch "$TWGIT_UPDATE_PATH"
-		local elapsed_time=$(( ($(date -u +%s) - $(date -r "$TWGIT_UPDATE_PATH" +%s)) ))
-		local interval=$(( $TWGIT_UPDATE_NB_DAYS * 86400 ))
-		local answer=''
+    local is_forced="$1"
+    cd "$TWGIT_ROOT_DIR"
+    if git rev-parse --git-dir 1>/dev/null 2>&1; then
+        [ ! -f "$TWGIT_UPDATE_PATH" ] && touch "$TWGIT_UPDATE_PATH"
+        local elapsed_time=$(( ($(date -u +%s) - $(date -r "$TWGIT_UPDATE_PATH" +%s)) ))
+        local interval=$(( $TWGIT_UPDATE_NB_DAYS * 86400 ))
+        local answer=''
 
-		if [ "$elapsed_time" -gt "$interval" ] || [ ! -z "$is_forced" ]; then
-			# Update Git :
-			processing "Fetch twgit repository for auto-update check..."
-			git fetch
+        if [ "$elapsed_time" -gt "$interval" ] || [ ! -z "$is_forced" ]; then
+            # Update Git :
+            processing "Fetch twgit repository for auto-update check..."
+            git fetch
 
-			assert_tag_exists
-			local current_tag="$(git describe)"
-			local last_tag="$(get_last_tag)"
-			if [ "$current_tag" != "$last_tag" ]; then
-				echo -n $(question "Update $last_tag available! Do you want to update twgit (or manually: twgit update)? [Y/N] ")
-				read answer
-				if [ "$answer" = "Y" ] || [ "$answer" = "y" ]; then
-					processing 'Update in progress...'
-					exec_git_command 'git reset --hard' 'Hard reset failed!'
-					exec_git_command "git checkout tags/$last_tag" "Could not check out tag '$last_tag'!"
-					> "$TWGIT_REDMINE_PATH"
-				fi
-			else
-				processing 'Twgit already up-to-date.'
-			fi
+            assert_tag_exists
+            local current_tag="$(git describe)"
+            local last_tag="$(get_last_tag)"
+            if [ "$current_tag" != "$last_tag" ]; then
+                echo -n $(question "Update $last_tag available! Do you want to update twgit (or manually: twgit update)? [Y/N] ")
+                read answer
+                if [ "$answer" = "Y" ] || [ "$answer" = "y" ]; then
+                    processing 'Update in progress...'
+                    exec_git_command 'git reset --hard' 'Hard reset failed!'
+                    exec_git_command "git checkout tags/$last_tag" "Could not check out tag '$last_tag'!"
+                    > "$TWGIT_FEATURES_SUBJECT_PATH"
+                fi
+            else
+                processing 'Twgit already up-to-date.'
+            fi
 
-			# Prochain update :
-			processing "Next auto-update check in $TWGIT_UPDATE_NB_DAYS days."
-			touch "$TWGIT_UPDATE_PATH"
+            # Prochain update :
+            processing "Next auto-update check in $TWGIT_UPDATE_NB_DAYS days."
+            touch "$TWGIT_UPDATE_PATH"
 
-			# MAJ du système d'update d'autocomplétion :
-			if [ ! -h "/etc/bash_completion.d/twgit" ]; then
-				warn "New autocompletion update system request you execute just once this line (to adapt):"
-				help_detail "sudo rm /etc/bash_completion.d/twgit && sudo ln -s ~/twgit/install/.bash_completion /etc/bash_completion.d/twgit && source ~/.bashrc"
-			fi
+            # MAJ du système d'update d'autocomplétion :
+            if [ ! -h "/etc/bash_completion.d/twgit" ]; then
+                warn "New autocompletion update system request you execute just once this line (to adapt):"
+                help_detail "sudo rm /etc/bash_completion.d/twgit && sudo ln -s ~/twgit/install/.bash_completion /etc/bash_completion.d/twgit && source ~/.bashrc"
+            fi
 
-			# Invite :
-			if [ "$answer" = "Y" ] || [ "$answer" = "y" ]; then
-				[ -z "$is_forced" ] && echo 'Thank you for re-entering your request.'
-				exit 0
-			fi
-		fi
-	elif [ ! -z "$is_forced" ]; then
-		warn 'Git repositoy not found!'
-	fi
-	cd - 1>/dev/null
+            # Invite :
+            if [ "$answer" = "Y" ] || [ "$answer" = "y" ]; then
+                [ -z "$is_forced" ] && echo 'Thank you for re-entering your request.'
+                exit 0
+            fi
+        fi
+    elif [ ! -z "$is_forced" ]; then
+        warn 'Git repositoy not found!'
+    fi
+    cd - 1>/dev/null
 }

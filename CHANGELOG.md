@@ -1,6 +1,28 @@
 ChangeLog
 =========
 
+## Version 1.4.0 (2012-03-01)
+
+Features:
+
+  - #30: Add a connector displaying subject of Github features
+  - #26: Check local repository has a remote repository
+  - #1: Add twgit init
+
+Unit tests:
+
+  - #25: Compute estimated Bash code coverage in Travis-ci
+  - estimated code coverage: 15%
+
+Quality code:
+
+  - #24: Redmine PHP code do not use main config file
+  - #19: Reduce coupling with Redmine
+
+Fix:
+
+  - #27: Main help finish with an error code not null
+
 ## Version 1.3.0 (2012-02-24)
 
 Fix:
@@ -15,6 +37,7 @@ Doc:
 Unit tests:
 
   - #23: Add a first unit test using Travis-ci.org
+  - estimated code coverage: 4%
 
 ## Version 1.2.0 (2012-02-13)
 

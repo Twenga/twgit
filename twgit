@@ -55,11 +55,13 @@ exec > >(printf -- "$TWGIT_HISTORY_SEPARATOR" "$log_date" "$log_call" >> $TWGIT_
 ##
 # Affiche l'aide
 #
+# @tested_by TwgitHelpTest
+#
 function usage () {
     echo; help 'Usage:'
     help_detail '<b>twgit <command> [<action>]</b>'
-    help_detail '    Always provide branch names without prefix:'
-    help_detail "    - '$TWGIT_PREFIX_FEATURE', '$TWGIT_PREFIX_RELEASE', '$TWGIT_PREFIX_HOTFIX', (tag) '$TWGIT_PREFIX_TAG'"
+    help_detail '    Always provide branch names without any prefix:'
+    help_detail "     - '$TWGIT_PREFIX_FEATURE', '$TWGIT_PREFIX_RELEASE', '$TWGIT_PREFIX_HOTFIX', (tag) '$TWGIT_PREFIX_TAG'"
 
     echo; help 'Available commands are:'
     help_detail '<b>feature</b>   Manage your feature branches.'
@@ -68,6 +70,14 @@ function usage () {
     help_detail '<b>tag</b>       Manage your tags.'
     echo
     help_detail '<b>clean</b>     Help to remove branches no longer tracked.'
+    help_detail '<b>init <starttag> [<url>]</b>'
+    help_detail '          Initialize git repository for twgit:'
+    help_detail '           - git init if necessary'
+    help_detail "           - add remote $TWGIT_ORIGIN <b><url></b> if necessary"
+    help_detail "           - create '$TWGIT_STABLE' branch if not exists,"
+    help_detail "             or pull '$TWGIT_ORIGIN/$TWGIT_STABLE' branch if exists"
+    help_detail '           - create the <b><starttag></b> tag on HEAD of stable'
+    help_detail '          A remote repository must exists.'
     help_detail '<b>update</b>    Force update twgit check.'
     help_detail '<b>[help]</b>    Display this help.'
     echo; help 'See also:'
@@ -88,6 +98,15 @@ function usage () {
 }
 
 ##
+# Action déclenchant l'affichage de l'aide.
+#
+# @tested_by TwgitHelpTest
+#
+function cmd_help () {
+    usage;
+}
+
+##
 # Appelle l'action demandée ("cmd_$2") sur la commande spécifiée ($1).
 # Les paramètres surnumérères sont passés à la commande.
 #
@@ -95,11 +114,6 @@ function usage () {
 # @param string $2 nom de l'action demandée, 'help' par défaut
 #
 function main () {
-    if [ $# -lt 1 ]; then
-        usage
-        exit 1
-    fi
-
     # load command:
     if [ ! -z "$1" ]; then
         local command="$1"; shift
@@ -110,6 +124,8 @@ function main () {
             autoupdate 'force'; exit 0
         elif [ "$command" = 'clean' ]; then
             clean_branches; exit 0
+        elif [ "$command" = 'init' ]; then
+            init "$@"; exit 0
         elif [ ! -e "$command_file" ]; then
             error "Command not found: '$command'"
             usage

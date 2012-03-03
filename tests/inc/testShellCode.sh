@@ -1,7 +1,8 @@
 #!/bin/bash
 
 ##
-# Call a function of common.inc.sh.
+# Execute code calling functions of common.inc.sh after loading Shell config files.
+# e.g.: /bin/bash testShellCode.sh 'process_options x -aV; isset_option a; echo $?'
 #
 # @author Geoffroy AUBRY <geoffroy.aubry@hi-media.com>
 #

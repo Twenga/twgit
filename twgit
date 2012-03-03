@@ -44,7 +44,7 @@ fi
 config_file="$(dirname $0)/conf/twgit.sh"
 if [ ! -f "$config_file" ]; then
     echo "/!\\ Config file not found: '$config_file'"
-    echo "Try to copy '$config_file' to '${config_file%.sh}-dist.sh' and configure it."
+    echo "Try to copy '${config_file%.sh}-dist.sh' to '$config_file' and configure it."
     exit 1
 fi
 . $config_file

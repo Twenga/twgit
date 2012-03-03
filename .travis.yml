@@ -6,3 +6,7 @@ after_script:
   - /bin/bash tests/inc/codeCoverage.sh
 
 script: phpunit --configuration conf/phpunit-dist.xml
+
+notifications:
+  on_success: always
+  on_failure: always

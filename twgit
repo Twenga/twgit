@@ -41,7 +41,13 @@ if [ "$DEBUG" = "1" ]; then
 fi
 
 # Includes :
-. `dirname $0`/conf/config.inc.sh
+config_file="$(dirname $0)/conf/twgit.sh"
+if [ ! -f "$config_file" ]; then
+    echo "/!\\ Config file not found: '$config_file'"
+    echo "Try to copy '$config_file' to '${config_file%.sh}-dist.sh' and configure it."
+    exit 1
+fi
+. $config_file
 . $TWGIT_INC_DIR/common.inc.sh
 
 # Duplication des flux à des fins d'historisation :
@@ -81,7 +87,7 @@ function usage () {
     help_detail '<b>update</b>    Force update twgit check.'
     help_detail '<b>[help]</b>    Display this help.'
     echo; help 'See also:'
-    help_detail "Try 'twgit <command> [help]' for more details."
+    help_detail "Try '<b>twgit <command> [help]</b>' for more details."
 
     echo; help 'About:'
     help_detail "<b>Contact</b>          https://github.com/Twenga/twgit"

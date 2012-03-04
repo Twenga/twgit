@@ -15,6 +15,9 @@ grep -E '^\s*function\s+([a-z0-9_-]+)\b|^\s*\}\s*$' --ignore-case --only-matchin
     | sed -r 's#^./##' \
     | tr '\n' '\000' \
     | sed -r "s/:([0-9]+):function\s+([a-z0-9_-]+)\x00[^:]+:([0-9]+):\}\x00/:\2:\1:\3\n/ig" \
+    | grep -vE '^install/' \
+    | grep -vE '^tests/' \
+    | sort \
     | awk -F: 'BEGIN {sum=0} {diff=$4-$3; sum += diff; print $0":"diff} END {print sum}' \
     > $rStats
 
@@ -25,6 +28,7 @@ grep -E '^\s*\*\s*@shcovers\s+.+::.' --ignore-case -r --no-filename --include=*T
     | tr -d '\r' \
     | sed 's/^.*@shcovers\s*//i' \
     | sed 's/::/:/' \
+    | sort | uniq \
     > $rCovers
 
 iSum="$(grep -f $rCovers $rStats | awk -F: 'BEGIN {sum=0} {sum+=$5} END {print sum}')"

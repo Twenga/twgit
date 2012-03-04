@@ -36,12 +36,9 @@
 
 
 
-if [ "$DEBUG" = "1" ]; then
-    set -x
-fi
-
 # Includes :
-config_file="$(dirname $0)/conf/twgit.sh"
+path="$0"; while [ -h "$path" ]; do path="$(readlink "$path")"; done
+config_file="$(dirname $path)/conf/twgit.sh"
 if [ ! -f "$config_file" ]; then
     echo "/!\\ Config file not found: '$config_file'"
     echo "Try to copy '${config_file%.sh}-dist.sh' to '$config_file' and configure it."

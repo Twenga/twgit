@@ -1,4 +1,4 @@
-#!bash
+#!/bin/bash
 
 ##
 # Bash completion support for twgit.

@@ -1,6 +1,12 @@
 ChangeLog
 =========
 
+## Version 1.5.0 (2012-03-04)
+
+Features:
+
+  - #31: Simplify installation
+
 ## Version 1.4.0 (2012-03-03)
 
 Features:

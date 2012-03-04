@@ -14,8 +14,20 @@ This tools is largely inspired by [GitFlow](https://github.com/nvie/gitflow), bu
 
 Feel free to contribute to it if you like.
 
-## Requirements & Installing twgit
-[Installation instructions](https://github.com/Twenga/twgit/wiki/Twgit#wiki-2.installation) are available in French wiki, waiting English translation...
+## Requirements
+
+  - Bash v4 _(2009)_ and above
+  - git v1.7.2 _(2010)_ and above
+
+## Installing twgit
+In the directory of your choice, e.g. `~/twgit`:
+
+```bash
+git clone git@github.com:Twenga/twgit.git .
+sudo make install
+```
+
+More [Installation instructions](https://github.com/Twenga/twgit/wiki/Twgit#wiki-2.installation) are available in French wiki, waiting English translation...
 
 ## Documentation
 [French documentation](https://github.com/Twenga/twgit/wiki) is available in wiki, waiting English translation...

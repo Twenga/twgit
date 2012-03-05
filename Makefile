@@ -34,7 +34,7 @@ install:
 	fi
 
 	@echo "Install '${BIN_DIR}/twgit'"
-	@ln -sf ${ROOT_DIR}/twgit ${BIN_DIR}/twgit
+	@echo '#!/bin/bash\n/bin/bash "'${ROOT_DIR}'/twgit" $$@' > ${BIN_DIR}/twgit
 	@chmod 0755 ${BIN_DIR}/twgit
 
 	@echo "Install Bash completion: '${BASH_COMPLETION_DIR}/twgit'"

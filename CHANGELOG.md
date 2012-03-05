@@ -1,6 +1,12 @@
 ChangeLog
 =========
 
+## Version 1.5.1 (2012-03-05)
+
+Fixes:
+
+  - #33: auto-update remove 755 on twgit
+
 ## Version 1.5.0 (2012-03-04)
 
 Features:

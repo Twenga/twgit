@@ -81,7 +81,7 @@ function get_hotfixes_in_progress () {
 function get_current_release_in_progress () {
     local releases="$(get_releases_in_progress)"
     local release="$(echo $releases | tr '\n' ' ' | cut -d' ' -f1)"
-    [[ $(echo $releases | wc -w) > 1 ]] && die "More than one release in propress detected: $(echo $releases | sed 's/ /, /g')! Only '$release' will be treated here."
+    [[ $(echo $releases | wc -w) > 1 ]] && die "More than one release in progress detected: $(echo $releases | sed 's/ /, /g')! Only '$release' will be treated here."
     echo ${release:((${#TWGIT_ORIGIN}+1))}	# supprime le préfixe 'origin/'
 }
 
@@ -91,6 +91,7 @@ function get_current_release_in_progress () {
 # et enregistre le résultat dans la globale GET_MERGED_FEATURES_RETURN_VALUE afin d'éviter les subshells.
 #
 # @param string $1 nom complet d'une release distante, sans "$TWGIT_ORIGIN/"
+# @testedby TwgitFeatureClassificationTest
 #
 function get_merged_features () {
     local release="$1"
@@ -126,11 +127,12 @@ declare -A REV_PARSE
 #
 # @param string $1 nom complet d'une branche
 # @see REV_PARSE
+# @testedby TwgitFeatureClassificationTest
 #
 function get_git_rev_parse () {
     local key="$1"
-    if [ -z "${REV_PARSE[$key]}" ]; then
-        REV_PARSE[$key]="$(git rev-parse $key)"
+    if [ ! -z "$key" ] && [ -z "${REV_PARSE[$key]}" ]; then
+        REV_PARSE[$key]="$(git rev-parse --verify -q "$key")"
     fi
 }
 
@@ -157,13 +159,14 @@ declare -A MERGE_BASE
 # @param string $1 référence (SHA1) git
 # @param string $2 référence (SHA1) git
 # @see MERGE_BASE
+# @testedby TwgitFeatureClassificationTest
 #
 function get_git_merge_base () {
     local rev1="$1"
     local rev2="$2"
     local key="$rev1|$rev2"
-    if [ -z "${MERGE_BASE[$key]}" ]; then
-        MERGE_BASE[$key]="$(git merge-base $rev1 $rev2)"
+    if [ "$key" != '|' ] && [ -z "${MERGE_BASE[$key]}" ]; then
+        MERGE_BASE[$key]="$(git merge-base $rev1 $rev2 2>/dev/null)"
     fi
 }
 
@@ -186,11 +189,12 @@ declare -A MERGED_BRANCHES
 #
 # @param string $1 nom complet d'une branche
 # @see MERGED_BRANCHES
+# @testedby TwgitFeatureClassificationTest
 #
 function get_git_merged_branches () {
     local rev="$1"
-    if [ -z "${MERGED_BRANCHES[$rev]}" ]; then
-        MERGED_BRANCHES[$rev]="$(git branch -r --merged $rev)"
+    if [ ! -z "$rev" ] && [ -z "${MERGED_BRANCHES[$rev]}" ]; then
+        MERGED_BRANCHES[$rev]="$(git branch -r --no-color --merged $rev 2>/dev/null)"
     fi
 }
 
@@ -199,21 +203,26 @@ function get_git_merged_branches () {
 # sur une seule ligne séparées par des espaces, et enregistre le résultat dans la globale GET_FEATURES_RETURN_VALUE
 # afin d'éviter les subshells.
 #
+# Ex. :
+#     get_features merged $release
+#     features="$GET_FEATURES_RETURN_VALUE"
+#
 # @param string $1 Type de relation avec la release $2 :
 #    - 'merged' pour lister les features mergées dans la release $2 et restées telle quelle depuis.
 #    - 'merged_in_progress' pour lister les features mergées dans la release $2 et dont le développement à continué.
 #    - 'free' pour lister celles n'ayant aucun rapport avec la release $2
 # @param string $2 nom complet d'une release distante, sans "$TWGIT_ORIGIN/"
+# @testedby TwgitFeatureClassificationTest
 #
 function get_features () {
     local feature_type="$1"
     local release="$2"
 
     if [ -z "$release" ]; then
-        if [ "$feature_type" = 'merged' ] || [ "$feature_type" = 'merged_in_progress' ]; then
-            GET_FEATURES_RETURN_VALUE=''
-        elif [ "$feature_type" = 'free' ]; then
+        if [ "$feature_type" = 'free' ]; then
             GET_FEATURES_RETURN_VALUE="$(git branch -r --no-merged $TWGIT_ORIGIN/$TWGIT_STABLE | grep "$TWGIT_ORIGIN/$TWGIT_PREFIX_FEATURE" | sed 's/^[* ]*//' | tr '\n' ' ' | sed 's/ *$//g')"
+        else
+            GET_FEATURES_RETURN_VALUE=''
         fi
     else
         release="$TWGIT_ORIGIN/$release"
@@ -244,9 +253,8 @@ function get_features () {
                 get_git_merge_base $release_merge_base $head_rev
                 stable_merge_base="${MERGE_BASE[$release_merge_base|$head_rev]}"
 
-                #has_dependency="$(git rev-list $f_rev ^$release_merge_base --parents --merges | grep $release_merge_base | wc -l)"
                 if [ "$release_merge_base" != "$stable_merge_base" ] && \
-                        [ "$(git rev-list $f_rev ^$release_merge_base --parents --merges | grep $release_merge_base | wc -l)" -eq 0 ]; then
+                        [ "$(git rev-list $f_rev ^$release_merge_base ^$stable_merge_base --parents --first-parent | cut -d' ' -f2 | grep $release_merge_base | wc -l)" -eq 1 ]; then
                     [ "$feature_type" = 'merged_in_progress' ] && return_features="$return_features $f"
                 elif [ "$feature_type" = 'free' ]; then
                     return_features="$return_features $f"
@@ -353,7 +361,7 @@ function get_next_version () {
 ##
 # Calcul et retourne la liste des emails des N committeurs les plus significatifs (en nombre de commits)
 # de la branche distante spécifiée, à raison d'un par ligne.
-# Filtre les committeurs sans email ainsi que 'devaa@twenga.com'.
+# Filtre les committeurs sans email ainsi que ceux en dehors du domaine '@$TWGIT_EMAIL_DOMAIN_NAME'.
 #
 # @param string $1 nom complet de branche distante, sans le "$TWGIT_ORIGIN/"
 # @param int $2 nombre maximum de committers à afficher
@@ -450,7 +458,7 @@ function assert_git_repository () {
 }
 
 ##
-# S'assure que les 2 branches spécifiées sont au même niveau.
+# S'assure que les 2 branches spécifiées sont au même niveau de mise à jour.
 # Gère l'option '-I' permettant de répondre automatiquement (mode non interactif) oui à la demande de pull.
 #
 # @param string $1 nom complet d'une branche locale
@@ -1031,7 +1039,7 @@ function init () {
 ##
 # Affiche la liste des emails des N committeurs les plus significatifs (en nombre de commits)
 # de la branche distante spécifiée, à raison d'un par ligne.
-# Filtre les committeurs sans email ainsi que 'devaa@twenga.com'.
+# Filtre les committeurs sans email ainsi que ceux en dehors du domaine '@$TWGIT_EMAIL_DOMAIN_NAME'.
 #
 # @param string $1 nom complet de branche distante, sans le "$TWGIT_ORIGIN/"
 # @param int $2 nombre maximum de committers à afficher, optionnel (vaut $TWGIT_DEFAULT_NB_COMMITTERS par défaut)

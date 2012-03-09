@@ -8,10 +8,10 @@ class TwgitMainTest extends TwgitTestCase
 {
 
     /**
-    * This method is called before the first test of this test class is run.
-    *
-    * @since Method available since Release 3.4.0
-    */
+     * This method is called before the first test of this test class is run.
+     *
+     * @since Method available since Release 3.4.0
+     */
     public static function setUpBeforeClass ()
     {
         self::_rawExec(

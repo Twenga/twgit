@@ -279,9 +279,9 @@ function cmd_merge-into-release () {
     fi
 
     # Merge :
-    local cmds="twgit feature start $feature
+    local cmds="$TWGIT_EXEC feature start $feature
 git pull $TWGIT_ORIGIN $feature_fullname
-twgit release start
+$TWGIT_EXEC release start
 git pull $TWGIT_ORIGIN $release_fullname
 git merge --no-ff $feature_fullname
 git push $TWGIT_ORIGIN $release_fullname"
@@ -292,8 +292,8 @@ git push $TWGIT_ORIGIN $release_fullname"
         if [ "$error" -ne 0 ]; then
             help_detail "$cmd"
         else
-            [ "${cmd:0:6}" = 'twgit ' ] && prefix='shell# ' || prefix="${TWGIT_GIT_COMMAND_PROMPT}"
-            processing "$prefix$cmd"
+            [ "${cmd:0:${#TWGIT_EXEC}+1}" = "$TWGIT_EXEC " ] && msg="shell# twgit ${cmd:${#TWGIT_EXEC}+1}" || msg="${TWGIT_GIT_COMMAND_PROMPT}$cmd"
+            processing "$msg"
             if ! eval $cmd; then
                 error=1
                 error "Merge '$feature_fullname' into '$release_fullname' aborted!"

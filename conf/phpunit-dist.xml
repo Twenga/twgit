@@ -13,6 +13,7 @@
     strict="true"
     verbose="true"
     stopOnFailure="false"
+    timeoutForSmallTests="8"
 >
     <testsuites>
         <testsuite name="Twgit">

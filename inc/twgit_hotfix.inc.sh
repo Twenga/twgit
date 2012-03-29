@@ -31,7 +31,8 @@ function usage () {
     help_detail '<b>list [-F]</b>'
     help_detail '    List current hotfix. Add <b>-F</b> to do not make fetch.'; echo
     help_detail '<b>remove <hotfixname></b>'
-    help_detail '    Remove both local and remote specified hotfix branch.'; echo
+    help_detail '    Remove both local and remote specified hotfix branch.'
+    help_detail '    Create a new tag to distinguish clearly the next hotfix from this one.'; echo
     help_detail '<b>start</b>'
     help_detail '    Create both a new local and remote hotfix, or fetch the remote hotfix,'
     help_detail '    or checkout the local hotfix.'

@@ -143,9 +143,8 @@ function cmd_list () {
     else
         help "Remote free features:"
         display_branches 'feature' "$features"; echo
+        alert_dissident_branches
     fi
-
-    alert_dissident_branches
 }
 
 ##

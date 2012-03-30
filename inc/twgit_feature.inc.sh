@@ -145,12 +145,7 @@ function cmd_list () {
         display_branches 'feature' "$features"; echo
     fi
 
-    if ! isset_option 'x'; then
-        local dissident_branches="$(get_dissident_remote_branches)"
-        if [ ! -z "$dissident_branches" ]; then
-            warn "Following branches are out of process: $(displayQuotedEnum $dissident_branches)!"; echo
-        fi
-    fi
+    alert_dissident_branches
 }
 
 ##
@@ -227,7 +222,7 @@ function cmd_start () {
     else
         assert_tag_exists
         local last_tag=$(get_last_tag)
-        exec_git_command "git checkout -b $feature_fullname $last_tag" "Could not check out tag '$last_tag'!"
+        exec_git_command "git checkout -b $feature_fullname tags/$last_tag" "Could not check out tag '$last_tag'!"
         process_first_commit 'feature' "$feature_fullname"
         process_push_branch $feature_fullname
     fi

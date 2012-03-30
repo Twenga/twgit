@@ -47,7 +47,7 @@ class TwgitReleaseTest extends TwgitTestCase
     /**
      * @shcovers inc/twgit_release.inc.sh::cmd_reset
      */
-    public function testInit_ThrowExceptionWhenReleaseParameterMissing ()
+    public function testReset_ThrowExceptionWhenReleaseParameterMissing ()
     {
         $this->_remoteExec('git init');
         $this->_localExec(TWGIT_EXEC . ' init 1.2.3 ' . TWGIT_REPOSITORY_ORIGIN_DIR);
@@ -59,7 +59,7 @@ class TwgitReleaseTest extends TwgitTestCase
     /**
      * @shcovers inc/twgit_release.inc.sh::cmd_reset
      */
-    public function testInit_ThrowExceptionWhenReleaseNotFound ()
+    public function testReset_ThrowExceptionWhenReleaseNotFound ()
     {
         $this->_remoteExec('git init');
         $this->_localExec(TWGIT_EXEC . ' init 1.2.3 ' . TWGIT_REPOSITORY_ORIGIN_DIR);
@@ -71,7 +71,7 @@ class TwgitReleaseTest extends TwgitTestCase
     /**
      * @shcovers inc/twgit_release.inc.sh::cmd_reset
      */
-    public function testInit_WithMinorRelease ()
+    public function testReset_WithMinorRelease ()
     {
         $this->_remoteExec('git init');
         $this->_localExec(TWGIT_EXEC . ' init 1.2.3 ' . TWGIT_REPOSITORY_ORIGIN_DIR);
@@ -85,7 +85,7 @@ class TwgitReleaseTest extends TwgitTestCase
     /**
      * @shcovers inc/twgit_release.inc.sh::cmd_reset
      */
-    public function testInit_WithMajorRelease ()
+    public function testReset_WithMajorRelease ()
     {
         $this->_remoteExec('git init');
         $this->_localExec(TWGIT_EXEC . ' init 1.2.3 ' . TWGIT_REPOSITORY_ORIGIN_DIR);
@@ -95,4 +95,18 @@ class TwgitReleaseTest extends TwgitTestCase
         $sMsg = $this->_localExec(TWGIT_EXEC . ' release list');
         $this->assertContains("Release: origin/release-2.0.0", $sMsg);
     }
+
+    /**
+     */
+    public function testStart_WithAmbiguousRef ()
+    {
+        $this->_remoteExec('git init');
+        $this->_localExec(TWGIT_EXEC . ' init 1.2.3 ' . TWGIT_REPOSITORY_ORIGIN_DIR);
+        $this->_localExec('git branch v1.2.3 v1.2.3');
+
+        $sMsg = $this->_localExec(TWGIT_EXEC . ' release start -I');
+        $this->assertNotContains("warning: refname 'v1.2.3' is ambiguous.", $sMsg);
+        $this->assertNotContains("fatal: Ambiguous object name: 'v1.2.3'.", $sMsg);
+    }
+
 }

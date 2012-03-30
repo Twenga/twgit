@@ -316,7 +316,7 @@ function get_tags_not_merged_into_branch () {
 
     local max_tags=$TWGIT_MAX_RETRIEVE_TAGS_NOT_MERGED
     for t in $inverted_all_tags; do
-        tag_rev=$(git rev-list $t | head -n 1)
+        tag_rev=$(git rev-list tags/$t | head -n 1)
         merge_base=$(git merge-base $release_rev $tag_rev)
         if [ "$tag_rev" != "$merge_base" ]; then
             inverted_tags_not_merged="$inverted_tags_not_merged $t"
@@ -642,9 +642,9 @@ function process_fetch () {
     local option="$1"
     if [ -z "$option" ] || ! isset_option "$option"; then
         exec_git_command "git fetch --prune $TWGIT_ORIGIN" "Could not fetch '$TWGIT_ORIGIN'!"
-        if [ ! -z "$option" ]; then
-            echo
-        fi
+    fi
+    if [ ! -z "$option" ] && ! isset_option "$option"; then
+        echo
     fi
 }
 
@@ -899,6 +899,28 @@ function alert_old_branch () {
         msg="${msg} $(displayInterval "$tags_not_merged")."
         [ "$2" = 'with-help' ] && msg="${msg} If need be: git merge --no-ff $(get_last_tag)"
         warn "$msg"
+    fi
+}
+
+##
+# Affiche un warning si des branches sont hors process.
+# N'affiche rien si l'option -x est activée (pour les rendus CSV).
+#
+function alert_dissident_branches () {
+    if ! isset_option 'x'; then
+        local dissident_branches="$(get_dissident_remote_branches)"
+        if [ ! -z "$dissident_branches" ]; then
+            warn "Following branches are out of process: $(displayQuotedEnum $dissident_branches)!"
+        fi
+    fi
+
+    local local_ambiguous_branches="$((get_local_branches; git tag) | sort | uniq -d)"
+    if [ ! -z "$local_ambiguous_branches" ]; then
+        warn "Following local branches are ambiguous: $(displayQuotedEnum $local_ambiguous_branches)!"
+    fi
+
+    if [ ! -z "$dissident_branches" ] || [ ! -z "$local_ambiguous_branches" ]; then
+        echo
     fi
 }
 

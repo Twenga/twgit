@@ -123,6 +123,8 @@ function cmd_list () {
         display_branches 'release' ''
     fi
     echo
+
+    alert_dissident_branches
 }
 
 ##
@@ -175,7 +177,7 @@ function cmd_start () {
         fi
     else
         local last_tag=$(get_last_tag)
-        exec_git_command "git checkout -b $release_fullname $last_tag" "Could not check out tag '$last_tag'!"
+        exec_git_command "git checkout -b $release_fullname tags/$last_tag" "Could not check out tag '$last_tag'!"
         process_first_commit 'release' "$release_fullname"
         process_push_branch $release_fullname
     fi

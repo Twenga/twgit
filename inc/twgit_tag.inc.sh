@@ -56,7 +56,7 @@ function cmd_list () {
     else
         for tag in $tags; do
             info "Tag: $tag"
-            git show $tag --pretty=medium | head -n 4 | tail -n +2
+            git show tags/$tag --pretty=medium | head -n 4 | tail -n +2
         done
     fi
 }

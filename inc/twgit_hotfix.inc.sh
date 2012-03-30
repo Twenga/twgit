@@ -61,6 +61,8 @@ function cmd_list () {
     local hotfixes=$(get_last_hotfixes 1)
     help "Remote current hotfix:"
     display_branches 'hotfix' "$hotfixes"; echo
+
+    alert_dissident_branches
 }
 
 ##
@@ -79,7 +81,7 @@ function cmd_start () {
         local last_tag=$(get_last_tag)
         hotfix=$(get_next_version 'revision')
         local hotfix_fullname="$TWGIT_PREFIX_HOTFIX$hotfix"
-        exec_git_command "git checkout -b $hotfix_fullname $last_tag" "Could not check out tag '$last_tag'!"
+        exec_git_command "git checkout -b $hotfix_fullname tags/$last_tag" "Could not check out tag '$last_tag'!"
         process_first_commit 'hotfix' "$hotfix_fullname"
         process_push_branch $hotfix_fullname
     else

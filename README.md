@@ -31,7 +31,7 @@ More [Installation instructions](https://github.com/Twenga/twgit/wiki/Twgit#wiki
 
 ## Getting started
 
-![Getting started](https://github.com/Twenga/twgit/blob/stable/doc/getting-started.png)
+![Getting started](https://github.com/Twenga/twgit/blob/feature-42/doc/getting-started.png)
 
 ## Documentation
 [French documentation](https://github.com/Twenga/twgit/wiki) is available in wiki, waiting English translation...

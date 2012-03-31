@@ -14,8 +14,6 @@
 # @license http://creativecommons.org/licenses/by-nc-sa/3.0/
 #
 
-assert_git_repository
-
 ##
 # Affiche l'aide de la commande tag.
 #

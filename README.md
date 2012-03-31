@@ -31,22 +31,22 @@ More [Installation instructions](https://github.com/Twenga/twgit/wiki/Twgit#wiki
 
 ## Getting started
 
-![Getting started](https://github.com/Twenga/twgit/blob/feature-42/doc/getting-started.png)
+![Getting started](https://github.com/Twenga/twgit/raw/stable/doc/getting-started.png)
 
 ## Documentation
 [French documentation](https://github.com/Twenga/twgit/wiki) is available in wiki, waiting English translation...
 
 ### Help on command prompt
 
-![twgit](https://github.com/Twenga/twgit/blob/stable/doc/screenshot-twgit.png)
+![twgit](https://github.com/Twenga/twgit/raw/stable/doc/screenshot-twgit.png)
 
-![twgit feature](https://github.com/Twenga/twgit/blob/stable/doc/screenshot-twgit-feature.png)
+![twgit feature](https://github.com/Twenga/twgit/raw/stable/doc/screenshot-twgit-feature.png)
 
-![twgit hotfix](https://github.com/Twenga/twgit/blob/stable/doc/screenshot-twgit-hotfix.png)
+![twgit hotfix](https://github.com/Twenga/twgit/raw/stable/doc/screenshot-twgit-hotfix.png)
 
-![twgit release](https://github.com/Twenga/twgit/blob/stable/doc/screenshot-twgit-release.png)
+![twgit release](https://github.com/Twenga/twgit/raw/stable/doc/screenshot-twgit-release.png)
 
-![twgit tag](https://github.com/Twenga/twgit/blob/stable/doc/screenshot-twgit-tag.png)
+![twgit tag](https://github.com/Twenga/twgit/raw/stable/doc/screenshot-twgit-tag.png)
 
 ## Copyrights & licensing
 See [LICENSE](https://github.com/Twenga/twgit/blob/stable/LICENSE.md) file for details.

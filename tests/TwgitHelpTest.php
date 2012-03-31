@@ -61,7 +61,7 @@ class TwgitHelpTest extends TwgitTestCase
      */
     public function testMainHelp_OnHelpAction ()
     {
-        $sMsg = $this->_exec(TWGIT_EXEC . ' help');
+        $sMsg = $this->_exec('cd ' . TWGIT_TMP_DIR . '; ' . TWGIT_EXEC . ' help');
         $this->assertContains("Usage:\n    twgit <command> [<action>]", $sMsg);
     }
 
@@ -71,7 +71,7 @@ class TwgitHelpTest extends TwgitTestCase
      */
     public function testMainHelp_WithNoAction ()
     {
-        $sMsg = $this->_exec(TWGIT_EXEC);
+        $sMsg = $this->_exec('cd ' . TWGIT_TMP_DIR . '; ' . TWGIT_EXEC);
         $this->assertContains("Usage:\n    twgit <command> [<action>]", $sMsg);
     }
 
@@ -99,7 +99,7 @@ class TwgitHelpTest extends TwgitTestCase
      */
     public function testFeatureHelp_OnHelpAction ()
     {
-        $sMsg = $this->_exec(TWGIT_EXEC . ' feature help');
+        $sMsg = $this->_exec('cd ' . TWGIT_TMP_DIR . '; ' . TWGIT_EXEC . ' feature help');
         $this->assertContains("Usage:\n    twgit feature <action>", $sMsg);
     }
 
@@ -109,7 +109,7 @@ class TwgitHelpTest extends TwgitTestCase
      */
     public function testFeatureHelp_WithNoAction ()
     {
-        $sMsg = $this->_exec(TWGIT_EXEC . ' feature');
+        $sMsg = $this->_exec('cd ' . TWGIT_TMP_DIR . '; ' . TWGIT_EXEC . ' feature');
         $this->assertContains("Usage:\n    twgit feature <action>", $sMsg);
     }
 
@@ -137,7 +137,7 @@ class TwgitHelpTest extends TwgitTestCase
      */
     public function testReleaseHelp_OnHelpAction ()
     {
-        $sMsg = $this->_exec(TWGIT_EXEC . ' release help');
+        $sMsg = $this->_exec('cd ' . TWGIT_TMP_DIR . '; ' . TWGIT_EXEC . ' release help');
         $this->assertContains("Usage:\n    twgit release <action>", $sMsg);
     }
 
@@ -147,7 +147,7 @@ class TwgitHelpTest extends TwgitTestCase
      */
     public function testReleaseHelp_WithNoAction ()
     {
-        $sMsg = $this->_exec(TWGIT_EXEC . ' release');
+        $sMsg = $this->_exec('cd ' . TWGIT_TMP_DIR . '; ' . TWGIT_EXEC . ' release');
         $this->assertContains("Usage:\n    twgit release <action>", $sMsg);
     }
 
@@ -175,7 +175,7 @@ class TwgitHelpTest extends TwgitTestCase
      */
     public function testHotfixHelp_OnHelpAction ()
     {
-        $sMsg = $this->_exec(TWGIT_EXEC . ' hotfix help');
+        $sMsg = $this->_exec('cd ' . TWGIT_TMP_DIR . '; ' . TWGIT_EXEC . ' hotfix help');
         $this->assertContains("Usage:\n    twgit hotfix <action>", $sMsg);
     }
 
@@ -185,7 +185,7 @@ class TwgitHelpTest extends TwgitTestCase
      */
     public function testHotfixHelp_WithNoAction ()
     {
-        $sMsg = $this->_exec(TWGIT_EXEC . ' hotfix');
+        $sMsg = $this->_exec('cd ' . TWGIT_TMP_DIR . '; ' . TWGIT_EXEC . ' hotfix');
         $this->assertContains("Usage:\n    twgit hotfix <action>", $sMsg);
     }
 
@@ -213,7 +213,7 @@ class TwgitHelpTest extends TwgitTestCase
      */
     public function testTagHelp_OnHelpAction ()
     {
-        $sMsg = $this->_exec(TWGIT_EXEC . ' tag help');
+        $sMsg = $this->_exec('cd ' . TWGIT_TMP_DIR . '; ' . TWGIT_EXEC . ' tag help');
         $this->assertContains("Usage:\n    twgit tag <action>", $sMsg);
     }
 
@@ -223,7 +223,7 @@ class TwgitHelpTest extends TwgitTestCase
      */
     public function testTagHelp_WithNoAction ()
     {
-        $sMsg = $this->_exec(TWGIT_EXEC . ' tag');
+        $sMsg = $this->_exec('cd ' . TWGIT_TMP_DIR . '; ' . TWGIT_EXEC . ' tag');
         $this->assertContains("Usage:\n    twgit tag <action>", $sMsg);
     }
 }

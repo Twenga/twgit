@@ -19,13 +19,18 @@ CONF_DIR:="${ROOT_DIR}/conf"
 INSTALL_DIR:="${ROOT_DIR}/install"
 CURRENT_BRANCH:="`git branch --no-color | grep '^\* ' | grep -v 'no branch' | sed 's/^* //g'`"
 
-.PHONY: all help install uninstall
+.PHONY: all doc help install uninstall
 
 default: help
 
+doc:
+	bash ${INSTALL_DIR}/command_prompt_screenshots.sh "${ROOT_DIR}"
+
 help:
-	@echo "Usage: make install"
-	@echo "       make uninstall"
+	@echo "Usage:"
+	@echo "    sudo make install: to install twgit in ${BIN_DIR}, bash completion, config file and colored git prompt"
+	@echo "    sudo make uninstall: to uninstall twgit from ${BIN_DIR} and bash completion"
+	@echo "    make doc: to generate screenshots of help on command prompt"
 
 install:
 	@if [ "${CURRENT_BRANCH}" != "stable" ]; then \

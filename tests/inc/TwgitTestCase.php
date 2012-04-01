@@ -53,6 +53,17 @@ class TwgitTestCase extends PHPUnit_Framework_TestCase
     }
 
     /**
+     * Supprime les couleurs Shell du message spécifié.
+     *
+     * @param string $sMsg
+     * @return string
+     */
+    protected static function stripColors ($sMsg)
+    {
+        return preg_replace('/\x1B\[([0-9]{1,2}(;[0-9]{1,2})?)?[m|K]/', '', $sMsg);
+    }
+
+    /**
      * Exécute la commande shell spécifiée et retourne la sortie d'exécution sous forme d'une chaîne de caractères.
      * L'éventuelle coloration Shell est enlevée.
      * En cas d'erreur shell (code d'erreur <> 0), lance une exception incluant le message d'erreur.
@@ -63,7 +74,15 @@ class TwgitTestCase extends PHPUnit_Framework_TestCase
      */
     protected function _exec ($sCmd)
     {
-        $aResult = self::_rawExec($sCmd);
+        try {
+            $aResult = self::_rawExec($sCmd);
+        } catch (RuntimeException $oException) {
+            throw new RuntimeException(
+                self::stripColors($oException->getMessage()),
+                $oException->getCode(),
+                $oException
+            );
+        }
         $sMsg = preg_replace('/\x1B\[([0-9]{1,2}(;[0-9]{1,2})?)?[m|K]/', '', implode("\n", $aResult));
         return $sMsg;
     }

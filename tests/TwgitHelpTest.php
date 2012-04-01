@@ -51,7 +51,7 @@ class TwgitHelpTest extends TwgitTestCase
      */
     public function testMainHelp_ThrowExcpetionWhenUnknownAction2 ()
     {
-        $this->setExpectedException('RuntimeException', "Usage:\x1B[0;37m\n    \x1B[0;37m\x1B[1;37mtwgit <command> [<action>]");
+        $this->setExpectedException('RuntimeException', "Usage:\n    twgit <command> [<action>]");
         $this->_exec(TWGIT_EXEC . ' unknownaction');
     }
 
@@ -89,7 +89,7 @@ class TwgitHelpTest extends TwgitTestCase
      */
     public function testFeatureHelp_ThrowExcpetionWhenUnknownAction2 ()
     {
-        $this->setExpectedException('RuntimeException', "Usage:\x1B[0;37m\n    \x1B[0;37m\x1B[1;37mtwgit feature <action>");
+        $this->setExpectedException('RuntimeException', "Usage:\n    twgit feature <action>");
         $this->_exec(TWGIT_EXEC . ' feature unknownaction');
     }
 
@@ -127,7 +127,7 @@ class TwgitHelpTest extends TwgitTestCase
      */
     public function testReleaseHelp_ThrowExcpetionWhenUnknownAction2 ()
     {
-        $this->setExpectedException('RuntimeException', "Usage:\x1B[0;37m\n    \x1B[0;37m\x1B[1;37mtwgit release <action>");
+        $this->setExpectedException('RuntimeException', "Usage:\n    twgit release <action>");
         $this->_exec(TWGIT_EXEC . ' release unknownaction');
     }
 
@@ -165,7 +165,7 @@ class TwgitHelpTest extends TwgitTestCase
      */
     public function testHotfixHelp_ThrowExcpetionWhenUnknownAction2 ()
     {
-        $this->setExpectedException('RuntimeException', "Usage:\x1B[0;37m\n    \x1B[0;37m\x1B[1;37mtwgit hotfix <action>");
+        $this->setExpectedException('RuntimeException', "Usage:\n    twgit hotfix <action>");
         $this->_exec(TWGIT_EXEC . ' hotfix unknownaction');
     }
 
@@ -203,7 +203,7 @@ class TwgitHelpTest extends TwgitTestCase
      */
     public function testTagHelp_ThrowExcpetionWhenUnknownAction2 ()
     {
-        $this->setExpectedException('RuntimeException', "Usage:\x1B[0;37m\n    \x1B[0;37m\x1B[1;37mtwgit tag <action>");
+        $this->setExpectedException('RuntimeException', "Usage:\n    twgit tag <action>");
         $this->_exec(TWGIT_EXEC . ' tag unknownaction');
     }
 

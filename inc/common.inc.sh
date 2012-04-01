@@ -104,7 +104,7 @@ function get_merged_features () {
     get_features merged $release
     local features_v2="$GET_FEATURES_RETURN_VALUE"
 
-    [ "$features" != "$features_v2" ] && die "Inconsistent result about merged features: '$features' != '$features_v2'!"
+    [ "$features" != "$features_v2" ] && die "Inconsistent result about merged features: '<b>$features</b>' != '<b>$features_v2</b>'!"
     GET_MERGED_FEATURES_RETURN_VALUE="$features"
 }
 
@@ -426,7 +426,7 @@ function assert_git_configured () {
     if ! git config --global user.name 1>/dev/null; then
         die "Unknown user.name! Please, do: git config --global user.name 'Firstname Lastname'"
     elif ! git config --global user.email 1>/dev/null; then
-        die "Unknown user.email! Please, do: git config --global user.email 'firstname.lastname@twenga.com'"
+        die "Unknown user.email! Please, do: git config --global user.email 'firstname.lastname@xyz.com'"
     fi
 }
 
@@ -442,7 +442,7 @@ function assert_git_repository () {
     assert_recent_git_version "$TWGIT_GIT_MIN_VERSION"
 
     if [ "$(git remote | grep -R "^$TWGIT_ORIGIN$" | wc -l)" -ne 1 ]; then
-        die "No remote '$TWGIT_ORIGIN' repository specified! Try: 'git remote add $TWGIT_ORIGIN <url>'"
+        die "No remote '<b>$TWGIT_ORIGIN</b>' repository specified! Try: 'git remote add $TWGIT_ORIGIN <url>'"
     fi
 
     local stable="$TWGIT_ORIGIN/$TWGIT_STABLE"
@@ -467,17 +467,17 @@ function assert_git_repository () {
 function assert_branches_equal () {
     processing "Compare branches '$1' with '$2'..."
     if ! has $1 $(get_local_branches); then
-        die "Local branch '$1' does not exist and is required!"
+        die "Local branch '<b>$1</b>' does not exist and is required!"
     elif ! has $2 $(get_remote_branches); then
-        die "Remote branch '$2' does not exist and is required!"
+        die "Remote branch '<b>$2</b>' does not exist and is required!"
     fi
 
     compare_branches "$1" "$2"
     local status=$?
     if [ $status -gt 0 ]; then
-        warn "Branches '$1' and '$2' have diverged."
+        warn "Branches '<b>$1</b>' and '<b>$2</b>' have diverged."
         if [ $status -eq 1 ]; then
-            warn "And local branch '$1' may be fast-forwarded!"
+            warn "And local branch '<b>$1</b>' may be fast-forwarded!"
             if ! isset_option 'I'; then
                 echo -n $(question "Pull '$1'? [Y/N] "); read answer
                 [ "$answer" != "Y" ] && [ "$answer" != "y" ] && die "Pull aborted! You must make a 'git pull $TWGIT_ORIGIN $1' to continue."
@@ -486,7 +486,7 @@ function assert_branches_equal () {
             exec_git_command "git merge $2" "Update '$1' failed!"
         elif [ $status -eq 2 ]; then
             # Warn here (not die), since there is no harm in being ahead:
-            warn "And local branch '$1' is ahead of '$2'."
+            warn "And local branch '<b>$1</b>' is ahead of '<b>$2</b>'."
         else
             die "Branches need merging first!"
         fi
@@ -514,20 +514,7 @@ function assert_new_local_branch () {
             help_detail "- or force renewal if feature: twgit feature start -d xxxx"
         else
             exec_git_command "git checkout $branch" "Could not checkout '$branch'!"
-
-            # Informe de la fraîcheur de la branche :
-            compare_branches "$branch" "$TWGIT_ORIGIN/$branch"
-            local status=$?
-            if [ $status -eq 0 ]; then
-                help "Local branch '$branch' up-to-date with remote '$TWGIT_ORIGIN/$branch'."
-            elif [ $status -eq 1 ]; then
-                help "If need be: git merge $TWGIT_ORIGIN/$branch"
-            elif [ $status -eq 2 ]; then
-                help "If need be: git push $TWGIT_ORIGIN $branch"
-            else
-                warn "Branches '$branch' and '$TWGIT_ORIGIN/$branch' have diverged!"
-            fi
-
+            inform_about_branch_status "$branch"
             alert_old_branch "$TWGIT_ORIGIN/$branch" 'with-help'
         fi
         echo
@@ -579,9 +566,9 @@ function assert_valid_tag_name () {
     local tag="$1"
     assert_valid_ref_name "$tag"
     processing 'Check valid tag name...'
-    $(echo "$tag" | grep -qP '^'$TWGIT_PREFIX_TAG'[0-9]+\.[0-9]+\.[0-9]+$') || die "Unauthorized tag name: '$tag'!"
+    $(echo "$tag" | grep -qP '^'$TWGIT_PREFIX_TAG'[0-9]+\.[0-9]+\.[0-9]+$') || die "Unauthorized tag name: '<b>$tag</b>'!"
     processing "Check whether tag '$tag' already exists..."
-    has "$tag" $(get_all_tags) && die "Tag '$tag' already exists! Try: twgit tag list"
+    has "$tag" $(get_all_tags) && die "Tag '<b>$tag</b>' already exists! Try: twgit tag list"
 }
 
 ##
@@ -715,7 +702,7 @@ function remove_remote_branch () {
             exec_git_command "git remote prune $TWGIT_ORIGIN" "Prune failed!"
         fi
     else
-        die "Remote branch '$TWGIT_ORIGIN/$branch' not found!"
+        die "Remote branch '<b>$TWGIT_ORIGIN/$branch</b>' not found!"
     fi
 }
 
@@ -749,7 +736,7 @@ function create_and_push_tag () {
 
     # Create tag:
     processing "${TWGIT_GIT_COMMAND_PROMPT}git tag -a $tag_fullname -m \"${TWGIT_PREFIX_COMMIT_MSG}$commit_msg\""
-    git tag -a $tag_fullname -m "${TWGIT_PREFIX_COMMIT_MSG}$commit_msg" || die "Could not create tag '$tag_fullname'!"
+    git tag -a $tag_fullname -m "${TWGIT_PREFIX_COMMIT_MSG}$commit_msg" || die "Could not create tag '<b>$tag_fullname</b>'!"
 
     # Push tags:
     exec_git_command "git push --tags $TWGIT_ORIGIN $TWGIT_STABLE" "Could not push '$TWGIT_STABLE' on '$TWGIT_ORIGIN'!"
@@ -966,6 +953,29 @@ function displayFeatureSubject () {
 }
 
 ##
+# Informe de l'état de la branche : à jour, en avance, en retard, a divergé.
+# Propose des commandes à exécuter.
+#
+# @param string $1 nom complet d'une branche potentiellement locale
+#
+function inform_about_branch_status () {
+    local branch="$1"
+    compare_branches "$branch" "$TWGIT_ORIGIN/$branch"
+    local status=$?
+    if [ $status -eq 0 ]; then
+        help "Local branch '<b>$branch</b>' up-to-date with remote '<b>$TWGIT_ORIGIN/$branch</b>'."
+    elif [ $status -eq 1 ]; then
+        help "If need be: git merge $TWGIT_ORIGIN/$branch"
+    elif [ $status -eq 2 ]; then
+        help "If need be: git push $TWGIT_ORIGIN $branch"
+    else
+        warn "Branches '<b>$branch</b>' and '<b>$TWGIT_ORIGIN/$branch</b>' have diverged!"
+        help "If need be: git merge $TWGIT_ORIGIN/$branch"
+        help "Then: git push $TWGIT_ORIGIN $branch"
+    fi
+}
+
+##
 # Convertit une liste de valeurs en une ligne CSV au format suivant et l'affiche : "v1";"va""lue2";"v\'3"
 #
 # @param string $@ liste de valeurs
@@ -1027,7 +1037,7 @@ function init () {
 
     processing "Check presence of remote '$TWGIT_ORIGIN' repository..."
     if [ "$(git remote | grep -R "^$TWGIT_ORIGIN$" | wc -l)" -ne 1 ]; then
-        [ -z "$remote_url" ] && die "Remote '$TWGIT_ORIGIN' repository url required!"
+        [ -z "$remote_url" ] && die "Remote '<b>$TWGIT_ORIGIN</b>' repository url required!"
         exec_git_command "git remote add origin $remote_url" 'Add remote repository failed!'
     fi
     process_fetch

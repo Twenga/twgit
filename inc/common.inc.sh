@@ -872,7 +872,10 @@ function display_branches () {
 # @param string $2 si présent et vaut 'with-help', alors une suggestion de merge sera proposée
 #
 function alert_old_branch () {
-    get_tags_not_merged_into_branch "$1"
+    local branch_fullname="$1"
+    local branch="${branch_fullname#$TWGIT_ORIGIN/}"
+
+    get_tags_not_merged_into_branch "$branch_fullname"
     local tags_not_merged="$GET_TAGS_NOT_MERGED_INTO_BRANCH_RETURN_VALUE"
     local nb_tags_no_merged="$(echo "$tags_not_merged" | wc -w)"
 
@@ -884,7 +887,7 @@ function alert_old_branch () {
         msg="${msg} not merged into this branch:"
         [ "$nb_tags_no_merged" -eq "$TWGIT_MAX_RETRIEVE_TAGS_NOT_MERGED" ] && msg="${msg} at least"
         msg="${msg} $(displayInterval "$tags_not_merged")."
-        [ "$2" = 'with-help' ] && msg="${msg} If need be: git merge --no-ff $(get_last_tag)"
+        [ "$2" = 'with-help' ] && msg="${msg} If need be: git merge --no-ff $(get_last_tag), then: git push $TWGIT_ORIGIN $branch"
         warn "$msg"
     fi
 }

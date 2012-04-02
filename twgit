@@ -149,6 +149,7 @@ function main () {
         usage
         exit 1
     else
+        [ "$action" != 'help' ] && assert_git_repository
         $action_func_name "$@"
     fi
 }

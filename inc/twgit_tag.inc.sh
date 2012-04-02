@@ -14,8 +14,6 @@
 # @license http://creativecommons.org/licenses/by-nc-sa/3.0/
 #
 
-assert_git_repository
-
 ##
 # Affiche l'aide de la commande tag.
 #
@@ -56,7 +54,7 @@ function cmd_list () {
     else
         for tag in $tags; do
             info "Tag: $tag"
-            git show $tag --pretty=medium | head -n 4 | tail -n +2
+            git show tags/$tag --pretty=medium | head -n 4 | tail -n +2
         done
     fi
 }

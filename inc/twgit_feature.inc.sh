@@ -14,8 +14,6 @@
 # @license http://creativecommons.org/licenses/by-nc-sa/3.0/
 #
 
-assert_git_repository
-
 ##
 # Affiche l'aide de la commande tag.
 #
@@ -40,13 +38,19 @@ function usage () {
     help_detail '<b>remove <featurename></b>'
     help_detail '    Remove both local and remote specified feature branch.'; echo
     help_detail '<b>show-modified-files [<featurename>]</b>'
-    help_detail '    List created/modified/deleted files of the current feature branch since'
-    help_detail '    its creation. If no <b><featurename></b> is specified, then use current feature.'; echo
+    help_detail '    List created/modified/deleted files of the specified feature branch since'
+    help_detail '    its creation (from commits). If no <b><featurename></b> is specified, then use'
+    help_detail '    current feature.'; echo
     help_detail '<b>start <featurename> [-d]</b>'
     help_detail '    Create both a new local and remote feature, or fetch the remote feature,'
     help_detail '    or checkout the local feature. Add <b>-d</b> to delete beforehand local feature'
     help_detail '    if exists.'
     help_detail "    Prefix '$TWGIT_PREFIX_FEATURE' will be added to the specified <b><featurename></b>."; echo
+    help_detail '<b>status [<featurename>]</b>'
+    help_detail '    Display information about specified feature: long name if a connector is'
+    help_detail '    setted, last commit, status between local and remote feature and execute'
+    help_detail '    a git status if specified feature is the current branch.'
+    help_detail '    If no <b><featurename></b> is specified, then use current feature.'; echo
     help_detail '<b>[help]</b>'
     help_detail '    Display this help.'; echo
 }
@@ -143,13 +147,7 @@ function cmd_list () {
     else
         help "Remote free features:"
         display_branches 'feature' "$features"; echo
-    fi
-
-    if ! isset_option 'x'; then
-        local dissident_branches="$(get_dissident_remote_branches)"
-        if [ ! -z "$dissident_branches" ]; then
-            warn "Following branches are out of process: $(displayQuotedEnum $dissident_branches)!"; echo
-        fi
+        alert_dissident_branches
     fi
 }
 
@@ -227,11 +225,62 @@ function cmd_start () {
     else
         assert_tag_exists
         local last_tag=$(get_last_tag)
-        exec_git_command "git checkout -b $feature_fullname $last_tag" "Could not check out tag '$last_tag'!"
+        exec_git_command "git checkout -b $feature_fullname tags/$last_tag" "Could not check out tag '$last_tag'!"
         process_first_commit 'feature' "$feature_fullname"
+
+        local subject="$(getFeatureSubject "$feature")"
+        [ ! -z "$subject" ] && subject=": $subject"
+        process_first_commit 'feature' "$feature_fullname" "$subject"
+
         process_push_branch $feature_fullname
+        inform_about_branch_status $feature_fullname
     fi
     alert_old_branch $TWGIT_ORIGIN/$feature_fullname with-help
+    echo
+}
+
+##
+# Affiche des informations sur la feature courante :
+# - nom long si un connecteur est configuré,
+# - info sur le dernier commit,
+# - info et conseil sur le statut de la version locale par rapport la distante,
+# - un git status si la feature fournie est celle courante.
+# Aucun git fetch n'est effectué.
+#
+# @param string $1 l'éventuelle feature pour la demande de status, sinon la feature courante est utilisée
+#
+function cmd_status () {
+    process_options "$@"
+    require_parameter '-'
+    local feature="$RETVAL"
+    local current_branch=$(get_current_branch)
+
+    # Si feature non spécifiée, récupérer la courante :
+    local feature_fullname
+    if [ -z "$feature" ]; then
+        local all_features=$(git branch -r | grep "$TWGIT_ORIGIN/$TWGIT_PREFIX_FEATURE" | sed 's/^[* ]*//' | tr '\n' ' ' | sed 's/ *$//g')
+        if ! has "$TWGIT_ORIGIN/$current_branch" $all_features; then
+            die "You must be in a feature if you didn't specify one!"
+        fi
+        feature_fullname="$current_branch"
+    else
+        feature_fullname="$TWGIT_PREFIX_FEATURE$feature"
+        if ! has $feature_fullname $(get_local_branches); then
+            die "Local branch '<b>$feature_fullname</b>' does not exist and is required!"
+        fi
+    fi
+
+    echo
+    display_branches 'feature' "$TWGIT_ORIGIN/$feature_fullname"
+    echo
+    inform_about_branch_status $feature_fullname
+    if [ "$feature_fullname" = "$current_branch" ]; then
+        exec_git_command "git status" "Error while git status!"
+        if [ "$(git config --get color.status)" != 'always' ]; then
+            echo
+            help "Try this to get colored status in this command: git config --global color.status always"
+        fi
+    fi
     echo
 }
 
@@ -261,7 +310,7 @@ function cmd_merge-into-release () {
         local all_features=$(git branch -r --no-merged $TWGIT_ORIGIN/$TWGIT_STABLE | grep "$TWGIT_ORIGIN/$TWGIT_PREFIX_FEATURE" | sed 's/^[* ]*//' | tr '\n' ' ' | sed 's/ *$//g')
         local current_branch=$(get_current_branch)
         if ! has "$TWGIT_ORIGIN/$current_branch" $all_features; then
-            die "You must be in a feature if you don't specified one!"
+            die "You must be in a feature if you didn't specify one!"
         else
             echo -n $(question "Are you sure to merge '$TWGIT_ORIGIN/$current_branch' into '$TWGIT_ORIGIN/$release_fullname'? [Y/N] "); read answer
             [ "$answer" != "Y" ] && [ "$answer" != "y" ] && die 'Merge into current release aborted!'
@@ -279,9 +328,9 @@ function cmd_merge-into-release () {
     fi
 
     # Merge :
-    local cmds="twgit feature start $feature
+    local cmds="$TWGIT_EXEC feature start $feature
 git pull $TWGIT_ORIGIN $feature_fullname
-twgit release start
+$TWGIT_EXEC release start
 git pull $TWGIT_ORIGIN $release_fullname
 git merge --no-ff $feature_fullname
 git push $TWGIT_ORIGIN $release_fullname"
@@ -292,8 +341,8 @@ git push $TWGIT_ORIGIN $release_fullname"
         if [ "$error" -ne 0 ]; then
             help_detail "$cmd"
         else
-            [ "${cmd:0:6}" = 'twgit ' ] && prefix='shell# ' || prefix="${TWGIT_GIT_COMMAND_PROMPT}"
-            processing "$prefix$cmd"
+            [ "${cmd:0:${#TWGIT_EXEC}+1}" = "$TWGIT_EXEC " ] && msg="shell# twgit ${cmd:${#TWGIT_EXEC}+1}" || msg="${TWGIT_GIT_COMMAND_PROMPT}$cmd"
+            processing "$msg"
             if ! eval $cmd; then
                 error=1
                 error "Merge '$feature_fullname' into '$release_fullname' aborted!"
@@ -325,7 +374,8 @@ function cmd_remove () {
 }
 
 ##
-# Liste les fichiers créés, modifiés ou supprimés dans la feature spécifiée depuis sa création.
+# Liste les fichiers créés, modifiés ou supprimés dans la feature spécifiée depuis sa création,
+# en inspectant les commits.
 #
 # @param string $1 l'éventuelle feature à analyser, sinon la feature courante sera utilisée
 #

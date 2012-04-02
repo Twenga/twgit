@@ -42,7 +42,7 @@ TWGIT_ORIGIN='origin'
 TWGIT_STABLE='stable'
 
 TWGIT_PREFIX_COMMIT_MSG='[twgit] '
-TWGIT_FIRST_COMMIT_MSG="${TWGIT_PREFIX_COMMIT_MSG}Init %s '%s'."	# ie: [twgit] Init feature 'feature-1'.
+TWGIT_FIRST_COMMIT_MSG="${TWGIT_PREFIX_COMMIT_MSG}Init %s '%s'%s."	# ie: [twgit] Init feature 'feature-1': full title.
 TWGIT_GIT_COMMAND_PROMPT='git# '
 TWGIT_GIT_MIN_VERSION='1.7.2.0'
 

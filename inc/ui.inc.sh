@@ -18,6 +18,7 @@ declare -A UI
 UI=(
     [error.header]='\033[1m\033[4;33m/!\\\033[0;37m '
     [error.color]='\033[1;31m'
+    [error.bold.color]='\033[1;33m'
     [info.color]='\033[1;37m'
     [feature_subject.color]='\033[1;34m'
     [help.header]='\033[1;36m(i) '

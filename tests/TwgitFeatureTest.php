@@ -70,4 +70,28 @@ class TwgitFeatureTest extends TwgitTestCase
         $this->assertNotContains("warning: refname 'v1.2.3' is ambiguous.", $sMsg);
     }
 
+    /**
+     */
+    public function testStart_WithNoConnectorSetted ()
+    {
+        $this->_remoteExec('git init');
+        $this->_localExec(TWGIT_EXEC . ' init 1.2.3 ' . TWGIT_REPOSITORY_ORIGIN_DIR);
+
+        $this->_localShellCodeCall('function getFeatureSubject(){ echo;}; . \$TWGIT_INC_DIR/twgit_feature.inc.sh; cmd_start 1');
+        $sMsg = $this->_localExec('git show HEAD --format="%s"');
+        $this->assertEquals("[twgit] Init feature 'feature-1'.", $sMsg);
+    }
+
+    /**
+     */
+    public function testStart_WithConnectorSetted ()
+    {
+        $this->_remoteExec('git init');
+        $this->_localExec(TWGIT_EXEC . ' init 1.2.3 ' . TWGIT_REPOSITORY_ORIGIN_DIR);
+
+        $this->_localShellCodeCall('function getFeatureSubject(){ echo \"Bla\'\\\\\"bla\";}; . \$TWGIT_INC_DIR/twgit_feature.inc.sh; cmd_start 1');
+        $sMsg = $this->_localExec('git show HEAD --format="%s"');
+        $this->assertEquals("[twgit] Init feature 'feature-1': Bla'\"bla.", $sMsg);
+    }
+
 }

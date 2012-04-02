@@ -228,7 +228,11 @@ function cmd_start () {
         assert_tag_exists
         local last_tag=$(get_last_tag)
         exec_git_command "git checkout -b $feature_fullname $last_tag" "Could not check out tag '$last_tag'!"
-        process_first_commit 'feature' "$feature_fullname"
+
+        local subject="$(getFeatureSubject "$feature")"
+        [ ! -z "$subject" ] && subject=": $subject"
+        process_first_commit 'feature' "$feature_fullname" "$subject"
+
         process_push_branch $feature_fullname
     fi
     alert_old_branch $TWGIT_ORIGIN/$feature_fullname with-help

@@ -646,10 +646,11 @@ function process_fetch () {
 #
 # @param string $1 titre à inclure dans le message de commit
 # @param string $2 nom complet de la branche à décaler
+# @param string $3 éventuelle description additionnelle
 # @see $TWGIT_FIRST_COMMIT_MSG
 #
 function process_first_commit () {
-    local commit_msg=$(printf "$TWGIT_FIRST_COMMIT_MSG" "$1" "$2")
+    local commit_msg=$(printf "$TWGIT_FIRST_COMMIT_MSG" "$1" "$2" "$3")
     processing "${TWGIT_GIT_COMMAND_PROMPT}git commit --allow-empty -m \"$commit_msg\""
     git commit --allow-empty -m "$commit_msg" || die 'Could not make initial commit!'
 }

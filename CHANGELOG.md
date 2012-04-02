@@ -1,6 +1,36 @@
 ChangeLog
 =========
 
+## Version 1.6.0 (2012-04-02)
+
+Features:
+
+  - #41: Add subject in commit messages of `twgit feature start` when a connector (github, redmine) is setted.
+**Must update** `TWGIT_FIRST_COMMIT_MSG` parameter of `conf/twgit.sh` :
+
+```bash
+TWGIT_FIRST_COMMIT_MSG="${TWGIT_PREFIX_COMMIT_MSG}Init %s '%s'%s."
+```
+
+  - #40: Make scripts more secure if a bad branch is created with the same name of a tag.
+  - #38: Add `twgit feature status [<featurename>]`
+  - #37: Check not exists branches with same name as tag
+
+Unit tests:
+
+  - #34: Add unit tests on `get_features()` and other similar functions
+  - estimated code coverage: 22%
+
+Doc:
+
+  - #42: Add some doc to README: Getting started, help on command prompt, ...
+
+Fix:
+
+  - #44: Installer creates conf/twgit.sh with root permissions
+  - #43: Help on command prompt is not accessible if not in a git repository
+  - #39: Error message when twgit release reset: `/!\ Tag 'vx.y.z' already exists!`
+
 ## Version 1.5.1 (2012-03-05)
 
 Fixes:

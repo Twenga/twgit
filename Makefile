@@ -44,7 +44,7 @@ install:
 		echo "Config file '${CONF_DIR}/twgit.sh' already existing."; \
 	else \
 		echo "Copy config file from '${CONF_DIR}/twgit-dist.sh' to '${CONF_DIR}/twgit.sh'"; \
-		cp -n "${CONF_DIR}/twgit-dist.sh" "${CONF_DIR}/twgit.sh"; \
+		cp --preserve=ownership -n "${CONF_DIR}/twgit-dist.sh" "${CONF_DIR}/twgit.sh"; \
 	fi
 
 	@if test ! -z "`cat ~/.bashrc | grep -E '\.bash_git' | grep -vE '^#'`"; then \

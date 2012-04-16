@@ -1,7 +1,8 @@
 #!/bin/bash
 
 ##
-# @author Geoffroy AUBRY <geoffroy.aubry@hi-media.com>
+# @copyright 2012 Geoffroy Aubry <geoffroy.aubry@free.fr>
+# @license http://www.apache.org/licenses/LICENSE-2.0
 #
 
 

@@ -5,7 +5,7 @@
  *
  * @package Lib
  * @copyright 2012 Geoffroy Aubry <geoffroy.aubry@free.fr>
- * @license http://creativecommons.org/licenses/by-nc-sa/3.0/
+ * @license http://www.apache.org/licenses/LICENSE-2.0
  * @see Shell_Interface::getPathStatus()
  */
 final class Shell_PathStatus

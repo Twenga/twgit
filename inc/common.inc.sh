@@ -576,7 +576,8 @@ function assert_valid_tag_name () {
     local tag="$1"
     assert_valid_ref_name "$tag"
     processing 'Check valid tag name...'
-    $(echo "$tag" | grep -qP '^'$TWGIT_PREFIX_TAG'[0-9]+\.[0-9]+\.[0-9]+$') || die "Unauthorized tag name: '<b>$tag</b>'!"
+    $(echo "$tag" | grep -qP '^'$TWGIT_PREFIX_TAG'[0-9]+\.[0-9]+\.[0-9]+$') || \
+        die "Unauthorized tag name: '<b>$tag</b>'! Must use major.minor.revision format, e.g. 1.2.3."
     processing "Check whether tag '$tag' already exists..."
     has "$tag" $(get_all_tags) && die "Tag '<b>$tag</b>' already exists! Try: twgit tag list"
 }

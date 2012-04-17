@@ -44,13 +44,14 @@ function usage () {
     help_detail '<b>start <featurename> [-d]</b>'
     help_detail '    Create both a new local and remote feature, or fetch the remote feature,'
     help_detail '    or checkout the local feature. Add <b>-d</b> to delete beforehand local feature'
-    help_detail '    if exists.'
-    help_detail "    Prefix '$TWGIT_PREFIX_FEATURE' will be added to the specified <b><featurename></b>."; echo
+    help_detail '    if exists.'; echo
     help_detail '<b>status [<featurename>]</b>'
     help_detail '    Display information about specified feature: long name if a connector is'
     help_detail '    setted, last commit, status between local and remote feature and execute'
     help_detail '    a git status if specified feature is the current branch.'
     help_detail '    If no <b><featurename></b> is specified, then use current feature.'; echo
+    help_detail "Prefix '$TWGIT_PREFIX_FEATURE' will be added to <b><featurename></b> and <b><newfeaturename></b>"
+    help_detail "parameters."; echo
     help_detail '<b>[help]</b>'
     help_detail '    Display this help.'; echo
 }

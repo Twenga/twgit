@@ -340,8 +340,7 @@ function get_tags_not_merged_into_branch () {
     for t in $inverted_tags_not_merged; do
         tags_not_merged="$t $tags_not_merged"
     done
-
-    GET_TAGS_NOT_MERGED_INTO_BRANCH_RETURN_VALUE="${tags_not_merged:1}"
+    GET_TAGS_NOT_MERGED_INTO_BRANCH_RETURN_VALUE="${tags_not_merged% }"
 }
 
 ##

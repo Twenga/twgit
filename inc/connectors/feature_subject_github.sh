@@ -30,7 +30,10 @@
 # @param string $1 issue name
 #
 issue="$1"
-url="$(printf "$TWGIT_FEATURE_SUBJECT_GITHUB_URL" "$issue")"
-wget -q -O - --no-cache $url \
-    | php -r '$o = json_decode(file_get_contents("php://stdin")); print_r($o->issue->title);'
+url="$(printf "https://github.com/api/v2/json/issues/show/%s/%s/%s" \
+        "$TWGIT_FEATURE_SUBJECT_GITHUB_USER" \
+        "$TWGIT_FEATURE_SUBJECT_GITHUB_REPOSITORY" \
+        "$issue")"
+(wget -q -O - --no-cache $url \
+    | php -r '$o = json_decode(file_get_contents("php://stdin")); if ($o !== NULL) {print_r($o->issue->title);}')
     2>/dev/null

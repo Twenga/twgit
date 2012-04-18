@@ -18,10 +18,18 @@
 ##
 # Retrive and display subject of a Redmine's issue.
 #
-# @param string $1 issue name
+# @param string $1 issue number or project name
 #
-issue="$1"
-url="$(printf "$TWGIT_FEATURE_SUBJECT_REDMINE_URL" "$issue")"
-wget -q -O - --no-cache $url \
-    | php -r '$o = json_decode(file_get_contents("php://stdin")); print_r($o->issue->subject);'
+ref="$1"
+issue_url="https://$TWGIT_FEATURE_SUBJECT_REDMINE_DOMAIN/issues/$ref.json?key=$TWGIT_FEATURE_SUBJECT_REDMINE_API_KEY"
+project_url="https://$TWGIT_FEATURE_SUBJECT_REDMINE_DOMAIN/projects/$ref.json?key=$TWGIT_FEATURE_SUBJECT_REDMINE_API_KEY"
+
+if [[ "$ref" =~ ^[0-9]+$ ]]; then
+    (wget -q -O - --no-cache $issue_url \
+    | php -r '$o = json_decode(file_get_contents("php://stdin")); if ($o !== NULL) {print_r($o->issue->subject);}')
     2>/dev/null
+else
+    (wget -q -O - --no-cache $project_url \
+    | php -r '$o = json_decode(file_get_contents("php://stdin")); if ($o !== NULL) {print_r($o->project->name);}')
+    2>/dev/null
+fi

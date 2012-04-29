@@ -43,6 +43,7 @@ UI=(
     [warning.color]='\033[0;33m'
     [warning.bold.color]='\033[1;33m'
     [question.color]='\033[1;33m'
+    [question.bold.color]='\033[1;37m'
     [processing.color]='\033[1;30m'
     [ok.color]='\033[0;32m'
 )

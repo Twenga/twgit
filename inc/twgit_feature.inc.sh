@@ -278,7 +278,7 @@ function cmd_status () {
         exec_git_command "git status" "Error while git status!"
         if [ "$(git config --get color.status)" != 'always' ]; then
             echo
-            help "Try this to get colored status in this command: git config --global color.status always"
+            help "Try this to get colored status in this command: <b>git config --global color.status always</b>"
         fi
     fi
     echo

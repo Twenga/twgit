@@ -6,7 +6,7 @@ ChangeLog
 Features:
 
   - #41: Add subject in commit messages of `twgit feature start` when a connector (github, redmine) is setted.
-**Must update** `TWGIT_FIRST_COMMIT_MSG` parameter of `conf/twgit.sh` :
+**Must update** `TWGIT_FIRST_COMMIT_MSG` parameter of `conf/twgit.sh`:
 
 ```bash
 TWGIT_FIRST_COMMIT_MSG="${TWGIT_PREFIX_COMMIT_MSG}Init %s '%s'%s."

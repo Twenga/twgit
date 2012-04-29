@@ -49,6 +49,7 @@ More [Installation instructions](https://github.com/Twenga/twgit/wiki/Twgit#wiki
 ![twgit tag](https://github.com/Twenga/twgit/raw/stable/doc/screenshot-twgit-tag.png)
 
 ## Copyrights & licensing
+Licensed under the Apache License 2.0.
 See [LICENSE](https://github.com/Twenga/twgit/blob/stable/LICENSE) file for details.
 
 ## ChangeLog

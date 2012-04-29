@@ -1,6 +1,26 @@
 ChangeLog
 =========
 
+## Version 1.7.0 (2012-04-29)
+
+Features:
+
+  - #48: Enhance update procedure: display news of CHANGELOG, Bash autocompletion update, and evolution of config file.
+  - #18: Fetch title of Redmine (sub)project for (sub)project feature
+
+Other:
+
+  - #45: Change license to Apache 2.0
+
+Doc:
+
+  - #47: Contextual help for twgit init need more precision on tag format
+  - #46: Fix "Getting started" graph
+
+Fix:
+
+  - #49: Two init commit nodes are created when starting a new feature
+
 ## Version 1.6.0 (2012-04-02)
 
 Features:

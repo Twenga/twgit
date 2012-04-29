@@ -3,16 +3,26 @@
 ##
 # twgit
 #
-# Copyright (c) 2011 Twenga SA.
 #
-# This work is licensed under the Creative Commons Attribution-NonCommercial-ShareAlike 3.0 Unported License.
-# To view a copy of this license, visit http://creativecommons.org/licenses/by-nc-sa/3.0/
-# or send a letter to Creative Commons, 444 Castro Street, Suite 900, Mountain View, California, 94041, USA.
+#
+# Copyright (c) 2011 Twenga SA
+# Copyright (c) 2012 Geoffroy Aubry <geoffroy.aubry@free.fr>
+#
+# Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance
+# with the License. You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software distributed under the License is distributed
+# on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License
+# for the specific language governing permissions and limitations under the License.
 #
 # @copyright 2011 Twenga SA
 # @copyright 2012 Geoffroy Aubry <geoffroy.aubry@free.fr>
-# @license http://creativecommons.org/licenses/by-nc-sa/3.0/
+# @license http://www.apache.org/licenses/LICENSE-2.0
 #
+
+
 
 . $TWGIT_INC_DIR/options_handler.inc.sh
 . $TWGIT_INC_DIR/ui.inc.sh
@@ -330,8 +340,7 @@ function get_tags_not_merged_into_branch () {
     for t in $inverted_tags_not_merged; do
         tags_not_merged="$t $tags_not_merged"
     done
-
-    GET_TAGS_NOT_MERGED_INTO_BRANCH_RETURN_VALUE="${tags_not_merged:1}"
+    GET_TAGS_NOT_MERGED_INTO_BRANCH_RETURN_VALUE="${tags_not_merged% }"
 }
 
 ##
@@ -566,7 +575,8 @@ function assert_valid_tag_name () {
     local tag="$1"
     assert_valid_ref_name "$tag"
     processing 'Check valid tag name...'
-    $(echo "$tag" | grep -qP '^'$TWGIT_PREFIX_TAG'[0-9]+\.[0-9]+\.[0-9]+$') || die "Unauthorized tag name: '<b>$tag</b>'!"
+    $(echo "$tag" | grep -qP '^'$TWGIT_PREFIX_TAG'[0-9]+\.[0-9]+\.[0-9]+$') || \
+        die "Unauthorized tag name: '<b>$tag</b>'! Must use major.minor.revision format, e.g. 1.2.3."
     processing "Check whether tag '$tag' already exists..."
     has "$tag" $(get_all_tags) && die "Tag '<b>$tag</b>' already exists! Try: twgit tag list"
 }
@@ -1092,6 +1102,33 @@ function display_rank_contributors () {
 }
 
 ##
+# Display section of CHANGELOG.md from $from_tag (exclusive) to $to_tag (inclusive).
+#
+# @param string $1 Full name of $from_tag
+# @param string $2 Full name of $to_tag
+#
+function displayChangelogSection () {
+    local from_tag="$1"
+    local to_tag="$2"
+
+    local content="$(git show $to_tag:CHANGELOG.md)";
+    content="## Version $(echo "${content#*## Version }")";
+    content="$(echo "${content%## Version ${from_tag:1}*}")";
+    content="$(echo -e "$content\n" | sed -r ':a;N;$!ba;s/\n\n(  -|```)/\n\1/g')";
+
+    local line
+    while read line; do
+        if [[ "$line" =~ ^## ]]; then
+            help "${line:3}"
+        elif [[ "$line" =~ ^[^-*\`].*:$ ]]; then
+            info "$line"
+        else
+            echo "  $line"
+        fi;
+    done <<< "$content"
+}
+
+##
 # Permet la mise à jour automatique de l'application dans le cas où le .git est toujours présent.
 # Tous les $TWGIT_UPDATE_NB_DAYS jours un fetch sera exécuté afin de proposer à l'utilisateur une
 # éventuelle MAJ. Qu'il décline ou non, le prochain passage aura lieu dans à nouveau $TWGIT_UPDATE_NB_DAYS jours.
@@ -1115,17 +1152,53 @@ function autoupdate () {
             processing "Fetch twgit repository for auto-update check..."
             git fetch
 
+            # Retrieve both current and last tag:
             assert_tag_exists
-            local current_tag="$(git describe)"
+            local current_tag="$(git describe --abbrev=0)"
+            local current_ref_on_top=''
+            if [ "$(git describe)" != "$current_tag" ]; then
+                current_ref_on_top="$(git describe | sed -r 's/^.*-g//')"
+            fi
             local last_tag="$(get_last_tag)"
-            if [ "$current_tag" != "$last_tag" ]; then
-                echo -n $(question "Update $last_tag available! Do you want to update twgit (or manually: twgit update)? [Y/N] ")
+
+            # If new update:
+            if [ "$current_tag$current_ref_on_top" != "$last_tag" ]; then
+
+                echo 'New content of CHANGELOG.md:'
+                displayChangelogSection "$current_tag" "$last_tag"
+
+                # Question:
+                local question
+                if [ "$current_tag" != "$last_tag" ]; then
+                    question="Do you want to update twgit from <b>$current_tag</b> to <b>$last_tag</b> (or manually: twgit update)? [Y/N] "
+                else
+                    question="You are ahead of last tag <b>$last_tag</b>. Would you like to return to it? [Y/N] "
+                fi
+                echo -n $(question "$question")
+
+                # Read answer:
                 read answer
                 if [ "$answer" = "Y" ] || [ "$answer" = "y" ]; then
                     processing 'Update in progress...'
                     exec_git_command 'git reset --hard' 'Hard reset failed!'
                     exec_git_command "git checkout tags/$last_tag" "Could not check out tag '$last_tag'!"
                     > "$TWGIT_FEATURES_SUBJECT_PATH"
+
+                    # Bash autcompletion updated?
+                    if ! git diff --quiet "$current_tag" "$last_tag" -- install/bash_completion.sh; then
+                        warn "Bash autocompletion updated. Please restart your Bash session or try: <b>source ~/.bashrc</b>";
+                    fi
+
+                    # Config file updated?
+                    if ! git diff --quiet "$current_tag" "$last_tag" -- $TWGIT_CONF_DIR/twgit-dist.sh; then
+                        warn "Config file updated! \
+Please consider the following diff between old and new version of <b>$TWGIT_CONF_DIR/twgit-dist.sh</b>, \
+then consequently update <b>$TWGIT_CONF_DIR/twgit.sh</b>";
+                        git diff "$current_tag" "$last_tag" -- $TWGIT_CONF_DIR/twgit-dist.sh
+                        if [ "$(git config --get color.diff)" != 'always' ]; then
+                            help "Try this to get colored diff in this command: <b>git config --global color.diff always</b>"
+                        fi
+                    fi
                 fi
             else
                 processing 'Twgit already up-to-date.'

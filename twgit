@@ -23,15 +23,21 @@
 #
 #
 #
-# Copyright (c) 2011 Twenga SA.
+# Copyright (c) 2011 Twenga SA
+# Copyright (c) 2012 Geoffroy Aubry <geoffroy.aubry@free.fr>
 #
-# This work is licensed under the Creative Commons Attribution-NonCommercial-ShareAlike 3.0 Unported License.
-# To view a copy of this license, visit http://creativecommons.org/licenses/by-nc-sa/3.0/
-# or send a letter to Creative Commons, 444 Castro Street, Suite 900, Mountain View, California, 94041, USA.
+# Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance
+# with the License. You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software distributed under the License is distributed
+# on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License
+# for the specific language governing permissions and limitations under the License.
 #
 # @copyright 2011 Twenga SA
 # @copyright 2012 Geoffroy Aubry <geoffroy.aubry@free.fr>
-# @license http://creativecommons.org/licenses/by-nc-sa/3.0/
+# @license http://www.apache.org/licenses/LICENSE-2.0
 #
 
 
@@ -73,13 +79,15 @@ function usage () {
     help_detail '<b>tag</b>       Manage your tags.'
     echo
     help_detail '<b>clean</b>     Help to remove branches no longer tracked.'
-    help_detail '<b>init <starttag> [<url>]</b>'
+    help_detail '<b>init <tagname> [<url>]</b>'
     help_detail '          Initialize git repository for twgit:'
-    help_detail '           - git init if necessary'
-    help_detail "           - add remote $TWGIT_ORIGIN <b><url></b> if necessary"
-    help_detail "           - create '$TWGIT_STABLE' branch if not exists,"
-    help_detail "             or pull '$TWGIT_ORIGIN/$TWGIT_STABLE' branch if exists"
-    help_detail '           - create the <b><starttag></b> tag on HEAD of stable'
+    help_detail '            - git init if necessary'
+    help_detail "            - add remote $TWGIT_ORIGIN <b><url></b> if necessary"
+    help_detail "            - create '$TWGIT_STABLE' branch if not exists, or pull '$TWGIT_ORIGIN/$TWGIT_STABLE'"
+    help_detail "              branch if exists"
+    help_detail '            - create <b><tagname></b> tag on HEAD of stable, e.g. 1.2.3, using'
+    help_detail '              major.minor.revision format. '
+    help_detail "              Prefix '$TWGIT_PREFIX_TAG' will be added to the specified <b><tagname></b>."
     help_detail '          A remote repository must exists.'
     help_detail '<b>update</b>    Force update twgit check.'
     help_detail '<b>[help]</b>    Display this help.'

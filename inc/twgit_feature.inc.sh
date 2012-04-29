@@ -3,16 +3,26 @@
 ##
 # twgit
 #
-# Copyright (c) 2011 Twenga SA.
 #
-# This work is licensed under the Creative Commons Attribution-NonCommercial-ShareAlike 3.0 Unported License.
-# To view a copy of this license, visit http://creativecommons.org/licenses/by-nc-sa/3.0/
-# or send a letter to Creative Commons, 444 Castro Street, Suite 900, Mountain View, California, 94041, USA.
+#
+# Copyright (c) 2011 Twenga SA
+# Copyright (c) 2012 Geoffroy Aubry <geoffroy.aubry@free.fr>
+#
+# Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance
+# with the License. You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software distributed under the License is distributed
+# on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License
+# for the specific language governing permissions and limitations under the License.
 #
 # @copyright 2011 Twenga SA
 # @copyright 2012 Geoffroy Aubry <geoffroy.aubry@free.fr>
-# @license http://creativecommons.org/licenses/by-nc-sa/3.0/
+# @license http://www.apache.org/licenses/LICENSE-2.0
 #
+
+
 
 ##
 # Affiche l'aide de la commande tag.
@@ -44,13 +54,14 @@ function usage () {
     help_detail '<b>start <featurename> [-d]</b>'
     help_detail '    Create both a new local and remote feature, or fetch the remote feature,'
     help_detail '    or checkout the local feature. Add <b>-d</b> to delete beforehand local feature'
-    help_detail '    if exists.'
-    help_detail "    Prefix '$TWGIT_PREFIX_FEATURE' will be added to the specified <b><featurename></b>."; echo
+    help_detail '    if exists.'; echo
     help_detail '<b>status [<featurename>]</b>'
     help_detail '    Display information about specified feature: long name if a connector is'
     help_detail '    setted, last commit, status between local and remote feature and execute'
     help_detail '    a git status if specified feature is the current branch.'
     help_detail '    If no <b><featurename></b> is specified, then use current feature.'; echo
+    help_detail "Prefix '$TWGIT_PREFIX_FEATURE' will be added to <b><featurename></b> and <b><newfeaturename></b>"
+    help_detail "parameters."; echo
     help_detail '<b>[help]</b>'
     help_detail '    Display this help.'; echo
 }
@@ -226,7 +237,6 @@ function cmd_start () {
         assert_tag_exists
         local last_tag=$(get_last_tag)
         exec_git_command "git checkout -b $feature_fullname tags/$last_tag" "Could not check out tag '$last_tag'!"
-        process_first_commit 'feature' "$feature_fullname"
 
         local subject="$(getFeatureSubject "$feature")"
         [ ! -z "$subject" ] && subject=": $subject"
@@ -278,7 +288,7 @@ function cmd_status () {
         exec_git_command "git status" "Error while git status!"
         if [ "$(git config --get color.status)" != 'always' ]; then
             echo
-            help "Try this to get colored status in this command: git config --global color.status always"
+            help "Try this to get colored status in this command: <b>git config --global color.status always</b>"
         fi
     fi
     echo

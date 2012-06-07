@@ -202,8 +202,7 @@ function cmd_start () {
 # ou récupère celui spécifié en paramètre.
 # Gère l'option '-I' permettant de répondre automatiquement (mode non interactif) oui à la demande de pull.
 #
-# @param string $1 nom court de la release
-# @param string $2 nom court optionnel du tag
+# @param string $1 nom court optionnel du tag
 #
 function cmd_finish () {
     process_options "$@"
@@ -223,7 +222,7 @@ function cmd_finish () {
     # Gestion du tag :
     [ -z "$tag" ] && tag="$release"
     local tag_fullname="$TWGIT_PREFIX_TAG$tag"
-    assert_valid_tag_name $tag_fullname
+    assert_new_and_valid_tag_name $tag
 
     # Détection hotfixes en cours :
     processing 'Check hotfix in progress...'
@@ -253,13 +252,24 @@ function cmd_finish () {
     exec_git_command "git checkout $TWGIT_STABLE" "Could not checkout '$TWGIT_STABLE'!"
     exec_git_command "git merge $TWGIT_ORIGIN/$TWGIT_STABLE" "Could not merge '$TWGIT_ORIGIN/$TWGIT_STABLE' into '$TWGIT_STABLE'!"
     exec_git_command "git merge --no-ff $release_fullname" "Could not merge '$release_fullname' into '$TWGIT_STABLE'!"
-    create_and_push_tag "$tag_fullname" "Release finish: $release_fullname"
+
+    # Get all included features:
+    get_merged_features $release_fullname
+    local features="$GET_MERGED_FEATURES_RETURN_VALUE"
+    local prefix="$TWGIT_ORIGIN/$TWGIT_PREFIX_FEATURE"
+
+    # Tag generation:
+    tag_comment="Release finish: $release_fullname"
+    for feature in $features; do
+        local feature_shortname="${feature:${#prefix}}"
+        local subject="$(getFeatureSubject "$feature_shortname")"
+        [ ! -z "$subject" ] && subject=": \"$subject\""
+        tag_comment="$tag_comment\n${TWGIT_PREFIX_COMMIT_MSG}Contains $TWGIT_PREFIX_FEATURE$feature_shortname$subject"
+    done
+    tag_comment="$(echo -e "$tag_comment")"
+    create_and_push_tag "$tag_fullname" "$tag_comment"
 
     # Suppression des features associées :
-    get_merged_features $release_fullname
-    features="$GET_MERGED_FEATURES_RETURN_VALUE"
-
-    local prefix="$TWGIT_ORIGIN/$TWGIT_PREFIX_RELEASE"
     for feature in $features; do
         processing "Delete '$feature' feature..."
         remove_feature "${feature:${#prefix}}"
@@ -281,13 +291,14 @@ function cmd_remove () {
     require_parameter 'release'
     local release="$RETVAL"
     local release_fullname="$TWGIT_PREFIX_RELEASE$release"
-    local tag_fullname="$TWGIT_PREFIX_TAG$release"
+    local tag="$release"
+    local tag_fullname="$TWGIT_PREFIX_TAG$tag"
 
     assert_valid_ref_name $release
     assert_clean_working_tree
 
     process_fetch
-    assert_valid_tag_name $tag_fullname
+    assert_new_and_valid_tag_name $tag
 
     # Suppression de la branche :
     exec_git_command "git checkout $TWGIT_STABLE" "Could not checkout '$TWGIT_STABLE'!"

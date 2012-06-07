@@ -291,7 +291,8 @@ function get_current_branch () {
 function get_all_tags () {
     local n="$1"
     [ -z "$n" ] && n=10000	# pour tout retourner
-    git tag | grep -E '^v[0-9]+\.[0-9]+\.[0-9]+$' | sed 's/v//' | sed 's/\./;/g' | sort --field-separator=";" -k1n -k2n -k3n | sed 's/;/./g' | sed 's/^/v/' | tail -n $n
+    git tag | grep -E '^'$TWGIT_PREFIX_TAG'[0-9]+\.[0-9]+\.[0-9]+$' | sed "s/$TWGIT_PREFIX_TAG//" | sed 's/\./;/g' \
+        | sort --field-separator=";" -k1n -k2n -k3n | sed 's/;/./g' | tail -n $n | sed "s/^/$TWGIT_PREFIX_TAG/"
 }
 
 ##
@@ -562,23 +563,37 @@ function assert_valid_ref_name () {
         | grep -vP "^$TWGIT_PREFIX_HOTFIX" \
         | grep -vP "^$TWGIT_PREFIX_DEMO" 1>/dev/null
     if [ $? -ne 0 ]; then
-        die 'Unauthorized reference prefix! Pick another name.'
+        msg='Unauthorized reference! Pick another name without using any prefix'
+        msg="$msg ('$TWGIT_PREFIX_FEATURE', '$TWGIT_PREFIX_RELEASE', '$TWGIT_PREFIX_HOTFIX', '$TWGIT_PREFIX_DEMO')."
+        die "$msg"
     fi
 }
 
 ##
-# S'assure que la référence fournie est un nom syntaxiquement correct de tag potentiel et qu'il est disponible.
+# S'assure que la référence fournie est un nom syntaxiquement correct de tag,
+# c'est-à-dire au format \d+.\d+.\d+
 #
-# @param string $1 référence de tag au format court \d+.\d+.\d+
+# @param string $1 référence de tag sans préfixe
 #
 function assert_valid_tag_name () {
     local tag="$1"
     assert_valid_ref_name "$tag"
     processing 'Check valid tag name...'
-    $(echo "$tag" | grep -qP '^'$TWGIT_PREFIX_TAG'[0-9]+\.[0-9]+\.[0-9]+$') || \
-        die "Unauthorized tag name: '<b>$tag</b>'! Must use major.minor.revision format, e.g. 1.2.3."
+    $(echo "$tag" | grep -qP '^[0-9]+\.[0-9]+\.[0-9]+$') || \
+        die "Unauthorized tag name: '<b>$tag</b>'! Must use <major.minor.revision> format, e.g. '1.2.3'."
+}
+
+##
+# S'assure que la référence fournie est un nom syntaxiquement correct de tag potentiel et qu'il est disponible.
+#
+# @param string $1 référence de tag sans préfixe
+#
+function assert_new_and_valid_tag_name () {
+    local tag="$1"
+    local tag_fullname="$TWGIT_PREFIX_TAG$tag"
+    assert_valid_tag_name "$tag"
     processing "Check whether tag '$tag' already exists..."
-    has "$tag" $(get_all_tags) && die "Tag '<b>$tag</b>' already exists! Try: twgit tag list"
+    has "$tag_fullname" $(get_all_tags) && die "Tag '<b>$tag_fullname</b>' already exists! Try: twgit tag list"
 }
 
 ##
@@ -954,16 +969,47 @@ function displayQuotedEnum () {
 }
 
 ##
-# Affiche le sujet d'une feature (ticket Redmine, issue Github, ...)
-# Le premier appel sollicite ws_redmine.inc.php qui lui-même exploite un WS Redmine,
+# Affiche le sujet d'une feature en le récupérant
+# d'une plate-forme Redmine, Github ou autre via le connecteur défini
+# par TWGIT_FEATURE_SUBJECT_CONNECTOR.
+#
+# Le premier appel sollicite le connecteur concerné,
 # les suivants bénéficieront du fichier de cache $TWGIT_FEATURES_SUBJECT_PATH.
 #
-# @param int $1 nom court de la feature
+# @param string $1 nom court de la feature
+# @param string $2 sujet sur échec, optionnel
 # @see getFeatureSubject()
 #
 function displayFeatureSubject () {
     local subject="$(getFeatureSubject "$1")"
+    [ -z "$subject" ] && subject="$2"
     [ ! -z "$subject" ] && displayMsg feature_subject "$subject" || echo
+}
+
+##
+# @param string $1 nom long du tag à afficher
+function displayTag () {
+    local tag="$1"
+    local msg pattern features feature_shortname feature_subject
+
+    info "Tag: $tag"
+    msg="$(git show tags/$tag --pretty=medium)"
+    echo "$msg" | head -n3 | tail -n+2
+    pattern="${TWGIT_PREFIX_COMMIT_MSG}Contains $TWGIT_PREFIX_FEATURE"
+    features="$(echo "$msg" | grep -F "$pattern" | sed -r "s/^.*$TWGIT_PREFIX_FEATURE//")"
+    if [ -z "$features" ]; then
+        info 'No feature included.'
+    else
+        info 'Included features:'
+        while read line; do
+            (echo "$line" | grep -q '^.*: ".*"$') || line="$line: \"\""
+            feature_shortname="$(echo "$line" | sed -r "s/^(.*): \".*$/\1/")"
+            feature_subject="$(echo "$line" | sed -r "s/^.*: \"(.*)\"$/\1/")"
+            [ -z "$feature_subject" ] && feature_subject="$(getFeatureSubject "$feature_shortname")"
+            echo -n "    - $TWGIT_ORIGIN/$TWGIT_PREFIX_FEATURE$feature_shortname "
+            displayFeatureSubject "$feature_shortname" "$feature_subject"
+        done < <(echo "$features")
+    fi
 }
 
 ##
@@ -1047,7 +1093,7 @@ function init () {
         assert_clean_working_tree
     fi
 
-    assert_valid_tag_name $tag_fullname
+    assert_new_and_valid_tag_name $tag
 
     processing "Check presence of remote '$TWGIT_ORIGIN' repository..."
     if [ "$(git remote | grep -R "^$TWGIT_ORIGIN$" | wc -l)" -ne 1 ]; then

@@ -117,14 +117,15 @@ function cmd_remove () {
     require_parameter 'hotfix'
     local hotfix="$RETVAL"
     local hotfix_fullname="$TWGIT_PREFIX_HOTFIX$hotfix"
-    local tag_fullname="$TWGIT_PREFIX_TAG$hotfix"
+    local tag="$hotfix"
+    local tag_fullname="$TWGIT_PREFIX_TAG$tag"
 
     assert_valid_ref_name $hotfix
     assert_clean_working_tree
     assert_working_tree_is_not_on_delete_branch $hotfix_fullname
 
     process_fetch
-    assert_valid_tag_name $tag_fullname
+    assert_new_and_valid_tag_name $tag
 
     # Suppression de la branche :
     exec_git_command "git checkout $TWGIT_STABLE" "Could not checkout '$TWGIT_STABLE'!"
@@ -167,7 +168,7 @@ function cmd_finish () {
     # Gestion du tag :
     local tag="$hotfix"
     local tag_fullname="$TWGIT_PREFIX_TAG$tag"
-    assert_valid_tag_name $tag_fullname
+    assert_new_and_valid_tag_name $tag
 
     exec_git_command "git checkout $TWGIT_STABLE" "Could not checkout '$TWGIT_STABLE'!"
     exec_git_command "git merge $TWGIT_ORIGIN/$TWGIT_STABLE" "Could not merge '$TWGIT_ORIGIN/$TWGIT_STABLE' into '$TWGIT_STABLE'!"

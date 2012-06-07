@@ -109,4 +109,35 @@ class TwgitReleaseTest extends TwgitTestCase
         $this->assertNotContains("fatal: Ambiguous object name: 'v1.2.3'.", $sMsg);
     }
 
+    /**
+     * Currently just check the tag annotation.
+     */
+    public function testFinish ()
+    {
+        $this->_localShellCodeCall('echo \'2;The subject\' > \$TWGIT_FEATURES_SUBJECT_PATH');
+
+        $this->_remoteExec('git init');
+        $this->_localExec(TWGIT_EXEC . ' init 1.2.3 ' . TWGIT_REPOSITORY_ORIGIN_DIR);
+        $this->_localExec(TWGIT_EXEC . ' release start -I');
+
+        $this->_localExec(TWGIT_EXEC . ' feature start 1');
+        $this->_localExec(TWGIT_EXEC . ' feature start 2');
+        $this->_localExec('git merge --no-ff feature-1; git commit --allow-empty -m "empty"; git push origin;');
+        $this->_localExec(TWGIT_EXEC . ' feature start 3');
+        $this->_localExec(TWGIT_EXEC . ' feature start 4');
+
+        $this->_localExec(TWGIT_EXEC . ' feature merge-into-release 2');
+        $this->_localExec(TWGIT_EXEC . ' feature merge-into-release 4');
+        $this->_localExec(TWGIT_EXEC . ' release finish');
+
+        $sMsg = $this->_localExec('git show v1.3.0');
+        $this->assertContains(
+            "\n[twgit] Release finish: release-1.3.0"
+            . "\n[twgit] Contains feature-1"
+            . "\n[twgit] Contains feature-2: \"The subject\""
+            . "\n[twgit] Contains feature-4\n\n"
+            , $sMsg);
+        $this->assertContains("Merge branch 'release-1.3.0' into stable", $sMsg);
+    }
+
 }

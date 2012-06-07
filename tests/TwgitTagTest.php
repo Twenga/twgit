@@ -45,6 +45,7 @@ class TwgitTagTest extends TwgitTestCase
     }
 
     /**
+     * @shcovers inc/twgit_tag.inc.sh::cmd_list
      */
     public function testList_WithAmbiguousRef ()
     {
@@ -54,6 +55,119 @@ class TwgitTagTest extends TwgitTestCase
 
         $sMsg = $this->_localExec(TWGIT_EXEC . ' tag list');
         $this->assertNotContains("warning: refname 'v1.2.3' is ambiguous.", $sMsg);
+    }
+
+    /**
+     * @shcovers inc/twgit_tag.inc.sh::cmd_list
+     */
+    public function testList_WithUnknownRef ()
+    {
+        $this->_remoteExec('git init');
+        $this->_localExec(TWGIT_EXEC . ' init 1.2.3 ' . TWGIT_REPOSITORY_ORIGIN_DIR);
+        $this->_localExec('git branch v1.2.3 v1.2.3');
+
+        $this->setExpectedException('RuntimeException', "/!\ Tag 'v6.6.6' does not exist! Try: twgit tag list");
+        $this->_localExec(TWGIT_EXEC . ' tag list 6.6.6');
+    }
+
+    /**
+     * @shcovers inc/twgit_tag.inc.sh::cmd_list
+     */
+    public function testList_WithBadRef ()
+    {
+        $this->_remoteExec('git init');
+        $this->_localExec(TWGIT_EXEC . ' init 1.2.3 ' . TWGIT_REPOSITORY_ORIGIN_DIR);
+        $this->_localExec('git branch v1.2.3 v1.2.3');
+
+        $this->setExpectedException(
+            'RuntimeException',
+            "/!\ Unauthorized tag name: 'toto'! Must use <major.minor.revision> format, e.g. '1.2.3'."
+        );
+        $sMsg = $this->_localExec(TWGIT_EXEC . ' tag list toto');
+    }
+
+    /**
+     * @dataProvider providerTestListWithValidTag
+     * @shcovers inc/twgit_tag.inc.sh::cmd_list
+     */
+    public function testList_WithValidTag ($sSubCmd, $sExpectedResult)
+    {
+        $this->_localShellCodeCall('echo \'2;The subject of 2\' > \$TWGIT_FEATURES_SUBJECT_PATH');
+        $this->_localShellCodeCall('echo \'4;The subject of 4\' >> \$TWGIT_FEATURES_SUBJECT_PATH');
+
+        $this->_remoteExec('git init');
+        $this->_localExec(TWGIT_EXEC . ' init 1.2.3 ' . TWGIT_REPOSITORY_ORIGIN_DIR);
+        $this->_localExec(TWGIT_EXEC . ' release start -I');
+
+        $this->_localExec(TWGIT_EXEC . ' feature start 1');
+        $this->_localExec(TWGIT_EXEC . ' feature start 2');
+        $this->_localExec('git merge --no-ff feature-1; git commit --allow-empty -m "empty"; git push origin;');
+        $this->_localExec(TWGIT_EXEC . ' feature start 3');
+        $this->_localExec(TWGIT_EXEC . ' feature start 4');
+        $this->_localExec(TWGIT_EXEC . ' feature start 5');
+
+        $this->_localExec(TWGIT_EXEC . ' feature merge-into-release 2');
+        $this->_localExec(TWGIT_EXEC . ' feature merge-into-release 4');
+        $this->_localExec(TWGIT_EXEC . ' feature merge-into-release 5');
+        $this->_localExec(TWGIT_EXEC . ' release finish');
+
+        $this->_localShellCodeCall('echo \'1;The NEW subject of 1\' > \$TWGIT_FEATURES_SUBJECT_PATH');
+        $this->_localShellCodeCall('echo \'2;The NEW subject of 2\' >> \$TWGIT_FEATURES_SUBJECT_PATH');
+        $sMsg = $this->_localExec(TWGIT_EXEC . ' tag list' . $sSubCmd);
+        $sMsg = preg_replace("/^Date:.*$/mi", 'Date: ---', $sMsg);
+        $this->assertContains($sExpectedResult, $sMsg);
+    }
+
+    public function providerTestListWithValidTag () {
+        return array(
+            array(
+                '', "git# git fetch --prune origin"
+                . "\n"
+                . "\n(i) List 5 last tags:"
+                . "\nTag: v1.2.3"
+                . "\nTagger: Firstname Lastname <firstname.lastname@xyz.com>"
+                . "\nDate: ---"
+                . "\nNo feature included."
+                . "\n"
+                . "\nTag: v1.3.0"
+                . "\nTagger: Firstname Lastname <firstname.lastname@xyz.com>"
+                . "\nDate: ---"
+                . "\nIncluded features:"
+                . "\n    - origin/feature-1 The NEW subject of 1"
+                . "\n    - origin/feature-2 The NEW subject of 2"
+                . "\n    - origin/feature-4 The subject of 4"
+                . "\n    - origin/feature-5"
+                . "\n"
+            ),
+            array(
+                ' 1.2.3', "git# git fetch --prune origin"
+                . "\n"
+                . "\nCheck valid ref name..."
+                . "\nCheck valid tag name..."
+                . "\n"
+                . "\nTag: v1.2.3"
+                . "\nTagger: Firstname Lastname <firstname.lastname@xyz.com>"
+                . "\nDate: ---"
+                . "\nNo feature included."
+                . "\n"
+            ),
+            array(
+                ' 1.3.0', "git# git fetch --prune origin"
+                . "\n"
+                . "\nCheck valid ref name..."
+                . "\nCheck valid tag name..."
+                . "\n"
+                . "\nTag: v1.3.0"
+                . "\nTagger: Firstname Lastname <firstname.lastname@xyz.com>"
+                . "\nDate: ---"
+                . "\nIncluded features:"
+                . "\n    - origin/feature-1 The NEW subject of 1"
+                . "\n    - origin/feature-2 The NEW subject of 2"
+                . "\n    - origin/feature-4 The subject of 4"
+                . "\n    - origin/feature-5"
+                . "\n"
+            ),
+        );
     }
 
 }

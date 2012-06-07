@@ -33,8 +33,9 @@ function usage () {
     echo; help 'Usage:'
     help_detail '<b>twgit tag <action></b>'
     echo; help 'Available actions are:'
-    help_detail '<b>list [-F]</b>'
-    help_detail '    List 5 last tags. Add <b>-F</b> to do not make fetch.'; echo
+    help_detail '<b>list [<tagname>] [-F]</b>'
+    help_detail '    List 5 last tags with included features. Add <b>-F</b> to do not make fetch.'
+    help_detail '    If <b><tagname></b> is specified, then focus on this tag.'; echo
     help_detail '<b>[help]</b>'
     help_detail '    Display this help.'; echo
 }
@@ -49,22 +50,37 @@ function cmd_help () {
 }
 
 ##
-# Liste les tags.
+# Liste les derniers tags ou l'un en particulier si spécifié.
+# Détaille les features incluses dans la release à la source du tag.
 # Gère l'option '-F' permettant d'éviter le fetch.
+#
+# @param string $1 nom court optionnel d'un tag
+# @testedby TwgitTagTest
 #
 function cmd_list () {
     process_options "$@"
+    require_parameter '-'
+    local tag="$RETVAL"
+    local tag_fullname="$TWGIT_PREFIX_TAG$tag"
     process_fetch 'F'
 
-    local max='5'
-    local tags=$(get_all_tags $max)
-    help "List $max last tags:"
-    if [ -z "$tags" ]; then
-        info 'No tag exists.'; echo
+    if [ ! -z "$tag" ]; then
+        assert_valid_tag_name "$tag"
+        ! has "$tag_fullname" $(get_all_tags) && die "Tag '<b>$tag_fullname</b>' does not exist! Try: twgit tag list"
+        echo
+        displayTag "$tag_fullname"
+        echo
     else
-        for tag in $tags; do
-            info "Tag: $tag"
-            git show tags/$tag --pretty=medium | head -n 4 | tail -n +2
-        done
+        local max='5'
+        local tags=$(get_all_tags $max)
+        help "List $max last tags:"
+        if [ -z "$tags" ]; then
+            info 'No tag exists.'; echo
+        else
+            for tag_fullname in $tags; do
+                displayTag "$tag_fullname"
+                echo
+            done
+        fi
     fi
 }

@@ -450,7 +450,7 @@ function assert_git_repository () {
 
     assert_recent_git_version "$TWGIT_GIT_MIN_VERSION"
 
-    if [ "$(git remote | grep -R "^$TWGIT_ORIGIN$" | wc -l)" -ne 1 ]; then
+    if [ "$(git remote | grep -E "^$TWGIT_ORIGIN$" | wc -l)" -ne 1 ]; then
         die "No remote '<b>$TWGIT_ORIGIN</b>' repository specified! Try: 'git remote add $TWGIT_ORIGIN <url>'"
     fi
 
@@ -1050,7 +1050,7 @@ function init () {
     assert_valid_tag_name $tag_fullname
 
     processing "Check presence of remote '$TWGIT_ORIGIN' repository..."
-    if [ "$(git remote | grep -R "^$TWGIT_ORIGIN$" | wc -l)" -ne 1 ]; then
+    if [ "$(git remote | grep -E "^$TWGIT_ORIGIN$" | wc -l)" -ne 1 ]; then
         [ -z "$remote_url" ] && die "Remote '<b>$TWGIT_ORIGIN</b>' repository url required!"
         exec_git_command "git remote add origin $remote_url" 'Add remote repository failed!'
     fi

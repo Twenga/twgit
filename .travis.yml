@@ -6,6 +6,8 @@ php:
 
 before_script:
   - cp conf/twgit-dist.sh conf/twgit.sh
+  - git config --global user.name 'Firstname Lastname'
+  - git config --global user.email 'firstname.lastname@xyz.com'
 script: phpunit --configuration conf/phpunit-dist.xml
 after_script:
   - /bin/bash tests/inc/codeCoverage.sh

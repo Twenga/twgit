@@ -432,9 +432,9 @@ function getFeatureSubject () {
 # @testedby TwgitSetupTest
 #
 function assert_git_configured () {
-    if ! git config --global user.name 1>/dev/null; then
+    if [ -z "$(git config user.name 2>/dev/null | tr -d ' ')" ]; then
         die "Unknown user.name! Please, do: git config --global user.name 'Firstname Lastname'"
-    elif ! git config --global user.email 1>/dev/null; then
+    elif [ -z "$(git config user.email 2>/dev/null | tr -d ' ')" ]; then
         die "Unknown user.email! Please, do: git config --global user.email 'firstname.lastname@xyz.com'"
     fi
 }

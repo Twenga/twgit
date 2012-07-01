@@ -27,6 +27,15 @@
 . $TWGIT_INC_DIR/options_handler.inc.sh
 . $TWGIT_INC_DIR/ui.inc.sh
 
+# Witch OS:
+uname="$(uname)"
+if [ "$uname" = 'FreeBSD' ] || [ "$uname" = 'Darwin' ]; then
+    TWGIT_OS='MacOSX'
+else
+    TWGIT_OS='Linux'
+fi
+
+
 
 
 #--------------------------------------------------------------------
@@ -1005,6 +1014,22 @@ function convertList2CSV () {
 }
 
 ##
+# Display the last update time of specified path, in seconds since 1970-01-01 00:00:00 UTC.
+# Compatible Linux and Mac OSX.
+#
+# @param string $1 path
+# @see $TWGIT_OS
+#
+function getLastUpdateTime () {
+    local path="$1"
+    if [ "$TWGIT_OS" = 'MacOSX' ]; then
+        stat -f %m "$path"
+    else
+        date -r "$path" +%s
+    fi
+}
+
+##
 # Propose de supprimer une à une les branches qui ne sont plus trackées.
 #
 function clean_branches () {
@@ -1133,7 +1158,7 @@ function displayChangelogSection () {
 # Tous les $TWGIT_UPDATE_NB_DAYS jours un fetch sera exécuté afin de proposer à l'utilisateur une
 # éventuelle MAJ. Qu'il décline ou non, le prochain passage aura lieu dans à nouveau $TWGIT_UPDATE_NB_DAYS jours.
 #
-# A des fins de test : "touch -mt 1105200101 ~/twgit/.lastupdate"
+# À des fins de test : "touch -mt 1105200101 ~/twgit/.lastupdate"
 #
 # @param string $1 Si non vide, force la vérification de la présence d'une MAJ même si $TWGIT_UPDATE_NB_DAYS jours
 #    ne se sont pas écoulés depuis le dernier test.
@@ -1143,7 +1168,7 @@ function autoupdate () {
     cd "$TWGIT_ROOT_DIR"
     if git rev-parse --git-dir 1>/dev/null 2>&1; then
         [ ! -f "$TWGIT_UPDATE_PATH" ] && touch "$TWGIT_UPDATE_PATH"
-        local elapsed_time=$(( ($(date -u +%s) - $(date -r "$TWGIT_UPDATE_PATH" +%s)) ))
+        local elapsed_time=$(( ($(date -u +%s) - $(getLastUpdateTime "$TWGIT_UPDATE_PATH")) ))
         local interval=$(( $TWGIT_UPDATE_NB_DAYS * 86400 ))
         local answer=''
 

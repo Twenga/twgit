@@ -1072,7 +1072,7 @@ function clean_branches () {
     local locales="$(get_local_branches)"
     for branch in $locales; do
         if ! has $branch $tracked; then
-            echo -n $(question "Local branch '$branch' is not tracked. Remove? [Y/N] ")
+            echo -n $(question "Local branch '<b>$branch</b>' is not tracked. Remove? [Y/N] ")
             read answer
             if [ "$answer" = "Y" ] || [ "$answer" = "y" ]; then
                 exec_git_command "git branch -D $branch" "Remove local branch '$branch' failed!"
@@ -1267,12 +1267,6 @@ then consequently update <b>$TWGIT_CONF_DIR/twgit.sh</b>";
             # Prochain update :
             processing "Next auto-update check in $TWGIT_UPDATE_NB_DAYS days."
             touch "$TWGIT_UPDATE_PATH"
-
-            # MAJ du système d'update d'autocomplétion :
-            if [ ! -h "/etc/bash_completion.d/twgit" ]; then
-                warn "New autocompletion update system request you execute just once this line (to adapt):"
-                help_detail "sudo rm /etc/bash_completion.d/twgit && sudo ln -s ~/twgit/install/.bash_completion /etc/bash_completion.d/twgit && source ~/.bashrc"
-            fi
 
             # Invite :
             if [ "$answer" = "Y" ] || [ "$answer" = "y" ]; then

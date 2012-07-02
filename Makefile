@@ -37,7 +37,7 @@ CURRENT_BRANCH:=$(shell git branch --no-color | grep '^\* ' | grep -v 'no branch
 
 uname:="$(shell uname)"
 OS:="$(shell if [ "$(uname)" = "FreeBSD" ] || [ "$(uname)" = "Darwin" ]; then echo "MacOSX"; else echo "Linux"; fi)"
-BASH_RC:="$(shell if [ "$(OS)" = "MacOSX" ]; then echo "${HOME}/.bash_profile"; else echo "${HOME}/.bashrc"; fi)"
+BASH_RC:="$(shell if [ "$(OS)" = "MacOSX" ]; then echo "${HOME}/.profile"; else echo "${HOME}/.bashrc"; fi)"
 
 .PHONY: all doc help install uninstall
 
@@ -65,6 +65,7 @@ install:
 	@echo "\nInstall executable '$(BIN_DIR)/twgit'."
 	@echo '#!/bin/bash\n/bin/bash "'$(ROOT_DIR)'/twgit" $$@' > $(BIN_DIR)/twgit
 	@chmod 0755 $(BIN_DIR)/twgit
+	@echo "(i) If your bash v4 is not '/bin/bash', please edit '$(BIN_DIR)/twgit'."
 
 	@echo "\nInstall Twgit Bash completion:"
 	@if test ! -z "`cat $(BASH_RC) | grep -E '/bash_completion.sh' | grep -vE '^#'`"; then \
@@ -72,7 +73,7 @@ install:
 	else \
 		echo "Add line '. $(ROOT_DIR)/install/bash_completion.sh' at end of script '$(BASH_RC)'."; \
 		echo "\n# Added by Twgit makefile:\n. $(ROOT_DIR)/install/bash_completion.sh" >> $(BASH_RC); \
-		echo "Restart bash session to enable autocompletion."; \
+		echo "(i) Restart bash session to enable autocompletion."; \
 	fi
 
 	@echo "\nCheck Twgit config file:"

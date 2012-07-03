@@ -48,31 +48,21 @@
 
 
 ##
-# Default colors
+# Colors and decorations types.
+#
+# For each type, message will be displayed as follows (.header and .bold are optional):
+#     '<type.header><type>message with <type.bold>bold section<type>.\033[0m'
+#
+# For example:
+#     CUI_COLORS=(
+#         [type]='\033[1;31m'
+#         [type.bold]='\033[1;33m'
+#         [type.header]='\033[1m\033[4;33m/!\\\033[0;37m '
+#     )
+#
 # @var associative array
 #
 declare -A CUI_COLORS
-CUI_COLORS=(
-    [error]='\033[1;31m'
-    [error.bold]='\033[1;33m'
-    [error.header]='\033[1m\033[4;33m/!\\\033[0;37m '
-    [feature_subject]='\033[1;34m'
-    [help]='\033[0;36m'
-    [help.bold]='\033[1;36m'
-    [help.header]='\033[1;36m(i) '
-    [help_detail]='\033[0;37m'
-    [help_detail.bold]='\033[1;37m'
-    [help_detail.header]='    '
-    [info]='\033[1;37m'
-    [normal]='\033[0;37m'
-    [ok]='\033[0;32m'
-    [processing]='\033[1;30m'
-    [question]='\033[1;33m'
-    [question.bold]='\033[1;37m'
-    [warning]='\033[0;33m'
-    [warning.bold]='\033[1;33m'
-    [warning.header]='\033[1m\033[4;33m/!\\\033[0;37m '
-)
 
 ##
 # Check if the specified key exists in $CUI_COLORS associative array.

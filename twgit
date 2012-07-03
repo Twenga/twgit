@@ -95,16 +95,16 @@ function usage () {
     CUI_displayMsg help_detail "Try '<b>twgit <command> [help]</b>' for more details."
 
     echo; CUI_displayMsg help 'About:'
-    CUI_displayMsg help_detail "<b>Contact</b>          https://github.com/Twenga/twgit"
-    CUI_displayMsg help_detail "<b>Git repository</b>   git@github.com:Twenga/twgit.git"
+    CUI_displayMsg help_detail "<b>Contact</b>                 https://github.com/Twenga/twgit"
+    CUI_displayMsg help_detail "<b>Git repository</b>          git@github.com:Twenga/twgit.git"
     local version=$(cd $TWGIT_ROOT_DIR && git describe)
-    CUI_displayMsg help_detail "<b>Version</b>          $version"
-    local last_update_timestamp=$(date -r "$TWGIT_UPDATE_PATH" +%s)
-    local last_update_date="$(date --date "1970-01-01 $last_update_timestamp sec" "+%Y-%m-%d %T")"
+    CUI_displayMsg help_detail "<b>Version</b>                 $version"
+    local last_update_timestamp=$(getLastUpdateTimestamp "$TWGIT_UPDATE_PATH")
+    local last_update_date="$(getDateFromTimestamp "$last_update_timestamp")"
     local next_update_timestamp=$(( $last_update_timestamp + $TWGIT_UPDATE_NB_DAYS * 86400 ))
-    local next_update_date="$(date --date "1970-01-01 $next_update_timestamp sec" "+%Y-%m-%d %T")"
-    CUI_displayMsg help_detail "<b>Last update</b>      $last_update_date"
-    CUI_displayMsg help_detail "<b>Next update</b>      $next_update_date"
+    local next_update_date="$(getDateFromTimestamp "$next_update_timestamp")"
+    CUI_displayMsg help_detail "<b>Last check for update</b>   $last_update_date"
+    CUI_displayMsg help_detail "<b>Next check for update</b>   $next_update_date"
     echo
 }
 

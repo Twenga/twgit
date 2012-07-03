@@ -30,6 +30,66 @@
 
 
 #--------------------------------------------------------------------
+# Mac OSX compatibility layer
+#--------------------------------------------------------------------
+
+# Witch OS:
+uname="$(uname)"
+if [ "$uname" = 'FreeBSD' ] || [ "$uname" = 'Darwin' ]; then
+    TWGIT_OS='MacOSX'
+else
+    TWGIT_OS='Linux'
+fi
+
+##
+# Display the last update time of specified path, in seconds since 1970-01-01 00:00:00 UTC.
+# Compatible Linux and Mac OSX.
+#
+# @param string $1 path
+# @see $TWGIT_OS
+#
+function getLastUpdateTimestamp () {
+    local path="$1"
+    if [ "$TWGIT_OS" = 'MacOSX' ]; then
+        stat -f %m "$path"
+    else
+        date -r "$path" +%s
+    fi
+}
+
+##
+# Display the specified timestamp converted to date with "+%Y-%m-%d %T" format.
+#
+# @param int $1 timestamp
+# @see $TWGIT_OS
+#
+function getDateFromTimestamp () {
+    local timestamp="$1"
+    if [ "$TWGIT_OS" = 'MacOSX' ]; then
+        date -r "$timestamp" "+%Y-%m-%d %T"
+    else
+        date --date "1970-01-01 $timestamp sec" "+%Y-%m-%d %T"
+    fi
+}
+
+##
+# Execute sed with the specified regexp-extended pattern.
+#
+# @param string $1 pattern using extended regular expressions
+# @see $TWGIT_OS
+#
+function sedRegexpExtended () {
+    local pattern="$1"
+    if [ "$TWGIT_OS" = 'MacOSX' ]; then
+        sed -E "$pattern";
+    else
+        sed -r "$pattern";
+    fi
+}
+
+
+
+#--------------------------------------------------------------------
 # Functions "Get"
 #--------------------------------------------------------------------
 
@@ -382,7 +442,7 @@ function get_contributors () {
     local max="$2"
     git shortlog -nse $TWGIT_ORIGIN/$TWGIT_STABLE..$branch \
         | grep -E "@$TWGIT_EMAIL_DOMAIN_NAME>$" \
-        | head -n $max | sed -r "s/^.*? <(.*@$TWGIT_EMAIL_DOMAIN_NAME)>$/\1/"
+        | head -n $max | sedRegexpExtended "s/^.*? <(.*@$TWGIT_EMAIL_DOMAIN_NAME)>$/\1/"
 }
 
 ##
@@ -1065,11 +1125,11 @@ function convertList2CSV () {
 # Propose de supprimer une à une les branches qui ne sont plus trackées.
 #
 function clean_branches () {
-    local tracked="$(git fetch --all -v --dry-run 2>&1 | grep '\->' | sed -r 's/^.* +([^ ]+) +\-> +.*$/\1/')"
+    local tracked="$(git fetch --all -v --dry-run 2>&1 | grep '\->' | sedRegexpExtended 's/^.* +([^ ]+) +\-> +.*$/\1/')"
     local locales="$(get_local_branches)"
     for branch in $locales; do
         if ! has $branch $tracked; then
-            echo -n $(CUI_displayMsg question "Local branch '$branch' is not tracked. Remove? [Y/N] ")
+            echo -n $(CUI_displayMsg question "Local branch '<b>$branch</b>' is not tracked. Remove? [Y/N] ")
             read answer
             if [ "$answer" = "Y" ] || [ "$answer" = "y" ]; then
                 exec_git_command "git branch -D $branch" "Remove local branch '$branch' failed!"
@@ -1171,7 +1231,7 @@ function displayChangelogSection () {
     local content="$(git show $to_tag:CHANGELOG.md)";
     content="## Version $(echo "${content#*## Version }")";
     content="$(echo "${content%## Version ${from_tag:1}*}")";
-    content="$(echo -e "$content\n" | sed -r ':a;N;$!ba;s/\n\n(  -|```)/\n\1/g')";
+    content="$(echo -e "$content\n" | sedRegexpExtended ':a;N;$!ba;s/\n\n(  -|```)/\n\1/g')";
 
     local line
     while read line; do
@@ -1190,7 +1250,7 @@ function displayChangelogSection () {
 # Tous les $TWGIT_UPDATE_NB_DAYS jours un fetch sera exécuté afin de proposer à l'utilisateur une
 # éventuelle MAJ. Qu'il décline ou non, le prochain passage aura lieu dans à nouveau $TWGIT_UPDATE_NB_DAYS jours.
 #
-# A des fins de test : "touch -mt 1105200101 ~/twgit/.lastupdate"
+# À des fins de test : "touch -mt 1105200101 ~/twgit/.lastupdate"
 #
 # @param string $1 Si non vide, force la vérification de la présence d'une MAJ même si $TWGIT_UPDATE_NB_DAYS jours
 #    ne se sont pas écoulés depuis le dernier test.
@@ -1200,7 +1260,7 @@ function autoupdate () {
     cd "$TWGIT_ROOT_DIR"
     if git rev-parse --git-dir 1>/dev/null 2>&1; then
         [ ! -f "$TWGIT_UPDATE_PATH" ] && touch "$TWGIT_UPDATE_PATH"
-        local elapsed_time=$(( ($(date -u +%s) - $(date -r "$TWGIT_UPDATE_PATH" +%s)) ))
+        local elapsed_time=$(( ($(date -u +%s) - $(getLastUpdateTimestamp "$TWGIT_UPDATE_PATH")) ))
         local interval=$(( $TWGIT_UPDATE_NB_DAYS * 86400 ))
         local answer=''
 
@@ -1214,7 +1274,7 @@ function autoupdate () {
             local current_tag="$(git describe --abbrev=0)"
             local current_ref_on_top=''
             if [ "$(git describe)" != "$current_tag" ]; then
-                current_ref_on_top="$(git describe | sed -r 's/^.*-g//')"
+                current_ref_on_top="$(git describe | sed 's/^.*-g//')"
             fi
             local last_tag="$(get_last_tag)"
 
@@ -1264,12 +1324,6 @@ then consequently update <b>$TWGIT_CONF_DIR/twgit.sh</b>";
             # Prochain update :
             CUI_displayMsg processing "Next auto-update check in $TWGIT_UPDATE_NB_DAYS days."
             touch "$TWGIT_UPDATE_PATH"
-
-            # MAJ du système d'update d'autocomplétion :
-            if [ ! -h "/etc/bash_completion.d/twgit" ]; then
-                CUI_displayMsg warning "New autocompletion update system request you execute just once this line (to adapt):"
-                CUI_displayMsg help_detail "sudo rm /etc/bash_completion.d/twgit && sudo ln -s ~/twgit/install/.bash_completion /etc/bash_completion.d/twgit && source ~/.bashrc"
-            fi
 
             # Invite :
             if [ "$answer" = "Y" ] || [ "$answer" = "y" ]; then

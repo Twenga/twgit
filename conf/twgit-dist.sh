@@ -82,7 +82,7 @@ TWGIT_FEATURE_SUBJECT_GITHUB_REPOSITORY=''	# e.g. 'twgit'
 # @var associative array
 # @see inc/coloredUI.inc.sh for more details.
 #
-CUI_COLORS=(
+declare -A CUI_COLORS=(
     [error]='\033[1;31m'
     [error.bold]='\033[1;33m'
     [error.header]='\033[1m\033[4;33m/!\\\033[0;37m '

@@ -3,11 +3,20 @@ ChangeLog
 
 ## Version 1.8.0 (2012-07-03)
 
+Note:
+
+  - Due to evolution of update system, the following message will appear during update. ***Ignore it***:
+
+```bash
+/!\ New autocompletion update system request you execute just once this line (to adapt):
+    sudo rm /etc/bash_completion.d/twgit && sudo ln -s ~/twgit/install/.bash_completion /etc/bash_completion.d/twgit && source ~/.bashrc
+```
+
 Features:
 
   - #54: Allow to define colors and decorations from config file
   - #53: Make twgit compatible with Mac OS X
-  - #50: Display features included in a tag: shows features merged into the release when the tag was created.
+  - #50: Display features included in a tag: shows features merged into the release when the tag was created. Add `twgit tag list [<tagname>] [-F]`.
 
 Fixes:
 

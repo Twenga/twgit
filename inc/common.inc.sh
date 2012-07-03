@@ -1282,15 +1282,16 @@ function autoupdate () {
             # If new update:
             if [ "$current_tag$current_ref_on_top" != "$last_tag" ]; then
 
-                echo 'New content of CHANGELOG.md:'
+                echo -e 'New content of CHANGELOG.md:\n'
                 displayChangelogSection "$current_tag" "$last_tag"
+                echo
 
                 # Question:
                 local question
                 if [ "$current_tag" != "$last_tag" ]; then
                     question="Do you want to update twgit from <b>$current_tag</b> to <b>$last_tag</b> (or manually: twgit update)? [Y/N] "
                 else
-                    question="You are ahead of last tag <b>$last_tag</b>. Would you like to return to it? [Y/N] "
+                    question="Twgit update. You are ahead of last tag <b>$last_tag</b>. Would you like to return to it? [Y/N] "
                 fi
                 echo -n $(CUI_displayMsg question "$question")
 
@@ -1309,9 +1310,10 @@ function autoupdate () {
 
                     # Config file updated?
                     if ! git diff --quiet "$current_tag" "$last_tag" -- $TWGIT_CONF_DIR/twgit-dist.sh; then
+                        echo
                         CUI_displayMsg warning "Config file updated! \
-Please consider the following diff between old and new version of <b>$TWGIT_CONF_DIR/twgit-dist.sh</b>, \
-then consequently update <b>$TWGIT_CONF_DIR/twgit.sh</b>";
+Please consider the following diff between old and new version of '<b>$TWGIT_CONF_DIR/twgit-dist.sh</b>', \
+then consequently update '<b>$TWGIT_CONF_DIR/twgit.sh</b>':";
                         git diff "$current_tag" "$last_tag" -- $TWGIT_CONF_DIR/twgit-dist.sh
                         if [ "$(git config --get color.diff)" != 'always' ]; then
                             CUI_displayMsg help "Try this to get colored diff in this command: <b>git config --global color.diff always</b>"

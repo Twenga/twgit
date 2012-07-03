@@ -50,6 +50,7 @@ if [ ! -f "$config_file" ]; then
     echo "Try to copy '${config_file%.sh}-dist.sh' to '$config_file' and configure it."
     exit 1
 fi
+declare -A CUI_COLORS
 . $config_file
 . $TWGIT_INC_DIR/common.inc.sh
 

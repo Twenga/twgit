@@ -26,14 +26,15 @@
 
 ##
 # Retrive and display subject of a Github's issue.
+# Compatible Github API v3: http://developer.github.com/v3/.
 #
 # @param string $1 issue name
 #
 issue="$1"
-url="$(printf "https://github.com/api/v2/json/issues/show/%s/%s/%s" \
+url="$(printf "https://api.github.com/repos/%s/%s/issues/%s" \
         "$TWGIT_FEATURE_SUBJECT_GITHUB_USER" \
         "$TWGIT_FEATURE_SUBJECT_GITHUB_REPOSITORY" \
         "$issue")"
 (wget --no-check-certificate --timeout=2 -q -O - --no-cache $url \
-    | php -r '$o = json_decode(file_get_contents("php://stdin")); if ($o !== NULL) {print_r($o->issue->title);}')
+    | php -r '$o = json_decode(file_get_contents("php://stdin")); if ($o !== NULL) {print_r($o->title);}')
     2>/dev/null

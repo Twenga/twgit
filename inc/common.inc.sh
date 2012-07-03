@@ -31,7 +31,7 @@
 
 
 #--------------------------------------------------------------------
-# Mac OSX compatibility layer
+# Mac OS X compatibility layer
 #--------------------------------------------------------------------
 
 # Witch OS:
@@ -44,7 +44,7 @@ fi
 
 ##
 # Display the last update time of specified path, in seconds since 1970-01-01 00:00:00 UTC.
-# Compatible Linux and Mac OSX.
+# Compatible Linux and Mac OS X.
 #
 # @param string $1 path
 # @see $TWGIT_OS
@@ -60,6 +60,7 @@ function getLastUpdateTimestamp () {
 
 ##
 # Display the specified timestamp converted to date with "+%Y-%m-%d %T" format.
+# Compatible Linux and Mac OS X.
 #
 # @param int $1 timestamp
 # @see $TWGIT_OS
@@ -75,6 +76,7 @@ function getDateFromTimestamp () {
 
 ##
 # Execute sed with the specified regexp-extended pattern.
+# Compatible Linux and Mac OS X.
 #
 # @param string $1 pattern using extended regular expressions
 # @see $TWGIT_OS
@@ -1068,15 +1070,15 @@ function displayTag () {
     msg="$(git show tags/$tag --pretty=medium)"
     echo "$msg" | head -n3 | tail -n+2
     pattern="${TWGIT_PREFIX_COMMIT_MSG}Contains $TWGIT_PREFIX_FEATURE"
-    features="$(echo "$msg" | grep -F "$pattern" | sed -r "s/^.*$TWGIT_PREFIX_FEATURE//")"
+    features="$(echo "$msg" | grep -F "$pattern" | sedRegexpExtended "s/^.*$TWGIT_PREFIX_FEATURE//")"
     if [ -z "$features" ]; then
         CUI_displayMsg info 'No feature included.'
     else
         CUI_displayMsg info 'Included features:'
         while read line; do
             (echo "$line" | grep -q '^.*: ".*"$') || line="$line: \"\""
-            feature_shortname="$(echo "$line" | sed -r "s/^(.*): \".*$/\1/")"
-            feature_subject="$(echo "$line" | sed -r "s/^.*: \"(.*)\"$/\1/")"
+            feature_shortname="$(echo "$line" | sedRegexpExtended "s/^(.*): \".*$/\1/")"
+            feature_subject="$(echo "$line" | sedRegexpExtended "s/^.*: \"(.*)\"$/\1/")"
             [ -z "$feature_subject" ] && feature_subject="$(getFeatureSubject "$feature_shortname")"
             echo -n "    - $TWGIT_ORIGIN/$TWGIT_PREFIX_FEATURE$feature_shortname "
             displayFeatureSubject "$feature_shortname" "$feature_subject"

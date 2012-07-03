@@ -20,7 +20,7 @@ Features:
 
 Fixes:
 
-  - #52: Bad option for grep in `assert_git_repository()` (thanks to #jaysus)
+  - #52: Bad option for grep in `assert_git_repository()` (thanks to Jérémie Havret)
 
 Unit tests:
 

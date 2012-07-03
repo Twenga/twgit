@@ -120,7 +120,10 @@ function CUI_displayMsg () {
 
     # Display:
     echo -en "$header${CUI_COLORS[$type]}"
-    echo -en "$msg" | sed "s/<b>/$(echo -e $bold_pattern_start | sed -e 's/[\/&]/\\&/g')/g" \
-                    | sed "s/<\/b>/$(echo -e $bold_pattern_end | sed -e 's/[\/&]/\\&/g')/g"
+    echo -en "$( \
+        echo "$msg" \
+        | sed "s/<b>/$(echo -e $bold_pattern_start | sed 's/[\/&]/\\&/g')/g" \
+        | sed "s/<\/b>/$(echo -e $bold_pattern_end | sed 's/[\/&]/\\&/g')/g" \
+    )"
     echo -e '\033[0m'
 }

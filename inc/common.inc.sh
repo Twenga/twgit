@@ -25,7 +25,7 @@
 
 
 . $TWGIT_INC_DIR/options_handler.inc.sh
-. $TWGIT_INC_DIR/ui.inc.sh
+. $TWGIT_INC_DIR/coloredUI.inc.sh
 
 
 
@@ -406,11 +406,11 @@ function getFeatureSubject () {
     if [ -z "$subject" ] && [ ! -z "$TWGIT_FEATURE_SUBJECT_CONNECTOR" ]; then
         local connector="$(printf "$TWGIT_FEATURE_SUBJECT_CONNECTOR_PATH" "$TWGIT_FEATURE_SUBJECT_CONNECTOR")"
         if [ ! -f "$connector" ]; then
-            warn "'$TWGIT_FEATURE_SUBJECT_CONNECTOR' connector not found!"
+            CUI_displayMsg warning "'$TWGIT_FEATURE_SUBJECT_CONNECTOR' connector not found!"
         else
             subject="$(. $connector $short_name 2>/dev/null)"
             if [ $? -ne 0 ]; then
-                error "'$TWGIT_FEATURE_SUBJECT_CONNECTOR' connector failed!"
+                CUI_displayMsg error "'$TWGIT_FEATURE_SUBJECT_CONNECTOR' connector failed!"
             elif [ ! -z "$subject" ]; then
                 echo "$short_name;$subject" >> "$TWGIT_FEATURES_SUBJECT_PATH"
             fi
@@ -432,9 +432,9 @@ function getFeatureSubject () {
 # @testedby TwgitSetupTest
 #
 function assert_git_configured () {
-    if ! git config --global user.name 1>/dev/null; then
+    if [ -z "$(git config user.name 2>/dev/null | tr -d ' ')" ]; then
         die "Unknown user.name! Please, do: git config --global user.name 'Firstname Lastname'"
-    elif ! git config --global user.email 1>/dev/null; then
+    elif [ -z "$(git config user.email 2>/dev/null | tr -d ' ')" ]; then
         die "Unknown user.email! Please, do: git config --global user.email 'firstname.lastname@xyz.com'"
     fi
 }
@@ -474,7 +474,7 @@ function assert_git_repository () {
 # @param string $2 nom complet d'une branche distante
 #
 function assert_branches_equal () {
-    processing "Compare branches '$1' with '$2'..."
+    CUI_displayMsg processing "Compare branches '$1' with '$2'..."
     if ! has $1 $(get_local_branches); then
         die "Local branch '<b>$1</b>' does not exist and is required!"
     elif ! has $2 $(get_remote_branches); then
@@ -484,18 +484,18 @@ function assert_branches_equal () {
     compare_branches "$1" "$2"
     local status=$?
     if [ $status -gt 0 ]; then
-        warn "Branches '<b>$1</b>' and '<b>$2</b>' have diverged."
+        CUI_displayMsg warning "Branches '<b>$1</b>' and '<b>$2</b>' have diverged."
         if [ $status -eq 1 ]; then
-            warn "And local branch '<b>$1</b>' may be fast-forwarded!"
+            CUI_displayMsg warning "And local branch '<b>$1</b>' may be fast-forwarded!"
             if ! isset_option 'I'; then
-                echo -n $(question "Pull '$1'? [Y/N] "); read answer
+                echo -n $(CUI_displayMsg question "Pull '$1'? [Y/N] "); read answer
                 [ "$answer" != "Y" ] && [ "$answer" != "y" ] && die "Pull aborted! You must make a 'git pull $TWGIT_ORIGIN $1' to continue."
             fi
             exec_git_command "git checkout $1" "Checkout '$1' failed!"
             exec_git_command "git merge $2" "Update '$1' failed!"
         elif [ $status -eq 2 ]; then
             # Warn here (not die), since there is no harm in being ahead:
-            warn "And local branch '<b>$1</b>' is ahead of '<b>$2</b>'."
+            CUI_displayMsg warning "And local branch '<b>$1</b>' is ahead of '<b>$2</b>'."
         else
             die "Branches need merging first!"
         fi
@@ -512,15 +512,15 @@ function assert_branches_equal () {
 #
 function assert_new_local_branch () {
     local branch="$1"
-    processing 'Check local branches...'
+    CUI_displayMsg processing 'Check local branches...'
     if has $branch $(get_local_branches); then
-        processing "Local branch '$branch' already exists!"
+        CUI_displayMsg processing "Local branch '$branch' already exists!"
         if ! has "$TWGIT_ORIGIN/$branch" $(get_remote_branches); then
-            error "Remote feature '$TWGIT_ORIGIN/$branch' not found while local one exists!"
-            help 'Perhaps:'
-            help_detail "- check the name of your branch"
-            help_detail "- delete this out of process local branch: git branch -D $branch"
-            help_detail "- or force renewal if feature: twgit feature start -d xxxx"
+            CUI_displayMsg error "Remote feature '$TWGIT_ORIGIN/$branch' not found while local one exists!"
+            CUI_displayMsg help 'Perhaps:'
+            CUI_displayMsg help_detail "- check the name of your branch"
+            CUI_displayMsg help_detail "- delete this out of process local branch: git branch -D $branch"
+            CUI_displayMsg help_detail "- or force renewal if feature: twgit feature start -d xxxx"
         else
             exec_git_command "git checkout $branch" "Could not checkout '$branch'!"
             inform_about_branch_status "$branch"
@@ -535,9 +535,9 @@ function assert_new_local_branch () {
 # S'assure que le dépôt git courant est dans le status 'working directory clean'.
 #
 function assert_clean_working_tree () {
-    processing 'Check clean working tree...'
+    CUI_displayMsg processing 'Check clean working tree...'
     if [ `git status --porcelain --ignore-submodules=all | wc -l` -ne 0 ]; then
-        error 'Untracked files or changes to be committed in your working tree!'
+        CUI_displayMsg error 'Untracked files or changes to be committed in your working tree!'
         exec_git_command 'git status' 'Git status failed!'
         exit 1
     fi
@@ -549,7 +549,7 @@ function assert_clean_working_tree () {
 # @param string $1 référence de branche
 #
 function assert_valid_ref_name () {
-    processing 'Check valid ref name...'
+    CUI_displayMsg processing 'Check valid ref name...'
     git check-ref-format --branch "$1" 1>/dev/null 2>&1
     if [ $? -ne 0 ]; then
         die "'$1' is not a valid reference name!"
@@ -574,10 +574,10 @@ function assert_valid_ref_name () {
 function assert_valid_tag_name () {
     local tag="$1"
     assert_valid_ref_name "$tag"
-    processing 'Check valid tag name...'
+    CUI_displayMsg processing 'Check valid tag name...'
     $(echo "$tag" | grep -qP '^'$TWGIT_PREFIX_TAG'[0-9]+\.[0-9]+\.[0-9]+$') || \
         die "Unauthorized tag name: '<b>$tag</b>'! Must use major.minor.revision format, e.g. 1.2.3."
-    processing "Check whether tag '$tag' already exists..."
+    CUI_displayMsg processing "Check whether tag '$tag' already exists..."
     has "$tag" $(get_all_tags) && die "Tag '<b>$tag</b>' already exists! Try: twgit tag list"
 }
 
@@ -589,9 +589,9 @@ function assert_valid_tag_name () {
 #
 function assert_working_tree_is_not_on_delete_branch () {
     local branch="$1"
-    processing "Check current branch..."
+    CUI_displayMsg processing "Check current branch..."
     if [ "$(get_current_branch)" = "$branch" ]; then
-        processing "Cannot delete the branch '$branch' which you are currently on! So:"
+        CUI_displayMsg processing "Cannot delete the branch '$branch' which you are currently on! So:"
         exec_git_command "git checkout $TWGIT_STABLE" "Could not checkout '$TWGIT_STABLE'!"
     fi
 }
@@ -600,7 +600,7 @@ function assert_working_tree_is_not_on_delete_branch () {
 # S'assure qu'au moins un tag existe.
 #
 function assert_tag_exists () {
-    processing 'Get last tag...'
+    CUI_displayMsg processing 'Get last tag...'
     local last_tag="$(get_last_tag)"
     [ -z "$last_tag" ] && die 'No tag exists!' || echo "Last tag: $last_tag"
 }
@@ -614,11 +614,11 @@ function assert_recent_git_version () {
     local needed=$(echo "$1" | awk -F. '{ printf("%d%02d%02d%02d\n", $1,$2,$3,$4); }')
     local current=$(git --version | sed 's/[^0-9.]//g' | awk -F. '{ printf("%d%02d%02d%02d\n", $1,$2,$3,$4); }')
     if [ $current -lt $needed ]; then
-        error "Please update git! Current: $(git --version | sed 's/[^0-9.]//g'). Need $1 or newer."
-        help 'Try:'
-        help_detail 'sudo apt-add-repository ppa:git-core/ppa'
-        help_detail 'sudo apt-get update'
-        help_detail 'sudo apt-get install git'
+        CUI_displayMsg error "Please update git! Current: $(git --version | sed 's/[^0-9.]//g'). Need $1 or newer."
+        CUI_displayMsg help 'Try:'
+        CUI_displayMsg help_detail 'sudo apt-add-repository ppa:git-core/ppa'
+        CUI_displayMsg help_detail 'sudo apt-get update'
+        CUI_displayMsg help_detail 'sudo apt-get install git'
         echo
         exit
     fi
@@ -656,7 +656,7 @@ function process_fetch () {
 #
 function process_first_commit () {
     local commit_msg=$(printf "$TWGIT_FIRST_COMMIT_MSG" "$1" "$2" "$3")
-    processing "${TWGIT_GIT_COMMAND_PROMPT}git commit --allow-empty -m \"$commit_msg\""
+    CUI_displayMsg processing "${TWGIT_GIT_COMMAND_PROMPT}git commit --allow-empty -m \"$commit_msg\""
     git commit --allow-empty -m "$commit_msg" || die 'Could not make initial commit!'
 }
 
@@ -681,7 +681,7 @@ function process_push_branch () {
 function exec_git_command () {
     local cmd="$1"
     local error_msg="$2"
-    processing "$TWGIT_GIT_COMMAND_PROMPT$cmd"
+    CUI_displayMsg processing "$TWGIT_GIT_COMMAND_PROMPT$cmd"
     $cmd || die "$error_msg"
 }
 
@@ -695,7 +695,7 @@ function remove_local_branch () {
     if has $branch $(get_local_branches); then
         exec_git_command "git branch -D $branch" "Remove local branch '$branch' failed!"
     else
-        processing "Local branch '$branch' not found."
+        CUI_displayMsg processing "Local branch '$branch' not found."
     fi
 }
 
@@ -709,7 +709,7 @@ function remove_remote_branch () {
     if has "$TWGIT_ORIGIN/$branch" $(get_remote_branches); then
         exec_git_command "git push $TWGIT_ORIGIN :$branch" "Delete remote branch '$TWGIT_ORIGIN/$branch' failed!"
         if [ $? -ne 0 ]; then
-            processing "Remove remote branch '$TWGIT_ORIGIN/$branch' failed! Maybe already deleted... so:"
+            CUI_displayMsg processing "Remove remote branch '$TWGIT_ORIGIN/$branch' failed! Maybe already deleted... so:"
             exec_git_command "git remote prune $TWGIT_ORIGIN" "Prune failed!"
         fi
     else
@@ -746,7 +746,7 @@ function create_and_push_tag () {
     local commit_msg="$2"
 
     # Create tag:
-    processing "${TWGIT_GIT_COMMAND_PROMPT}git tag -a $tag_fullname -m \"${TWGIT_PREFIX_COMMIT_MSG}$commit_msg\""
+    CUI_displayMsg processing "${TWGIT_GIT_COMMAND_PROMPT}git tag -a $tag_fullname -m \"${TWGIT_PREFIX_COMMIT_MSG}$commit_msg\""
     git tag -a $tag_fullname -m "${TWGIT_PREFIX_COMMIT_MSG}$commit_msg" || die "Could not create tag '<b>$tag_fullname</b>'!"
 
     # Push tags:
@@ -758,6 +758,12 @@ function create_and_push_tag () {
 #--------------------------------------------------------------------
 # Autres fonctions...
 #--------------------------------------------------------------------
+
+function die () {
+    CUI_displayMsg error "$*" >&2
+    echo
+    exit 1
+}
 
 ##
 # Echappe les caractères '.+$*' d'une chaîne.
@@ -856,7 +862,7 @@ function display_branches () {
     )
 
     if [ -z "$branches" ]; then
-        info 'No such branch exists.';
+        CUI_displayMsg info 'No such branch exists.';
     else
         local prefix="$TWGIT_ORIGIN/$TWGIT_PREFIX_FEATURE"
         local add_empty_line=0
@@ -864,7 +870,7 @@ function display_branches () {
             if ! isset_option 'c'; then
                 [ "$add_empty_line" = "0" ] && add_empty_line=1 || echo
             fi
-            echo -n $(info "${titles[$type]}$branch ")
+            echo -n $(CUI_displayMsg info "${titles[$type]}$branch ")
 
             [ "$type" = "feature" ] && displayFeatureSubject "${branch:${#prefix}}" || echo
 
@@ -899,7 +905,7 @@ function alert_old_branch () {
         [ "$nb_tags_no_merged" -eq "$TWGIT_MAX_RETRIEVE_TAGS_NOT_MERGED" ] && msg="${msg} at least"
         msg="${msg} $(displayInterval "$tags_not_merged")."
         [ "$2" = 'with-help' ] && msg="${msg} If need be: git merge --no-ff $(get_last_tag), then: git push $TWGIT_ORIGIN $branch"
-        warn "$msg"
+        CUI_displayMsg warning "$msg"
     fi
 }
 
@@ -911,13 +917,13 @@ function alert_dissident_branches () {
     if ! isset_option 'x'; then
         local dissident_branches="$(get_dissident_remote_branches)"
         if [ ! -z "$dissident_branches" ]; then
-            warn "Following branches are out of process: $(displayQuotedEnum $dissident_branches)!"
+            CUI_displayMsg warning "Following branches are out of process: $(displayQuotedEnum $dissident_branches)!"
         fi
     fi
 
     local local_ambiguous_branches="$((get_local_branches; git tag) | sort | uniq -d)"
     if [ ! -z "$local_ambiguous_branches" ]; then
-        warn "Following local branches are ambiguous: $(displayQuotedEnum $local_ambiguous_branches)!"
+        CUI_displayMsg warning "Following local branches are ambiguous: $(displayQuotedEnum $local_ambiguous_branches)!"
     fi
 
     if [ ! -z "$dissident_branches" ] || [ ! -z "$local_ambiguous_branches" ]; then
@@ -963,7 +969,7 @@ function displayQuotedEnum () {
 #
 function displayFeatureSubject () {
     local subject="$(getFeatureSubject "$1")"
-    [ ! -z "$subject" ] && displayMsg feature_subject "$subject" || echo
+    [ ! -z "$subject" ] && CUI_displayMsg feature_subject "$subject" || echo
 }
 
 ##
@@ -977,15 +983,15 @@ function inform_about_branch_status () {
     compare_branches "$branch" "$TWGIT_ORIGIN/$branch"
     local status=$?
     if [ $status -eq 0 ]; then
-        help "Local branch '<b>$branch</b>' up-to-date with remote '<b>$TWGIT_ORIGIN/$branch</b>'."
+        CUI_displayMsg help "Local branch '<b>$branch</b>' up-to-date with remote '<b>$TWGIT_ORIGIN/$branch</b>'."
     elif [ $status -eq 1 ]; then
-        help "If need be: git merge $TWGIT_ORIGIN/$branch"
+        CUI_displayMsg help "If need be: git merge $TWGIT_ORIGIN/$branch"
     elif [ $status -eq 2 ]; then
-        help "If need be: git push $TWGIT_ORIGIN $branch"
+        CUI_displayMsg help "If need be: git push $TWGIT_ORIGIN $branch"
     else
-        warn "Branches '<b>$branch</b>' and '<b>$TWGIT_ORIGIN/$branch</b>' have diverged!"
-        help "If need be: git merge $TWGIT_ORIGIN/$branch"
-        help "Then: git push $TWGIT_ORIGIN $branch"
+        CUI_displayMsg warning "Branches '<b>$branch</b>' and '<b>$TWGIT_ORIGIN/$branch</b>' have diverged!"
+        CUI_displayMsg help "If need be: git merge $TWGIT_ORIGIN/$branch"
+        CUI_displayMsg help "Then: git push $TWGIT_ORIGIN $branch"
     fi
 }
 
@@ -1012,7 +1018,7 @@ function clean_branches () {
     local locales="$(get_local_branches)"
     for branch in $locales; do
         if ! has $branch $tracked; then
-            echo -n $(question "Local branch '$branch' is not tracked. Remove? [Y/N] ")
+            echo -n $(CUI_displayMsg question "Local branch '$branch' is not tracked. Remove? [Y/N] ")
             read answer
             if [ "$answer" = "Y" ] || [ "$answer" = "y" ]; then
                 exec_git_command "git branch -D $branch" "Remove local branch '$branch' failed!"
@@ -1040,7 +1046,7 @@ function init () {
     local remote_url="$2"
     local tag_fullname="$TWGIT_PREFIX_TAG$tag"
 
-    processing "Check need for git init..."
+    CUI_displayMsg processing "Check need for git init..."
     if [ ! -z "$(git rev-parse --git-dir 2>&1 1>/dev/null)" ]; then
         exec_git_command 'git init' 'Initialization of git repository failed!'
     else
@@ -1049,21 +1055,21 @@ function init () {
 
     assert_valid_tag_name $tag_fullname
 
-    processing "Check presence of remote '$TWGIT_ORIGIN' repository..."
+    CUI_displayMsg processing "Check presence of remote '$TWGIT_ORIGIN' repository..."
     if [ "$(git remote | grep -R "^$TWGIT_ORIGIN$" | wc -l)" -ne 1 ]; then
         [ -z "$remote_url" ] && die "Remote '<b>$TWGIT_ORIGIN</b>' repository url required!"
         exec_git_command "git remote add origin $remote_url" 'Add remote repository failed!'
     fi
     process_fetch
 
-    processing "Check presence of '$TWGIT_STABLE' branch..."
+    CUI_displayMsg processing "Check presence of '$TWGIT_STABLE' branch..."
     if has $TWGIT_STABLE $(get_local_branches); then
-        processing "Local '$TWGIT_STABLE' detected."
+        CUI_displayMsg processing "Local '$TWGIT_STABLE' detected."
         if ! has $TWGIT_ORIGIN/$TWGIT_STABLE $(get_remote_branches); then
             exec_git_command "git push --set-upstream $TWGIT_ORIGIN $TWGIT_STABLE" 'Git push failed!'
         fi
     elif has $TWGIT_ORIGIN/$TWGIT_STABLE $(get_remote_branches); then
-        processing "Remote '$TWGIT_ORIGIN/$TWGIT_STABLE' detected."
+        CUI_displayMsg processing "Remote '$TWGIT_ORIGIN/$TWGIT_STABLE' detected."
         exec_git_command "git checkout --track -b $TWGIT_STABLE $TWGIT_ORIGIN/$TWGIT_STABLE" \
                          "Could not check out '$TWGIT_ORIGIN/$TWGIT_STABLE'!"
     else
@@ -1095,7 +1101,7 @@ function display_rank_contributors () {
     local max="$2"
     [ -z "$max" ] && max=$TWGIT_DEFAULT_NB_COMMITTERS
 
-    info "First $max committers into '$TWGIT_ORIGIN/$branch_fullname' remote branch:"
+    CUI_displayMsg info "First $max committers into '$TWGIT_ORIGIN/$branch_fullname' remote branch:"
     local contributors="$(get_contributors "$branch_fullname" $max)"
     [ -z "$contributors" ] && echo 'nobody' || echo $contributors | tr ' ' '\n'
     echo
@@ -1119,9 +1125,9 @@ function displayChangelogSection () {
     local line
     while read line; do
         if [[ "$line" =~ ^## ]]; then
-            help "${line:3}"
+            CUI_displayMsg help "${line:3}"
         elif [[ "$line" =~ ^[^-*\`].*:$ ]]; then
-            info "$line"
+            CUI_displayMsg info "$line"
         else
             echo "  $line"
         fi;
@@ -1149,7 +1155,7 @@ function autoupdate () {
 
         if [ "$elapsed_time" -gt "$interval" ] || [ ! -z "$is_forced" ]; then
             # Update Git :
-            processing "Fetch twgit repository for auto-update check..."
+            CUI_displayMsg processing "Fetch twgit repository for auto-update check..."
             git fetch
 
             # Retrieve both current and last tag:
@@ -1174,44 +1180,44 @@ function autoupdate () {
                 else
                     question="You are ahead of last tag <b>$last_tag</b>. Would you like to return to it? [Y/N] "
                 fi
-                echo -n $(question "$question")
+                echo -n $(CUI_displayMsg question "$question")
 
                 # Read answer:
                 read answer
                 if [ "$answer" = "Y" ] || [ "$answer" = "y" ]; then
-                    processing 'Update in progress...'
+                    CUI_displayMsg processing 'Update in progress...'
                     exec_git_command 'git reset --hard' 'Hard reset failed!'
                     exec_git_command "git checkout tags/$last_tag" "Could not check out tag '$last_tag'!"
                     > "$TWGIT_FEATURES_SUBJECT_PATH"
 
                     # Bash autcompletion updated?
                     if ! git diff --quiet "$current_tag" "$last_tag" -- install/bash_completion.sh; then
-                        warn "Bash autocompletion updated. Please restart your Bash session or try: <b>source ~/.bashrc</b>";
+                        CUI_displayMsg warning "Bash autocompletion updated. Please restart your Bash session or try: <b>source ~/.bashrc</b>";
                     fi
 
                     # Config file updated?
                     if ! git diff --quiet "$current_tag" "$last_tag" -- $TWGIT_CONF_DIR/twgit-dist.sh; then
-                        warn "Config file updated! \
+                        CUI_displayMsg warning "Config file updated! \
 Please consider the following diff between old and new version of <b>$TWGIT_CONF_DIR/twgit-dist.sh</b>, \
 then consequently update <b>$TWGIT_CONF_DIR/twgit.sh</b>";
                         git diff "$current_tag" "$last_tag" -- $TWGIT_CONF_DIR/twgit-dist.sh
                         if [ "$(git config --get color.diff)" != 'always' ]; then
-                            help "Try this to get colored diff in this command: <b>git config --global color.diff always</b>"
+                            CUI_displayMsg help "Try this to get colored diff in this command: <b>git config --global color.diff always</b>"
                         fi
                     fi
                 fi
             else
-                processing 'Twgit already up-to-date.'
+                CUI_displayMsg processing 'Twgit already up-to-date.'
             fi
 
             # Prochain update :
-            processing "Next auto-update check in $TWGIT_UPDATE_NB_DAYS days."
+            CUI_displayMsg processing "Next auto-update check in $TWGIT_UPDATE_NB_DAYS days."
             touch "$TWGIT_UPDATE_PATH"
 
             # MAJ du système d'update d'autocomplétion :
             if [ ! -h "/etc/bash_completion.d/twgit" ]; then
-                warn "New autocompletion update system request you execute just once this line (to adapt):"
-                help_detail "sudo rm /etc/bash_completion.d/twgit && sudo ln -s ~/twgit/install/.bash_completion /etc/bash_completion.d/twgit && source ~/.bashrc"
+                CUI_displayMsg warning "New autocompletion update system request you execute just once this line (to adapt):"
+                CUI_displayMsg help_detail "sudo rm /etc/bash_completion.d/twgit && sudo ln -s ~/twgit/install/.bash_completion /etc/bash_completion.d/twgit && source ~/.bashrc"
             fi
 
             # Invite :
@@ -1221,7 +1227,7 @@ then consequently update <b>$TWGIT_CONF_DIR/twgit.sh</b>";
             fi
         fi
     elif [ ! -z "$is_forced" ]; then
-        warn 'Git repositoy not found!'
+        CUI_displayMsg warning 'Git repositoy not found!'
     fi
     cd - 1>/dev/null
 }

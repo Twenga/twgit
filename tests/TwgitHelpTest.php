@@ -8,36 +8,6 @@ class TwgitHelpTest extends TwgitTestCase
 {
 
     /**
-    * This method is called before the first test of this test class is run.
-    *
-    * @since Method available since Release 3.4.0
-    */
-    public static function setUpBeforeClass ()
-    {
-        $o = self::_getShellInstance();
-        $o->remove(TWGIT_REPOSITORY_ORIGIN_DIR);
-        $o->remove(TWGIT_REPOSITORY_LOCAL_DIR);
-        $o->mkdir(TWGIT_REPOSITORY_ORIGIN_DIR, '0777');
-        $o->mkdir(TWGIT_REPOSITORY_LOCAL_DIR, '0777');
-
-        self::_rawExec(
-            "touch \$HOME/.gitconfig && mv \$HOME/.gitconfig \$HOME/.gitconfig.BAK && \\
-            git config --global user.name 'Firstname Lastname' && \\
-            git config --global user.email 'firstname.lastname@xyz.com'"
-        );
-    }
-
-    /**
-     * This method is called after the last test of this test class is run.
-     *
-     * @since Method available since Release 3.4.0
-     */
-    public static function tearDownAfterClass ()
-    {
-        self::_rawExec('mv $HOME/.gitconfig.BAK $HOME/.gitconfig');
-    }
-
-    /**
      * @shcovers twgit::usage
      */
     public function testMainHelp_ThrowExcpetionWhenUnknownAction1 ()

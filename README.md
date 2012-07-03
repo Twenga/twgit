@@ -17,7 +17,8 @@ Feel free to contribute to it if you like.
 ## Requirements
 
   - Bash v4 _(2009)_ and above
-  - git v1.7.2 _(2010)_ and above
+  - Git v1.7.2 _(2010)_ and above
+  - Supported Operating Systems: Linux (Debian/Ubuntu), Mac OS X
 
 ## Installing twgit
 In the directory of your choice, e.g. `~/twgit`:

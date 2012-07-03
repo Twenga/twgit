@@ -19,6 +19,7 @@
 #
 # @copyright 2011 Twenga SA
 # @copyright 2012 Geoffroy Aubry <geoffroy.aubry@free.fr>
+# @copyright 2012 Jérémie Havret <jhavret@hi-media.com>
 # @license http://www.apache.org/licenses/LICENSE-2.0
 #
 

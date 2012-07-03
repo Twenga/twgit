@@ -1,6 +1,26 @@
 ChangeLog
 =========
 
+## Version 1.8.0 (2012-07-03)
+
+Features:
+
+  - #54: Allow to define colors and decorations from config file
+  - #53: Make twgit compatible with Mac OS X
+  - #50: Display features included in a tag: shows features merged into the release when the tag was created.
+
+Fixes:
+
+  - #52: Bad option for grep in `assert_git_repository()` (thanks to #jaysus)
+
+Unit tests:
+
+  - estimated code coverage: 25%
+
+Quality code:
+
+  - #13: Risk of name collision with functions of ui.inc.sh library
+
 ## Version 1.7.0 (2012-04-29)
 
 Features:
@@ -17,7 +37,7 @@ Doc:
   - #47: Contextual help for twgit init need more precision on tag format
   - #46: Fix "Getting started" graph
 
-Fix:
+Fixes:
 
   - #49: Two init commit nodes are created when starting a new feature
 
@@ -45,7 +65,7 @@ Doc:
 
   - #42: Add some doc to README: Getting started, help on command prompt, ...
 
-Fix:
+Fixes:
 
   - #44: Installer creates conf/twgit.sh with root permissions
   - #43: Help on command prompt is not accessible if not in a git repository
@@ -82,13 +102,13 @@ Quality code:
   - #24: Now Redmine PHP code uses main config file
   - #19: Reduce coupling with Redmine
 
-Fix:
+Fixes:
 
   - #27: Main help finish with an error code not null
 
 ## Version 1.3.0 (2012-02-24)
 
-Fix:
+Fixes:
 
   - #21: Bad twgit version displayed in about section.
 

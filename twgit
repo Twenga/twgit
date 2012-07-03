@@ -53,11 +53,32 @@ fi
 . $config_file
 . $TWGIT_INC_DIR/common.inc.sh
 
-# Duplication des flux à des fins d'historisation :
+
+
+##
+# Duplication des flux à des fins d'historisation
+#
 log_date="$(date "+%Y-%m-%d %H:%M:%S")"
 log_call="$0 $@"
-exec 2> >(printf -- "$TWGIT_HISTORY_SEPARATOR" "$log_date" "$log_call" >> $TWGIT_HISTORY_ERROR_PATH; tee -a $TWGIT_HISTORY_ERROR_PATH >&2)
-exec > >(printf -- "$TWGIT_HISTORY_SEPARATOR" "$log_date" "$log_call" >> $TWGIT_HISTORY_LOG_PATH; tee -a $TWGIT_HISTORY_LOG_PATH)
+
+# Log errors:
+printf -- "$TWGIT_HISTORY_SEPARATOR" "$log_date" "$log_call" >> $TWGIT_HISTORY_ERROR_PATH
+PIPE_ERROR=$TWGIT_TMP_DIR/twgit_$$_error.tmp
+mkfifo "$PIPE_ERROR"
+tee -a <$PIPE_ERROR $TWGIT_HISTORY_ERROR_PATH &
+exec 2>&-
+exec 2>$PIPE_ERROR
+
+# Log display:
+printf -- "$TWGIT_HISTORY_SEPARATOR" "$log_date" "$log_call" >> $TWGIT_HISTORY_LOG_PATH
+PIPE_LOG=$TWGIT_TMP_DIR/twgit_$$_log.tmp
+mkfifo "$PIPE_LOG"
+tee -a <$PIPE_LOG $TWGIT_HISTORY_LOG_PATH &
+exec 1>&-
+exec 1>$PIPE_LOG
+
+# Clean on exit:
+trap "rm -f $PIPE_LOG $PIPE_ERROR" EXIT ERR
 
 
 

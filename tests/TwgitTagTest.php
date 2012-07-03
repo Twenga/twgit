@@ -72,6 +72,11 @@ class TwgitTagTest extends TwgitTestCase
         $this->_localShellCodeCall('echo \'4;The subject of 4\' >> \$TWGIT_FEATURES_SUBJECT_PATH');
 
         $this->_remoteExec('git init');
+        $this->_localExec(
+            "git init && \\
+            git config user.name 'Firstname Lastname' && \\
+            git config user.email 'firstname.lastname@xyz.com'"
+        );
         $this->_localExec(TWGIT_EXEC . ' init 1.2.3 ' . TWGIT_REPOSITORY_ORIGIN_DIR);
         $this->_localExec(TWGIT_EXEC . ' release start -I');
 

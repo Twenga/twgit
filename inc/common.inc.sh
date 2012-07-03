@@ -1003,15 +1003,15 @@ function displayTag () {
     local tag="$1"
     local msg pattern features feature_shortname feature_subject
 
-    info "Tag: $tag"
+    CUI_displayMsg info "Tag: $tag"
     msg="$(git show tags/$tag --pretty=medium)"
     echo "$msg" | head -n3 | tail -n+2
     pattern="${TWGIT_PREFIX_COMMIT_MSG}Contains $TWGIT_PREFIX_FEATURE"
     features="$(echo "$msg" | grep -F "$pattern" | sed -r "s/^.*$TWGIT_PREFIX_FEATURE//")"
     if [ -z "$features" ]; then
-        info 'No feature included.'
+        CUI_displayMsg info 'No feature included.'
     else
-        info 'Included features:'
+        CUI_displayMsg info 'Included features:'
         while read line; do
             (echo "$line" | grep -q '^.*: ".*"$') || line="$line: \"\""
             feature_shortname="$(echo "$line" | sed -r "s/^(.*): \".*$/\1/")"

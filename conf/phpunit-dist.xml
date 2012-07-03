@@ -14,7 +14,7 @@
     verbose="true"
     stopOnFailure="false"
     timeoutForSmallTests="20"
-    timeoutForMediumTests="30"
+    timeoutForMediumTests="40"
     timeoutForLargeTests="60"
 >
     <testsuites>

@@ -30,14 +30,14 @@
 # @testedby TwgitHelpTest
 #
 function usage () {
-    echo; help 'Usage:'
-    help_detail '<b>twgit tag <action></b>'
-    echo; help 'Available actions are:'
-    help_detail '<b>list [<tagname>] [-F]</b>'
-    help_detail '    List 5 last tags with included features. Add <b>-F</b> to do not make fetch.'
-    help_detail '    If <b><tagname></b> is specified, then focus on this tag.'; echo
-    help_detail '<b>[help]</b>'
-    help_detail '    Display this help.'; echo
+    echo; CUI_displayMsg help 'Usage:'
+    CUI_displayMsg help_detail '<b>twgit tag <action></b>'
+    echo; CUI_displayMsg help 'Available actions are:'
+    CUI_displayMsg help_detail '<b>list [<tagname>] [-F]</b>'
+    CUI_displayMsg help_detail '    List 5 last tags with included features. Add <b>-F</b> to do not make fetch.'
+    CUI_displayMsg help_detail '    If <b><tagname></b> is specified, then focus on this tag.'; echo
+    CUI_displayMsg help_detail '<b>[help]</b>'
+    CUI_displayMsg help_detail '    Display this help.'; echo
 }
 
 ##
@@ -73,9 +73,9 @@ function cmd_list () {
     else
         local max='5'
         local tags=$(get_all_tags $max)
-        help "List $max last tags:"
+        CUI_displayMsg help "List $max last tags:"
         if [ -z "$tags" ]; then
-            info 'No tag exists.'; echo
+            CUI_displayMsg info 'No tag exists.'; echo
         else
             for tag_fullname in $tags; do
                 displayTag "$tag_fullname"

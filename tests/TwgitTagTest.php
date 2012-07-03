@@ -8,30 +8,6 @@ class TwgitTagTest extends TwgitTestCase
 {
 
     /**
-    * This method is called before the first test of this test class is run.
-    *
-    * @since Method available since Release 3.4.0
-    */
-    public static function setUpBeforeClass ()
-    {
-        self::_rawExec(
-            "touch \$HOME/.gitconfig && mv \$HOME/.gitconfig \$HOME/.gitconfig.BAK && \\
-            git config --global user.name 'Firstname Lastname' && \\
-            git config --global user.email 'firstname.lastname@xyz.com'"
-        );
-    }
-
-    /**
-     * This method is called after the last test of this test class is run.
-     *
-     * @since Method available since Release 3.4.0
-     */
-    public static function tearDownAfterClass ()
-    {
-        self::_rawExec('mv $HOME/.gitconfig.BAK $HOME/.gitconfig');
-    }
-
-    /**
      * Sets up the fixture, for example, open a network connection.
      * This method is called before a test is executed.
      */

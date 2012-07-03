@@ -14,6 +14,7 @@ Note:
 
 Features:
 
+  - #55: Adapt github connector to Github API v3
   - #54: Allow to define colors and decorations from config file
   - #53: Make twgit compatible with Mac OS X
   - #50: Display features included in a tag: shows features merged into the release when the tag was created. Add `twgit tag list [<tagname>] [-F]`.

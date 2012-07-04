@@ -3,6 +3,8 @@
 ##
 # Generate screenshots of help on command prompt.
 #
+# Usage: bash command_prompt_screenshots.sh <twgit_root_dir>
+#
 #
 #
 # Copyright (c) 2012 Geoffroy Aubry <geoffroy.aubry@free.fr>

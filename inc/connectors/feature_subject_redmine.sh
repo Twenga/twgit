@@ -34,11 +34,11 @@ issue_url="https://$TWGIT_FEATURE_SUBJECT_REDMINE_DOMAIN/issues/$ref.json?key=$T
 project_url="https://$TWGIT_FEATURE_SUBJECT_REDMINE_DOMAIN/projects/$ref.json?key=$TWGIT_FEATURE_SUBJECT_REDMINE_API_KEY"
 
 if [[ "$ref" =~ ^[0-9]+$ ]]; then
-    (wget -q -O - --no-cache $issue_url \
+    (wget --no-check-certificate --timeout=2 -q -O - --no-cache $issue_url \
     | php -r '$o = json_decode(file_get_contents("php://stdin")); if ($o !== NULL) {print_r($o->issue->subject);}')
     2>/dev/null
 else
-    (wget -q -O - --no-cache $project_url \
+    (wget --no-check-certificate --timeout=2 -q -O - --no-cache $project_url \
     | php -r '$o = json_decode(file_get_contents("php://stdin")); if ($o !== NULL) {print_r($o->project->name);}')
     2>/dev/null
 fi

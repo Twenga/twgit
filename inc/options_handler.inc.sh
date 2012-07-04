@@ -101,7 +101,7 @@ function require_parameter () {
     elif [ "$name" = '-' ]; then
         RETVAL=''
     else
-        error "Missing argument <$name>!"
+        CUI_displayMsg error "Missing argument <$name>!"
         usage
         exit 1
     fi

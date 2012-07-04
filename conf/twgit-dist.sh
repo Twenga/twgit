@@ -27,6 +27,7 @@
 TWGIT_ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 TWGIT_INC_DIR="$TWGIT_ROOT_DIR/inc"
 TWGIT_CONF_DIR="$TWGIT_ROOT_DIR/conf"
+TWGIT_TMP_DIR="/tmp"
 
 TWGIT_BASH_EXEC="/bin/bash"
 TWGIT_EXEC="$TWGIT_BASH_EXEC $TWGIT_ROOT_DIR/twgit"
@@ -66,3 +67,40 @@ TWGIT_FEATURE_SUBJECT_REDMINE_API_KEY=''	# API key is a 40-byte hexadecimal stri
 TWGIT_FEATURE_SUBJECT_REDMINE_DOMAIN=''		# e.g. 'www.redmine.org'
 TWGIT_FEATURE_SUBJECT_GITHUB_USER=''		# e.g. 'Twenga'
 TWGIT_FEATURE_SUBJECT_GITHUB_REPOSITORY=''	# e.g. 'twgit'
+
+##
+# Colors and decorations types.
+# MUST define following types:
+#     error, feature_subject, help, help_detail, info, normal, ok, processing, question, warning.
+#
+# For each type, message will be displayed as follows (.header and .bold are optional):
+#     '<type.header><type>message with <type.bold>bold section<type>.\033[0m'
+#
+# Color codes :
+#   - http://www.tux-planet.fr/les-codes-de-couleurs-en-bash/
+#   - http://confignewton.com/wp-content/uploads/2011/07/bash_color_codes.png
+#
+# @var associative array
+# @see inc/coloredUI.inc.sh for more details.
+#
+declare -A CUI_COLORS=(
+    [error]='\033[1;31m'
+    [error.bold]='\033[1;33m'
+    [error.header]='\033[1m\033[4;33m/!\\\033[0;37m '
+    [feature_subject]='\033[1;34m'
+    [help]='\033[0;36m'
+    [help.bold]='\033[1;36m'
+    [help.header]='\033[1;36m(i) '
+    [help_detail]='\033[0;37m'
+    [help_detail.bold]='\033[1;37m'
+    [help_detail.header]='    '
+    [info]='\033[1;37m'
+    [normal]='\033[0;37m'
+    [ok]='\033[0;32m'
+    [processing]='\033[1;30m'
+    [question]='\033[1;33m'
+    [question.bold]='\033[1;37m'
+    [warning]='\033[0;33m'
+    [warning.bold]='\033[1;33m'
+    [warning.header]='\033[1m\033[4;33m/!\\\033[0;37m '
+)

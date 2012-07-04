@@ -13,7 +13,7 @@
 sCommonFunction="$1"; shift
 
 # Includes:
-. `dirname $0`/../../conf/twgit.sh
+. $(dirname $0)/../../conf/twgit.sh
 . $TWGIT_INC_DIR/common.inc.sh
 
 # Execution:

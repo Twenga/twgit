@@ -17,7 +17,9 @@ Feel free to contribute to it if you like.
 ## Requirements
 
   - Bash v4 _(2009)_ and above
-  - git v1.7.2 _(2010)_ and above
+  - Git v1.7.2 _(2010)_ and above
+  - php5-cli for Redmine and Github connectors (can be switched off): allow to display issue's title/subject into twgit
+  - Supported operating systems: Debian/Ubuntu Linux, Mac OS X
 
 ## Installing twgit
 In the directory of your choice, e.g. `~/twgit`:

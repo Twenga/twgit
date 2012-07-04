@@ -8,26 +8,6 @@ class TwgitSetupTest extends TwgitTestCase
 {
 
     /**
-    * This method is called before the first test of this test class is run.
-    *
-    * @since Method available since Release 3.4.0
-    */
-    public static function setUpBeforeClass ()
-    {
-        self::_rawExec('touch $HOME/.gitconfig && mv $HOME/.gitconfig $HOME/.gitconfig.BAK');
-    }
-
-    /**
-     * This method is called after the last test of this test class is run.
-     *
-     * @since Method available since Release 3.4.0
-     */
-    public static function tearDownAfterClass ()
-    {
-        self::_rawExec('mv $HOME/.gitconfig.BAK $HOME/.gitconfig');
-    }
-
-    /**
     * Sets up the fixture, for example, open a network connection.
     * This method is called before a test is executed.
     */
@@ -45,6 +25,7 @@ class TwgitSetupTest extends TwgitTestCase
      */
     public function testAssertGitConfigured_ThrowExcpetionWhenUnknownUsername ()
     {
+        $this->_localExec("git init && git config user.name ''");
         $this->setExpectedException('RuntimeException', 'Unknown user.name!');
         $this->_localFunctionCall('assert_git_configured');
     }
@@ -54,7 +35,11 @@ class TwgitSetupTest extends TwgitTestCase
      */
     public function testAssertGitConfigured_ThrowExcpetionWhenUnknownUserEmail ()
     {
-        $this->_exec("git config --global user.name 'Firstname Lastname'");
+        $this->_localExec(
+            "git init && \\
+            git config user.name 'Firstname Lastname' && \\
+            git config user.email ''"
+        );
         $this->setExpectedException('RuntimeException', 'Unknown user.email!');
         $this->_localFunctionCall('assert_git_configured');
     }
@@ -64,9 +49,10 @@ class TwgitSetupTest extends TwgitTestCase
      */
     public function testAssertGitConfigured_OK ()
     {
-        $this->_exec(
-            "git config --global user.name 'Firstname Lastname' && \\
-            git config --global user.email 'firstname.lastname@xyz.com'"
+        $this->_localExec(
+            "git init && \\
+            git config user.name 'Firstname Lastname' && \\
+            git config user.email 'firstname.lastname@xyz.com'"
         );
         $sMsg = $this->_localFunctionCall('assert_git_configured');
         $this->assertEmpty($sMsg);

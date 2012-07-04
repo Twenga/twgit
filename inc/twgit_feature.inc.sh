@@ -30,40 +30,40 @@
 # @testedby TwgitHelpTest
 #
 function usage () {
-    echo; help 'Usage:'
-    help_detail '<b>twgit feature <action></b>'
-    echo; help 'Available actions are:'
-    help_detail '<b>committers <featurename> [<max>] [-F]</b>'
-    help_detail '    List first <b><max></b> committers into the specified remote feature.'
-    help_detail "    Default value of <b><max></b>: $TWGIT_DEFAULT_NB_COMMITTERS. Add <b>-F</b> to do not make fetch."; echo
-    help_detail '<b>list [-c|-F|-x]</b>'
-    help_detail '    List remote features. Add <b>-F</b> to do not make fetch, <b>-c</b> to compact display'
-    help_detail '    and <b>-x</b> (eXtremely compact) to CSV display.'; echo
-    help_detail '<b>merge-into-release [<featurename>]</b>'
-    help_detail '    Try to merge specified feature into current release.'
-    help_detail '    If no <b><featurename></b> is specified, then ask to use current feature.'; echo
-    help_detail '<b>migrate <oldfeaturefullname> <newfeaturename></b>'
-    help_detail '    Migrate old branch to new process.'
-    help_detail '    For example: "twgit feature migrate rm7880 7880"'; echo
-    help_detail '<b>remove <featurename></b>'
-    help_detail '    Remove both local and remote specified feature branch.'; echo
-    help_detail '<b>show-modified-files [<featurename>]</b>'
-    help_detail '    List created/modified/deleted files of the specified feature branch since'
-    help_detail '    its creation (from commits). If no <b><featurename></b> is specified, then use'
-    help_detail '    current feature.'; echo
-    help_detail '<b>start <featurename> [-d]</b>'
-    help_detail '    Create both a new local and remote feature, or fetch the remote feature,'
-    help_detail '    or checkout the local feature. Add <b>-d</b> to delete beforehand local feature'
-    help_detail '    if exists.'; echo
-    help_detail '<b>status [<featurename>]</b>'
-    help_detail '    Display information about specified feature: long name if a connector is'
-    help_detail '    setted, last commit, status between local and remote feature and execute'
-    help_detail '    a git status if specified feature is the current branch.'
-    help_detail '    If no <b><featurename></b> is specified, then use current feature.'; echo
-    help_detail "Prefix '$TWGIT_PREFIX_FEATURE' will be added to <b><featurename></b> and <b><newfeaturename></b>"
-    help_detail "parameters."; echo
-    help_detail '<b>[help]</b>'
-    help_detail '    Display this help.'; echo
+    echo; CUI_displayMsg help 'Usage:'
+    CUI_displayMsg help_detail '<b>twgit feature <action></b>'
+    echo; CUI_displayMsg help 'Available actions are:'
+    CUI_displayMsg help_detail '<b>committers <featurename> [<max>] [-F]</b>'
+    CUI_displayMsg help_detail '    List first <b><max></b> committers into the specified remote feature.'
+    CUI_displayMsg help_detail "    Default value of <b><max></b>: $TWGIT_DEFAULT_NB_COMMITTERS. Add <b>-F</b> to do not make fetch."; echo
+    CUI_displayMsg help_detail '<b>list [-c|-F|-x]</b>'
+    CUI_displayMsg help_detail '    List remote features. Add <b>-F</b> to do not make fetch, <b>-c</b> to compact display'
+    CUI_displayMsg help_detail '    and <b>-x</b> (eXtremely compact) to CSV display.'; echo
+    CUI_displayMsg help_detail '<b>merge-into-release [<featurename>]</b>'
+    CUI_displayMsg help_detail '    Try to merge specified feature into current release.'
+    CUI_displayMsg help_detail '    If no <b><featurename></b> is specified, then ask to use current feature.'; echo
+    CUI_displayMsg help_detail '<b>migrate <oldfeaturefullname> <newfeaturename></b>'
+    CUI_displayMsg help_detail '    Migrate old branch to new process.'
+    CUI_displayMsg help_detail '    For example: "twgit feature migrate rm7880 7880"'; echo
+    CUI_displayMsg help_detail '<b>remove <featurename></b>'
+    CUI_displayMsg help_detail '    Remove both local and remote specified feature branch.'; echo
+    CUI_displayMsg help_detail '<b>show-modified-files [<featurename>]</b>'
+    CUI_displayMsg help_detail '    List created/modified/deleted files of the specified feature branch since'
+    CUI_displayMsg help_detail '    its creation (from commits). If no <b><featurename></b> is specified, then use'
+    CUI_displayMsg help_detail '    current feature.'; echo
+    CUI_displayMsg help_detail '<b>start <featurename> [-d]</b>'
+    CUI_displayMsg help_detail '    Create both a new local and remote feature, or fetch the remote feature,'
+    CUI_displayMsg help_detail '    or checkout the local feature. Add <b>-d</b> to delete beforehand local feature'
+    CUI_displayMsg help_detail '    if exists.'; echo
+    CUI_displayMsg help_detail '<b>status [<featurename>]</b>'
+    CUI_displayMsg help_detail '    Display information about specified feature: long name if a connector is'
+    CUI_displayMsg help_detail '    setted, last commit, status between local and remote feature and execute'
+    CUI_displayMsg help_detail '    a git status if specified feature is the current branch.'
+    CUI_displayMsg help_detail '    If no <b><featurename></b> is specified, then use current feature.'; echo
+    CUI_displayMsg help_detail "Prefix '$TWGIT_PREFIX_FEATURE' will be added to <b><featurename></b> and <b><newfeaturename></b>"
+    CUI_displayMsg help_detail "parameters."; echo
+    CUI_displayMsg help_detail '<b>[help]</b>'
+    CUI_displayMsg help_detail '    Display this help.'; echo
 }
 
 ##
@@ -121,16 +121,16 @@ function cmd_list () {
     if isset_option 'x'; then
         display_csv_branches "$features" "merged into stable"
     elif [ ! -z "$features" ]; then
-        help "Remote features merged into '<b>$TWGIT_STABLE</b>' via releases:"
-        warn 'They would not exists!'
+        CUI_displayMsg help "Remote features merged into '<b>$TWGIT_STABLE</b>' via releases:"
+        CUI_displayMsg warning 'They would not exists!'
         display_branches 'feature' "$features"; echo
     fi
 
     local release="$(get_current_release_in_progress)"
     if [ -z "$release" ]; then
         if ! isset_option 'x'; then
-            help "Remote delivered features merged into release in progress:"
-            info 'No such branch exists.'; echo
+            CUI_displayMsg help "Remote delivered features merged into release in progress:"
+            CUI_displayMsg info 'No such branch exists.'; echo
         fi
     else
         get_merged_features $release
@@ -143,9 +143,9 @@ function cmd_list () {
             display_csv_branches "$features_merged" "merged into release"
             display_csv_branches "$features_in_progress" "merged into release, then in progress"
         else
-            help "Remote delivered features merged into release in progress '<b>$TWGIT_ORIGIN/$release</b>':"
+            CUI_displayMsg help "Remote delivered features merged into release in progress '<b>$TWGIT_ORIGIN/$release</b>':"
             display_branches 'feature' "$features_merged"; echo
-            help "Remote features in progress, previously merged into '<b>$TWGIT_ORIGIN/$release</b>':"
+            CUI_displayMsg help "Remote features in progress, previously merged into '<b>$TWGIT_ORIGIN/$release</b>':"
             display_branches 'feature' "$features_in_progress"; echo
         fi
     fi
@@ -156,7 +156,7 @@ function cmd_list () {
     if isset_option 'x'; then
         display_csv_branches "$features" "free"
     else
-        help "Remote free features:"
+        CUI_displayMsg help "Remote free features:"
         display_branches 'feature' "$features"; echo
         alert_dissident_branches
     fi
@@ -180,23 +180,23 @@ function cmd_migrate () {
     assert_valid_ref_name $feature
     assert_clean_working_tree
 
-    processing 'Check local features...'
+    CUI_displayMsg processing 'Check local features...'
     if has $feature_fullname $(get_local_branches); then
         die "Local branch '$feature_fullname' already exists!"
     fi
 
     process_fetch
-    processing 'Check remote features...'
+    CUI_displayMsg processing 'Check remote features...'
     if ! has "$TWGIT_ORIGIN/$oldfeature_fullname" $(get_remote_branches); then
         die "Remote branch '$TWGIT_ORIGIN/$oldfeature_fullname' does not exist!"
     elif has "$TWGIT_ORIGIN/$feature_fullname" $(get_remote_branches); then
         die "Remote feature '$feature_fullname' already exists!"
     fi
 
-    echo -n $(question "Are you sure to migrate '$oldfeature_fullname' to '$feature_fullname'? Branch '$oldfeature_fullname' will be deleted. [Y/N] "); read answer
+    echo -n $(CUI_displayMsg question "Are you sure to migrate '$oldfeature_fullname' to '$feature_fullname'? Branch '$oldfeature_fullname' will be deleted. [Y/N] "); read answer
     [ "$answer" != "Y" ] && [ "$answer" != "y" ] && die 'Branch migration aborted!'
 
-    processing "Migrate '<b>$oldfeature_fullname</b>' to '<b>$feature_fullname</b>'..."
+    CUI_displayMsg processing "Migrate '<b>$oldfeature_fullname</b>' to '<b>$feature_fullname</b>'..."
     exec_git_command "git checkout --track -b $feature_fullname $TWGIT_ORIGIN/$oldfeature_fullname" "Could not check out feature '$TWGIT_ORIGIN/$oldfeature_fullname'!"
     remove_local_branch "$oldfeature_fullname"
     remove_remote_branch "$oldfeature_fullname"
@@ -229,9 +229,9 @@ function cmd_start () {
         assert_new_local_branch $feature_fullname
     fi
 
-    processing 'Check remote features...'
+    CUI_displayMsg processing 'Check remote features...'
     if has "$TWGIT_ORIGIN/$feature_fullname" $(get_remote_branches); then
-        processing "Remote feature '$feature_fullname' detected."
+        CUI_displayMsg processing "Remote feature '$feature_fullname' detected."
         exec_git_command "git checkout --track -b $feature_fullname $TWGIT_ORIGIN/$feature_fullname" "Could not check out feature '$TWGIT_ORIGIN/$feature_fullname'!"
     else
         assert_tag_exists
@@ -288,7 +288,7 @@ function cmd_status () {
         exec_git_command "git status" "Error while git status!"
         if [ "$(git config --get color.status)" != 'always' ]; then
             echo
-            help "Try this to get colored status in this command: <b>git config --global color.status always</b>"
+            CUI_displayMsg help "Try this to get colored status in this command: <b>git config --global color.status always</b>"
         fi
     fi
     echo
@@ -311,7 +311,7 @@ function cmd_merge-into-release () {
     # Tests préliminaires :
     assert_clean_working_tree
     process_fetch
-    processing 'Check remote release...'
+    CUI_displayMsg processing 'Check remote release...'
     [ -z "$release" ] && die 'No release in progress!'
 
     # Si feature non spécifiée, récupérer la courante :
@@ -322,7 +322,7 @@ function cmd_merge-into-release () {
         if ! has "$TWGIT_ORIGIN/$current_branch" $all_features; then
             die "You must be in a feature if you didn't specify one!"
         else
-            echo -n $(question "Are you sure to merge '$TWGIT_ORIGIN/$current_branch' into '$TWGIT_ORIGIN/$release_fullname'? [Y/N] "); read answer
+            echo -n $(CUI_displayMsg question "Are you sure to merge '$TWGIT_ORIGIN/$current_branch' into '$TWGIT_ORIGIN/$release_fullname'? [Y/N] "); read answer
             [ "$answer" != "Y" ] && [ "$answer" != "y" ] && die 'Merge into current release aborted!'
         fi
         feature_fullname="$current_branch"
@@ -332,9 +332,9 @@ function cmd_merge-into-release () {
     fi
 
     # Autres tests :
-    processing 'Check remote feature...'
+    CUI_displayMsg processing 'Check remote feature...'
     if ! has "$TWGIT_ORIGIN/$feature_fullname" $(get_remote_branches); then
-        die "Remote feature '$TWGIT_ORIGIN/$feature_fullname' not found!"
+        die "Remote feature '<b>$TWGIT_ORIGIN/$feature_fullname</b>' not found!"
     fi
 
     # Merge :
@@ -349,19 +349,19 @@ git push $TWGIT_ORIGIN $release_fullname"
     local prefix
     for cmd in $cmds; do
         if [ "$error" -ne 0 ]; then
-            help_detail "$cmd"
+            CUI_displayMsg help_detail "$cmd"
         else
             [ "${cmd:0:${#TWGIT_EXEC}+1}" = "$TWGIT_EXEC " ] && msg="shell# twgit ${cmd:${#TWGIT_EXEC}+1}" || msg="${TWGIT_GIT_COMMAND_PROMPT}$cmd"
-            processing "$msg"
+            CUI_displayMsg processing "$msg"
             if ! eval $cmd; then
                 error=1
-                error "Merge '$feature_fullname' into '$release_fullname' aborted!"
-                help 'Commands not executed:'
-                help_detail "$cmd"
+                CUI_displayMsg error "Merge '$feature_fullname' into '$release_fullname' aborted!"
+                CUI_displayMsg help 'Commands not executed:'
+                CUI_displayMsg help_detail "$cmd"
                 if [ "${cmd:0:10}" = "git merge " ]; then
-                    help_detail "  - resolve conflicts"
-                    help_detail "  - git add..."
-                    help_detail "  - git commit..."
+                    CUI_displayMsg help_detail "  - resolve conflicts"
+                    CUI_displayMsg help_detail "  - git add..."
+                    CUI_displayMsg help_detail "  - git commit..."
                 fi
             fi
         fi
@@ -396,7 +396,7 @@ function cmd_show-modified-files () {
 
     if [ ! -z "$feature" ]; then
         feature_fullname="$TWGIT_PREFIX_FEATURE$feature"
-        processing 'Check remote feature...'
+        CUI_displayMsg processing 'Check remote feature...'
         if ! has "$TWGIT_ORIGIN/$feature_fullname" $(get_remote_branches); then
             die "Remote feature '$TWGIT_ORIGIN/$feature_fullname' not found!"
         fi
@@ -416,14 +416,14 @@ function cmd_show-modified-files () {
     local modified_files="$(git show --pretty="format:" --name-only $start_sha1..HEAD | sort | uniq | sed '/^$/d')"
     local count="$(echo "$modified_files" | sed '/^$/d' | wc -l)"
 
-    info "SHA1 of creation of '$feature_fullname':"
+    CUI_displayMsg info "SHA1 of creation of '$feature_fullname':"
     echo $start_sha1; echo
 
-    info "Number of created/modified/deleted files of '$feature_fullname' since its creation:"
+    CUI_displayMsg info "Number of created/modified/deleted files of '$feature_fullname' since its creation:"
     echo "$count"; echo
 
     if [ "$count" != '0' ]; then
-        info "List of these files:"
+        CUI_displayMsg info "List of these files:"
         echo "$modified_files"; echo
     fi
 }

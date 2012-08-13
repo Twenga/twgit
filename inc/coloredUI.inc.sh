@@ -73,12 +73,12 @@ declare -A CUI_COLORS
 #
 function CUI_isSet () {
     local key="$1"
-    return $(echo " ${!CUI_COLORS[*]} " | tr '\n' ' ' | grep " $key " -q)
+    [ -z "${CUI_COLORS[$key]-}" ] && return 1 || return 0
 }
 
 ##
 # Display a message of the specified type, using ${CUI_COLORS[$type]}.
-# If ${CUI_COLORS[$type.color]} exists, then this will be used as prefix.
+# If ${CUI_COLORS[$type.header]} exists, then this will be used as prefix.
 # If ${CUI_COLORS[$type.bold]} exists, then this will be used to display text in '<b>...</b>' tags.
 # In any case <b> tags will be stripped.
 #
@@ -96,7 +96,7 @@ function CUI_displayMsg () {
     if ! CUI_isSet "$type"; then
         echo "Unknown display type '$type'!" >&2
         echo -n 'Available types: ' >&2
-        local types=$(echo "${!CUI_COLORS[*]}" | grep -vE "\.bold$" | grep -vE "\.header$" | sort)
+        local types=$(echo "${!CUI_COLORS[*]}" | tr ' ' "\n" | grep -vE "\.bold$" | grep -vE "\.header$" | sort)
         local trimmed_types=$(echo $types)
         echo "${trimmed_types// /, }." >&2
         exit 1
@@ -119,11 +119,7 @@ function CUI_displayMsg () {
     fi
 
     # Display:
-    echo -en "$header${CUI_COLORS[$type]}"
-    echo -en "$( \
-        echo "$msg" \
-        | sed "s/<b>/$(echo -e $bold_pattern_start | sed 's/[\/&]/\\&/g')/g" \
-        | sed "s/<\/b>/$(echo -e $bold_pattern_end | sed 's/[\/&]/\\&/g')/g" \
-    )"
-    echo -e '\033[0m'
+    msg="${msg//<b>/$bold_pattern_start}"
+    msg="${msg//<\/b>/$bold_pattern_end}"
+    echo -e "$header${CUI_COLORS[$type]}$msg\033[0m"
 }

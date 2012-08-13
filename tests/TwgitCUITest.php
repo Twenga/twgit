@@ -47,7 +47,7 @@ class TwgitCUITest extends TwgitTestCase
     public function testDisplayMsg_ThrowExceptionWhenUnknownTypeAndSeveralDefinedTypes ()
     {
         $this->setExpectedException('RuntimeException', "Unknown display type 'info'!\nAvailable types: a, c.");
-        $sMsg = $this->_localShellCodeCall('CUI_COLORS=([a]=b [c]=d); CUI_displayMsg info', false);
+        $sMsg = $this->_localShellCodeCall('CUI_COLORS=([a]=b [c]=d [c.bold]=d2 [c.header]=d3); CUI_displayMsg info', false);
     }
 
     /**

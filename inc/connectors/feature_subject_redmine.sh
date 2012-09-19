@@ -30,8 +30,13 @@
 # @param string $1 issue number or project name
 #
 ref="$1"
-issue_url="https://$TWGIT_FEATURE_SUBJECT_REDMINE_DOMAIN/issues/$ref.json?key=$TWGIT_FEATURE_SUBJECT_REDMINE_API_KEY"
-project_url="https://$TWGIT_FEATURE_SUBJECT_REDMINE_DOMAIN/projects/$ref.json?key=$TWGIT_FEATURE_SUBJECT_REDMINE_API_KEY"
+if [[ "$TWGIT_FEATURE_SUBJECT_REDMINE_DOMAIN" =~ ^https?:// ]]; then
+    scheme=''
+else
+    scheme='https://'
+fi
+issue_url="$scheme$TWGIT_FEATURE_SUBJECT_REDMINE_DOMAIN/issues/$ref.json?key=$TWGIT_FEATURE_SUBJECT_REDMINE_API_KEY"
+project_url="$scheme$TWGIT_FEATURE_SUBJECT_REDMINE_DOMAIN/projects/$ref.json?key=$TWGIT_FEATURE_SUBJECT_REDMINE_API_KEY"
 wget_cmd='wget --no-check-certificate --timeout=3 -q -O - --no-cache'
 
 # Python or PHP ?

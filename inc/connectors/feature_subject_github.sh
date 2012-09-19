@@ -35,6 +35,30 @@ url="$(printf "https://api.github.com/repos/%s/%s/issues/%s" \
         "$TWGIT_FEATURE_SUBJECT_GITHUB_USER" \
         "$TWGIT_FEATURE_SUBJECT_GITHUB_REPOSITORY" \
         "$issue")"
-(wget --no-check-certificate --timeout=2 -q -O - --no-cache $url \
+wget_cmd='wget --no-check-certificate --timeout=3 -q -O - --no-cache'
+
+# Python or PHP ?
+language='?'
+which python 1>/dev/null 2>&1
+if [ $? -eq 0 ]; then
+    language='python'
+else
+    which php 1>/dev/null 2>&1
+    if [ $? -eq 0 ]; then
+        language='php'
+    fi
+fi
+
+# Convert JSON with Python or PHP:
+if [ "$language" = 'python' ]; then
+    ($wget_cmd $url | python -c 'import sys,json;s=sys.stdin.read();
+if s!="": data=json.loads(s); print data["title"]')
+    2>/dev/null
+elif [ "$language" = 'php' ]; then
+    ($wget_cmd $url \
     | php -r '$o = json_decode(file_get_contents("php://stdin")); if ($o !== NULL) {print_r($o->title);}')
     2>/dev/null
+else
+    echo "Language '$language' not handled!" >&2
+    exit 1
+fi

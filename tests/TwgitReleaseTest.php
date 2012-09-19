@@ -88,7 +88,7 @@ class TwgitReleaseTest extends TwgitTestCase
     /**
      * Currently just check the tag annotation.
      */
-    public function testFinish ()
+    public function testFinish_WithMinorRelease ()
     {
         $this->_localShellCodeCall('echo \'2;The subject\' > \$TWGIT_FEATURES_SUBJECT_PATH');
 
@@ -116,4 +116,117 @@ class TwgitReleaseTest extends TwgitTestCase
         $this->assertContains("Merge branch 'release-1.3.0' into stable", $sMsg);
     }
 
+    /**
+     * @shcovers inc/common.inc.sh::assert_clean_stable_branch_and_checkout
+     */
+    public function testFinish_ThrowExceptionWhenExtraCommitIntoStable ()
+    {
+        $this->_remoteExec('git init');
+        $this->_localExec(TWGIT_EXEC . ' init 1.2.3 ' . TWGIT_REPOSITORY_ORIGIN_DIR);
+        $this->_localExec(TWGIT_EXEC . ' release start -I');
+
+        $this->_localExec('git checkout stable');
+        $this->_localExec('git commit --allow-empty -m "extra commit!"');
+
+        $this->setExpectedException(
+            'RuntimeException',
+            "Local 'stable' branch is ahead of 'origin/stable'! Commits on 'stable' are out of process."
+                . " Try: git checkout stable && git reset origin/stable"
+        );
+        $sMsg = $this->_localExec(TWGIT_EXEC . ' release finish');
+    }
+
+    /**
+     * @shcovers inc/common.inc.sh::assert_clean_stable_branch_and_checkout
+     */
+    public function testFinish_WithExtraCommitIntoStableThenReset ()
+    {
+        $this->_remoteExec('git init');
+        $this->_localExec(TWGIT_EXEC . ' init 1.2.3 ' . TWGIT_REPOSITORY_ORIGIN_DIR);
+        $this->_localExec(TWGIT_EXEC . ' release start -I');
+
+        $this->_localExec('git checkout stable');
+        $this->_localExec('git commit --allow-empty -m "extra commit!"');
+        $this->_localExec('git checkout stable && git reset origin/stable');
+
+        $this->_localExec(TWGIT_EXEC . ' release finish');
+        $sMsg = $this->_localExec('git tag');
+        $this->assertContains('v1.3.0', $sMsg);
+    }
+
+    /**
+     * @shcovers inc/common.inc.sh::assert_clean_stable_branch_and_checkout
+     */
+    public function testRemove_ThrowExceptionWhenExtraCommitIntoStable ()
+    {
+        $this->_remoteExec('git init');
+        $this->_localExec(TWGIT_EXEC . ' init 1.2.3 ' . TWGIT_REPOSITORY_ORIGIN_DIR);
+        $this->_localExec(TWGIT_EXEC . ' release start -I');
+
+        $this->_localExec('git checkout stable');
+        $this->_localExec('git commit --allow-empty -m "extra commit!"');
+
+        $this->setExpectedException(
+            'RuntimeException',
+            "Local 'stable' branch is ahead of 'origin/stable'! Commits on 'stable' are out of process."
+                . " Try: git checkout stable && git reset origin/stable"
+        );
+        $sMsg = $this->_localExec(TWGIT_EXEC . ' release remove 1.3.0');
+    }
+
+    /**
+     * @shcovers inc/common.inc.sh::assert_clean_stable_branch_and_checkout
+     */
+    public function testRemove_WithExtraCommitIntoStableThenReset ()
+    {
+        $this->_remoteExec('git init');
+        $this->_localExec(TWGIT_EXEC . ' init 1.2.3 ' . TWGIT_REPOSITORY_ORIGIN_DIR);
+        $this->_localExec(TWGIT_EXEC . ' release start -I');
+
+        $this->_localExec('git checkout stable');
+        $this->_localExec('git commit --allow-empty -m "extra commit!"');
+        $this->_localExec('git checkout stable && git reset origin/stable');
+
+        $this->_localExec(TWGIT_EXEC . ' release remove 1.3.0');
+        $sMsg = $this->_localExec('git tag');
+        $this->assertContains('v1.3.0', $sMsg);
+    }
+
+    /**
+     * @shcovers inc/common.inc.sh::assert_clean_stable_branch_and_checkout
+     */
+    public function testReset_ThrowExceptionWhenExtraCommitIntoStable ()
+    {
+        $this->_remoteExec('git init');
+        $this->_localExec(TWGIT_EXEC . ' init 1.2.3 ' . TWGIT_REPOSITORY_ORIGIN_DIR);
+        $this->_localExec(TWGIT_EXEC . ' release start -I');
+
+        $this->_localExec('git checkout stable');
+        $this->_localExec('git commit --allow-empty -m "extra commit!"');
+
+        $this->setExpectedException(
+            'RuntimeException',
+            "Local 'stable' branch is ahead of 'origin/stable'! Commits on 'stable' are out of process."
+                . " Try: git checkout stable && git reset origin/stable"
+        );
+        $sMsg = $this->_localExec(TWGIT_EXEC . ' release reset 1.3.0 -I');
+    }
+
+    /**
+     * @shcovers inc/common.inc.sh::assert_clean_stable_branch_and_checkout
+     */
+    public function testReset_WithExtraCommitIntoStableThenReset ()
+    {
+        $this->_remoteExec('git init');
+        $this->_localExec(TWGIT_EXEC . ' init 1.2.3 ' . TWGIT_REPOSITORY_ORIGIN_DIR);
+        $this->_localExec(TWGIT_EXEC . ' release start -I');
+
+        $this->_localExec('git checkout stable');
+        $this->_localExec('git commit --allow-empty -m "extra commit!"');
+        $this->_localExec('git checkout stable && git reset origin/stable');
+
+        $this->_localExec(TWGIT_EXEC . ' release reset 1.3.0 -I');
+        $sMsg = $this->_localExec('git tag');
+        $this->assertContains('v1.3.0', $sMsg);
+    }
 }

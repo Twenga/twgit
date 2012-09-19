@@ -515,7 +515,7 @@ function assert_git_repository () {
     assert_recent_git_version "$TWGIT_GIT_MIN_VERSION"
 
     if [ "$(git remote | grep -E "^$TWGIT_ORIGIN$" | wc -l)" -ne 1 ]; then
-        die "No remote '<b>$TWGIT_ORIGIN</b>' repository specified! Try: 'git remote add $TWGIT_ORIGIN <url>'"
+        die "No remote '<b>$TWGIT_ORIGIN</b>' repository specified! Try: git remote add $TWGIT_ORIGIN <url>"
     fi
 
     local stable="$TWGIT_ORIGIN/$TWGIT_STABLE"
@@ -700,6 +700,25 @@ function assert_recent_git_version () {
         echo
         exit
     fi
+}
+
+##
+# Check that no commit occurs in stable branch not already present in origin/stable.
+#
+# @testedby TwgitHotfixTest
+# @testedby TwgitReleaseTest
+#
+function assert_clean_stable_branch_and_checkout () {
+    exec_git_command "git checkout $TWGIT_STABLE" "Could not checkout '$TWGIT_STABLE'!"
+    CUI_displayMsg processing "Check health of '$TWGIT_STABLE' branch..."
+    local extra_commits="$(git log origin/stable..stable --oneline | wc -l)"
+    if [ "$extra_commits" -gt 0 ]; then
+        die "Local '<b>$TWGIT_STABLE</b>' branch is ahead of '<b>$TWGIT_ORIGIN/$TWGIT_STABLE</b>'!" \
+            "Commits on '<b>$TWGIT_STABLE</b>' are out of process." \
+            "Try: git checkout stable && git reset $TWGIT_ORIGIN/$TWGIT_STABLE"
+    fi
+    exec_git_command "git merge $TWGIT_ORIGIN/$TWGIT_STABLE" \
+        "Could not merge '$TWGIT_ORIGIN/$TWGIT_STABLE' into '$TWGIT_STABLE'!"
 }
 
 

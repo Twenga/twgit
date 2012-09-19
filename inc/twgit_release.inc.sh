@@ -251,8 +251,7 @@ function cmd_finish () {
         exec_git_command "git checkout --track -b $release_fullname $TWGIT_ORIGIN/$release_fullname" "Could not check out hotfix '$TWGIT_ORIGIN/$hotfix_fullname'!"
     fi
 
-    exec_git_command "git checkout $TWGIT_STABLE" "Could not checkout '$TWGIT_STABLE'!"
-    exec_git_command "git merge $TWGIT_ORIGIN/$TWGIT_STABLE" "Could not merge '$TWGIT_ORIGIN/$TWGIT_STABLE' into '$TWGIT_STABLE'!"
+    assert_clean_stable_branch_and_checkout
     exec_git_command "git merge --no-ff $release_fullname" "Could not merge '$release_fullname' into '$TWGIT_STABLE'!"
 
     # Get all included features:
@@ -303,8 +302,7 @@ function cmd_remove () {
     assert_new_and_valid_tag_name $tag
 
     # Suppression de la branche :
-    exec_git_command "git checkout $TWGIT_STABLE" "Could not checkout '$TWGIT_STABLE'!"
-    exec_git_command "git merge $TWGIT_ORIGIN/$TWGIT_STABLE" "Could not merge '$TWGIT_ORIGIN/$TWGIT_STABLE' into '$TWGIT_STABLE'!"
+    assert_clean_stable_branch_and_checkout
     remove_local_branch $release_fullname
     remove_remote_branch $release_fullname
 

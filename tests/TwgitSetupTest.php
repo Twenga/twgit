@@ -16,8 +16,10 @@ class TwgitSetupTest extends TwgitTestCase
         $o = self::_getShellInstance();
         $o->remove(TWGIT_REPOSITORY_ORIGIN_DIR);
         $o->remove(TWGIT_REPOSITORY_LOCAL_DIR);
+        $o->remove(TWGIT_REPOSITORY_SECOND_REMOTE_DIR);
         $o->mkdir(TWGIT_REPOSITORY_ORIGIN_DIR, '0777');
         $o->mkdir(TWGIT_REPOSITORY_LOCAL_DIR, '0777');
+        $o->mkdir(TWGIT_REPOSITORY_SECOND_REMOTE_DIR, '0777');
     }
 
     /**
@@ -186,5 +188,52 @@ class TwgitSetupTest extends TwgitTestCase
         );
         $sMsg = $this->_localFunctionCall('assert_git_repository');
         $this->assertEmpty($sMsg);
+    }
+
+    /**
+     * @dataProvider providerTestAlertDissidentBranches
+     * @shcovers inc/common.inc.sh::alert_dissident_branches
+     */
+    public function testAlertDissidentBranches ($sLocalCmd, $sExpectedResult)
+    {
+        $this->_remoteExec('git init && git commit --allow-empty -m "-" && git checkout -b feature-currentOfNonBareRepo');
+        $this->_localExec(TWGIT_EXEC . ' init 1.2.3 ' . TWGIT_REPOSITORY_ORIGIN_DIR);
+        $this->_localExec('cd ' . TWGIT_REPOSITORY_SECOND_REMOTE_DIR . ' && git init');
+        $this->_localExec('git remote add second ' . TWGIT_REPOSITORY_SECOND_REMOTE_DIR);
+
+        $this->_localExec($sLocalCmd);
+        $sMsg = $this->_localFunctionCall('alert_dissident_branches');
+        $this->assertEquals($sExpectedResult, $sMsg);
+    }
+
+    public function providerTestAlertDissidentBranches ()
+    {
+        return array(
+            array(':', ''),
+            array(
+                'git checkout -b feature-X && git push origin feature-X'
+                    . ' && git checkout -b release-X && git push origin release-X'
+                    . ' && git checkout -b hotfix-X && git push origin hotfix-X'
+                    . ' && git checkout -b demo-X && git push origin demo-X'
+                    . ' && git checkout -b master && git push origin master'
+                    . ' && git checkout -b outofprocess && git push origin outofprocess'
+                    . ' && git remote set-head origin stable',
+                "/!\ Following branches are out of process: 'origin/outofprocess'!\n"
+            ),
+            array(
+                'git checkout -b outofprocess && git push origin outofprocess && git push second outofprocess'
+                    . ' && git checkout -b out2 && git push origin out2 && git push second out2',
+                "/!\ Following branches are out of process: 'origin/out2', 'origin/outofprocess'!\n"
+            ),
+            array(
+                'git branch v1.2.3 v1.2.3',
+                "/!\ Following local branches are ambiguous: 'v1.2.3'!\n"
+            ),
+            array(
+                'git checkout -b outofprocess && git push origin outofprocess && git branch v1.2.3 v1.2.3',
+                "/!\ Following branches are out of process: 'origin/outofprocess'!\n"
+                    . "/!\ Following local branches are ambiguous: 'v1.2.3'!\n"
+            ),
+        );
     }
 }

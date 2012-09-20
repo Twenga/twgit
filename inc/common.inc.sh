@@ -122,15 +122,24 @@ function get_remote_branches () {
 ##
 # Affiche la liste des branches distantes qui ne sont pas catégorisables dans le process.
 #
+# @testedby TwgitCommonGettersTest
+#
 function get_dissident_remote_branches () {
+    local cmd='grep -v'
+    while read repository; do
+        cmd="$cmd -e '^$repository/'";
+    done < <(git remote | grep -v "^$TWGIT_ORIGIN$")
+
     git branch -r --no-color | sed 's/^[* ] //' \
-        | grep -vP "^$TWGIT_ORIGIN/$TWGIT_PREFIX_FEATURE" \
-        | grep -vP "^$TWGIT_ORIGIN/$TWGIT_PREFIX_RELEASE" \
-        | grep -vP "^$TWGIT_ORIGIN/$TWGIT_PREFIX_HOTFIX" \
-        | grep -vP "^$TWGIT_ORIGIN/$TWGIT_PREFIX_DEMO" \
-        | grep -vP "^$TWGIT_ORIGIN/HEAD" \
-        | grep -vP "^$TWGIT_ORIGIN/master" \
-        | grep -vP "^$TWGIT_ORIGIN/$TWGIT_STABLE"
+        | grep -v -e "^$TWGIT_ORIGIN/$TWGIT_PREFIX_FEATURE" \
+            -e "^$TWGIT_ORIGIN/$TWGIT_PREFIX_RELEASE" \
+            -e "^$TWGIT_ORIGIN/$TWGIT_PREFIX_HOTFIX" \
+            -e "^$TWGIT_ORIGIN/$TWGIT_PREFIX_DEMO" \
+            -e "^$TWGIT_ORIGIN/HEAD\($\|\s\)" \
+            -e "^$TWGIT_ORIGIN/master\($\|\s\)" \
+            -e "^$TWGIT_ORIGIN/$TWGIT_STABLE\($\|\s\)" \
+        | eval "$cmd" \
+        || :
 }
 
 ##
@@ -995,6 +1004,8 @@ function alert_old_branch () {
 ##
 # Affiche un warning si des branches sont hors process.
 # N'affiche rien si l'option -x est activée (pour les rendus CSV).
+#
+# @testedby TwgitSetupTest
 #
 function alert_dissident_branches () {
     if ! isset_option 'x'; then

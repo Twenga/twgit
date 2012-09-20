@@ -128,8 +128,7 @@ function cmd_remove () {
     assert_new_and_valid_tag_name $tag
 
     # Suppression de la branche :
-    exec_git_command "git checkout $TWGIT_STABLE" "Could not checkout '$TWGIT_STABLE'!"
-    exec_git_command "git merge $TWGIT_ORIGIN/$TWGIT_STABLE" "Could not merge '$TWGIT_ORIGIN/$TWGIT_STABLE' into '$TWGIT_STABLE'!"
+    assert_clean_stable_branch_and_checkout
     remove_local_branch $hotfix_fullname
     remove_remote_branch $hotfix_fullname
 
@@ -170,8 +169,7 @@ function cmd_finish () {
     local tag_fullname="$TWGIT_PREFIX_TAG$tag"
     assert_new_and_valid_tag_name $tag
 
-    exec_git_command "git checkout $TWGIT_STABLE" "Could not checkout '$TWGIT_STABLE'!"
-    exec_git_command "git merge $TWGIT_ORIGIN/$TWGIT_STABLE" "Could not merge '$TWGIT_ORIGIN/$TWGIT_STABLE' into '$TWGIT_STABLE'!"
+    assert_clean_stable_branch_and_checkout
     exec_git_command "git merge --no-ff $hotfix_fullname" "Could not merge '$hotfix_fullname' into '$TWGIT_STABLE'!"
     create_and_push_tag "$tag_fullname" "Hotfix finish: $hotfix_fullname"
 

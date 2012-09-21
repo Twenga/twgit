@@ -1046,30 +1046,42 @@ function alert_dissident_branches () {
 
 ##
 # Affiche un interval "a to z" à partir du premier et du dernier élément de la liste fournie.
+# N'affiche que le premier élément s'il est seul.
 #
-# @param string $1 liste de valeurs séparées par des espaces
+# @param string $@ liste de valeurs séparées par des espaces
+# @testedby TwgitCommonToolsTest
 #
 function displayInterval () {
     local -a list=($@)
     local nb_items="${#list[@]}"
-    local first_item="${list[0]}"
-    local last_item="${list[$((nb_items-1))]}"
 
-    echo -n "'<b>$first_item</b>'"
-    [ "$nb_items" -gt 1 ] && echo " to '<b>$last_item</b>'" || echo
+    if [ "$nb_items" -gt 0 ]; then
+        local first_item="${list[0]}"
+        local last_item="${list[$((nb_items-1))]}"
+
+        echo -n "'<b>$first_item</b>'"
+        [ "$nb_items" -gt 1 ] && echo " to '<b>$last_item</b>'" || echo
+    fi
 }
 
 ##
-# Affiche la liste de valeurs sur une seule ligne, séparées par des virgules et chaque valeur entre simples quotes.
+# Affiche la liste de valeurs sur une seule ligne, séparées par des virgules
+# et chaque valeur entre balises <b>…</b> et simples quotes.
 #
 # @param string $@ liste de valeurs sur une ou plusieurs lignes, séparées par des espaces ou des sauts de ligne
+# @testedby TwgitCommonToolsTest
 #
 function displayQuotedEnum () {
     local list="$@"
     local one_line_list="$(echo $list | tr '\n' ' ')"
     local trimmed_list="$(echo $one_line_list)"
-    local quoted_list="'<b>${trimmed_list// /</b>', '<b>}</b>'"
-    echo $quoted_list
+
+    if [ -z "$trimmed_list" ]; then
+        echo
+    else
+        local quoted_list="'<b>${trimmed_list// /</b>', '<b>}</b>'"
+        echo $quoted_list
+    fi
 }
 
 ##
@@ -1092,6 +1104,7 @@ function displayFeatureSubject () {
 
 ##
 # @param string $1 nom long du tag à afficher
+#
 function displayTag () {
     local tag="$1"
     local msg pattern features feature_shortname feature_subject
@@ -1141,8 +1154,10 @@ function inform_about_branch_status () {
 
 ##
 # Convertit une liste de valeurs en une ligne CSV au format suivant et l'affiche : "v1";"va""lue2";"v\'3"
+# Attention, les blancs inter et intra paramètre bash sont remplacés par un unique espace.
 #
-# @param string $@ liste de valeurs
+# @param string $1...$n liste de valeurs
+# @testedby TwgitCommonToolsTest
 #
 function convertList2CSV () {
     local row

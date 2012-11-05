@@ -125,10 +125,11 @@ function get_remote_branches () {
 # @testedby TwgitCommonGettersTest
 #
 function get_dissident_remote_branches () {
-    local cmd='grep -v'
+    local cmd=''
     while read repository; do
-        cmd="$cmd -e '^$repository/'";
+        cmd="$cmd -e \"^$repository/\"";
     done < <(git remote | grep -v "^$TWGIT_ORIGIN$")
+    [ -z "$cmd" ] && cmd='tee /dev/null' || cmd="grep -v $cmd"
 
     git branch -r --no-color | sed 's/^[* ] //' \
         | grep -v -e "^$TWGIT_ORIGIN/$TWGIT_PREFIX_FEATURE" \

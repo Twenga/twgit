@@ -13,6 +13,10 @@ Core enhancements:
 Fixes:
 
   - #61: Abusive branches out of process
+ 
+Unit tests:
+
+  - estimated code coverage: 29%
 
 ## Version 1.8.0 (2012-07-03)
 

@@ -30,15 +30,51 @@
 # @param string $1 issue number or project name
 #
 ref="$1"
-issue_url="https://$TWGIT_FEATURE_SUBJECT_REDMINE_DOMAIN/issues/$ref.json?key=$TWGIT_FEATURE_SUBJECT_REDMINE_API_KEY"
-project_url="https://$TWGIT_FEATURE_SUBJECT_REDMINE_DOMAIN/projects/$ref.json?key=$TWGIT_FEATURE_SUBJECT_REDMINE_API_KEY"
-
-if [[ "$ref" =~ ^[0-9]+$ ]]; then
-    (wget --no-check-certificate --timeout=2 -q -O - --no-cache $issue_url \
-    | php -r '$o = json_decode(file_get_contents("php://stdin")); if ($o !== NULL) {print_r($o->issue->subject);}')
-    2>/dev/null
+if [[ "$TWGIT_FEATURE_SUBJECT_REDMINE_DOMAIN" =~ ^https?:// ]]; then
+    scheme=''
 else
-    (wget --no-check-certificate --timeout=2 -q -O - --no-cache $project_url \
-    | php -r '$o = json_decode(file_get_contents("php://stdin")); if ($o !== NULL) {print_r($o->project->name);}')
-    2>/dev/null
+    scheme='https://'
+fi
+issue_url="$scheme$TWGIT_FEATURE_SUBJECT_REDMINE_DOMAIN/issues/$ref.json?key=$TWGIT_FEATURE_SUBJECT_REDMINE_API_KEY"
+project_url="$scheme$TWGIT_FEATURE_SUBJECT_REDMINE_DOMAIN/projects/$ref.json?key=$TWGIT_FEATURE_SUBJECT_REDMINE_API_KEY"
+wget_cmd='wget --no-check-certificate --timeout=3 -q -O - --no-cache'
+
+# Python or PHP ?
+language='?'
+which python 1>/dev/null 2>&1
+if [ $? -eq 0 ]; then
+    language='python'
+else
+    which php 1>/dev/null 2>&1
+    if [ $? -eq 0 ]; then
+        language='php'
+    fi
+fi
+
+# Convert JSON with Python or PHP:
+if [ "$language" = 'python' ]; then
+    if [[ "$ref" =~ ^[0-9]+$ ]]; then
+        ($wget_cmd $issue_url \
+        | python -c 'import sys,json;s=sys.stdin.read();
+if s!="": data=json.loads(s); print data["issue"]["subject"]')
+        2>/dev/null
+    else
+        ($wget_cmd $project_url \
+        | python -c 'import sys,json;s=sys.stdin.read();
+if s!="": data=json.loads(s); print data["project"]["name"]')
+        2>/dev/null
+    fi
+elif [ "$language" = 'php' ]; then
+    if [[ "$ref" =~ ^[0-9]+$ ]]; then
+        ($wget_cmd $issue_url \
+        | php -r '$o = json_decode(file_get_contents("php://stdin")); if ($o !== NULL) {print_r($o->issue->subject);}')
+        2>/dev/null
+    else
+        ($wget_cmd $project_url \
+        | php -r '$o = json_decode(file_get_contents("php://stdin")); if ($o !== NULL) {print_r($o->project->name);}')
+        2>/dev/null
+    fi
+else
+    echo "Language '$language' not handled!" >&2
+    exit 1
 fi

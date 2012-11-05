@@ -122,15 +122,25 @@ function get_remote_branches () {
 ##
 # Affiche la liste des branches distantes qui ne sont pas catégorisables dans le process.
 #
+# @testedby TwgitCommonGettersTest
+#
 function get_dissident_remote_branches () {
+    local cmd=''
+    while read repository; do
+        cmd="$cmd -e \"^$repository/\"";
+    done < <(git remote | grep -v "^$TWGIT_ORIGIN$")
+    [ -z "$cmd" ] && cmd='tee /dev/null' || cmd="grep -v $cmd"
+
     git branch -r --no-color | sed 's/^[* ] //' \
-        | grep -vP "^$TWGIT_ORIGIN/$TWGIT_PREFIX_FEATURE" \
-        | grep -vP "^$TWGIT_ORIGIN/$TWGIT_PREFIX_RELEASE" \
-        | grep -vP "^$TWGIT_ORIGIN/$TWGIT_PREFIX_HOTFIX" \
-        | grep -vP "^$TWGIT_ORIGIN/$TWGIT_PREFIX_DEMO" \
-        | grep -vP "^$TWGIT_ORIGIN/HEAD" \
-        | grep -vP "^$TWGIT_ORIGIN/master" \
-        | grep -vP "^$TWGIT_ORIGIN/$TWGIT_STABLE"
+        | grep -v -e "^$TWGIT_ORIGIN/$TWGIT_PREFIX_FEATURE" \
+            -e "^$TWGIT_ORIGIN/$TWGIT_PREFIX_RELEASE" \
+            -e "^$TWGIT_ORIGIN/$TWGIT_PREFIX_HOTFIX" \
+            -e "^$TWGIT_ORIGIN/$TWGIT_PREFIX_DEMO" \
+            -e "^$TWGIT_ORIGIN/HEAD\($\|\s\)" \
+            -e "^$TWGIT_ORIGIN/master\($\|\s\)" \
+            -e "^$TWGIT_ORIGIN/$TWGIT_STABLE\($\|\s\)" \
+        | eval "$cmd" \
+        || :
 }
 
 ##
@@ -515,7 +525,7 @@ function assert_git_repository () {
     assert_recent_git_version "$TWGIT_GIT_MIN_VERSION"
 
     if [ "$(git remote | grep -E "^$TWGIT_ORIGIN$" | wc -l)" -ne 1 ]; then
-        die "No remote '<b>$TWGIT_ORIGIN</b>' repository specified! Try: 'git remote add $TWGIT_ORIGIN <url>'"
+        die "No remote '<b>$TWGIT_ORIGIN</b>' repository specified! Try: git remote add $TWGIT_ORIGIN <url>"
     fi
 
     local stable="$TWGIT_ORIGIN/$TWGIT_STABLE"
@@ -700,6 +710,25 @@ function assert_recent_git_version () {
         echo
         exit
     fi
+}
+
+##
+# Check that no commit occurs in stable branch not already present in origin/stable.
+#
+# @testedby TwgitHotfixTest
+# @testedby TwgitReleaseTest
+#
+function assert_clean_stable_branch_and_checkout () {
+    exec_git_command "git checkout $TWGIT_STABLE" "Could not checkout '$TWGIT_STABLE'!"
+    CUI_displayMsg processing "Check health of '$TWGIT_STABLE' branch..."
+    local extra_commits="$(git log origin/stable..stable --oneline | wc -l)"
+    if [ "$extra_commits" -gt 0 ]; then
+        die "Local '<b>$TWGIT_STABLE</b>' branch is ahead of '<b>$TWGIT_ORIGIN/$TWGIT_STABLE</b>'!" \
+            "Commits on '<b>$TWGIT_STABLE</b>' are out of process." \
+            "Try: git checkout stable && git reset $TWGIT_ORIGIN/$TWGIT_STABLE"
+    fi
+    exec_git_command "git merge $TWGIT_ORIGIN/$TWGIT_STABLE" \
+        "Could not merge '$TWGIT_ORIGIN/$TWGIT_STABLE' into '$TWGIT_STABLE'!"
 }
 
 
@@ -996,6 +1025,8 @@ function alert_old_branch () {
 # Affiche un warning si des branches sont hors process.
 # N'affiche rien si l'option -x est activée (pour les rendus CSV).
 #
+# @testedby TwgitSetupTest
+#
 function alert_dissident_branches () {
     if ! isset_option 'x'; then
         local dissident_branches="$(get_dissident_remote_branches)"
@@ -1016,30 +1047,42 @@ function alert_dissident_branches () {
 
 ##
 # Affiche un interval "a to z" à partir du premier et du dernier élément de la liste fournie.
+# N'affiche que le premier élément s'il est seul.
 #
-# @param string $1 liste de valeurs séparées par des espaces
+# @param string $@ liste de valeurs séparées par des espaces
+# @testedby TwgitCommonToolsTest
 #
 function displayInterval () {
     local -a list=($@)
     local nb_items="${#list[@]}"
-    local first_item="${list[0]}"
-    local last_item="${list[$((nb_items-1))]}"
 
-    echo -n "'<b>$first_item</b>'"
-    [ "$nb_items" -gt 1 ] && echo " to '<b>$last_item</b>'" || echo
+    if [ "$nb_items" -gt 0 ]; then
+        local first_item="${list[0]}"
+        local last_item="${list[$((nb_items-1))]}"
+
+        echo -n "'<b>$first_item</b>'"
+        [ "$nb_items" -gt 1 ] && echo " to '<b>$last_item</b>'" || echo
+    fi
 }
 
 ##
-# Affiche la liste de valeurs sur une seule ligne, séparées par des virgules et chaque valeur entre simples quotes.
+# Affiche la liste de valeurs sur une seule ligne, séparées par des virgules
+# et chaque valeur entre balises <b>…</b> et simples quotes.
 #
 # @param string $@ liste de valeurs sur une ou plusieurs lignes, séparées par des espaces ou des sauts de ligne
+# @testedby TwgitCommonToolsTest
 #
 function displayQuotedEnum () {
     local list="$@"
     local one_line_list="$(echo $list | tr '\n' ' ')"
     local trimmed_list="$(echo $one_line_list)"
-    local quoted_list="'<b>${trimmed_list// /</b>', '<b>}</b>'"
-    echo $quoted_list
+
+    if [ -z "$trimmed_list" ]; then
+        echo
+    else
+        local quoted_list="'<b>${trimmed_list// /</b>', '<b>}</b>'"
+        echo $quoted_list
+    fi
 }
 
 ##
@@ -1062,6 +1105,7 @@ function displayFeatureSubject () {
 
 ##
 # @param string $1 nom long du tag à afficher
+#
 function displayTag () {
     local tag="$1"
     local msg pattern features feature_shortname feature_subject
@@ -1111,8 +1155,10 @@ function inform_about_branch_status () {
 
 ##
 # Convertit une liste de valeurs en une ligne CSV au format suivant et l'affiche : "v1";"va""lue2";"v\'3"
+# Attention, les blancs inter et intra paramètre bash sont remplacés par un unique espace.
 #
-# @param string $@ liste de valeurs
+# @param string $1...$n liste de valeurs
+# @testedby TwgitCommonToolsTest
 #
 function convertList2CSV () {
     local row

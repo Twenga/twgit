@@ -16,8 +16,10 @@ class TwgitReleaseTest extends TwgitTestCase
         $o = self::_getShellInstance();
         $o->remove(TWGIT_REPOSITORY_ORIGIN_DIR);
         $o->remove(TWGIT_REPOSITORY_LOCAL_DIR);
+        $o->remove(TWGIT_REPOSITORY_SECOND_REMOTE_DIR);
         $o->mkdir(TWGIT_REPOSITORY_ORIGIN_DIR, '0777');
         $o->mkdir(TWGIT_REPOSITORY_LOCAL_DIR, '0777');
+        $o->mkdir(TWGIT_REPOSITORY_SECOND_REMOTE_DIR, '0777');
     }
 
     /**
@@ -88,7 +90,7 @@ class TwgitReleaseTest extends TwgitTestCase
     /**
      * Currently just check the tag annotation.
      */
-    public function testFinish ()
+    public function testFinish_WithMinorRelease ()
     {
         $this->_localShellCodeCall('echo \'2;The subject\' > \$TWGIT_FEATURES_SUBJECT_PATH');
 
@@ -116,4 +118,173 @@ class TwgitReleaseTest extends TwgitTestCase
         $this->assertContains("Merge branch 'release-1.3.0' into stable", $sMsg);
     }
 
+    /**
+     * @shcovers inc/common.inc.sh::assert_clean_stable_branch_and_checkout
+     */
+    public function testFinish_ThrowExceptionWhenExtraCommitIntoStable ()
+    {
+        $this->_remoteExec('git init');
+        $this->_localExec(TWGIT_EXEC . ' init 1.2.3 ' . TWGIT_REPOSITORY_ORIGIN_DIR);
+        $this->_localExec(TWGIT_EXEC . ' release start -I');
+
+        $this->_localExec('git checkout stable');
+        $this->_localExec('git commit --allow-empty -m "extra commit!"');
+
+        $this->setExpectedException(
+            'RuntimeException',
+            "Local 'stable' branch is ahead of 'origin/stable'! Commits on 'stable' are out of process."
+                . " Try: git checkout stable && git reset origin/stable"
+        );
+        $sMsg = $this->_localExec(TWGIT_EXEC . ' release finish');
+    }
+
+    /**
+     * @shcovers inc/common.inc.sh::assert_clean_stable_branch_and_checkout
+     */
+    public function testFinish_WithExtraCommitIntoStableThenReset ()
+    {
+        $this->_remoteExec('git init');
+        $this->_localExec(TWGIT_EXEC . ' init 1.2.3 ' . TWGIT_REPOSITORY_ORIGIN_DIR);
+        $this->_localExec(TWGIT_EXEC . ' release start -I');
+
+        $this->_localExec('git checkout stable');
+        $this->_localExec('git commit --allow-empty -m "extra commit!"');
+        $this->_localExec('git checkout stable && git reset origin/stable');
+
+        $this->_localExec(TWGIT_EXEC . ' release finish');
+        $sMsg = $this->_localExec('git tag');
+        $this->assertContains('v1.3.0', $sMsg);
+    }
+
+    /**
+     * @shcovers inc/common.inc.sh::assert_clean_stable_branch_and_checkout
+     */
+    public function testRemove_ThrowExceptionWhenExtraCommitIntoStable ()
+    {
+        $this->_remoteExec('git init');
+        $this->_localExec(TWGIT_EXEC . ' init 1.2.3 ' . TWGIT_REPOSITORY_ORIGIN_DIR);
+        $this->_localExec(TWGIT_EXEC . ' release start -I');
+
+        $this->_localExec('git checkout stable');
+        $this->_localExec('git commit --allow-empty -m "extra commit!"');
+
+        $this->setExpectedException(
+            'RuntimeException',
+            "Local 'stable' branch is ahead of 'origin/stable'! Commits on 'stable' are out of process."
+                . " Try: git checkout stable && git reset origin/stable"
+        );
+        $sMsg = $this->_localExec(TWGIT_EXEC . ' release remove 1.3.0');
+    }
+
+    /**
+     * @shcovers inc/common.inc.sh::assert_clean_stable_branch_and_checkout
+     */
+    public function testRemove_WithExtraCommitIntoStableThenReset ()
+    {
+        $this->_remoteExec('git init');
+        $this->_localExec(TWGIT_EXEC . ' init 1.2.3 ' . TWGIT_REPOSITORY_ORIGIN_DIR);
+        $this->_localExec(TWGIT_EXEC . ' release start -I');
+
+        $this->_localExec('git checkout stable');
+        $this->_localExec('git commit --allow-empty -m "extra commit!"');
+        $this->_localExec('git checkout stable && git reset origin/stable');
+
+        $this->_localExec(TWGIT_EXEC . ' release remove 1.3.0');
+        $sMsg = $this->_localExec('git tag');
+        $this->assertContains('v1.3.0', $sMsg);
+    }
+
+    /**
+     * @shcovers inc/common.inc.sh::assert_clean_stable_branch_and_checkout
+     */
+    public function testReset_ThrowExceptionWhenExtraCommitIntoStable ()
+    {
+        $this->_remoteExec('git init');
+        $this->_localExec(TWGIT_EXEC . ' init 1.2.3 ' . TWGIT_REPOSITORY_ORIGIN_DIR);
+        $this->_localExec(TWGIT_EXEC . ' release start -I');
+
+        $this->_localExec('git checkout stable');
+        $this->_localExec('git commit --allow-empty -m "extra commit!"');
+
+        $this->setExpectedException(
+            'RuntimeException',
+            "Local 'stable' branch is ahead of 'origin/stable'! Commits on 'stable' are out of process."
+                . " Try: git checkout stable && git reset origin/stable"
+        );
+        $sMsg = $this->_localExec(TWGIT_EXEC . ' release reset 1.3.0 -I');
+    }
+
+    /**
+     * @shcovers inc/common.inc.sh::assert_clean_stable_branch_and_checkout
+     */
+    public function testReset_WithExtraCommitIntoStableThenReset ()
+    {
+        $this->_remoteExec('git init');
+        $this->_localExec(TWGIT_EXEC . ' init 1.2.3 ' . TWGIT_REPOSITORY_ORIGIN_DIR);
+        $this->_localExec(TWGIT_EXEC . ' release start -I');
+
+        $this->_localExec('git checkout stable');
+        $this->_localExec('git commit --allow-empty -m "extra commit!"');
+        $this->_localExec('git checkout stable && git reset origin/stable');
+
+        $this->_localExec(TWGIT_EXEC . ' release reset 1.3.0 -I');
+        $sMsg = $this->_localExec('git tag');
+        $this->assertContains('v1.3.0', $sMsg);
+    }
+
+    /**
+     * @dataProvider providerTestListAboutBranchesOutOfProcess
+     */
+    public function testList_AboutBranchesOutOfProcess ($sLocalCmd, $sExpectedContent, $sNotExpectedContent)
+    {
+        $this->_remoteExec('git init && git commit --allow-empty -m "-" && git checkout -b feature-currentOfNonBareRepo');
+        $this->_localExec(TWGIT_EXEC . ' init 1.2.3 ' . TWGIT_REPOSITORY_ORIGIN_DIR);
+        $this->_localExec('cd ' . TWGIT_REPOSITORY_SECOND_REMOTE_DIR . ' && git init');
+        $this->_localExec('git remote add second ' . TWGIT_REPOSITORY_SECOND_REMOTE_DIR);
+
+        $this->_localExec($sLocalCmd);
+        $sMsg = $this->_localExec(TWGIT_EXEC . ' release list');
+        if ( ! empty($sExpectedContent)) {
+            $this->assertContains($sExpectedContent, $sMsg);
+        }
+        if ( ! empty($sNotExpectedContent)) {
+            $this->assertNotContains($sNotExpectedContent, $sMsg);
+        }
+    }
+
+    public function providerTestListAboutBranchesOutOfProcess ()
+    {
+        return array(
+            array(':', '', 'Following branches are out of process'),
+            array(':', '', 'Following local branches are ambiguous'),
+            array(
+                'git checkout -b feature-X && git push origin feature-X'
+                    . ' && git checkout -b release-X && git push origin release-X'
+                    . ' && git checkout -b hotfix-X && git push origin hotfix-X'
+                    . ' && git checkout -b demo-X && git push origin demo-X'
+                    . ' && git checkout -b master && git push origin master'
+                    . ' && git checkout -b outofprocess && git push origin outofprocess'
+                    . ' && git remote set-head origin stable',
+                "/!\ Following branches are out of process: 'origin/outofprocess'!",
+                'Following local branches are ambiguous'
+            ),
+            array(
+                'git checkout -b outofprocess && git push origin outofprocess && git push second outofprocess'
+                    . ' && git checkout -b out2 && git push origin out2 && git push second out2',
+                "/!\ Following branches are out of process: 'origin/out2', 'origin/outofprocess'!",
+                'Following local branches are ambiguous'
+            ),
+            array(
+                'git branch v1.2.3 v1.2.3',
+                "/!\ Following local branches are ambiguous: 'v1.2.3'!",
+                'Following branches are out of process'
+            ),
+            array(
+                'git checkout -b outofprocess && git push origin outofprocess && git branch v1.2.3 v1.2.3',
+                "/!\ Following branches are out of process: 'origin/outofprocess'!\n"
+                    . "/!\ Following local branches are ambiguous: 'v1.2.3'!",
+                ''
+            ),
+        );
+    }
 }

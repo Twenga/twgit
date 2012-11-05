@@ -1,6 +1,23 @@
 ChangeLog
 =========
 
+## Version 1.9.0 (2012-11-05)
+
+Core enhancements:
+
+  - #60: Prevent abusive commit into stable branch
+  - #59: Allow to choose between http:// and https:// for Redmine URL
+  - #58: Add Python implementation of Github and Redmine connectors
+  - #57: Slowdowns due to highlighting of text
+
+Fixes:
+
+  - #61: Abusive branches out of process
+ 
+Unit tests:
+
+  - estimated code coverage: 29%
+
 ## Version 1.8.0 (2012-07-03)
 
 Note:

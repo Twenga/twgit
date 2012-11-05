@@ -78,8 +78,9 @@ class TwgitTestCase extends PHPUnit_Framework_TestCase
         try {
             $aResult = self::_rawExec($sCmd);
         } catch (RuntimeException $oException) {
+            $sMsg = ($oException->getMessage() != '' ? $oException->getMessage() : '-- no message --');
             throw new RuntimeException(
-                self::stripColors($oException->getMessage()),
+                self::stripColors($sMsg),
                 $oException->getCode(),
                 $oException
             );

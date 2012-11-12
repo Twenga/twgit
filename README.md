@@ -1,5 +1,7 @@
-TwGit
+[![TwGit logo](https://github.com/Twenga/twgit/raw/stable/doc/logo-med.png)](http://twgit.twenga.com/) TwGit
 ==========
+
+#### [Homepage](http://twgit.twenga.com/)
 
 #### Continuous integration
 To run the test suite, simply:

@@ -56,12 +56,12 @@ if [ "$language" = 'python' ]; then
     if [[ "$ref" =~ ^[0-9]+$ ]]; then
         ($wget_cmd $issue_url \
         | python -c 'import sys,json;s=sys.stdin.read();
-if s!="": data=json.loads(s); print data["issue"]["subject"]')
+if s!="": data=json.loads(s); print data["issue"]["subject"].encode("utf8")')
         2>/dev/null
     else
         ($wget_cmd $project_url \
         | python -c 'import sys,json;s=sys.stdin.read();
-if s!="": data=json.loads(s); print data["project"]["name"]')
+if s!="": data=json.loads(s); print data["project"]["name"].encode("utf8")')
         2>/dev/null
     fi
 elif [ "$language" = 'php' ]; then

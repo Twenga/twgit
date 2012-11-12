@@ -1,6 +1,16 @@
 ChangeLog
 =========
 
+## Version 1.9.1 (2012-11-12)
+
+Fixes:
+
+  - #75: Python version of Redmine connector doesn't handle unicode characters
+  
+Doc:
+
+  - Add logo and homepage link to README.md
+
 ## Version 1.9.0 (2012-11-05)
 
 Core enhancements:

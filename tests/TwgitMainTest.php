@@ -44,7 +44,7 @@ class TwgitMainTest extends TwgitTestCase
     public function testInit_ThrowExceptionWhenBadRemoteRepository ()
     {
         $this->setExpectedException('RuntimeException', "Could not fetch 'origin'!");
-        $this->_localExec(TWGIT_EXEC . ' init 1.2.3 /tmp/origin');
+        $this->_localExec(TWGIT_EXEC . ' init 1.2.3 ' . TWGIT_REPOSITORY_ORIGIN_DIR);
     }
 
     /**
@@ -53,12 +53,12 @@ class TwgitMainTest extends TwgitTestCase
     public function testInit_Empty ()
     {
         $this->_remoteExec('git init');
-        $sMsg = $this->_localExec(TWGIT_EXEC . ' init 1.2.3 /tmp/origin');
+        $sMsg = $this->_localExec(TWGIT_EXEC . ' init 1.2.3 ' . TWGIT_REPOSITORY_ORIGIN_DIR);
 
-        $this->assertContains("Initialized empty Git repository in /tmp/local/.git/", $sMsg);
+        $this->assertContains("Initialized empty Git repository in " . TWGIT_REPOSITORY_LOCAL_DIR . "/.git/", $sMsg);
         $this->assertNotContains("Check clean working tree...", $sMsg);
 
-        $this->assertContains("git remote add origin /tmp/origin", $sMsg);
+        $this->assertContains("git remote add origin " . TWGIT_REPOSITORY_ORIGIN_DIR, $sMsg);
 
         $this->assertContains("git branch -m stable", $sMsg);
         $this->assertNotContains("git checkout -b stable master", $sMsg);
@@ -75,12 +75,12 @@ class TwgitMainTest extends TwgitTestCase
     {
         $this->_remoteExec('git init');
         $this->_localExec('git init');
-        $sMsg = $this->_localExec(TWGIT_EXEC . ' init 1.2.3 /tmp/origin');
+        $sMsg = $this->_localExec(TWGIT_EXEC . ' init 1.2.3 ' . TWGIT_REPOSITORY_ORIGIN_DIR);
 
-        $this->assertNotContains("Initialized empty Git repository in /tmp/local/.git/", $sMsg);
+        $this->assertNotContains("Initialized empty Git repository in " . TWGIT_REPOSITORY_LOCAL_DIR . "/.git/", $sMsg);
         $this->assertContains("Check clean working tree...", $sMsg);
 
-        $this->assertContains("git remote add origin /tmp/origin", $sMsg);
+        $this->assertContains("git remote add origin " . TWGIT_REPOSITORY_ORIGIN_DIR, $sMsg);
 
         $this->assertContains("git branch -m stable", $sMsg);
         $this->assertNotContains("git checkout -b stable master", $sMsg);
@@ -96,13 +96,13 @@ class TwgitMainTest extends TwgitTestCase
     public function testInit_WithGitInitAndAddRemote ()
     {
         $this->_remoteExec('git init');
-        $this->_localExec('git init && git remote add origin /tmp/origin');
+        $this->_localExec('git init && git remote add origin ' . TWGIT_REPOSITORY_ORIGIN_DIR);
         $sMsg = $this->_localExec(TWGIT_EXEC . ' init 1.2.3');
 
-        $this->assertNotContains("Initialized empty Git repository in /tmp/local/.git/", $sMsg);
+        $this->assertNotContains("Initialized empty Git repository in " . TWGIT_REPOSITORY_LOCAL_DIR . "/.git/", $sMsg);
         $this->assertContains("Check clean working tree...", $sMsg);
 
-        $this->assertNotContains("git remote add origin /tmp/origin", $sMsg);
+        $this->assertNotContains("git remote add origin " . TWGIT_REPOSITORY_ORIGIN_DIR, $sMsg);
 
         $this->assertContains("git branch -m stable", $sMsg);
         $this->assertNotContains("git checkout -b stable master", $sMsg);
@@ -125,12 +125,12 @@ class TwgitMainTest extends TwgitTestCase
             git commit -m 'initial commit'"
         );
 
-        $sMsg = $this->_localExec(TWGIT_EXEC . ' init 1.2.3 /tmp/origin');
+        $sMsg = $this->_localExec(TWGIT_EXEC . ' init 1.2.3 ' . TWGIT_REPOSITORY_ORIGIN_DIR);
 
-        $this->assertNotContains("Initialized empty Git repository in /tmp/local/.git/", $sMsg);
+        $this->assertNotContains("Initialized empty Git repository in " . TWGIT_REPOSITORY_LOCAL_DIR . "/.git/", $sMsg);
         $this->assertContains("Check clean working tree...", $sMsg);
 
-        $this->assertContains("git remote add origin /tmp/origin", $sMsg);
+        $this->assertContains("git remote add origin " . TWGIT_REPOSITORY_ORIGIN_DIR, $sMsg);
 
         $this->assertNotContains("git branch -m stable", $sMsg);
         $this->assertContains("git checkout -b stable master", $sMsg);
@@ -152,12 +152,12 @@ class TwgitMainTest extends TwgitTestCase
             git commit -m 'initial commit'"
         );
 
-        $sMsg = $this->_localExec(TWGIT_EXEC . ' init 1.2.3 /tmp/origin');
+        $sMsg = $this->_localExec(TWGIT_EXEC . ' init 1.2.3 ' . TWGIT_REPOSITORY_ORIGIN_DIR);
 
-        $this->assertContains("Initialized empty Git repository in /tmp/local/.git/", $sMsg);
+        $this->assertContains("Initialized empty Git repository in " . TWGIT_REPOSITORY_LOCAL_DIR . "/.git/", $sMsg);
         $this->assertNotContains("Check clean working tree...", $sMsg);
 
-        $this->assertContains("git remote add origin /tmp/origin", $sMsg);
+        $this->assertContains("git remote add origin " . TWGIT_REPOSITORY_ORIGIN_DIR, $sMsg);
 
         $this->assertNotContains("git branch -m stable", $sMsg);
         $this->assertNotContains("git checkout -b stable master", $sMsg);
@@ -181,12 +181,12 @@ class TwgitMainTest extends TwgitTestCase
             git branch -m stable"
         );
 
-        $sMsg = $this->_localExec(TWGIT_EXEC . ' init 1.2.3 /tmp/origin');
+        $sMsg = $this->_localExec(TWGIT_EXEC . ' init 1.2.3 ' . TWGIT_REPOSITORY_ORIGIN_DIR);
 
-        $this->assertNotContains("Initialized empty Git repository in /tmp/local/.git/", $sMsg);
+        $this->assertNotContains("Initialized empty Git repository in " . TWGIT_REPOSITORY_LOCAL_DIR . "/.git/", $sMsg);
         $this->assertContains("Check clean working tree...", $sMsg);
 
-        $this->assertContains("git remote add origin /tmp/origin", $sMsg);
+        $this->assertContains("git remote add origin " . TWGIT_REPOSITORY_ORIGIN_DIR, $sMsg);
 
         $this->assertNotContains("git branch -m stable", $sMsg);
         $this->assertNotContains("git checkout -b stable master", $sMsg);
@@ -209,16 +209,16 @@ class TwgitMainTest extends TwgitTestCase
             git add . && \\
             git commit -m 'initial commit' && \\
             git branch -m stable && \\
-            git remote add origin /tmp/origin && \\
+            git remote add origin " . TWGIT_REPOSITORY_ORIGIN_DIR . " && \\
             git push --set-upstream origin stable"
         );
 
-        $sMsg = $this->_localExec(TWGIT_EXEC . ' init 1.2.3 /tmp/origin');
+        $sMsg = $this->_localExec(TWGIT_EXEC . ' init 1.2.3 ' . TWGIT_REPOSITORY_ORIGIN_DIR);
 
-        $this->assertNotContains("Initialized empty Git repository in /tmp/local/.git/", $sMsg);
+        $this->assertNotContains("Initialized empty Git repository in " . TWGIT_REPOSITORY_LOCAL_DIR . "/.git/", $sMsg);
         $this->assertContains("Check clean working tree...", $sMsg);
 
-        $this->assertNotContains("git remote add origin /tmp/origin", $sMsg);
+        $this->assertNotContains("git remote add origin " . TWGIT_REPOSITORY_ORIGIN_DIR, $sMsg);
 
         $this->assertNotContains("git branch -m stable", $sMsg);
         $this->assertNotContains("git checkout -b stable master", $sMsg);
@@ -241,18 +241,18 @@ class TwgitMainTest extends TwgitTestCase
             git add . && \\
             git commit -m 'initial commit' && \\
             git branch -m stable && \\
-            git remote add origin /tmp/origin && \\
+            git remote add origin " . TWGIT_REPOSITORY_ORIGIN_DIR . " && \\
             git push --set-upstream origin stable && \\
             git checkout -b foo && \\
             git branch -D stable"
         );
 
-        $sMsg = $this->_localExec(TWGIT_EXEC . ' init 1.2.3 /tmp/origin');
+        $sMsg = $this->_localExec(TWGIT_EXEC . ' init 1.2.3 ' . TWGIT_REPOSITORY_ORIGIN_DIR);
 
-        $this->assertNotContains("Initialized empty Git repository in /tmp/local/.git/", $sMsg);
+        $this->assertNotContains("Initialized empty Git repository in " . TWGIT_REPOSITORY_LOCAL_DIR . "/.git/", $sMsg);
         $this->assertContains("Check clean working tree...", $sMsg);
 
-        $this->assertNotContains("git remote add origin /tmp/origin", $sMsg);
+        $this->assertNotContains("git remote add origin " . TWGIT_REPOSITORY_ORIGIN_DIR, $sMsg);
 
         $this->assertNotContains("git branch -m stable", $sMsg);
         $this->assertNotContains("git checkout -b stable master", $sMsg);

@@ -17,7 +17,7 @@ sCmds="$1"; shift
 . $TWGIT_INC_DIR/common.inc.sh
 
 # Execution:
-rFile="$(tempfile)"
+rFile="${TWGIT_TMP_DIR}/file.$$.$RANDOM"
 echo "$sCmds" > $rFile
 . $rFile
 rm -f $rFile

@@ -34,7 +34,7 @@ function usage () {
     CUI_displayMsg help_detail '<b>twgit release <action></b>'
     echo; CUI_displayMsg help 'Available actions are:'
     CUI_displayMsg help_detail '<b>committers [<max>] [-F]</b>'
-    CUI_displayMsg help_detail '    List first <b><max></b> committers into the current release.'
+    CUI_displayMsg help_detail '    List first <b><max></b> committers (authors in fact) into the current release.'
     CUI_displayMsg help_detail "    Default value of <b><max></b>: $TWGIT_DEFAULT_NB_COMMITTERS. Add <b>-F</b> to do not make fetch."; echo
     CUI_displayMsg help_detail '<b>list [-F]</b>'
     CUI_displayMsg help_detail '    List remote releases. Add <b>-F</b> to do not make fetch.'; echo
@@ -72,10 +72,10 @@ function cmd_help () {
 }
 
 ##
-# Liste les personnes ayant le plus committé sur l'éventuelle release en cours.
+# Liste les auteurs ayant le plus contribué (en nombre de commits) sur l'éventuelle release en cours.
 # Gère l'option '-F' permettant d'éviter le fetch.
 #
-# @param int $1 nombre de committers à afficher au maximum, optionnel
+# @param int $1 nombre d'auteurs à afficher au maximum, optionnel
 #
 function cmd_committers () {
     process_options "$@"

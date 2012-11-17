@@ -262,4 +262,155 @@ class TwgitMainTest extends TwgitTestCase
 
         $this->assertContains('git tag -a v1.2.3 -m "[twgit] First tag."', $sMsg);
     }
+
+    /**
+     * @dataProvider providerTestGetContributors_WithOnly1Author
+     * @shcovers inc/common.inc.sh::get_contributors
+     */
+    public function testGetContributors_WithOnly1Author ($sConfEmailDomainName, $sExpectedResult)
+    {
+        $this->_remoteExec('git init');
+        $this->_localExec(TWGIT_EXEC . ' init 1.2.3 ' . TWGIT_REPOSITORY_ORIGIN_DIR);
+        $this->_localExec(
+            "git config user.name 'Firstname Lastname' && \\
+            git config user.email 'firstname.lastname@xyz.com' && \\
+            " . TWGIT_EXEC . ' feature start 1'
+        );
+        $sCmd = 'TWGIT_EMAIL_DOMAIN_NAME=\"' . $sConfEmailDomainName . '\" && get_contributors feature-1 3';
+        $sMsg = $this->_localShellCodeCall($sCmd);
+        $this->assertEquals($sExpectedResult, $sMsg);
+    }
+
+    public function providerTestGetContributors_WithOnly1Author ()
+    {
+        return array(
+            array('', 'Firstname Lastname <firstname.lastname@xyz.com>'),
+            array('xyz.com', 'Firstname Lastname <firstname.lastname@xyz.com>'),
+            array('other.unknown', ''),
+        );
+    }
+
+    /**
+     * @dataProvider providerTestGetContributors_WithMultipleAuthors
+     * @shcovers inc/common.inc.sh::get_contributors
+     */
+    public function testGetContributors_WithMultipleAuthors ($sConfEmailDomainName, $iMaxNbToDisplay, $sExpectedResult)
+    {
+        $this->_remoteExec('git init');
+        $this->_localExec(TWGIT_EXEC . ' init 1.2.3 ' . TWGIT_REPOSITORY_ORIGIN_DIR);
+        $this->_localExec(
+            "git config user.name 'F1 L1' && \\
+            git config user.email 'f1.l1@xyz.com' && \\
+            " . TWGIT_EXEC . ' feature start 1'
+        );
+        $this->_localExec(
+            "git config user.name 'F2 L2' && \\
+            git config user.email 'f2.l2@xyz.com' && \\
+            " . 'git commit --allow-empty -m "A" && git commit --allow-empty -m "B"'
+            . ' && git commit --allow-empty -m "C" && git push origin'
+        );
+        $this->_localExec(
+            "git config user.name 'F3 L3' && \\
+            git config user.email 'f3.l3@other.com' && \\
+            " . 'git commit --allow-empty -m "D" && git commit --allow-empty -m "E" && git push origin'
+        );
+        $sCmd = 'TWGIT_EMAIL_DOMAIN_NAME=\"' . $sConfEmailDomainName . '\" '
+              . '&& get_contributors feature-1 ' . $iMaxNbToDisplay;
+        $sMsg = $this->_localShellCodeCall($sCmd);
+        $this->assertEquals($sExpectedResult, $sMsg);
+    }
+
+    public function providerTestGetContributors_WithMultipleAuthors ()
+    {
+        return array(
+            array('', 1, 'F2 L2 <f2.l2@xyz.com>'),
+            array('', 3, "F2 L2 <f2.l2@xyz.com>\nF3 L3 <f3.l3@other.com>\nF1 L1 <f1.l1@xyz.com>"),
+            array('xyz.com', 1, 'F2 L2 <f2.l2@xyz.com>'),
+            array('xyz.com', 3, "F2 L2 <f2.l2@xyz.com>\nF1 L1 <f1.l1@xyz.com>"),
+            array('other.unknown', 1, ''),
+            array('other.unknown', 3, ''),
+        );
+    }
+
+    /**
+     * @dataProvider providerDisplayRankContributors_WithOnly1Author
+     * @shcovers inc/common.inc.sh::display_rank_contributors
+     */
+    public function testDisplayRankContributors_WithOnly1Author (
+        $sConfEmailDomainName, $iMaxNbToDisplay, $sExpectedResult
+    ) {
+        $this->_remoteExec('git init');
+        $this->_localExec(TWGIT_EXEC . ' init 1.2.3 ' . TWGIT_REPOSITORY_ORIGIN_DIR);
+        $this->_localExec(
+            "git config user.name 'Firstname Lastname' && \\
+            git config user.email 'firstname.lastname@xyz.com' && \\
+            " . TWGIT_EXEC . ' feature start 1'
+        );
+        $sCmd = 'TWGIT_EMAIL_DOMAIN_NAME=\"' . $sConfEmailDomainName . '\"'
+              . ' && TWGIT_DEFAULT_NB_COMMITTERS=3'
+              . ' && display_rank_contributors feature-1 ' . $iMaxNbToDisplay;
+        $sMsg = $this->_localShellCodeCall($sCmd);
+        $this->assertEquals($sExpectedResult, $sMsg);
+    }
+
+    public function providerDisplayRankContributors_WithOnly1Author ()
+    {
+        return array(
+            array('', '', "First 3 committers into 'origin/feature-1' remote branch:\nFirstname Lastname <firstname.lastname@xyz.com>\n"),
+            array('', 1, "First committer into 'origin/feature-1' remote branch:\nFirstname Lastname <firstname.lastname@xyz.com>\n"),
+            array('', 2, "First 2 committers into 'origin/feature-1' remote branch:\nFirstname Lastname <firstname.lastname@xyz.com>\n"),
+            array('xyz.com', '', "First 3 committers into 'origin/feature-1' remote branch (filtered by email domain: '@xyz.com'):\nFirstname Lastname <firstname.lastname@xyz.com>\n"),
+            array('xyz.com', 1, "First committer into 'origin/feature-1' remote branch (filtered by email domain: '@xyz.com'):\nFirstname Lastname <firstname.lastname@xyz.com>\n"),
+            array('xyz.com', 2, "First 2 committers into 'origin/feature-1' remote branch (filtered by email domain: '@xyz.com'):\nFirstname Lastname <firstname.lastname@xyz.com>\n"),
+            array('other.unknown', '', "First 3 committers into 'origin/feature-1' remote branch (filtered by email domain: '@other.unknown'):\nnobody\n"),
+            array('other.unknown', 1, "First committer into 'origin/feature-1' remote branch (filtered by email domain: '@other.unknown'):\nnobody\n"),
+            array('other.unknown', 2, "First 2 committers into 'origin/feature-1' remote branch (filtered by email domain: '@other.unknown'):\nnobody\n"),
+        );
+    }
+
+    /**
+     * @dataProvider providerTestGetContributors_WithMultipleAuthors
+     * @shcovers inc/common.inc.sh::display_rank_contributors
+     */
+    public function testDisplayRankContributors_WithMultipleAuthors ($sConfEmailDomainName, $iMaxNbToDisplay, $sExpectedResult)
+    {
+        $this->_remoteExec('git init');
+        $this->_localExec(TWGIT_EXEC . ' init 1.2.3 ' . TWGIT_REPOSITORY_ORIGIN_DIR);
+        $this->_localExec(
+            "git config user.name 'F1 L1' && \\
+            git config user.email 'f1.l1@xyz.com' && \\
+            " . TWGIT_EXEC . ' feature start 1'
+        );
+        $this->_localExec(
+            "git config user.name 'F2 L2' && \\
+            git config user.email 'f2.l2@xyz.com' && \\
+            " . 'git commit --allow-empty -m "A" && git commit --allow-empty -m "B"'
+            . ' && git commit --allow-empty -m "C" && git push origin'
+        );
+        $this->_localExec(
+            "git config user.name 'F3 L3' && \\
+            git config user.email 'f3.l3@other.com' && \\
+            " . 'git commit --allow-empty -m "D" && git commit --allow-empty -m "E" && git push origin'
+        );
+        $sCmd = 'TWGIT_EMAIL_DOMAIN_NAME=\"' . $sConfEmailDomainName . '\" '
+              . ' && TWGIT_DEFAULT_NB_COMMITTERS=3'
+              . '&& get_contributors feature-1 ' . $iMaxNbToDisplay;
+        $sMsg = $this->_localShellCodeCall($sCmd);
+        $this->assertEquals($sExpectedResult, $sMsg);
+    }
+
+    public function providerDisplayRankContributors_WithMultipleAuthors ()
+    {
+        return array(
+            array('', '', "First 3 committers into 'origin/feature-1' remote branch:\nF2 L2 <f2.l2@xyz.com>\nF3 L3 <f3.l3@other.com>\nF1 L1 <f1.l1@xyz.com>\n"),
+            array('', 1, "First committer into 'origin/feature-1' remote branch:\nF2 L2 <f2.l2@xyz.com>\n"),
+            array('', 2, "First 2 committers into 'origin/feature-1' remote branch:\nF2 L2 <f2.l2@xyz.com>\nF3 L3 <f3.l3@other.com>\n"),
+            array('xyz.com', '', "First 3 committers into 'origin/feature-1' remote branch (filtered by email domain: '@xyz.com'):\nF2 L2 <f2.l2@xyz.com>\nF1 L1 <f1.l1@xyz.com>\n"),
+            array('xyz.com', 1, "First committer into 'origin/feature-1' remote branch (filtered by email domain: '@xyz.com'):\nF2 L2 <f2.l2@xyz.com>\n"),
+            array('xyz.com', 2, "First 2 committers into 'origin/feature-1' remote branch (filtered by email domain: '@xyz.com'):\nF2 L2 <f2.l2@xyz.com>\nF1 L1 <f1.l1@xyz.com>\n"),
+            array('other.unknown', '', "First 3 committers into 'origin/feature-1' remote branch (filtered by email domain: '@other.unknown'):\nnobody\n"),
+            array('other.unknown', 1, "First committer into 'origin/feature-1' remote branch (filtered by email domain: '@other.unknown'):\nnobody\n"),
+            array('other.unknown', 2, "First 2 committers into 'origin/feature-1' remote branch (filtered by email domain: '@other.unknown'):\nnobody\n"),
+        );
+    }
 }

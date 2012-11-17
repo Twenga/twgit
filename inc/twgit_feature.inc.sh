@@ -33,9 +33,10 @@ function usage () {
     echo; CUI_displayMsg help 'Usage:'
     CUI_displayMsg help_detail '<b>twgit feature <action></b>'
     echo; CUI_displayMsg help 'Available actions are:'
-    CUI_displayMsg help_detail '<b>committers <featurename> [<max>] [-F]</b>'
-    CUI_displayMsg help_detail '    List first <b><max></b> committers into the specified remote feature.'
-    CUI_displayMsg help_detail "    Default value of <b><max></b>: $TWGIT_DEFAULT_NB_COMMITTERS. Add <b>-F</b> to do not make fetch."; echo
+    CUI_displayMsg help_detail '<b>committers [<featurename> [<max>]] [-F]</b>'
+    CUI_displayMsg help_detail '    List first <b><max></b> committers (authors in fact) into the specified remote'
+    CUI_displayMsg help_detail "    feature. Default value of <b><max></b>: $TWGIT_DEFAULT_NB_COMMITTERS. Add <b>-F</b> to do not make fetch."
+    CUI_displayMsg help_detail '    If no <b><featurename></b> is specified, then use current feature.'; echo
     CUI_displayMsg help_detail '<b>list [-c|-F|-x]</b>'
     CUI_displayMsg help_detail '    List remote features. Add <b>-F</b> to do not make fetch, <b>-c</b> to compact display'
     CUI_displayMsg help_detail '    and <b>-x</b> (eXtremely compact) to CSV display.'; echo
@@ -76,18 +77,30 @@ function cmd_help () {
 }
 
 ##
-# Liste les personnes ayant le plus committé sur la feature spécifiée.
+# Liste les auteurs ayant le plus contribué (en nombre de commits) sur la feature spécifiée.
 # Gère l'option '-F' permettant d'éviter le fetch.
 #
-# @param string $1 nom court de la feature
-# @param int $2 nombre de committers à afficher au maximum, optionnel
+# @param string $1 nom court de la feature, optionnel
+# @param int $2 nombre d'auteurs à afficher au maximum, optionnel
 #
 function cmd_committers () {
     process_options "$@"
-
-    require_parameter 'feature'
+    require_parameter '-'
     local feature="$RETVAL"
-    local feature_fullname="$TWGIT_PREFIX_FEATURE$feature"
+    local feature_fullname
+
+    local all_features=$(git branch -r | grep "$TWGIT_ORIGIN/$TWGIT_PREFIX_FEATURE" | sed 's/^[* ]*//' | tr '\n' ' ' | sed 's/ *$//g')
+    if [ -z "$feature" ]; then
+        feature_fullname="$(get_current_branch)"
+        if ! has "$TWGIT_ORIGIN/$feature_fullname" $all_features; then
+            die "You must be in a feature if you didn't specify one!"
+        fi
+    else
+        feature_fullname="$TWGIT_PREFIX_FEATURE$feature"
+        if ! has "$TWGIT_ORIGIN/$feature_fullname" $all_features; then
+            die "Remote feature '<b>$TWGIT_ORIGIN/$feature_fullname</b>' not found!"
+        fi
+    fi
 
     require_parameter '-'
     local max="$RETVAL"

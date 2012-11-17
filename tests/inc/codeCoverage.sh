@@ -6,17 +6,19 @@
 # @license http://www.apache.org/licenses/LICENSE-2.0
 #
 
+. ./inc/os_compatibility.inc.sh
 
 
-rStats="$(tempfile)"
-rCovers="$(tempfile)"
+rStats="/tmp/file.$$.$RANDOM"
+rCovers="/tmp/file.$$.$RANDOM"
 
 # Compute stats about Bash functions in a CSV file plus an extra line for total lines of code.
 # CSV format: path:function_name:start_line:end_line:nb_of_line_of_code
+# Use % instead of \000 in tr command, octal value doesn't work with sed command in mac os x
 grep -E '^\s*function\s+([a-z0-9_-]+)\b|^\s*\}\s*$' --ignore-case --only-matching --line-number -r --include=twgit --include=*.sh --with-filename . \
-    | sed -r 's#^./##' \
-    | tr '\n' '\000' \
-    | sed -r "s/:([0-9]+):function\s+([a-z0-9_-]+)\x00[^:]+:([0-9]+):\}\x00/:\2:\1:\3\n/ig" \
+    | sedRegexpExtended 's#^./##' \
+    | tr '\n' '%' \
+    | sedRegexpExtended 's/:([0-9]+):function[ ]+([a-zA-Z0-9_-]+)%[^:]+:([0-9]+):\}%/:\2:\1:\3\'$'\n/g' \
     | grep -vE '^install/' \
     | grep -vE '^tests/' \
     | sort \
@@ -28,7 +30,7 @@ grep -E '^\s*function\s+([a-z0-9_-]+)\b|^\s*\}\s*$' --ignore-case --only-matchin
 # Example: @shcovers inc/common.inc.sh::assert_git_configured
 grep -E '^\s*\*\s*@shcovers\s+.+::.' --ignore-case -r --no-filename --include=*Test.php --exclude-dir=tests/lib ./tests \
     | tr -d '\r' \
-    | sed 's/^.*@shcovers\s*//i' \
+    | sed 's/^.*@shcovers[ ]*//' \
     | sed 's/::/:/' \
     | sort | uniq \
     > $rCovers

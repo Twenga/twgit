@@ -442,20 +442,24 @@ function get_next_version () {
 }
 
 ##
-# Calcul et retourne la liste des emails des N committeurs les plus significatifs (en nombre de commits)
+# Calcul et retourne la liste des emails des N auteurs de commit les plus significatifs (en nombre de commits)
 # de la branche distante spécifiée, à raison d'un par ligne.
-# Filtre les committeurs sans email ainsi que ceux en dehors du domaine '@$TWGIT_EMAIL_DOMAIN_NAME'.
+# Filtre les auteurs sans email ainsi que ceux en dehors du domaine '@$TWGIT_EMAIL_DOMAIN_NAME' si défini.
 #
 # @param string $1 nom complet de branche distante, sans le "$TWGIT_ORIGIN/"
-# @param int $2 nombre maximum de committers à afficher
+# @param int $2 nombre maximum d'auteurs à afficher
 # @see display_rank_contributors()
+# @testedby TwgitMainTest
 #
 function get_contributors () {
     local branch="$TWGIT_ORIGIN/$1"
     local max="$2"
+    local domain_pattern
+
+    [ -z "$TWGIT_EMAIL_DOMAIN_NAME" ] && domain_pattern='.*' || domain_pattern="$TWGIT_EMAIL_DOMAIN_NAME"
     git shortlog -nse $TWGIT_ORIGIN/$TWGIT_STABLE..$branch \
-        | grep -E "@$TWGIT_EMAIL_DOMAIN_NAME>$" \
-        | head -n $max | sedRegexpExtended "s/^.*? <(.*@$TWGIT_EMAIL_DOMAIN_NAME)>$/\1/"
+        | grep -E "@$domain_pattern>$" \
+        | head -n $max | sedRegexpExtended "s/^\s*[0-9]+\s+(.*? <.*@$domain_pattern>)$/\1/"
 }
 
 ##
@@ -1249,21 +1253,26 @@ function init () {
 }
 
 ##
-# Affiche la liste des emails des N committeurs les plus significatifs (en nombre de commits)
+# Affiche la liste des emails des N auteurs les plus significatifs (en nombre de commits)
 # de la branche distante spécifiée, à raison d'un par ligne.
-# Filtre les committeurs sans email ainsi que ceux en dehors du domaine '@$TWGIT_EMAIL_DOMAIN_NAME'.
+# Filtre les auteurs sans email ainsi que ceux en dehors du domaine '@$TWGIT_EMAIL_DOMAIN_NAME' si défini.
 #
 # @param string $1 nom complet de branche distante, sans le "$TWGIT_ORIGIN/"
-# @param int $2 nombre maximum de committers à afficher, optionnel (vaut $TWGIT_DEFAULT_NB_COMMITTERS par défaut)
+# @param int $2 nombre maximum d'auteurs à afficher, optionnel (vaut $TWGIT_DEFAULT_NB_COMMITTERS par défaut)
+# @see get_contributors()
+# @testedby TwgitMainTest
 #
 function display_rank_contributors () {
     local branch_fullname="$1"
     local max="$2"
     [ -z "$max" ] && max=$TWGIT_DEFAULT_NB_COMMITTERS
 
-    CUI_displayMsg info "First $max committers into '$TWGIT_ORIGIN/$branch_fullname' remote branch:"
+    local header filter
+    [ "$max" -eq 1 ] && header="First committer" || header="First $max committers"
+    [ -z "$TWGIT_EMAIL_DOMAIN_NAME" ] && filter='' || filter=" (filtered by email domain: '@$TWGIT_EMAIL_DOMAIN_NAME')"
+    CUI_displayMsg info "$header into '$TWGIT_ORIGIN/$branch_fullname' remote branch$filter:"
     local contributors="$(get_contributors "$branch_fullname" $max)"
-    [ -z "$contributors" ] && echo 'nobody' || echo $contributors | tr ' ' '\n'
+    [ -z "$contributors" ] && echo 'nobody' || echo "$contributors"
     echo
 }
 

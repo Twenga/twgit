@@ -5,7 +5,7 @@
 
 #### Continuous integration
 To run the test suite, simply:
-`$ phpunit -c conf/phpunit-dist.xml`
+`$ phpunit -c conf/phpunit.xml`
 ![travis-ci.org](http://travis-ci.org/favicon.ico)&nbsp;[![Build Status](https://secure.travis-ci.org/Twenga/twgit.png?branch=stable)](http://travis-ci.org/Twenga/twgit)
 
 ## Description

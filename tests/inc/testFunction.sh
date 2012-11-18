@@ -4,7 +4,7 @@
 # Call a function of common.inc.sh after loading Shell config files.
 # e.g.: /bin/bash testFunction.sh process_fetch x
 #
-# @author Geoffroy AUBRY <geoffroy.aubry@hi-media.com>
+# @author Geoffroy Aubry <geoffroy.aubry@hi-media.com>
 #
 
 

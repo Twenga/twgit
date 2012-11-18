@@ -4,7 +4,7 @@
  * Classe parente des tests Twgit, permet de faciliter les interactions entre PHP, Shell et Git.
  *
  * @package Tests
- * @author Geoffroy AUBRY <geoffroy.aubry@hi-media.com>
+ * @author Geoffroy Aubry <geoffroy.aubry@hi-media.com>
  */
 class TwgitTestCase extends PHPUnit_Framework_TestCase
 {

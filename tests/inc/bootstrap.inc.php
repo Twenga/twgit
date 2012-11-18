@@ -4,7 +4,7 @@
  * Bootstrap for unit tests only.
  *
  * @package Tests
- * @author Geoffroy AUBRY <geoffroy.aubry@free.fr>
+ * @author Geoffroy Aubry <geoffroy.aubry@free.fr>
  */
 
 include_once(__DIR__ . '/../../conf/phpunit-dist.php');

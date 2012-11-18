@@ -2,7 +2,8 @@
 
 /**
  * @package Tests
- * @author Geoffroy AUBRY <geoffroy.aubry@hi-media.com>
+ * @author Geoffroy Aubry <geoffroy.aubry@hi-media.com>
+ * @author Laurent Toussaint <lt.laurent.toussaint@gmail.com>
  */
 class TwgitMainTest extends TwgitTestCase
 {

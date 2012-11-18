@@ -2,7 +2,7 @@
 
 /**
  * @package Tests
- * @author Geoffroy AUBRY <geoffroy.aubry@hi-media.com>
+ * @author Geoffroy Aubry <geoffroy.aubry@hi-media.com>
  */
 class TwgitReleaseTest extends TwgitTestCase
 {

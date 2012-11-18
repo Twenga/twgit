@@ -3,6 +3,7 @@
 ##
 # Usage: /bin/bash tests/inc/codeCoverage.sh
 # @copyright 2012 Geoffroy Aubry <geoffroy.aubry@free.fr>
+# @copyright 2012 Laurent Toussaint <lt.laurent.toussaint@gmail.com>
 # @license http://www.apache.org/licenses/LICENSE-2.0
 #
 

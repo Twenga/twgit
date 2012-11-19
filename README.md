@@ -3,7 +3,7 @@
 
 #### [Homepage](http://twgit.twenga.com/)
 
-#### Continuous integration ![travis-ci.org](http://travis-ci.org/favicon.ico)&nbsp;[![Build Status](https://secure.travis-ci.org/Twenga/twgit.png?branch=stable)](http://travis-ci.org/Twenga/twgit)
+#### Continuous integration [![travis-ci.org](https://github.com/Twenga/twgit/raw/stable/doc/travis-favicon.png)](http://travis-ci.org/Twenga/twgit)&nbsp;[![Build Status](https://secure.travis-ci.org/Twenga/twgit.png?branch=stable)](http://travis-ci.org/Twenga/twgit)
 To run the test suite, simply:
 
 ```bash

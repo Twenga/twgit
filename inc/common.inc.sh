@@ -401,7 +401,7 @@ function get_contributors () {
     [ -z "$TWGIT_EMAIL_DOMAIN_NAME" ] && domain_pattern='.*' || domain_pattern="$TWGIT_EMAIL_DOMAIN_NAME"
     git shortlog -nse $TWGIT_ORIGIN/$TWGIT_STABLE..$branch \
         | grep -E "@$domain_pattern>$" \
-        | head -n $max | sedRegexpExtended "s/^\s*[0-9]+\s+(.*? <.*@$domain_pattern>)$/\1/"
+        | head -n $max | tr -s '\t' ' ' | cut -d' ' -f3-
 }
 
 ##

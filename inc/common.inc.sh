@@ -72,14 +72,15 @@ function get_dissident_remote_branches () {
     done < <(git remote | grep -v "^$TWGIT_ORIGIN$")
     [ -z "$cmd" ] && cmd='tee /dev/null' || cmd="grep -v $cmd"
 
-    git branch -r --no-color | sed 's/^[* ] //' \
-        | grep -v -e "^$TWGIT_ORIGIN/$TWGIT_PREFIX_FEATURE" \
-            -e "^$TWGIT_ORIGIN/$TWGIT_PREFIX_RELEASE" \
-            -e "^$TWGIT_ORIGIN/$TWGIT_PREFIX_HOTFIX" \
-            -e "^$TWGIT_ORIGIN/$TWGIT_PREFIX_DEMO" \
-            -e "^$TWGIT_ORIGIN/HEAD\($\|\s\)" \
-            -e "^$TWGIT_ORIGIN/master\($\|\s\)" \
-            -e "^$TWGIT_ORIGIN/$TWGIT_STABLE\($\|\s\)" \
+    git branch -r --no-color | sed 's/^[* ] //' | sed -e 's/^/ /' -e 's/$/ /' \
+        | grep -v -e " $TWGIT_ORIGIN/$TWGIT_PREFIX_FEATURE" \
+            -e " $TWGIT_ORIGIN/$TWGIT_PREFIX_RELEASE" \
+            -e " $TWGIT_ORIGIN/$TWGIT_PREFIX_HOTFIX" \
+            -e " $TWGIT_ORIGIN/$TWGIT_PREFIX_DEMO" \
+            -e " $TWGIT_ORIGIN/HEAD " \
+            -e " $TWGIT_ORIGIN/master " \
+            -e " $TWGIT_ORIGIN/$TWGIT_STABLE " \
+        | sed 's/[ ]//' \
         | eval "$cmd" \
         || :
 }
@@ -576,10 +577,10 @@ function assert_valid_ref_name () {
         die "'$1' is not a valid reference name: whitespaces not allowed!"
     fi
 
-    echo $1 | grep -vP "^$TWGIT_PREFIX_FEATURE" \
-        | grep -vP "^$TWGIT_PREFIX_RELEASE" \
-        | grep -vP "^$TWGIT_PREFIX_HOTFIX" \
-        | grep -vP "^$TWGIT_PREFIX_DEMO" 1>/dev/null
+    echo " $1 " | grep -v " $TWGIT_PREFIX_FEATURE" \
+        | grep -v " $TWGIT_PREFIX_RELEASE" \
+        | grep -v " $TWGIT_PREFIX_HOTFIX" \
+        | grep -v " $TWGIT_PREFIX_DEMO" 1>/dev/null
     if [ $? -ne 0 ]; then
         msg='Unauthorized reference! Pick another name without using any prefix'
         msg="$msg ('$TWGIT_PREFIX_FEATURE', '$TWGIT_PREFIX_RELEASE', '$TWGIT_PREFIX_HOTFIX', '$TWGIT_PREFIX_DEMO')."
@@ -597,7 +598,7 @@ function assert_valid_tag_name () {
     local tag="$1"
     assert_valid_ref_name "$tag"
     CUI_displayMsg processing 'Check valid tag name...'
-    $(echo "$tag" | grep -qP '^[0-9]+\.[0-9]+\.[0-9]+$') || \
+    $(echo " $tag " | grep -qE ' [0-9]+\.[0-9]+\.[0-9]+ ') || \
         die "Unauthorized tag name: '<b>$tag</b>'! Must use <major.minor.revision> format, e.g. '1.2.3'."
 }
 

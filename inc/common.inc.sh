@@ -511,6 +511,11 @@ function assert_git_configured () {
     fi
 }
 
+##
+# S'assure que si un connecteur pour le sujet des features est déclaré, alors il est connu et wget est installé.
+#
+# @testedby TwgitSetupTest
+#
 function assert_connectors_well_configured () {
     if [ ! -z "$TWGIT_FEATURE_SUBJECT_CONNECTOR" ]; then
         local connector="$(printf "$TWGIT_FEATURE_SUBJECT_CONNECTOR_PATH" "$TWGIT_FEATURE_SUBJECT_CONNECTOR")"
@@ -518,9 +523,9 @@ function assert_connectors_well_configured () {
             die "'<b>$TWGIT_FEATURE_SUBJECT_CONNECTOR</b>' connector not found!" \
                 "Please adjust <b>TWGIT_FEATURE_SUBJECT_CONNECTOR</b> in '$config_file'."
         else
-            which wgetww 1>/dev/null 2>&1
+            which wget 1>/dev/null 2>&1
             if [ $? -ne 0 ]; then
-                die "Feature's subject not available because wget was not found!" \
+                die "Feature's subject not available because <b>wget</b> was not found!" \
                     "Install it (e.g.: apt-get install wget) or switch off connectors in '$config_file'."
             fi
         fi

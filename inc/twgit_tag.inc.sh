@@ -35,7 +35,8 @@ function usage () {
     echo; CUI_displayMsg help 'Available actions are:'
     CUI_displayMsg help_detail '<b>list [<tagname>] [-F]</b>'
     CUI_displayMsg help_detail '    List 5 last tags with included features. Add <b>-F</b> to do not make fetch.'
-    CUI_displayMsg help_detail '    If <b><tagname></b> is specified, then focus on this tag.'; echo
+    CUI_displayMsg help_detail '    If <b><tagname></b> is specified (using major.minor.revision format), then'
+    CUI_displayMsg help_detail '    focus on this tag.'; echo
     CUI_displayMsg help_detail '<b>[help]</b>'
     CUI_displayMsg help_detail '    Display this help.'; echo
 }

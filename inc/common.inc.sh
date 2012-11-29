@@ -661,13 +661,16 @@ function assert_valid_tag_name () {
 # S'assure que la référence fournie est un nom syntaxiquement correct de tag potentiel et qu'il est disponible.
 #
 # @param string $1 référence de tag sans préfixe
+# @testedby TwgitCommonAssertsTest
 #
 function assert_new_and_valid_tag_name () {
     local tag="$1"
     local tag_fullname="$TWGIT_PREFIX_TAG$tag"
     assert_valid_tag_name "$tag"
     CUI_displayMsg processing "Check whether tag '$tag' already exists..."
-    has "$tag_fullname" $(get_all_tags) && die "Tag '<b>$tag_fullname</b>' already exists! Try: twgit tag list"
+    if has "$tag_fullname" $(get_all_tags); then
+        die "Tag '<b>$tag_fullname</b>' already exists! Try: twgit tag list"
+    fi
 }
 
 ##
@@ -687,6 +690,7 @@ function assert_working_tree_is_not_on_delete_branch () {
 
 ##
 # S'assure qu'au moins un tag existe.
+# @testedby TwgitCommonAssertsTest
 #
 function assert_tag_exists () {
     CUI_displayMsg processing 'Get last tag...'

@@ -586,14 +586,13 @@ function assert_clean_working_tree () {
 # S'assure que la référence fournie est un nom syntaxiquement correct de branche potentielle.
 #
 # @param string $1 référence de branche
+# @testedby TwgitCommonAssertsTest
 #
 function assert_valid_ref_name () {
     CUI_displayMsg processing 'Check valid ref name...'
     git check-ref-format --branch "$1" 1>/dev/null 2>&1
     if [ $? -ne 0 ]; then
-        die "'$1' is not a valid reference name!"
-    elif  echo "$1" | grep -q ' '; then
-        die "'$1' is not a valid reference name: whitespaces not allowed!"
+        die "'<b>$1</b>' is not a valid reference name! See <b>git check-ref-format</b> for more details."
     fi
 
     echo " $1 " | grep -v " $TWGIT_PREFIX_FEATURE" \
@@ -612,26 +611,31 @@ function assert_valid_ref_name () {
 # c'est-à-dire au format \d+.\d+.\d+
 #
 # @param string $1 référence de tag sans préfixe
+# @testedby TwgitCommonAssertsTest
 #
 function assert_valid_tag_name () {
     local tag="$1"
     assert_valid_ref_name "$tag"
     CUI_displayMsg processing 'Check valid tag name...'
-    $(echo " $tag " | grep -qE ' [0-9]+\.[0-9]+\.[0-9]+ ') || \
-        die "Unauthorized tag name: '<b>$tag</b>'! Must use <major.minor.revision> format, e.g. '1.2.3'."
+    echo "$tag" | grep -qE '^(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)$' \
+        && [ "$tag" != '0.0.0' ] \
+        || die "Unauthorized tag name: '<b>$tag</b>'! Must use <major.minor.revision> format, e.g. '1.2.3'."
 }
 
 ##
 # S'assure que la référence fournie est un nom syntaxiquement correct de tag potentiel et qu'il est disponible.
 #
 # @param string $1 référence de tag sans préfixe
+# @testedby TwgitCommonAssertsTest
 #
 function assert_new_and_valid_tag_name () {
     local tag="$1"
     local tag_fullname="$TWGIT_PREFIX_TAG$tag"
     assert_valid_tag_name "$tag"
     CUI_displayMsg processing "Check whether tag '$tag' already exists..."
-    has "$tag_fullname" $(get_all_tags) && die "Tag '<b>$tag_fullname</b>' already exists! Try: twgit tag list"
+    if has "$tag_fullname" $(get_all_tags); then
+        die "Tag '<b>$tag_fullname</b>' already exists! Try: twgit tag list"
+    fi
 }
 
 ##
@@ -651,6 +655,7 @@ function assert_working_tree_is_not_on_delete_branch () {
 
 ##
 # S'assure qu'au moins un tag existe.
+# @testedby TwgitCommonAssertsTest
 #
 function assert_tag_exists () {
     CUI_displayMsg processing 'Get last tag...'

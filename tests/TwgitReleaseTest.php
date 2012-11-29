@@ -88,6 +88,59 @@ class TwgitReleaseTest extends TwgitTestCase
     }
 
     /**
+     */
+    public function testStart_ThrowExceptionWhenSpecifiedTagAlreadyExists ()
+    {
+        $this->_remoteExec('git init');
+        $this->_localExec(TWGIT_EXEC . ' init 1.2.3 ' . TWGIT_REPOSITORY_ORIGIN_DIR);
+        $this->_localExec('git branch v1.2.3 v1.2.3');
+
+        $this->setExpectedException('RuntimeException', "/!\ Tag 'v1.2.3' already exists! Try: twgit tag list");
+        $sMsg = $this->_localExec(TWGIT_EXEC . ' release start -I 1.2.3');
+    }
+
+    /**
+     */
+    public function testStart_ThrowExceptionWhenSpecifiedValueIsNotATag ()
+    {
+        $this->_remoteExec('git init');
+        $this->_localExec(TWGIT_EXEC . ' init 1.2.3 ' . TWGIT_REPOSITORY_ORIGIN_DIR);
+        $this->_localExec('git branch v1.2.3 v1.2.3');
+
+        $this->setExpectedException(
+            'RuntimeException',
+            "/!\ Unauthorized tag name: 'toto'! Must use <major.minor.revision> format, e.g. '1.2.3'."
+        );
+        $sMsg = $this->_localExec(TWGIT_EXEC . ' release start -I toto');
+    }
+
+    /**
+     */
+    public function testStart_WithSpecifiedTag ()
+    {
+        $this->_remoteExec('git init');
+        $this->_localExec(TWGIT_EXEC . ' init 1.2.3 ' . TWGIT_REPOSITORY_ORIGIN_DIR);
+        $this->_localExec('git branch v1.2.3 v1.2.3');
+
+        $sMsg = $this->_localExec(TWGIT_EXEC . ' release start -I 10.0.2');
+        $sMsg = $this->_localExec(TWGIT_EXEC . ' release list');
+        $this->assertContains("Release: origin/release-10.0.2", $sMsg);
+    }
+
+    /**
+     */
+    public function testStart_WithNoSpecifiedTag ()
+    {
+        $this->_remoteExec('git init');
+        $this->_localExec(TWGIT_EXEC . ' init 1.2.3 ' . TWGIT_REPOSITORY_ORIGIN_DIR);
+        $this->_localExec('git branch v1.2.3 v1.2.3');
+
+        $sMsg = $this->_localExec(TWGIT_EXEC . ' release start -I');
+        $sMsg = $this->_localExec(TWGIT_EXEC . ' release list');
+        $this->assertContains("Release: origin/release-1.3.0", $sMsg);
+    }
+
+    /**
      * Currently just check the tag annotation.
      */
     public function testFinish_WithMinorRelease ()

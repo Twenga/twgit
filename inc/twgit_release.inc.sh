@@ -229,14 +229,16 @@ function cmd_finish () {
     # Détection hotfixes en cours :
     CUI_displayMsg processing 'Check hotfix in progress...'
     local hotfix="$(get_hotfixes_in_progress)"
-    [ ! -z "$hotfix" ] && die "Close a release while hotfix in progress is forbidden! Hotfix '$hotfix' must be treated first."
+    [ ! -z "$hotfix" ] && die "Close a release while hotfix in progress is forbidden! Hotfix '$hotfix' must be closed first."
 
     # Détection tags (via hotfixes) réalisés entre temps :
     CUI_displayMsg processing 'Check tags not merged...'
     get_tags_not_merged_into_branch "$TWGIT_ORIGIN/$release_fullname"
     tags_not_merged="$(echo "$GET_TAGS_NOT_MERGED_INTO_BRANCH_RETURN_VALUE" | sed 's/ /, /g')"
 
-    [ ! -z "$tags_not_merged" ] && die "You must merge following tag(s) into this release before close it: $tags_not_merged"
+    [ ! -z "$tags_not_merged" ] \
+        && die "You must merge the last tag into this release before close it." \
+            "In $release_fullname branch: git merge --no-ff $(get_last_tag), then: git push $TWGIT_ORIGIN $release_fullname"
 
     CUI_displayMsg processing 'Check remote features...'
     get_features merged_in_progress $release_fullname

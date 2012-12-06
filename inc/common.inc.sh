@@ -7,6 +7,7 @@
 #
 # Copyright (c) 2011 Twenga SA
 # Copyright (c) 2012 Geoffroy Aubry <geoffroy.aubry@free.fr>
+# Copyright (c) 2012 Laurent Toussaint <lt.laurent.toussaint@gmail.com>
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance
 # with the License. You may obtain a copy of the License at
@@ -20,6 +21,7 @@
 # @copyright 2011 Twenga SA
 # @copyright 2012 Geoffroy Aubry <geoffroy.aubry@free.fr>
 # @copyright 2012 Jérémie Havret <jhavret@hi-media.com>
+# @copyright 2012 Laurent Toussaint <lt.laurent.toussaint@gmail.com>
 # @license http://www.apache.org/licenses/LICENSE-2.0
 #
 
@@ -27,68 +29,7 @@
 
 . $TWGIT_INC_DIR/options_handler.inc.sh
 . $TWGIT_INC_DIR/coloredUI.inc.sh
-
-
-
-#--------------------------------------------------------------------
-# Mac OS X compatibility layer
-#--------------------------------------------------------------------
-
-# Witch OS:
-uname="$(uname)"
-if [ "$uname" = 'FreeBSD' ] || [ "$uname" = 'Darwin' ]; then
-    TWGIT_OS='MacOSX'
-else
-    TWGIT_OS='Linux'
-fi
-
-##
-# Display the last update time of specified path, in seconds since 1970-01-01 00:00:00 UTC.
-# Compatible Linux and Mac OS X.
-#
-# @param string $1 path
-# @see $TWGIT_OS
-#
-function getLastUpdateTimestamp () {
-    local path="$1"
-    if [ "$TWGIT_OS" = 'MacOSX' ]; then
-        stat -f %m "$path"
-    else
-        date -r "$path" +%s
-    fi
-}
-
-##
-# Display the specified timestamp converted to date with "+%Y-%m-%d %T" format.
-# Compatible Linux and Mac OS X.
-#
-# @param int $1 timestamp
-# @see $TWGIT_OS
-#
-function getDateFromTimestamp () {
-    local timestamp="$1"
-    if [ "$TWGIT_OS" = 'MacOSX' ]; then
-        date -r "$timestamp" "+%Y-%m-%d %T"
-    else
-        date --date "1970-01-01 $timestamp sec" "+%Y-%m-%d %T"
-    fi
-}
-
-##
-# Execute sed with the specified regexp-extended pattern.
-# Compatible Linux and Mac OS X.
-#
-# @param string $1 pattern using extended regular expressions
-# @see $TWGIT_OS
-#
-function sedRegexpExtended () {
-    local pattern="$1"
-    if [ "$TWGIT_OS" = 'MacOSX' ]; then
-        sed -E "$pattern";
-    else
-        sed -r "$pattern";
-    fi
-}
+. $TWGIT_INC_DIR/os_compatibility.inc.sh
 
 
 
@@ -131,14 +72,15 @@ function get_dissident_remote_branches () {
     done < <(git remote | grep -v "^$TWGIT_ORIGIN$")
     [ -z "$cmd" ] && cmd='tee /dev/null' || cmd="grep -v $cmd"
 
-    git branch -r --no-color | sed 's/^[* ] //' \
-        | grep -v -e "^$TWGIT_ORIGIN/$TWGIT_PREFIX_FEATURE" \
-            -e "^$TWGIT_ORIGIN/$TWGIT_PREFIX_RELEASE" \
-            -e "^$TWGIT_ORIGIN/$TWGIT_PREFIX_HOTFIX" \
-            -e "^$TWGIT_ORIGIN/$TWGIT_PREFIX_DEMO" \
-            -e "^$TWGIT_ORIGIN/HEAD\($\|\s\)" \
-            -e "^$TWGIT_ORIGIN/master\($\|\s\)" \
-            -e "^$TWGIT_ORIGIN/$TWGIT_STABLE\($\|\s\)" \
+    git branch -r --no-color | sed 's/^[* ] //' | sed -e 's/^/ /' -e 's/$/ /' \
+        | grep -v -e " $TWGIT_ORIGIN/$TWGIT_PREFIX_FEATURE" \
+            -e " $TWGIT_ORIGIN/$TWGIT_PREFIX_RELEASE" \
+            -e " $TWGIT_ORIGIN/$TWGIT_PREFIX_HOTFIX" \
+            -e " $TWGIT_ORIGIN/$TWGIT_PREFIX_DEMO" \
+            -e " $TWGIT_ORIGIN/HEAD " \
+            -e " $TWGIT_ORIGIN/master " \
+            -e " $TWGIT_ORIGIN/$TWGIT_STABLE " \
+        | sed 's/[ ]//' \
         | eval "$cmd" \
         || :
 }
@@ -631,10 +573,10 @@ function assert_valid_ref_name () {
         die "'$1' is not a valid reference name: whitespaces not allowed!"
     fi
 
-    echo $1 | grep -vP "^$TWGIT_PREFIX_FEATURE" \
-        | grep -vP "^$TWGIT_PREFIX_RELEASE" \
-        | grep -vP "^$TWGIT_PREFIX_HOTFIX" \
-        | grep -vP "^$TWGIT_PREFIX_DEMO" 1>/dev/null
+    echo " $1 " | grep -v " $TWGIT_PREFIX_FEATURE" \
+        | grep -v " $TWGIT_PREFIX_RELEASE" \
+        | grep -v " $TWGIT_PREFIX_HOTFIX" \
+        | grep -v " $TWGIT_PREFIX_DEMO" 1>/dev/null
     if [ $? -ne 0 ]; then
         msg='Unauthorized reference! Pick another name without using any prefix'
         msg="$msg ('$TWGIT_PREFIX_FEATURE', '$TWGIT_PREFIX_RELEASE', '$TWGIT_PREFIX_HOTFIX', '$TWGIT_PREFIX_DEMO')."
@@ -652,7 +594,7 @@ function assert_valid_tag_name () {
     local tag="$1"
     assert_valid_ref_name "$tag"
     CUI_displayMsg processing 'Check valid tag name...'
-    $(echo "$tag" | grep -qP '^[0-9]+\.[0-9]+\.[0-9]+$') || \
+    $(echo " $tag " | grep -qE ' [0-9]+\.[0-9]+\.[0-9]+ ') || \
         die "Unauthorized tag name: '<b>$tag</b>'! Must use <major.minor.revision> format, e.g. '1.2.3'."
 }
 

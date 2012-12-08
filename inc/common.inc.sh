@@ -474,6 +474,7 @@ function get_contributors () {
 # Le fichier associé au connecteur est défini par $TWGIT_FEATURE_SUBJECT_CONNECTOR_PATH.
 #
 # @param int $1 nom court de la feature
+# @testedby TwgitCommonGettersTest
 #
 function getFeatureSubject () {
     local short_name="$1"
@@ -482,7 +483,7 @@ function getFeatureSubject () {
     [ ! -s "$TWGIT_FEATURES_SUBJECT_PATH" ] && touch "$TWGIT_FEATURES_SUBJECT_PATH"
 
     subject="$(cat "$TWGIT_FEATURES_SUBJECT_PATH" | grep -E "^$short_name;" | head -n 1 | sed 's/^[^;]*;//')"
-    if [ -z "$subject" ] && [ ! -z "$TWGIT_FEATURE_SUBJECT_CONNECTOR" ]; then
+    if [ ! -z "$short_name" ] && [ -z "$subject" ] && [ ! -z "$TWGIT_FEATURE_SUBJECT_CONNECTOR" ]; then
         local connector="$(printf "$TWGIT_FEATURE_SUBJECT_CONNECTOR_PATH" "$TWGIT_FEATURE_SUBJECT_CONNECTOR")"
         if [ -f "$connector" ]; then
             subject="$(. $connector $short_name 2>/dev/null)"
@@ -1120,6 +1121,7 @@ function displayQuotedEnum () {
 # @param string $1 nom court de la feature
 # @param string $2 sujet sur échec, optionnel
 # @see getFeatureSubject()
+# @testedby TwgitCommonGettersTest
 #
 function displayFeatureSubject () {
     local subject="$(getFeatureSubject "$1")"
@@ -1143,14 +1145,14 @@ function displayTag () {
         CUI_displayMsg info 'No feature included.'
     else
         CUI_displayMsg info 'Included features:'
-        while read line; do
+        echo "$features" | while read line; do
             (echo "$line" | grep -q '^.*: ".*"$') || line="$line: \"\""
             feature_shortname="$(echo "$line" | sedRegexpExtended "s/^(.*): \".*$/\1/")"
             feature_subject="$(echo "$line" | sedRegexpExtended "s/^.*: \"(.*)\"$/\1/")"
             [ -z "$feature_subject" ] && feature_subject="$(getFeatureSubject "$feature_shortname")"
             echo -n "    - $TWGIT_ORIGIN/$TWGIT_PREFIX_FEATURE$feature_shortname "
             displayFeatureSubject "$feature_shortname" "$feature_subject"
-        done < <(echo "$features")
+        done
     fi
 }
 

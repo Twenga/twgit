@@ -484,9 +484,7 @@ function getFeatureSubject () {
     subject="$(cat "$TWGIT_FEATURES_SUBJECT_PATH" | grep -E "^$short_name;" | head -n 1 | sed 's/^[^;]*;//')"
     if [ -z "$subject" ] && [ ! -z "$TWGIT_FEATURE_SUBJECT_CONNECTOR" ]; then
         local connector="$(printf "$TWGIT_FEATURE_SUBJECT_CONNECTOR_PATH" "$TWGIT_FEATURE_SUBJECT_CONNECTOR")"
-        if [ ! -f "$connector" ]; then
-            CUI_displayMsg warning "'$TWGIT_FEATURE_SUBJECT_CONNECTOR' connector not found!"
-        else
+        if [ -f "$connector" ]; then
             subject="$(. $connector $short_name 2>/dev/null)"
             if [ $? -ne 0 ]; then
                 CUI_displayMsg error "'$TWGIT_FEATURE_SUBJECT_CONNECTOR' connector failed!"
@@ -515,6 +513,27 @@ function assert_git_configured () {
         die "Unknown user.name! Please, do: git config --global user.name 'Firstname Lastname'"
     elif [ -z "$(git config user.email 2>/dev/null | tr -d ' ')" ]; then
         die "Unknown user.email! Please, do: git config --global user.email 'firstname.lastname@xyz.com'"
+    fi
+}
+
+##
+# S'assure que si un connecteur pour le sujet des features est déclaré, alors il est connu et wget est installé.
+#
+# @testedby TwgitSetupTest
+#
+function assert_connectors_well_configured () {
+    if [ ! -z "$TWGIT_FEATURE_SUBJECT_CONNECTOR" ]; then
+        local connector="$(printf "$TWGIT_FEATURE_SUBJECT_CONNECTOR_PATH" "$TWGIT_FEATURE_SUBJECT_CONNECTOR")"
+        if [ ! -f "$connector" ]; then
+            die "'<b>$TWGIT_FEATURE_SUBJECT_CONNECTOR</b>' connector not found!" \
+                "Please adjust <b>TWGIT_FEATURE_SUBJECT_CONNECTOR</b> in '$config_file'."
+        else
+            which wget 1>/dev/null 2>&1
+            if [ $? -ne 0 ]; then
+                die "Feature's subject not available because <b>wget</b> was not found!" \
+                    "Install it (e.g.: apt-get install wget) or switch off connectors in '$config_file'."
+            fi
+        fi
     fi
 }
 

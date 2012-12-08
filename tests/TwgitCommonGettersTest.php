@@ -104,15 +104,16 @@ class TwgitCommonGettersTest extends TwgitTestCase
     /**
      * @shcovers inc/common.inc.sh::getFeatureSubject
      */
-    public function testGetFeatureSubject_WithParameterAndConnector ()
-    {
-        $sCmd = 'TWGIT_FEATURES_SUBJECT_PATH="$(tempfile -d ' . TWGIT_TMP_DIR . ')"; '
-              . 'config_file=\'F\'; TWGIT_FEATURE_SUBJECT_CONNECTOR=\'github\'; '
-              . 'getFeatureSubject 2; '
-              . 'rm -f "\$TWGIT_FEATURES_SUBJECT_PATH"';
-        $sMsg = $this->_localShellCodeCall($sCmd);
-        $this->assertEquals('email when too old features', $sMsg);
-    }
+//     public function testGetFeatureSubject_WithParameterAndConnector ()
+//     {
+//         $sCmd = 'TWGIT_FEATURES_SUBJECT_PATH="$(tempfile -d ' . TWGIT_TMP_DIR . ')"; '
+//               . 'config_file=\'F\'; TWGIT_FEATURE_SUBJECT_CONNECTOR=\'github\'; '
+//               . 'getFeatureSubject 2; '
+//               . 'rm -f "\$TWGIT_FEATURES_SUBJECT_PATH"';
+//         $sMsg = $this->_localShellCodeCall($sCmd);
+//         $this->assertEquals('email when too old features', $sMsg);
+//     }
+// => Pb with API rate limit: http://developer.github.com/v3/#rate-limiting
 
     /**
      * @shcovers inc/common.inc.sh::displayFeatureSubject

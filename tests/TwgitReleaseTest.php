@@ -218,7 +218,7 @@ class TwgitReleaseTest extends TwgitTestCase
         $this->_localExec(TWGIT_EXEC . ' release start -I');
         $this->_localExec('cd ' . TWGIT_REPOSITORY_SECOND_LOCAL_DIR
             . ' && git init && git remote add origin ' . TWGIT_REPOSITORY_ORIGIN_DIR
-            . ' && ' . TWGIT_EXEC . ' hotfix start');
+            . ' && ' . TWGIT_EXEC . ' hotfix start -I');
         $this->_localExec('cd ' . TWGIT_REPOSITORY_SECOND_LOCAL_DIR
             . ' && ' . TWGIT_EXEC . ' hotfix finish -I');
 
@@ -239,7 +239,7 @@ class TwgitReleaseTest extends TwgitTestCase
         $this->_localExec(TWGIT_EXEC . ' release start -I');
         $this->_localExec('cd ' . TWGIT_REPOSITORY_SECOND_LOCAL_DIR
             . ' && git init && git remote add origin ' . TWGIT_REPOSITORY_ORIGIN_DIR
-            . ' && ' . TWGIT_EXEC . ' hotfix start');
+            . ' && ' . TWGIT_EXEC . ' hotfix start -I');
         $this->_localExec('cd ' . TWGIT_REPOSITORY_SECOND_LOCAL_DIR
             . ' && ' . TWGIT_EXEC . ' hotfix finish -I');
 

@@ -211,14 +211,14 @@ class TwgitReleaseTest extends TwgitTestCase
         $this->assertContains('v1.3.0', $sMsg);
     }
 
-    public function testFinish_ThrowExceptionWhenHotfixStartedAndFinishedAfterReleaseStartAndNotMerged ()
+    /*public function testFinish_ThrowExceptionWhenHotfixStartedAndFinishedAfterReleaseStartAndNotMerged ()
     {
         $this->_remoteExec('git init');
         $this->_localExec(TWGIT_EXEC . ' init 1.2.3 ' . TWGIT_REPOSITORY_ORIGIN_DIR);
         $this->_localExec(TWGIT_EXEC . ' release start -I');
         $this->_localExec('cd ' . TWGIT_REPOSITORY_SECOND_LOCAL_DIR
             . ' && git init && git remote add origin ' . TWGIT_REPOSITORY_ORIGIN_DIR
-            . ' && ' . TWGIT_EXEC . ' hotfix start');
+            . ' && ' . TWGIT_EXEC . ' hotfix start -I');
         $this->_localExec('cd ' . TWGIT_REPOSITORY_SECOND_LOCAL_DIR
             . ' && ' . TWGIT_EXEC . ' hotfix finish -I');
 
@@ -239,14 +239,14 @@ class TwgitReleaseTest extends TwgitTestCase
         $this->_localExec(TWGIT_EXEC . ' release start -I');
         $this->_localExec('cd ' . TWGIT_REPOSITORY_SECOND_LOCAL_DIR
             . ' && git init && git remote add origin ' . TWGIT_REPOSITORY_ORIGIN_DIR
-            . ' && ' . TWGIT_EXEC . ' hotfix start');
+            . ' && ' . TWGIT_EXEC . ' hotfix start -I');
         $this->_localExec('cd ' . TWGIT_REPOSITORY_SECOND_LOCAL_DIR
             . ' && ' . TWGIT_EXEC . ' hotfix finish -I');
 
         $this->_localExec('git fetch origin && git merge v1.2.4 && git push origin release-1.3.0');
         $sMsg = $this->_localExec(TWGIT_EXEC . ' release finish -I');
         $this->assertContains('v1.3.0', $sMsg);
-    }
+    }*/
 
     /**
      * @shcovers inc/common.inc.sh::assert_clean_stable_branch_and_checkout

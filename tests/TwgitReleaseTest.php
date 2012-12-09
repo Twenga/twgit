@@ -16,9 +16,11 @@ class TwgitReleaseTest extends TwgitTestCase
         $o = self::_getShellInstance();
         $o->remove(TWGIT_REPOSITORY_ORIGIN_DIR);
         $o->remove(TWGIT_REPOSITORY_LOCAL_DIR);
+        $o->remove(TWGIT_REPOSITORY_SECOND_LOCAL_DIR);
         $o->remove(TWGIT_REPOSITORY_SECOND_REMOTE_DIR);
         $o->mkdir(TWGIT_REPOSITORY_ORIGIN_DIR, '0777');
         $o->mkdir(TWGIT_REPOSITORY_LOCAL_DIR, '0777');
+        $o->mkdir(TWGIT_REPOSITORY_SECOND_LOCAL_DIR, '0777');
         $o->mkdir(TWGIT_REPOSITORY_SECOND_REMOTE_DIR, '0777');
     }
 
@@ -206,6 +208,43 @@ class TwgitReleaseTest extends TwgitTestCase
 
         $this->_localExec(TWGIT_EXEC . ' release finish');
         $sMsg = $this->_localExec('git tag');
+        $this->assertContains('v1.3.0', $sMsg);
+    }
+
+    public function testFinish_ThrowExceptionWhenHotfixStartedAndFinishedAfterReleaseStartAndNotMerged ()
+    {
+        $this->_remoteExec('git init');
+        $this->_localExec(TWGIT_EXEC . ' init 1.2.3 ' . TWGIT_REPOSITORY_ORIGIN_DIR);
+        $this->_localExec(TWGIT_EXEC . ' release start -I');
+        $this->_localExec('cd ' . TWGIT_REPOSITORY_SECOND_LOCAL_DIR
+            . ' && git init && git remote add origin ' . TWGIT_REPOSITORY_ORIGIN_DIR
+            . ' && ' . TWGIT_EXEC . ' hotfix start -I');
+        $this->_localExec('cd ' . TWGIT_REPOSITORY_SECOND_LOCAL_DIR
+            . ' && ' . TWGIT_EXEC . ' hotfix finish');
+
+        $this->setExpectedException(
+            'RuntimeException',
+            "/!\ You must merge the last tag into this release before close it."
+            . " In release-1.3.0 branch: git merge --no-ff v1.2.4, then: git push origin release-1.3.0"
+        );
+        $sMsg = $this->_localExec(TWGIT_EXEC . ' release finish');
+        $sMsg = $this->_localExec('git tag');
+        $this->assertContains('v1.3.0', $sMsg);
+    }
+
+    public function testFinish_WithHotfixStartedAndFinishedAfterReleaseStartAndMerged ()
+    {
+        $this->_remoteExec('git init');
+        $this->_localExec(TWGIT_EXEC . ' init 1.2.3 ' . TWGIT_REPOSITORY_ORIGIN_DIR);
+        $this->_localExec(TWGIT_EXEC . ' release start -I');
+        $this->_localExec('cd ' . TWGIT_REPOSITORY_SECOND_LOCAL_DIR
+            . ' && git init && git remote add origin ' . TWGIT_REPOSITORY_ORIGIN_DIR
+            . ' && ' . TWGIT_EXEC . ' hotfix start -I');
+        $this->_localExec('cd ' . TWGIT_REPOSITORY_SECOND_LOCAL_DIR
+            . ' && ' . TWGIT_EXEC . ' hotfix finish');
+
+        $this->_localExec('git fetch origin && git merge v1.2.4 && git push origin release-1.3.0');
+        $sMsg = $this->_localExec(TWGIT_EXEC . ' release finish');
         $this->assertContains('v1.3.0', $sMsg);
     }
 

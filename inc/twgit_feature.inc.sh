@@ -318,14 +318,14 @@ function cmd_merge-into-release () {
     require_parameter '-'
     local feature="$RETVAL"
 
-    # Récupération de la release en cours :
-    local release_fullname=$(get_current_release_in_progress)
-    local release="${release_fullname:${#TWGIT_PREFIX_RELEASE}}"
-
     # Tests préliminaires :
     assert_clean_working_tree
     process_fetch
+
+    # Récupération de la release en cours :
     CUI_displayMsg processing 'Check remote release...'
+    local release_fullname=$(get_current_release_in_progress)
+    local release="${release_fullname:${#TWGIT_PREFIX_RELEASE}}"
     [ -z "$release" ] && die 'No release in progress!'
 
     # Si feature non spécifiée, récupérer la courante :

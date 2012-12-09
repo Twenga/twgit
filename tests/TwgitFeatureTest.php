@@ -16,9 +16,11 @@ class TwgitFeatureTest extends TwgitTestCase
         $o = self::_getShellInstance();
         $o->remove(TWGIT_REPOSITORY_ORIGIN_DIR);
         $o->remove(TWGIT_REPOSITORY_LOCAL_DIR);
+        $o->remove(TWGIT_REPOSITORY_SECOND_LOCAL_DIR);
         $o->remove(TWGIT_REPOSITORY_SECOND_REMOTE_DIR);
         $o->mkdir(TWGIT_REPOSITORY_ORIGIN_DIR, '0777');
         $o->mkdir(TWGIT_REPOSITORY_LOCAL_DIR, '0777');
+        $o->mkdir(TWGIT_REPOSITORY_SECOND_LOCAL_DIR, '0777');
         $o->mkdir(TWGIT_REPOSITORY_SECOND_REMOTE_DIR, '0777');
     }
 
@@ -130,5 +132,26 @@ class TwgitFeatureTest extends TwgitTestCase
                 ''
             ),
         );
+    }
+
+    public function testMergeIntoRelease_WhenReleaseNotYetFetched ()
+    {
+        $this->_remoteExec('git init');
+        $this->_localExec(TWGIT_EXEC . ' init 1.2.3 ' . TWGIT_REPOSITORY_ORIGIN_DIR);
+        $this->_localExec(TWGIT_EXEC . ' feature start 42');
+        $sMsg = $this->_localExec('cd ' . TWGIT_REPOSITORY_SECOND_LOCAL_DIR
+            . ' && git init && git remote add origin ' . TWGIT_REPOSITORY_ORIGIN_DIR
+            . ' && ' . TWGIT_EXEC . ' release start -I');
+
+        $sMsg = $this->_localExec(TWGIT_EXEC . ' feature merge-into-release 42');
+        $sExpectedMsg = "git# git pull origin release-1.3.0\n"
+            . "From /tmp/origin\n"
+            . " * branch            release-1.3.0 -> FETCH_HEAD\n"
+            . "Already up-to-date.\n"
+            . "git# git merge --no-ff feature-42\n"
+            . "Already up-to-date!\n"
+            . "Merge made by recursive.\n"
+            . "git# git push origin release-1.3.0";
+        $this->assertContains($sExpectedMsg, $sMsg);
     }
 }

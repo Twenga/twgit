@@ -38,7 +38,7 @@ function _twgit () {
         local command="${COMP_WORDS[COMP_CWORD-1]}"
         case "${command}" in
             feature)
-                local opts="committers help list merge-into-release migrate remove show-modified-files start status"
+                local opts="committers help list merge-into-release migrate remove start status what-changed"
                 COMPREPLY=( $(compgen -W "${opts}" -- ${cur}) )
                 ;;
             hotfix)

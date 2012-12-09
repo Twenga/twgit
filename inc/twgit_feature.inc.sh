@@ -48,10 +48,6 @@ function usage () {
     CUI_displayMsg help_detail '    For example: "twgit feature migrate rm7880 7880"'; echo
     CUI_displayMsg help_detail '<b>remove <featurename></b>'
     CUI_displayMsg help_detail '    Remove both local and remote specified feature branch.'; echo
-    CUI_displayMsg help_detail '<b>show-modified-files [<featurename>]</b>'
-    CUI_displayMsg help_detail '    List created/modified/deleted files of the specified feature branch since'
-    CUI_displayMsg help_detail '    its creation (from commits). If no <b><featurename></b> is specified, then use'
-    CUI_displayMsg help_detail '    current feature.'; echo
     CUI_displayMsg help_detail '<b>start <featurename> [-d]</b>'
     CUI_displayMsg help_detail '    Create both a new local and remote feature, or fetch the remote feature,'
     CUI_displayMsg help_detail '    or checkout the local feature. Add <b>-d</b> to delete beforehand local feature'
@@ -61,6 +57,11 @@ function usage () {
     CUI_displayMsg help_detail '    setted, last commit, status between local and remote feature and execute'
     CUI_displayMsg help_detail '    a git status if specified feature is the current branch.'
     CUI_displayMsg help_detail '    If no <b><featurename></b> is specified, then use current feature.'; echo
+    CUI_displayMsg help_detail '<b>what-changed [<featurename>]</b>'
+    CUI_displayMsg help_detail '    Usable for opened features as well as for closed features.'
+    CUI_displayMsg help_detail '    Display initial commit and final commit if exists. List created, modified'
+    CUI_displayMsg help_detail '    and deleted files in the specified feature branch since its creation. If'
+    CUI_displayMsg help_detail '    no <b><featurename></b> is specified, then use current feature.'; echo
     CUI_displayMsg help_detail "Prefix '$TWGIT_PREFIX_FEATURE' will be added to <b><featurename></b> and <b><newfeaturename></b>"
     CUI_displayMsg help_detail "parameters."; echo
     CUI_displayMsg help_detail '<b>[help]</b>'
@@ -402,18 +403,27 @@ function cmd_remove () {
 #
 # @param string $1 l'éventuelle feature à analyser, sinon la feature courante sera utilisée
 #
-function cmd_show-modified-files () {
+function cmd_what-changed () {
     process_options "$@"
     require_parameter '-'
     local feature="$RETVAL"
+    local last_ref
+
+    process_fetch
 
     if [ ! -z "$feature" ]; then
         feature_fullname="$TWGIT_PREFIX_FEATURE$feature"
         CUI_displayMsg processing 'Check remote feature...'
-        if ! has "$TWGIT_ORIGIN/$feature_fullname" $(get_remote_branches); then
-            die "Remote feature '$TWGIT_ORIGIN/$feature_fullname' not found!"
+        if has "$TWGIT_ORIGIN/$feature_fullname" $(get_remote_branches); then
+            last_ref="$TWGIT_ORIGIN/$feature_fullname"
+            short_last_ref="$(git rev-parse --short "$last_ref")"
+        else
+            last_ref="$(git log --fixed-strings --grep="Merge branch '$feature_fullname' into release" --pretty="format:%H" "$TWGIT_ORIGIN/$TWGIT_STABLE" | head -n1)"
+            if [ -z "$last_ref" ]; then
+                die "Remote feature '<b>$TWGIT_ORIGIN/$feature_fullname</b>' not found!"
+            fi
+            short_last_ref="${last_ref:0:7}"
         fi
-        $TWGIT_EXEC feature start $feature || die "Unable to start '$feature' feature!"
     else
         local all_features=$(git branch -r --no-merged $TWGIT_ORIGIN/$TWGIT_STABLE | grep "$TWGIT_ORIGIN/$TWGIT_PREFIX_FEATURE" | sed 's/^[* ]*//' | tr '\n' ' ' | sed 's/ *$//g')
         local current_branch=$(get_current_branch)
@@ -422,21 +432,38 @@ function cmd_show-modified-files () {
         fi
         feature_fullname="$current_branch"
         feature="${feature_fullname:${#TWGIT_PREFIX_FEATURE}}"
+        last_ref="$TWGIT_ORIGIN/$feature_fullname"
+        short_last_ref="$(git rev-parse --short "$last_ref")"
     fi
 
     local commit_msg=$(printf "$TWGIT_FIRST_COMMIT_MSG" "feature" "$feature_fullname")
-    local start_sha1=$(git log --fixed-strings --grep="$commit_msg" --pretty="format:%H")
-    local modified_files="$(git show --pretty="format:" --name-only $start_sha1..HEAD | sort | uniq | sed '/^$/d')"
-    local count="$(echo "$modified_files" | sed '/^$/d' | wc -l)"
+    local start_sha1="$(git log --fixed-strings --grep="${commit_msg:0:-1}" --pretty="format:%H" "$last_ref")"
+    local modified_files="$(git show --pretty="format:" --name-only $start_sha1.."$last_ref" | sort | uniq | sed '/^$/d')"
+    local count_commits="$(git log --oneline $start_sha1~1.."$last_ref" | wc -l)"
+    local count_files="$(echo "$modified_files" | sed '/^$/d' | wc -l)"
 
-    CUI_displayMsg info "SHA1 of creation of '$feature_fullname':"
-    echo $start_sha1; echo
+    echo
+    CUI_displayMsg info "Initial commit of '$TWGIT_ORIGIN/$feature_fullname':"
+    git show $start_sha1 --pretty=medium | head -n3
 
-    CUI_displayMsg info "Number of created/modified/deleted files of '$feature_fullname' since its creation:"
-    echo "$count"; echo
-
-    if [ "$count" != '0' ]; then
-        CUI_displayMsg info "List of these files:"
-        echo "$modified_files"; echo
+    if [ "$last_ref" != "$TWGIT_ORIGIN/$feature_fullname" ]; then
+        echo
+        CUI_displayMsg info "Final commit of '$TWGIT_ORIGIN/$feature_fullname':"
+        git show $last_ref --pretty=medium | grep -v '^Merge: ' | head -n3
+    else
+        CUI_displayMsg normal "Feature in progress (not closed)."
     fi
+
+    echo
+    local plural_commits='' plural_files=''
+    [ "$count_commits" -gt 1 ] && plural_commits='s'
+    [ "$count_files" -gt 1 ] && plural_files='s'
+    CUI_displayMsg info "List of created/modified/deleted files in ${start_sha1:0:7}..$short_last_ref commits" \
+        "($count_commits commit$plural_commits, $count_files file$plural_files):"
+    if [ "$count" != '0' ]; then
+        echo "$modified_files"
+    else
+        echo 'No modified files.'
+    fi
+    echo
 }

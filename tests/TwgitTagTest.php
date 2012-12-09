@@ -90,7 +90,7 @@ class TwgitTagTest extends TwgitTestCase
         $this->_localExec(TWGIT_EXEC . ' feature merge-into-release 2');
         $this->_localExec(TWGIT_EXEC . ' feature merge-into-release 4');
         $this->_localExec(TWGIT_EXEC . ' feature merge-into-release 5');
-        $this->_localExec(TWGIT_EXEC . ' release finish');
+        $this->_localExec(TWGIT_EXEC . ' release finish -I');
 
         $this->_localShellCodeCall('echo \'1;The NEW subject of 1\' > \$TWGIT_FEATURES_SUBJECT_PATH');
         $this->_localShellCodeCall('echo \'2;The NEW subject of 2\' >> \$TWGIT_FEATURES_SUBJECT_PATH');

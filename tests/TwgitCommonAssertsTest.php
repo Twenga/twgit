@@ -190,7 +190,7 @@ class TwgitCommonAssertsTest extends TwgitTestCase
         $this->_remoteExec('git init');
         $this->_localExec(TWGIT_EXEC . ' init 1.2.3 ' . TWGIT_REPOSITORY_ORIGIN_DIR);
         $this->_localExec(TWGIT_EXEC . ' release start -I');
-        $this->_localExec(TWGIT_EXEC . ' release finish');
+        $this->_localExec(TWGIT_EXEC . ' release finish -I');
 
         $sMsg = $this->_localFunctionCall('assert_tag_exists');
         $this->assertEquals("Get last tag...\nLast tag: v1.3.0", $sMsg);

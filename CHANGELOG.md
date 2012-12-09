@@ -1,6 +1,35 @@
 ChangeLog
 =========
 
+## Version 1.10.0 (2012-12-13)
+
+Features:
+
+  - #82: `twgit feature show-modified-files` is renamed `twgit feature what-changed` and now handles opened as well as closed features.
+Display initial commit and final commit if exists. List created, modified and deleted files in the specified feature branch since its creation.
+If no <featurename> is specified, then use current feature.
+  
+Fixes:
+
+  - #63: Bug when `twgit feature merge-into-release` and release not yet fetched
+  - #17: Remove release fails if release name is not tag-compatible. Now `twgit release start <releasename>` must use major.minor.revision
+
+UI:
+
+  - #80: Tip displayed when `release finish` is blocked by tag's hotfix is now more helpful
+  
+Core enhancements:
+
+  - #81: Bash redirection with process substitution causes problem on VM (2nd)
+  - #78: `grep -P` doesn't work with Mac OS Mountain Lion...
+  - #73: Listing of comitters not enough robust: if configuration variable `TWGIT_EMAIL_DOMAIN_NAME` is not defined, then `twgit feature comitters <feature>` display a wrong result.
+  - #68: Check wget is installed if connectors (Redmine, Github) are activated
+
+Unit tests:
+
+  - #79: Unit tests are now executable on OS X
+  - estimated code coverage: 34%
+  
 ## Version 1.9.1 (2012-11-12)
 
 Fixes:

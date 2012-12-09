@@ -7,6 +7,12 @@
 class TwgitCUITest extends TwgitTestCase
 {
 
+	/**
+	 * Color directory temporarily created for tests
+	 * @var string
+	 */
+	protected $_sTmpColorDir;
+
     /**
     * Sets up the fixture, for example, open a network connection.
     * This method is called before a test is executed.
@@ -18,6 +24,58 @@ class TwgitCUITest extends TwgitTestCase
         $o->remove(TWGIT_REPOSITORY_LOCAL_DIR);
         $o->mkdir(TWGIT_REPOSITORY_ORIGIN_DIR, '0777');
         $o->mkdir(TWGIT_REPOSITORY_LOCAL_DIR, '0777');
+
+        $this->_sTmpColorDir = TWGIT_TMP_DIR . '/color';
+        $o->remove($this->_sTmpColorDir);
+        $o->mkdir($this->_sTmpColorDir, '0777');
+    }
+
+    /**
+     * @shcovers inc/coloredUI.inc.sh::CUI_initColors
+     * @shcovers inc/coloredUI.inc.sh::CUI_loadColorFile
+     * @shcovers inc/coloredUI.inc.sh::CUI_existsColorFile
+     */
+    public function testLoadColorFile_ThrowExceptionWhenDefaultColorFileNotExists ()
+    {
+    	$this->setExpectedException('RuntimeException', "Can't load default color file, try to update twgit using'twgit update'");
+    	$sMsg = $this->_localShellCodeCall('TWGIT_COLOR_DIR="/";TWGIT_COLOR_FILE="default"; CUI_initColors', false);
+    }
+
+    /**
+     * @shcovers inc/coloredUI.inc.sh::CUI_initColors
+     * @shcovers inc/coloredUI.inc.sh::CUI_loadColorFile
+     * @shcovers inc/coloredUI.inc.sh::CUI_existsColorFile
+     */
+    public function testLoadColorFile_DisplayWarningWhenCustomColorFileNotExistsButDefaultExists ()
+    {
+    	$sMsg = $this->_localShellCodeCall('TWGIT_COLOR_FILE="custom"; CUI_initColors', false);
+    	$this->assertEquals('\033[1m\033[4;33m/!\\\033[0;37m \033[0;33mCan\'t load "custom" color file, please make sure "' . TWGIT_ROOT_DIR . '/conf/color/custom.sh" file exists or change TWGIT_COLOR_FILE configuration\033[0m', $sMsg);
+    }
+
+    /**
+     * @shcovers inc/coloredUI.inc.sh::CUI_initColors
+     * @shcovers inc/coloredUI.inc.sh::CUI_loadColorFile
+     * @shcovers inc/coloredUI.inc.sh::CUI_existsColorFile
+     */
+    public function testLoadColorFile_NoMessageWhenGoodCustomColorFile ()
+    {
+    	$o = self::_getShellInstance();
+    	$o->exec('touch ' . $this->_sTmpColorDir . '/custom.sh');
+    	$sMsg = $this->_localShellCodeCall('TWGIT_COLOR_DIR="' . $this->_sTmpColorDir . '"; TWGIT_COLOR_FILE="custom"; CUI_initColors', false);
+    	$this->assertEquals('', $sMsg);
+    }
+
+    /**
+     * @shcovers inc/coloredUI.inc.sh::CUI_initColors
+     * @shcovers inc/coloredUI.inc.sh::CUI_loadColorFile
+     * @shcovers inc/coloredUI.inc.sh::CUI_existsColorFile
+     */
+    public function testLoadColorFile_NoMessageWhenDefaultColorFile ()
+    {
+    	$o = self::_getShellInstance();
+    	$o->exec('touch ' . $this->_sTmpColorDir . '/default.sh');
+    	$sMsg = $this->_localShellCodeCall('TWGIT_COLOR_DIR="' . $this->_sTmpColorDir . '"; TWGIT_COLOR_FILE="default"; CUI_initColors', false);
+    	$this->assertEquals('', $sMsg);
     }
 
     /**

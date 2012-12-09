@@ -45,6 +45,63 @@
 # @license http://www.apache.org/licenses/LICENSE-2.0
 #
 
+##
+# Check if color file exists
+#
+# @param string $1 Name of the choose color
+# @return 0 if exists, else 1
+##
+function CUI_existsColorFile () {
+	local colorName=$1
+	[ -f "$TWGIT_COLOR_DIR/$colorName.sh" ] && return 0 || return 1
+}
+
+##
+# Load color file
+#
+# @param string $1 Name of the choose color
+##
+function CUI_loadColorFile () {
+	local colorName=$1
+	. "$TWGIT_COLOR_DIR/$colorName.sh"
+}
+
+
+##
+# Initialize colors and decoration
+
+# @param string $1 Name of the default color file
+# @see $CUI_COLORS
+# @testedby TwgitCUITest
+# @return 0
+#
+function CUI_initColors () {
+	local defaultColor="default"
+
+	if ! [ $defaultColor = $TWGIT_COLOR_DIR ]; then
+		if CUI_existsColorFile "$TWGIT_COLOR_FILE" ; then
+			CUI_loadColorFile "$TWGIT_COLOR_FILE"
+			return 0
+		else
+			errorMessage="Can't load \"$TWGIT_COLOR_FILE\" color file, please make sure \"$TWGIT_COLOR_DIR/$TWGIT_COLOR_FILE.sh\" file exists or change TWGIT_COLOR_FILE configuration"
+		fi
+	fi
+
+
+	if CUI_existsColorFile $defaultColor; then
+		CUI_loadColorFile $defaultColor
+		CUI_displayMsg warning $errorMessage
+		return 0
+	else
+		echo "Can't load default color file, try to update twgit using'twgit update'"
+		exit 1
+	fi
+
+}
+
+# Need to declare CUI_COLORS here to allow accessiblity in next functions
+
+
 
 
 ##

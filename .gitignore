@@ -9,3 +9,4 @@
 /conf/phpunit.xml
 /conf/phpunit.php
 /conf/twgit.sh
+/conf/color/_*.sh

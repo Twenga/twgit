@@ -9,13 +9,13 @@
 #
 
 
-
 # Parameters:
 sCmds="$1"; shift
 
 # Includes:
 . $(dirname $0)/../../conf/twgit.sh
 . $TWGIT_INC_DIR/common.inc.sh
+CUI_initColors
 
 # Execution:
 rFile="${TWGIT_TMP_DIR}/file.$$.$RANDOM"

@@ -149,9 +149,8 @@ class TwgitFeatureTest extends TwgitTestCase
             . " * branch            release-1.3.0 -> FETCH_HEAD\n"
             . "Already up-to-date.\n"
             . "git# git merge --no-ff feature-42\n"
-            . "Already up-to-date!\n"
-            . "Merge made by recursive.\n"
-            . "git# git push origin release-1.3.0";
+            . "Already up-to-date!";
         $this->assertContains($sExpectedMsg, $sMsg);
+        $this->assertContains("git# git push origin release-1.3.0", $sMsg);
     }
 }

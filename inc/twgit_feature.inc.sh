@@ -424,7 +424,7 @@ function cmd_what-changed () {
     fi
 
     local commit_msg=$(printf "$TWGIT_FIRST_COMMIT_MSG" "feature" "$feature_fullname")
-    local start_sha1="$(git log --fixed-strings --grep="${commit_msg:0:-1}" --pretty="format:%H" "$last_ref")"
+    local start_sha1="$(git log --fixed-strings --grep="${commit_msg:0:$((${#commit_msg} - 1))}" --pretty="format:%H" "$last_ref")"
     local modified_files="$(git show --pretty="format:" --name-only $start_sha1.."$last_ref" | sort | uniq | sed '/^$/d')"
     local count_commits="$(git log --oneline $start_sha1~1.."$last_ref" | wc -l)"
     local count_files="$(echo "$modified_files" | sed '/^$/d' | wc -l)"

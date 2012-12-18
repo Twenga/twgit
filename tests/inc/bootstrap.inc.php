@@ -4,10 +4,10 @@
  * Bootstrap for unit tests only.
  *
  * @package Tests
- * @author Geoffroy AUBRY <geoffroy.aubry@free.fr>
+ * @author Geoffroy Aubry <geoffroy.aubry@free.fr>
  */
 
-include_once(__DIR__ . '/../../conf/phpunit-dist.php');
+include_once(__DIR__ . '/../../conf/phpunit.php');
 include_once(TWGIT_TESTS_LIB_DIR . '/ClassLoader.php');
 
 set_include_path(

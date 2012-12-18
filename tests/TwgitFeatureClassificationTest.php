@@ -2,7 +2,8 @@
 
 /**
  * @package Tests
- * @author Geoffroy AUBRY <geoffroy.aubry@hi-media.com>
+ * @author Geoffroy Aubry <geoffroy.aubry@hi-media.com>
+ * @author Laurent Toussaint <lt.laurent.toussaint@gmail.com>
  */
 class TwgitFeatureClassificationTest extends TwgitTestCase
 {
@@ -19,7 +20,7 @@ class TwgitFeatureClassificationTest extends TwgitTestCase
         $o->mkdir(TWGIT_REPOSITORY_ORIGIN_DIR, '0777');
         $o->mkdir(TWGIT_REPOSITORY_LOCAL_DIR, '0777');
         $this->_remoteExec('git init');
-        $this->_localExec(TWGIT_EXEC . ' init 1.0.0 /tmp/origin');
+        $this->_localExec(TWGIT_EXEC . ' init 1.0.0 ' . TWGIT_REPOSITORY_ORIGIN_DIR);
     }
 
     /**

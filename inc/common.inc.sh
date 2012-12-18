@@ -7,6 +7,7 @@
 #
 # Copyright (c) 2011 Twenga SA
 # Copyright (c) 2012 Geoffroy Aubry <geoffroy.aubry@free.fr>
+# Copyright (c) 2012 Laurent Toussaint <lt.laurent.toussaint@gmail.com>
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance
 # with the License. You may obtain a copy of the License at
@@ -20,6 +21,7 @@
 # @copyright 2011 Twenga SA
 # @copyright 2012 Geoffroy Aubry <geoffroy.aubry@free.fr>
 # @copyright 2012 Jérémie Havret <jhavret@hi-media.com>
+# @copyright 2012 Laurent Toussaint <lt.laurent.toussaint@gmail.com>
 # @license http://www.apache.org/licenses/LICENSE-2.0
 #
 
@@ -27,68 +29,7 @@
 
 . $TWGIT_INC_DIR/options_handler.inc.sh
 . $TWGIT_INC_DIR/coloredUI.inc.sh
-
-
-
-#--------------------------------------------------------------------
-# Mac OS X compatibility layer
-#--------------------------------------------------------------------
-
-# Witch OS:
-uname="$(uname)"
-if [ "$uname" = 'FreeBSD' ] || [ "$uname" = 'Darwin' ]; then
-    TWGIT_OS='MacOSX'
-else
-    TWGIT_OS='Linux'
-fi
-
-##
-# Display the last update time of specified path, in seconds since 1970-01-01 00:00:00 UTC.
-# Compatible Linux and Mac OS X.
-#
-# @param string $1 path
-# @see $TWGIT_OS
-#
-function getLastUpdateTimestamp () {
-    local path="$1"
-    if [ "$TWGIT_OS" = 'MacOSX' ]; then
-        stat -f %m "$path"
-    else
-        date -r "$path" +%s
-    fi
-}
-
-##
-# Display the specified timestamp converted to date with "+%Y-%m-%d %T" format.
-# Compatible Linux and Mac OS X.
-#
-# @param int $1 timestamp
-# @see $TWGIT_OS
-#
-function getDateFromTimestamp () {
-    local timestamp="$1"
-    if [ "$TWGIT_OS" = 'MacOSX' ]; then
-        date -r "$timestamp" "+%Y-%m-%d %T"
-    else
-        date --date "1970-01-01 $timestamp sec" "+%Y-%m-%d %T"
-    fi
-}
-
-##
-# Execute sed with the specified regexp-extended pattern.
-# Compatible Linux and Mac OS X.
-#
-# @param string $1 pattern using extended regular expressions
-# @see $TWGIT_OS
-#
-function sedRegexpExtended () {
-    local pattern="$1"
-    if [ "$TWGIT_OS" = 'MacOSX' ]; then
-        sed -E "$pattern";
-    else
-        sed -r "$pattern";
-    fi
-}
+. $TWGIT_INC_DIR/os_compatibility.inc.sh
 
 
 
@@ -125,20 +66,26 @@ function get_remote_branches () {
 # @testedby TwgitCommonGettersTest
 #
 function get_dissident_remote_branches () {
+    local pipe="$TWGIT_TMP_DIR/twgit_pipe_$$_$RANDOM"
+    mkfifo "$pipe"
+    git remote | grep -v "^$TWGIT_ORIGIN$" > $pipe &
+
     local cmd=''
     while read repository; do
         cmd="$cmd -e \"^$repository/\"";
-    done < <(git remote | grep -v "^$TWGIT_ORIGIN$")
+    done < $pipe
+    rm -f "$pipe"
     [ -z "$cmd" ] && cmd='tee /dev/null' || cmd="grep -v $cmd"
 
-    git branch -r --no-color | sed 's/^[* ] //' \
-        | grep -v -e "^$TWGIT_ORIGIN/$TWGIT_PREFIX_FEATURE" \
-            -e "^$TWGIT_ORIGIN/$TWGIT_PREFIX_RELEASE" \
-            -e "^$TWGIT_ORIGIN/$TWGIT_PREFIX_HOTFIX" \
-            -e "^$TWGIT_ORIGIN/$TWGIT_PREFIX_DEMO" \
-            -e "^$TWGIT_ORIGIN/HEAD\($\|\s\)" \
-            -e "^$TWGIT_ORIGIN/master\($\|\s\)" \
-            -e "^$TWGIT_ORIGIN/$TWGIT_STABLE\($\|\s\)" \
+    git branch -r --no-color | sed 's/^[* ] //' | sed -e 's/^/ /' -e 's/$/ /' \
+        | grep -v -e " $TWGIT_ORIGIN/$TWGIT_PREFIX_FEATURE" \
+            -e " $TWGIT_ORIGIN/$TWGIT_PREFIX_RELEASE" \
+            -e " $TWGIT_ORIGIN/$TWGIT_PREFIX_HOTFIX" \
+            -e " $TWGIT_ORIGIN/$TWGIT_PREFIX_DEMO" \
+            -e " $TWGIT_ORIGIN/HEAD " \
+            -e " $TWGIT_ORIGIN/master " \
+            -e " $TWGIT_ORIGIN/$TWGIT_STABLE " \
+        | sed 's/[ ]//' \
         | eval "$cmd" \
         || :
 }
@@ -442,20 +389,24 @@ function get_next_version () {
 }
 
 ##
-# Calcul et retourne la liste des emails des N committeurs les plus significatifs (en nombre de commits)
+# Calcul et retourne la liste des emails des N auteurs de commit les plus significatifs (en nombre de commits)
 # de la branche distante spécifiée, à raison d'un par ligne.
-# Filtre les committeurs sans email ainsi que ceux en dehors du domaine '@$TWGIT_EMAIL_DOMAIN_NAME'.
+# Filtre les auteurs sans email ainsi que ceux en dehors du domaine '@$TWGIT_EMAIL_DOMAIN_NAME' si défini.
 #
 # @param string $1 nom complet de branche distante, sans le "$TWGIT_ORIGIN/"
-# @param int $2 nombre maximum de committers à afficher
+# @param int $2 nombre maximum d'auteurs à afficher
 # @see display_rank_contributors()
+# @testedby TwgitMainTest
 #
 function get_contributors () {
     local branch="$TWGIT_ORIGIN/$1"
     local max="$2"
+    local domain_pattern
+
+    [ -z "$TWGIT_EMAIL_DOMAIN_NAME" ] && domain_pattern='.*' || domain_pattern="$TWGIT_EMAIL_DOMAIN_NAME"
     git shortlog -nse $TWGIT_ORIGIN/$TWGIT_STABLE..$branch \
-        | grep -E "@$TWGIT_EMAIL_DOMAIN_NAME>$" \
-        | head -n $max | sedRegexpExtended "s/^.*? <(.*@$TWGIT_EMAIL_DOMAIN_NAME)>$/\1/"
+        | grep -E "@$domain_pattern>$" \
+        | head -n $max | tr -s '\t' ' ' | cut -d' ' -f3-
 }
 
 ##
@@ -469,6 +420,7 @@ function get_contributors () {
 # Le fichier associé au connecteur est défini par $TWGIT_FEATURE_SUBJECT_CONNECTOR_PATH.
 #
 # @param int $1 nom court de la feature
+# @testedby TwgitCommonGettersTest
 #
 function getFeatureSubject () {
     local short_name="$1"
@@ -477,11 +429,9 @@ function getFeatureSubject () {
     [ ! -s "$TWGIT_FEATURES_SUBJECT_PATH" ] && touch "$TWGIT_FEATURES_SUBJECT_PATH"
 
     subject="$(cat "$TWGIT_FEATURES_SUBJECT_PATH" | grep -E "^$short_name;" | head -n 1 | sed 's/^[^;]*;//')"
-    if [ -z "$subject" ] && [ ! -z "$TWGIT_FEATURE_SUBJECT_CONNECTOR" ]; then
+    if [ ! -z "$short_name" ] && [ -z "$subject" ] && [ ! -z "$TWGIT_FEATURE_SUBJECT_CONNECTOR" ]; then
         local connector="$(printf "$TWGIT_FEATURE_SUBJECT_CONNECTOR_PATH" "$TWGIT_FEATURE_SUBJECT_CONNECTOR")"
-        if [ ! -f "$connector" ]; then
-            CUI_displayMsg warning "'$TWGIT_FEATURE_SUBJECT_CONNECTOR' connector not found!"
-        else
+        if [ -f "$connector" ]; then
             subject="$(. $connector $short_name 2>/dev/null)"
             if [ $? -ne 0 ]; then
                 CUI_displayMsg error "'$TWGIT_FEATURE_SUBJECT_CONNECTOR' connector failed!"
@@ -510,6 +460,27 @@ function assert_git_configured () {
         die "Unknown user.name! Please, do: git config --global user.name 'Firstname Lastname'"
     elif [ -z "$(git config user.email 2>/dev/null | tr -d ' ')" ]; then
         die "Unknown user.email! Please, do: git config --global user.email 'firstname.lastname@xyz.com'"
+    fi
+}
+
+##
+# S'assure que si un connecteur pour le sujet des features est déclaré, alors il est connu et wget est installé.
+#
+# @testedby TwgitSetupTest
+#
+function assert_connectors_well_configured () {
+    if [ ! -z "$TWGIT_FEATURE_SUBJECT_CONNECTOR" ]; then
+        local connector="$(printf "$TWGIT_FEATURE_SUBJECT_CONNECTOR_PATH" "$TWGIT_FEATURE_SUBJECT_CONNECTOR")"
+        if [ ! -f "$connector" ]; then
+            die "'<b>$TWGIT_FEATURE_SUBJECT_CONNECTOR</b>' connector not found!" \
+                "Please adjust <b>TWGIT_FEATURE_SUBJECT_CONNECTOR</b> in '$config_file'."
+        else
+            which wget 1>/dev/null 2>&1
+            if [ $? -ne 0 ]; then
+                die "Feature's subject not available because <b>wget</b> was not found!" \
+                    "Install it (e.g.: apt-get install wget) or switch off connectors in '$config_file'."
+            fi
+        fi
     fi
 }
 
@@ -621,20 +592,19 @@ function assert_clean_working_tree () {
 # S'assure que la référence fournie est un nom syntaxiquement correct de branche potentielle.
 #
 # @param string $1 référence de branche
+# @testedby TwgitCommonAssertsTest
 #
 function assert_valid_ref_name () {
     CUI_displayMsg processing 'Check valid ref name...'
     git check-ref-format --branch "$1" 1>/dev/null 2>&1
     if [ $? -ne 0 ]; then
-        die "'$1' is not a valid reference name!"
-    elif  echo "$1" | grep -q ' '; then
-        die "'$1' is not a valid reference name: whitespaces not allowed!"
+        die "'<b>$1</b>' is not a valid reference name! See <b>git check-ref-format</b> for more details."
     fi
 
-    echo $1 | grep -vP "^$TWGIT_PREFIX_FEATURE" \
-        | grep -vP "^$TWGIT_PREFIX_RELEASE" \
-        | grep -vP "^$TWGIT_PREFIX_HOTFIX" \
-        | grep -vP "^$TWGIT_PREFIX_DEMO" 1>/dev/null
+    echo " $1 " | grep -v " $TWGIT_PREFIX_FEATURE" \
+        | grep -v " $TWGIT_PREFIX_RELEASE" \
+        | grep -v " $TWGIT_PREFIX_HOTFIX" \
+        | grep -v " $TWGIT_PREFIX_DEMO" 1>/dev/null
     if [ $? -ne 0 ]; then
         msg='Unauthorized reference! Pick another name without using any prefix'
         msg="$msg ('$TWGIT_PREFIX_FEATURE', '$TWGIT_PREFIX_RELEASE', '$TWGIT_PREFIX_HOTFIX', '$TWGIT_PREFIX_DEMO')."
@@ -647,26 +617,31 @@ function assert_valid_ref_name () {
 # c'est-à-dire au format \d+.\d+.\d+
 #
 # @param string $1 référence de tag sans préfixe
+# @testedby TwgitCommonAssertsTest
 #
 function assert_valid_tag_name () {
     local tag="$1"
     assert_valid_ref_name "$tag"
     CUI_displayMsg processing 'Check valid tag name...'
-    $(echo "$tag" | grep -qP '^[0-9]+\.[0-9]+\.[0-9]+$') || \
-        die "Unauthorized tag name: '<b>$tag</b>'! Must use <major.minor.revision> format, e.g. '1.2.3'."
+    echo "$tag" | grep -qE '^(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)$' \
+        && [ "$tag" != '0.0.0' ] \
+        || die "Unauthorized tag name: '<b>$tag</b>'! Must use <major.minor.revision> format, e.g. '1.2.3'."
 }
 
 ##
 # S'assure que la référence fournie est un nom syntaxiquement correct de tag potentiel et qu'il est disponible.
 #
 # @param string $1 référence de tag sans préfixe
+# @testedby TwgitCommonAssertsTest
 #
 function assert_new_and_valid_tag_name () {
     local tag="$1"
     local tag_fullname="$TWGIT_PREFIX_TAG$tag"
     assert_valid_tag_name "$tag"
     CUI_displayMsg processing "Check whether tag '$tag' already exists..."
-    has "$tag_fullname" $(get_all_tags) && die "Tag '<b>$tag_fullname</b>' already exists! Try: twgit tag list"
+    if has "$tag_fullname" $(get_all_tags); then
+        die "Tag '<b>$tag_fullname</b>' already exists! Try: twgit tag list"
+    fi
 }
 
 ##
@@ -686,6 +661,7 @@ function assert_working_tree_is_not_on_delete_branch () {
 
 ##
 # S'assure qu'au moins un tag existe.
+# @testedby TwgitCommonAssertsTest
 #
 function assert_tag_exists () {
     CUI_displayMsg processing 'Get last tag...'
@@ -1096,6 +1072,7 @@ function displayQuotedEnum () {
 # @param string $1 nom court de la feature
 # @param string $2 sujet sur échec, optionnel
 # @see getFeatureSubject()
+# @testedby TwgitCommonGettersTest
 #
 function displayFeatureSubject () {
     local subject="$(getFeatureSubject "$1")"
@@ -1119,14 +1096,14 @@ function displayTag () {
         CUI_displayMsg info 'No feature included.'
     else
         CUI_displayMsg info 'Included features:'
-        while read line; do
+        echo "$features" | while read line; do
             (echo "$line" | grep -q '^.*: ".*"$') || line="$line: \"\""
             feature_shortname="$(echo "$line" | sedRegexpExtended "s/^(.*): \".*$/\1/")"
             feature_subject="$(echo "$line" | sedRegexpExtended "s/^.*: \"(.*)\"$/\1/")"
             [ -z "$feature_subject" ] && feature_subject="$(getFeatureSubject "$feature_shortname")"
             echo -n "    - $TWGIT_ORIGIN/$TWGIT_PREFIX_FEATURE$feature_shortname "
             displayFeatureSubject "$feature_shortname" "$feature_subject"
-        done < <(echo "$features")
+        done
     fi
 }
 
@@ -1249,21 +1226,26 @@ function init () {
 }
 
 ##
-# Affiche la liste des emails des N committeurs les plus significatifs (en nombre de commits)
+# Affiche la liste des emails des N auteurs les plus significatifs (en nombre de commits)
 # de la branche distante spécifiée, à raison d'un par ligne.
-# Filtre les committeurs sans email ainsi que ceux en dehors du domaine '@$TWGIT_EMAIL_DOMAIN_NAME'.
+# Filtre les auteurs sans email ainsi que ceux en dehors du domaine '@$TWGIT_EMAIL_DOMAIN_NAME' si défini.
 #
 # @param string $1 nom complet de branche distante, sans le "$TWGIT_ORIGIN/"
-# @param int $2 nombre maximum de committers à afficher, optionnel (vaut $TWGIT_DEFAULT_NB_COMMITTERS par défaut)
+# @param int $2 nombre maximum d'auteurs à afficher, optionnel (vaut $TWGIT_DEFAULT_NB_COMMITTERS par défaut)
+# @see get_contributors()
+# @testedby TwgitMainTest
 #
 function display_rank_contributors () {
     local branch_fullname="$1"
     local max="$2"
     [ -z "$max" ] && max=$TWGIT_DEFAULT_NB_COMMITTERS
 
-    CUI_displayMsg info "First $max committers into '$TWGIT_ORIGIN/$branch_fullname' remote branch:"
+    local header filter
+    [ "$max" -eq 1 ] && header="First committer" || header="First $max committers"
+    [ -z "$TWGIT_EMAIL_DOMAIN_NAME" ] && filter='' || filter=" (filtered by email domain: '@$TWGIT_EMAIL_DOMAIN_NAME')"
+    CUI_displayMsg info "$header into '$TWGIT_ORIGIN/$branch_fullname' remote branch$filter:"
     local contributors="$(get_contributors "$branch_fullname" $max)"
-    [ -z "$contributors" ] && echo 'nobody' || echo $contributors | tr ' ' '\n'
+    [ -z "$contributors" ] && echo 'nobody' || echo "$contributors"
     echo
 }
 

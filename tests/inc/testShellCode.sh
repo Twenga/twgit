@@ -4,7 +4,8 @@
 # Execute code calling functions of common.inc.sh after loading Shell config files.
 # e.g.: /bin/bash testShellCode.sh 'process_options x -aV; isset_option a; echo $?'
 #
-# @author Geoffroy AUBRY <geoffroy.aubry@hi-media.com>
+# @author Geoffroy Aubry <geoffroy.aubry@hi-media.com>
+# @author Laurent Toussaint <lt.laurent.toussaint@gmail.com>
 #
 
 
@@ -17,7 +18,7 @@ sCmds="$1"; shift
 . $TWGIT_INC_DIR/common.inc.sh
 
 # Execution:
-rFile="$(tempfile)"
+rFile="${TWGIT_TMP_DIR}/file.$$.$RANDOM"
 echo "$sCmds" > $rFile
 . $rFile
 rm -f $rFile

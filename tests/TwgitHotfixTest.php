@@ -2,7 +2,7 @@
 
 /**
  * @package Tests
- * @author Geoffroy AUBRY <geoffroy.aubry@hi-media.com>
+ * @author Geoffroy Aubry <geoffroy.aubry@hi-media.com>
  */
 class TwgitHotfixTest extends TwgitTestCase
 {
@@ -68,7 +68,7 @@ class TwgitHotfixTest extends TwgitTestCase
         $this->_localExec('git commit --allow-empty -m "extra commit!"');
         $this->_localExec('git checkout stable && git reset origin/stable');
 
-        $this->_localExec(TWGIT_EXEC . ' hotfix finish');
+        $this->_localExec(TWGIT_EXEC . ' hotfix finish -I');
         $sMsg = $this->_localExec('git tag');
         $this->assertContains('v1.2.4', $sMsg);
     }
@@ -80,7 +80,7 @@ class TwgitHotfixTest extends TwgitTestCase
         $this->_remoteExec('git init');
         $this->_localExec(TWGIT_EXEC . ' init 1.2.3 ' . TWGIT_REPOSITORY_ORIGIN_DIR);
         $this->_localExec(TWGIT_EXEC . ' hotfix start -I');
-        $this->_localExec(TWGIT_EXEC . ' hotfix finish');
+        $this->_localExec(TWGIT_EXEC . ' hotfix finish -I');
         $sMsg = $this->_localExec('git tag');
         $this->assertContains('v1.2.4', $sMsg);
     }

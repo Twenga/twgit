@@ -2,7 +2,7 @@
 
 /**
  * @package Tests
- * @author Geoffroy AUBRY <geoffroy.aubry@hi-media.com>
+ * @author Geoffroy Aubry <geoffroy.aubry@hi-media.com>
  */
 class TwgitReleaseTest extends TwgitTestCase
 {
@@ -16,9 +16,11 @@ class TwgitReleaseTest extends TwgitTestCase
         $o = self::_getShellInstance();
         $o->remove(TWGIT_REPOSITORY_ORIGIN_DIR);
         $o->remove(TWGIT_REPOSITORY_LOCAL_DIR);
+        $o->remove(TWGIT_REPOSITORY_SECOND_LOCAL_DIR);
         $o->remove(TWGIT_REPOSITORY_SECOND_REMOTE_DIR);
         $o->mkdir(TWGIT_REPOSITORY_ORIGIN_DIR, '0777');
         $o->mkdir(TWGIT_REPOSITORY_LOCAL_DIR, '0777');
+        $o->mkdir(TWGIT_REPOSITORY_SECOND_LOCAL_DIR, '0777');
         $o->mkdir(TWGIT_REPOSITORY_SECOND_REMOTE_DIR, '0777');
     }
 
@@ -88,6 +90,59 @@ class TwgitReleaseTest extends TwgitTestCase
     }
 
     /**
+     */
+    public function testStart_ThrowExceptionWhenSpecifiedTagAlreadyExists ()
+    {
+        $this->_remoteExec('git init');
+        $this->_localExec(TWGIT_EXEC . ' init 1.2.3 ' . TWGIT_REPOSITORY_ORIGIN_DIR);
+        $this->_localExec('git branch v1.2.3 v1.2.3');
+
+        $this->setExpectedException('RuntimeException', "/!\ Tag 'v1.2.3' already exists! Try: twgit tag list");
+        $sMsg = $this->_localExec(TWGIT_EXEC . ' release start -I 1.2.3');
+    }
+
+    /**
+     */
+    public function testStart_ThrowExceptionWhenSpecifiedValueIsNotATag ()
+    {
+        $this->_remoteExec('git init');
+        $this->_localExec(TWGIT_EXEC . ' init 1.2.3 ' . TWGIT_REPOSITORY_ORIGIN_DIR);
+        $this->_localExec('git branch v1.2.3 v1.2.3');
+
+        $this->setExpectedException(
+            'RuntimeException',
+            "/!\ Unauthorized tag name: 'toto'! Must use <major.minor.revision> format, e.g. '1.2.3'."
+        );
+        $sMsg = $this->_localExec(TWGIT_EXEC . ' release start -I toto');
+    }
+
+    /**
+     */
+    public function testStart_WithSpecifiedTag ()
+    {
+        $this->_remoteExec('git init');
+        $this->_localExec(TWGIT_EXEC . ' init 1.2.3 ' . TWGIT_REPOSITORY_ORIGIN_DIR);
+        $this->_localExec('git branch v1.2.3 v1.2.3');
+
+        $sMsg = $this->_localExec(TWGIT_EXEC . ' release start -I 10.0.2');
+        $sMsg = $this->_localExec(TWGIT_EXEC . ' release list');
+        $this->assertContains("Release: origin/release-10.0.2", $sMsg);
+    }
+
+    /**
+     */
+    public function testStart_WithNoSpecifiedTag ()
+    {
+        $this->_remoteExec('git init');
+        $this->_localExec(TWGIT_EXEC . ' init 1.2.3 ' . TWGIT_REPOSITORY_ORIGIN_DIR);
+        $this->_localExec('git branch v1.2.3 v1.2.3');
+
+        $sMsg = $this->_localExec(TWGIT_EXEC . ' release start -I');
+        $sMsg = $this->_localExec(TWGIT_EXEC . ' release list');
+        $this->assertContains("Release: origin/release-1.3.0", $sMsg);
+    }
+
+    /**
      * Currently just check the tag annotation.
      */
     public function testFinish_WithMinorRelease ()
@@ -106,7 +161,7 @@ class TwgitReleaseTest extends TwgitTestCase
 
         $this->_localExec(TWGIT_EXEC . ' feature merge-into-release 2');
         $this->_localExec(TWGIT_EXEC . ' feature merge-into-release 4');
-        $this->_localExec(TWGIT_EXEC . ' release finish');
+        $this->_localExec(TWGIT_EXEC . ' release finish -I');
 
         $sMsg = $this->_localExec('git show v1.3.0');
         $this->assertContains(
@@ -135,7 +190,7 @@ class TwgitReleaseTest extends TwgitTestCase
             "Local 'stable' branch is ahead of 'origin/stable'! Commits on 'stable' are out of process."
                 . " Try: git checkout stable && git reset origin/stable"
         );
-        $sMsg = $this->_localExec(TWGIT_EXEC . ' release finish');
+        $sMsg = $this->_localExec(TWGIT_EXEC . ' release finish -I');
     }
 
     /**
@@ -151,10 +206,47 @@ class TwgitReleaseTest extends TwgitTestCase
         $this->_localExec('git commit --allow-empty -m "extra commit!"');
         $this->_localExec('git checkout stable && git reset origin/stable');
 
-        $this->_localExec(TWGIT_EXEC . ' release finish');
+        $this->_localExec(TWGIT_EXEC . ' release finish -I');
         $sMsg = $this->_localExec('git tag');
         $this->assertContains('v1.3.0', $sMsg);
     }
+
+    /*public function testFinish_ThrowExceptionWhenHotfixStartedAndFinishedAfterReleaseStartAndNotMerged ()
+    {
+        $this->_remoteExec('git init');
+        $this->_localExec(TWGIT_EXEC . ' init 1.2.3 ' . TWGIT_REPOSITORY_ORIGIN_DIR);
+        $this->_localExec(TWGIT_EXEC . ' release start -I');
+        $this->_localExec('cd ' . TWGIT_REPOSITORY_SECOND_LOCAL_DIR
+            . ' && git init && git remote add origin ' . TWGIT_REPOSITORY_ORIGIN_DIR
+            . ' && ' . TWGIT_EXEC . ' hotfix start -I');
+        $this->_localExec('cd ' . TWGIT_REPOSITORY_SECOND_LOCAL_DIR
+            . ' && ' . TWGIT_EXEC . ' hotfix finish -I');
+
+        $this->setExpectedException(
+            'RuntimeException',
+            "/!\ You must merge the last tag into this release before close it."
+            . " In release-1.3.0 branch: git merge --no-ff v1.2.4, then: git push origin release-1.3.0"
+        );
+        $sMsg = $this->_localExec(TWGIT_EXEC . ' release finish -I');
+        $sMsg = $this->_localExec('git tag');
+        $this->assertContains('v1.3.0', $sMsg);
+    }
+
+    public function testFinish_WithHotfixStartedAndFinishedAfterReleaseStartAndMerged ()
+    {
+        $this->_remoteExec('git init');
+        $this->_localExec(TWGIT_EXEC . ' init 1.2.3 ' . TWGIT_REPOSITORY_ORIGIN_DIR);
+        $this->_localExec(TWGIT_EXEC . ' release start -I');
+        $this->_localExec('cd ' . TWGIT_REPOSITORY_SECOND_LOCAL_DIR
+            . ' && git init && git remote add origin ' . TWGIT_REPOSITORY_ORIGIN_DIR
+            . ' && ' . TWGIT_EXEC . ' hotfix start -I');
+        $this->_localExec('cd ' . TWGIT_REPOSITORY_SECOND_LOCAL_DIR
+            . ' && ' . TWGIT_EXEC . ' hotfix finish -I');
+
+        $this->_localExec('git fetch origin && git merge v1.2.4 && git push origin release-1.3.0');
+        $sMsg = $this->_localExec(TWGIT_EXEC . ' release finish -I');
+        $this->assertContains('v1.3.0', $sMsg);
+    }*/
 
     /**
      * @shcovers inc/common.inc.sh::assert_clean_stable_branch_and_checkout

@@ -102,11 +102,11 @@ function usage () {
     CUI_displayMsg help_detail '<b>clean</b>     Help to remove branches no longer tracked.'
     CUI_displayMsg help_detail '<b>init <tagname> [<url>]</b>'
     CUI_displayMsg help_detail '          Initialize git repository for twgit:'
-    CUI_displayMsg help_detail '            - git init if necessary'
-    CUI_displayMsg help_detail "            - add remote $TWGIT_ORIGIN <b><url></b> if necessary"
-    CUI_displayMsg help_detail "            - create '$TWGIT_STABLE' branch if not exists, or pull '$TWGIT_ORIGIN/$TWGIT_STABLE'"
+    CUI_displayMsg help_detail '            – git init if necessary'
+    CUI_displayMsg help_detail "            – add remote $TWGIT_ORIGIN <b><url></b> if necessary"
+    CUI_displayMsg help_detail "            – create '$TWGIT_STABLE' branch if not exists, or pull '$TWGIT_ORIGIN/$TWGIT_STABLE'"
     CUI_displayMsg help_detail "              branch if exists"
-    CUI_displayMsg help_detail '            - create <b><tagname></b> tag on HEAD of stable, e.g. 1.2.3, using'
+    CUI_displayMsg help_detail '            – create <b><tagname></b> tag on HEAD of stable, e.g. 1.2.3, using'
     CUI_displayMsg help_detail '              major.minor.revision format. '
     CUI_displayMsg help_detail "              Prefix '$TWGIT_PREFIX_TAG' will be added to the specified <b><tagname></b>."
     CUI_displayMsg help_detail '          A remote repository must exists.'
@@ -185,4 +185,5 @@ function main () {
 
 [ "$1" != "update" ] && [ "$TWGIT_UPDATE_AUTO" = "1" ] && autoupdate
 assert_git_configured
+assert_connectors_well_configured
 main "$@"

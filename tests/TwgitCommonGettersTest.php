@@ -2,7 +2,7 @@
 
 /**
  * @package Tests
- * @author Geoffroy AUBRY <geoffroy.aubry@hi-media.com>
+ * @author Geoffroy Aubry <geoffroy.aubry@hi-media.com>
  */
 class TwgitCommonGettersTest extends TwgitTestCase
 {
@@ -58,5 +58,82 @@ class TwgitCommonGettersTest extends TwgitTestCase
                 'origin/out2' . "\n" . 'origin/outofprocess'
             ),
         );
+    }
+
+    /**
+     * @shcovers inc/common.inc.sh::getFeatureSubject
+     */
+    public function testGetFeatureSubject_WithNoParameter ()
+    {
+        $sCmd = 'TWGIT_FEATURES_SUBJECT_PATH="$(tempfile -d ' . TWGIT_TMP_DIR . ')"; '
+              . 'echo \'2;The subject of 2\' > \$TWGIT_FEATURES_SUBJECT_PATH; '
+              . 'config_file=\'F\'; TWGIT_FEATURE_SUBJECT_CONNECTOR=\'github\'; '
+              . 'getFeatureSubject; '
+              . 'rm -f "\$TWGIT_FEATURES_SUBJECT_PATH"';
+        $sMsg = $this->_localShellCodeCall($sCmd);
+        $this->assertEmpty($sMsg);
+    }
+
+    /**
+     * @shcovers inc/common.inc.sh::getFeatureSubject
+     */
+    public function testGetFeatureSubject_WithParameterButNoSubjectNorConnector ()
+    {
+        $sCmd = 'TWGIT_FEATURES_SUBJECT_PATH="$(tempfile -d ' . TWGIT_TMP_DIR . ')"; '
+              . 'config_file=\'F\'; TWGIT_FEATURE_SUBJECT_CONNECTOR=\'no_connector\'; '
+              . 'getFeatureSubject 2; '
+              . 'rm -f "\$TWGIT_FEATURES_SUBJECT_PATH"';
+        $sMsg = $this->_localShellCodeCall($sCmd);
+        $this->assertEmpty($sMsg);
+    }
+
+    /**
+     * @shcovers inc/common.inc.sh::getFeatureSubject
+     */
+    public function testGetFeatureSubject_WithParameterAndSubject ()
+    {
+        $sCmd = 'TWGIT_FEATURES_SUBJECT_PATH="$(tempfile -d ' . TWGIT_TMP_DIR . ')"; '
+              . 'echo \'2;The subject of 2\' > \$TWGIT_FEATURES_SUBJECT_PATH; '
+              . 'config_file=\'F\'; TWGIT_FEATURE_SUBJECT_CONNECTOR=\'no_connector\'; '
+              . 'getFeatureSubject 2; '
+              . 'rm -f "\$TWGIT_FEATURES_SUBJECT_PATH"';
+        $sMsg = $this->_localShellCodeCall($sCmd);
+        $this->assertEquals('The subject of 2', $sMsg);
+    }
+
+    /**
+     * @shcovers inc/common.inc.sh::getFeatureSubject
+     */
+//     public function testGetFeatureSubject_WithParameterAndConnector ()
+//     {
+//         $sCmd = 'TWGIT_FEATURES_SUBJECT_PATH="$(tempfile -d ' . TWGIT_TMP_DIR . ')"; '
+//               . 'config_file=\'F\'; TWGIT_FEATURE_SUBJECT_CONNECTOR=\'github\'; '
+//               . 'getFeatureSubject 2; '
+//               . 'rm -f "\$TWGIT_FEATURES_SUBJECT_PATH"';
+//         $sMsg = $this->_localShellCodeCall($sCmd);
+//         $this->assertEquals('email when too old features', $sMsg);
+//     }
+// => Pb with API rate limit: http://developer.github.com/v3/#rate-limiting
+
+    /**
+     * @shcovers inc/common.inc.sh::displayFeatureSubject
+     */
+    public function testDisplayFeatureSubject_WithKnownFeature ()
+    {
+        $sCmd = 'function getFeatureSubject() { echo "XYZ-\$1";}; '
+              . 'displayFeatureSubject 2';
+        $sMsg = $this->_localShellCodeCall($sCmd);
+        $this->assertEquals('XYZ-2', $sMsg);
+    }
+
+    /**
+     * @shcovers inc/common.inc.sh::displayFeatureSubject
+     */
+    public function testDisplayFeatureSubject_WithUnknownFeature ()
+    {
+        $sCmd = 'function getFeatureSubject() { echo ;}; '
+              . 'displayFeatureSubject 2 \"default subject\"';
+        $sMsg = $this->_localShellCodeCall($sCmd);
+        $this->assertEquals('default subject', $sMsg);
     }
 }

@@ -3,10 +3,14 @@
 
 #### [Homepage](http://twgit.twenga.com/)
 
-#### Continuous integration
+#### Continuous integration [![travis-ci.org](https://github.com/Twenga/twgit/raw/stable/doc/travis-favicon.png)](http://travis-ci.org/Twenga/twgit)&nbsp;[![Build Status](https://secure.travis-ci.org/Twenga/twgit.png?branch=stable)](http://travis-ci.org/Twenga/twgit)
 To run the test suite, simply:
-`$ phpunit -c conf/phpunit-dist.xml`
-![travis-ci.org](http://travis-ci.org/favicon.ico)&nbsp;[![Build Status](https://secure.travis-ci.org/Twenga/twgit.png?branch=stable)](http://travis-ci.org/Twenga/twgit)
+
+```bash
+$ cp conf/twgit-dist.sh conf/twgit.sh          # and adapt, if necessary
+$ cp conf/phpunit-dist.php conf/phpunit.php    # and adapt, if necessary
+$ phpunit -c conf/phpunit-dist.xml
+```
 
 ## Description
 Twgit is a free and open source assisting tools for managing features, hotfixes and releases on Git repositories.

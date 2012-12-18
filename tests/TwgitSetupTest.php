@@ -2,7 +2,7 @@
 
 /**
  * @package Tests
- * @author Geoffroy AUBRY <geoffroy.aubry@hi-media.com>
+ * @author Geoffroy Aubry <geoffroy.aubry@hi-media.com>
  */
 class TwgitSetupTest extends TwgitTestCase
 {
@@ -188,6 +188,56 @@ class TwgitSetupTest extends TwgitTestCase
         );
         $sMsg = $this->_localFunctionCall('assert_git_repository');
         $this->assertEmpty($sMsg);
+    }
+
+    /**
+     * @shcovers inc/common.inc.sh::assert_connectors_well_configured
+     */
+    public function testAssertConnectorsWellConfigured_ThrowExceptionWhenConnectorNotFound ()
+    {
+        $sMsg = "/!\ 'X' connector not found! Please adjust TWGIT_FEATURE_SUBJECT_CONNECTOR in 'F'.";
+        $this->setExpectedException('RuntimeException', $sMsg);
+
+        $sCmd = 'config_file=\'F\'; TWGIT_FEATURE_SUBJECT_CONNECTOR=\'X\'; assert_connectors_well_configured';
+        $sMsg = $this->_localShellCodeCall($sCmd);
+    }
+
+    /**
+     * @shcovers inc/common.inc.sh::assert_connectors_well_configured
+     */
+    public function testAssertConnectorsWellConfigured_ThrowExceptionWhenWgetNotFound ()
+    {
+        $sMsg = "/!\ Feature's subject not available because wget was not found! "
+              . "Install it (e.g.: apt-get install wget) or switch off connectors in 'F'.";
+        $this->setExpectedException('RuntimeException', $sMsg);
+
+        $sWgetPath = $this->_exec('which wget');
+        $sPath = $this->_exec('echo $PATH');
+        $sPathWOWget = preg_replace('#(^|:)' . substr($sWgetPath, 0, -5) . '(:|$)#', ':', $sPath);
+        $sCmd = "PATH='$sPathWOWget'; "
+              . 'config_file=\'F\'; TWGIT_FEATURE_SUBJECT_CONNECTOR=\'github\'; assert_connectors_well_configured';
+        $sMsg = $this->_localShellCodeCall($sCmd);
+    }
+
+    /**
+     * @dataProvider providerTestAssertConnectorsWellConfigured_WithConnectorAndWget
+     * @shcovers inc/common.inc.sh::assert_connectors_well_configured
+     */
+    public function testAssertConnectorsWellConfigured_WithConnectorAndWget ($sConnector)
+    {
+        $sCmd = 'config_file=\'F\'; TWGIT_FEATURE_SUBJECT_CONNECTOR=\''
+              . $sConnector . '\'; assert_connectors_well_configured';
+        $sMsg = $this->_localShellCodeCall($sCmd);
+        $this->assertEmpty($sMsg);
+    }
+
+    public function providerTestAssertConnectorsWellConfigured_WithConnectorAndWget ()
+    {
+        return array(
+            array(''),
+            array('github'),
+            array('redmine'),
+        );
     }
 
     /**

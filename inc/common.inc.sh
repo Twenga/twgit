@@ -297,6 +297,14 @@ function get_features () {
 }
 
 ##
+# Recupere la liste des demos
+#
+function get_demos () {
+  RETVAL="$(git branch -r | grep "$TWGIT_ORIGIN/$TWGIT_PREFIX_DEMO" | sed 's/^[* ]*//')"
+}
+
+
+##
 # Affiche le nom complet de la branche courante, chaîne vide sinon.
 #
 function get_current_branch () {
@@ -968,6 +976,32 @@ function display_branches () {
             ! isset_option 'c' && git show $branch --pretty=medium | grep -v '^Merge: ' | head -n 3
         done
     fi
+}
+
+##
+# Affiche la liste des features merged dans la demo
+# @param string $1 nom de la branche de demo
+#
+function display_demo () {
+    local demo="$1"
+    local demo_prefix="$TWGIT_ORIGIN/$TWGIT_PREFIX_DEMO"
+    GET_FEATURES_RETURN_VALUE="$(git branch -r --merged "$demo" | grep -v "$demo" | grep -v stable 2>/dev/null)"
+ 
+    echo -n $(CUI_displayMsg info "Demo: $demo ")
+    displayFeatureSubject "${demo:${#demo_prefix}}" || echo
+
+    if [ ! -z "$GET_FEATURES_RETURN_VALUE" ]; then                             
+        local prefix="$TWGIT_ORIGIN/$TWGIT_PREFIX_FEATURE"                       
+        for f in $GET_FEATURES_RETURN_VALUE; do        
+            echo -n "    - $f "                                                    
+            echo -n $(CUI_displayMsg ok '[merged]')' '                             
+            displayFeatureSubject "${f:${#prefix}}"                                
+        done                                                                     
+    else                                                                       
+        echo -n "    -  "                                                    
+        echo -n $(CUI_displayMsg ok '[no features merged]')' '
+        echo
+    fi 
 }
 
 ##

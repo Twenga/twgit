@@ -52,7 +52,7 @@ fi
 # Convert JSON with Python or PHP:
 if [ "$language" = 'python' ]; then
     ($wget_cmd $url | python -c 'import sys,json;s=sys.stdin.read();
-if s!="": data=json.loads(s); print data["title"]')
+if s!="": data=json.loads(s); print data["title"].encode("utf8")')
     2>/dev/null
 elif [ "$language" = 'php' ]; then
     ($wget_cmd $url \

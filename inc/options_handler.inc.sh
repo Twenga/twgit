@@ -66,6 +66,7 @@ function process_options {
         fi
         shift
     done
+    FCT_OPTIONS="$FCT_OPTIONS $(echo $TWGIT_DEFAULT_RENDERING_OPTION | sed 's/\(.\)/\1 /g')"
     FCT_PARAMETERS=${FCT_PARAMETERS:1}
 }
 

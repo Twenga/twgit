@@ -56,6 +56,7 @@ TWGIT_GIT_COMMAND_PROMPT='git# '
 TWGIT_GIT_MIN_VERSION='1.7.2.0'
 
 TWGIT_DEFAULT_NB_COMMITTERS='3'
+TWGIT_DEFAULT_RENDERING_OPTION='' # defaul rendering option in ('','c','x'), c => compact , x => eXtremely compact
 
 TWGIT_EMAIL_DOMAIN_NAME=''	# e.g. twenga.com
 

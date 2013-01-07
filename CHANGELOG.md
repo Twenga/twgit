@@ -1,6 +1,18 @@
 ChangeLog
 =========
 
+## Version 1.10.2 (2013-01-07)
+
+Fixes:
+
+  - #83: Fix Interrupted system call from time to time in inc/common.inc::get_dissident_remote_branches()
+
+## Version 1.10.1 (2012-12-28)
+
+Fixes:
+
+  - Python version of Github connector doesn't handle unicode characters
+
 ## Version 1.10.0 (2012-12-18)
 
 Features:

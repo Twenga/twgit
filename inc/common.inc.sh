@@ -66,17 +66,10 @@ function get_remote_branches () {
 # @testedby TwgitCommonGettersTest
 #
 function get_dissident_remote_branches () {
-    local pipe="$TWGIT_TMP_DIR/twgit_pipe_$$_$RANDOM"
-    mkfifo "$pipe"
-    git remote | grep -v "^$TWGIT_ORIGIN$" > $pipe &
+    # génère une chaîne du genre : ' -e "^second/" -e "^third/"'
+    local cmd="$(git remote | grep -v "^$TWGIT_ORIGIN$" | sed -e 's/^/ -e "^/' -e 's/$/\/"/' | tr '\n' ' ')"
 
-    local cmd=''
-    while read repository; do
-        cmd="$cmd -e \"^$repository/\"";
-    done < $pipe
-    rm -f "$pipe"
     [ -z "$cmd" ] && cmd='tee /dev/null' || cmd="grep -v $cmd"
-
     git branch -r --no-color | sed 's/^[* ] //' | sed -e 's/^/ /' -e 's/$/ /' \
         | grep -v -e " $TWGIT_ORIGIN/$TWGIT_PREFIX_FEATURE" \
             -e " $TWGIT_ORIGIN/$TWGIT_PREFIX_RELEASE" \

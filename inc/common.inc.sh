@@ -827,6 +827,24 @@ function remove_feature () {
 }
 
 ##
+# Supprime la branche locale et distante de la demo spécifiée.
+#
+# @param string $1 nom court de la demo
+#
+function demo_remove () {
+    local demo="$1"
+    local demo_fullname="$TWGIT_PREFIX_DEMO$demo"
+              
+    assert_valid_ref_name $demo
+    assert_clean_working_tree
+    assert_working_tree_is_not_on_delete_branch $demo_fullname
+                              
+    process_fetch
+    remove_local_branch $demo_fullname
+    remove_remote_branch $demo_fullname
+}
+
+##
 # Crée un tag sur la branche courante puis le pousse.
 #
 # @param string $1 nom complet du tag

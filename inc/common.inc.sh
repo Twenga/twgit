@@ -831,7 +831,7 @@ function remove_feature () {
 #
 # @param string $1 nom court de la demo
 #
-function demo_remove () {
+function remove_demo () {
     local demo="$1"
     local demo_fullname="$TWGIT_PREFIX_DEMO$demo"
               
@@ -1014,7 +1014,8 @@ function display_demo () {
             echo -n "    - $f "                                                    
             echo -n $(CUI_displayMsg ok '[merged]')' '                             
             displayFeatureSubject "${f:${#prefix}}"                                
-        done                                                                     
+        done 
+        alert_old_branch $demo_prerix$demo with-help
     else                                                                       
         echo -n "    -  "                                                    
         echo -n $(CUI_displayMsg ok '[no features merged]')' '

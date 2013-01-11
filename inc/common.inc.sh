@@ -1280,7 +1280,8 @@ function displayChangelogSection () {
 #    ne se sont pas écoulés depuis le dernier test.
 #
 function autoupdate () {
-    local is_forced="$1"
+    [ $1 = 'force' ] && local is_forced="$1" || local is_forced=""
+    shift
     cd "$TWGIT_ROOT_DIR"
     if git rev-parse --git-dir 1>/dev/null 2>&1; then
         [ ! -f "$TWGIT_UPDATE_PATH" ] && touch "$TWGIT_UPDATE_PATH"
@@ -1353,7 +1354,11 @@ then consequently update '<b>$TWGIT_CONF_DIR/twgit.sh</b>':";
 
             # Invite :
             if [ "$answer" = "Y" ] || [ "$answer" = "y" ]; then
-                [ -z "$is_forced" ] && echo 'Thank you for re-entering your request.'
+                if [ -z "$is_forced" ]; then
+                    echo 'Continuing with your initial request...'
+                    cd - 1>/dev/null
+                    $TWGIT_EXEC $*
+                fi
                 exit 0
             fi
         fi

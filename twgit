@@ -50,7 +50,13 @@ if [ ! -f "$config_file" ]; then
     echo "Try to copy '${config_file%.sh}-dist.sh' to '$config_file' and configure it."
     exit 1
 fi
+root_directory="$(git rev-parse --show-toplevel)"
+secondary_config_file="$root_directory/.twgit"
 . $config_file
+if [ -f "$secondary_config_file" ]; then
+#    echo "Reading the secondary config file..."
+    . $secondary_config_file
+fi
 . $TWGIT_INC_DIR/common.inc.sh
 
 

@@ -1011,7 +1011,11 @@ function display_demo () {
         done 
 
         get_features merged_in_progress ${demo:${#origin_prefix}}
-        local merged_in_progress_features="$GET_FEATURES_RETURN_VALUE"
+        for f in $GET_FEATURES_RETURN_VALUE; do             
+            echo -n "    - $f "                                                    
+            echo -n $(CUI_displayMsg warning 'merged, then in progress.')' '
+            displayFeatureSubject "${f:${#prefix}}"                                     
+        done
 
         alert_old_branch $demo_prerix$demo with-help
     else                                                                       

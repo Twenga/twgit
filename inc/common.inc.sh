@@ -995,6 +995,7 @@ function display_branches () {
 #
 function display_demo () {
     local demo="$1"
+    local origin_prefix="$TWGIT_ORIGIN/"
     local demo_prefix="$TWGIT_ORIGIN/$TWGIT_PREFIX_DEMO"
     GET_FEATURES_RETURN_VALUE="$(git branch -r --merged "$demo" | grep -v "$demo" | grep -v stable 2>/dev/null)"
  
@@ -1008,6 +1009,10 @@ function display_demo () {
             echo -n $(CUI_displayMsg ok '[merged]')' '                             
             displayFeatureSubject "${f:${#prefix}}"                                
         done 
+
+        get_features merged_in_progress ${demo:${#origin_prefix}}
+        local merged_in_progress_features="$GET_FEATURES_RETURN_VALUE"
+
         alert_old_branch $demo_prerix$demo with-help
     else                                                                       
         echo -n "    -  "                                                    

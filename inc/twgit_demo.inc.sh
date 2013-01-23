@@ -63,29 +63,28 @@ function cmd_help () {
 # Gère l'option '-F' permettant d'éviter le fetch.
 #
 function cmd_list () {
-  process_options "$@"
-  if isset_option 'x'; then
-    process_fetch 'F' 1>/dev/null
-  else
-    process_fetch 'F'
-  fi
+    process_options "$@"
+    if isset_option 'x'; then
+        process_fetch 'F' 1>/dev/null
+    else
+        process_fetch 'F'
+    fi
 
-  get_demos
-  demos="$RETVAL"
-  local add_empty_line=0
+    get_demos
+    local demos="$RETVAL"
+    local add_empty_line=0
   
-  CUI_displayMsg help "Remote demos in progress:"
-  if [ ! -z "$demos" ]; then
-    for d in $demos; do
-      if ! isset_option 'c'; then                       
-        [ "$add_empty_line" = "0" ] && add_empty_line=1 || echo 
-      fi 
-      display_demo $d
-    done
-  else
-      CUI_displayMsg info 'No demos exists.'; echo
-  fi
-
+    CUI_displayMsg help "Remote demos in progress:"
+    if [ ! -z "$demos" ]; then
+        for d in $demos; do
+            if ! isset_option 'c'; then                       
+                [ "$add_empty_line" = "0" ] && add_empty_line=1 || echo 
+            fi 
+            display_demo $d
+        done
+    else
+        CUI_displayMsg info 'No demos exists.'; echo
+    fi
 }
 
 ##

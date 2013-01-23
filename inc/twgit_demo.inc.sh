@@ -157,7 +157,7 @@ function cmd_merge () {
     if ! has "$TWGIT_ORIGIN/$feature_fullname" $(get_remote_branches); then
         die "Remote feature '<b>$TWGIT_ORIGIN/$feature_fullname</b>' not found!"
     else 
-      git merge $TWGIT_ORIGIN/$TWGIT_PREFIX_FEATURE$1
+      git merge --no-ff $TWGIT_ORIGIN/$TWGIT_PREFIX_FEATURE$1
     fi
 }
 

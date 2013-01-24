@@ -951,7 +951,8 @@ function display_branches () {
             if ! isset_option 'c'; then
                 [ "$add_empty_line" = "0" ] && add_empty_line=1 || echo
             fi
-            echo -n $(CUI_displayMsg info "${titles[$type]}$branch ")
+            local stable_origin="$(git describe --abbrev=0 $branch)"
+            echo -n $(CUI_displayMsg info "${titles[$type]}$branch (from stable $stable_origin) ")
 
             [ "$type" = "feature" ] && displayFeatureSubject "${branch:${#prefix}}" || echo
 

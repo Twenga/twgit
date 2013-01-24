@@ -42,7 +42,7 @@ function _twgit () {
                 COMPREPLY=( $(compgen -W "${opts}" -- ${cur}) )
                 ;;
             demo)
-                local opts="help list merge remove start"
+                local opts="help list merge-feature remove start"
                 COMPREPLY=( $(compgen -W "${opts}" -- ${cur}) )
                 ;;
             hotfix)

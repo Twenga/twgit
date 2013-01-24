@@ -999,9 +999,9 @@ function display_demo () {
     local demo_prefix="$TWGIT_ORIGIN/$TWGIT_PREFIX_DEMO"
     GET_FEATURES_RETURN_VALUE="$(git branch -r --merged "$demo" | grep -v "$demo" | grep -v stable 2>/dev/null)"
 
-    local stable_origin="$(git describe --abbrev=0 $1)"
- 
-    echo -n $(CUI_displayMsg info "Demo: $demo (from $stable_origin) ")
+    local stable_origin="$(git describe --abbrev=0 $demo)"
+    echo -n $(CUI_displayMsg info "Demo: $demo")
+    echo -n $(CUI_displayMsg help_detail " (from <b>$stable_origin</b>) ")
     displayFeatureSubject "${demo:${#demo_prefix}}" || echo
 
     if [ ! -z "$GET_FEATURES_RETURN_VALUE" ]; then                             

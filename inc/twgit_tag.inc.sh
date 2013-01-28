@@ -72,7 +72,7 @@ function cmd_list () {
         displayTag "$tag_fullname"
         echo
     else
-        local max='5'
+        local max='150'
         local tags=$(get_all_tags $max)
         CUI_displayMsg help "List $max last tags:"
         if [ -z "$tags" ]; then

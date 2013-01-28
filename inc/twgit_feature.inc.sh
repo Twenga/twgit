@@ -123,6 +123,11 @@ function cmd_committers () {
 #
 function cmd_list () {
     process_options "$@"
+
+    if ! isset_option '$TWGIT_DEFAULT_RENDERING_OPTION'; then
+        FCT_OPTIONS="$FCT_OPTIONS $(echo $TWGIT_DEFAULT_RENDERING_OPTION | sed 's/\(.\)/\1 /g')"
+    fi
+
     if isset_option 'x'; then
         process_fetch 'F' 1>/dev/null
     else

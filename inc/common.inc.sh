@@ -847,12 +847,12 @@ function die () {
 }
 
 ##
-# Echappe les caractères '.+$*' d'une chaîne.
+# Échappe les caractères '.+$*[]' d'une chaîne.
 #
 # @param string $1 chaîne à échapper
 #
 function escape () {
-    echo "$1" | sed 's/\([\.\+\$\*]\)/\\\1/g'
+    echo "$1" | sed 's/\([\.\+\$\*\[]\|\]\)/\\\1/g'
 }
 
 ##
@@ -1087,11 +1087,8 @@ function displayTag () {
     features="$(echo "$msg" | grep -F "$pattern" | sedRegexpExtended "s/^.*$TWGIT_PREFIX_FEATURE//")"
     if [ -z "$features" ]; then
         local previous_tag="$(git describe --abbrev=0 $tag^2)"
-        commits="$(git log --no-merges  --pretty='%s' $previous_tag..$tag | grep -v 'twgit')"
-        echo "$commits" | while read line; do
-            echo -n "    - $TWGIT_ORIGIN/$TWGIT_PREFIX_HOTFIX$tag "
-            CUI_displayMsg feature_subject $line
-        done
+        CUI_displayMsg info "Commit logs from $previous_tag tag:"
+        git log --no-merges --pretty='oneline' --abbrev-commit $previous_tag..$tag | grep -v "$(escape "$TWGIT_PREFIX_COMMIT_MSG")"
     else
         CUI_displayMsg info 'Included features:'
         echo "$features" | while read line; do

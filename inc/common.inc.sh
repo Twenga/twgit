@@ -1087,7 +1087,7 @@ function displayTag () {
     features="$(echo "$msg" | grep -F "$pattern" | sedRegexpExtended "s/^.*$TWGIT_PREFIX_FEATURE//")"
     if [ -z "$features" ]; then
         if ! git show $tag^2 1>/dev/null 2>&1; then
-            CUI_displayMsg info "No included features and it's the first tag."
+            CUI_displayMsg info "No feature included and it's the first tag."
         else
             local previous_tag="$(git describe --abbrev=0 $tag^2)"
             CUI_displayMsg info "Commit logs from $previous_tag tag:"

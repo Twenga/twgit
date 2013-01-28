@@ -108,7 +108,7 @@ class TwgitTagTest extends TwgitTestCase
                 . "\nTag: v1.2.3"
                 . "\nTagger: Firstname Lastname <firstname.lastname@xyz.com>"
                 . "\nDate: ---"
-                . "\nNo feature included."
+                . "\nNo feature included and it's the first tag."
                 . "\n"
                 . "\nTag: v1.3.0"
                 . "\nTagger: Firstname Lastname <firstname.lastname@xyz.com>"
@@ -129,7 +129,7 @@ class TwgitTagTest extends TwgitTestCase
                 . "\nTag: v1.2.3"
                 . "\nTagger: Firstname Lastname <firstname.lastname@xyz.com>"
                 . "\nDate: ---"
-                . "\nNo feature included."
+                . "\nNo feature included and it's the first tag."
                 . "\n"
             ),
             array(

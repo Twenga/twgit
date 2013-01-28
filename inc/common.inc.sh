@@ -859,7 +859,7 @@ function escape () {
 # Retourne 0 si la chaîne $1 est présente dans la concaténation du reste des paramètres, 1 sinon.
 #
 # @param string $1 chaîne à rechercher
-# @param string $2-n chaînes dans lesquelles rechercher
+# @param string $2..$n chaînes dans lesquelles rechercher
 # @return int 0 si la chaîne $1 est présente dans la concaténation du reste des paramètres, 1 sinon.
 #
 function has () {
@@ -1129,7 +1129,7 @@ function inform_about_branch_status () {
 # Convertit une liste de valeurs en une ligne CSV au format suivant et l'affiche : "v1";"va""lue2";"v\'3"
 # Attention, les blancs inter et intra paramètre bash sont remplacés par un unique espace.
 #
-# @param string $1...$n liste de valeurs
+# @param string $1..$n liste de valeurs
 # @testedby TwgitCommonToolsTest
 #
 function convertList2CSV () {
@@ -1278,11 +1278,16 @@ function displayChangelogSection () {
 #
 # À des fins de test : "touch -mt 1105200101 ~/twgit/.lastupdate"
 #
-# @param string $1 Si non vide, force la vérification de la présence d'une MAJ même si $TWGIT_UPDATE_NB_DAYS jours
-#    ne se sont pas écoulés depuis le dernier test.
+# @param string $1 Si vaut 'force', alors force la vérification de la présence d'une MAJ même
+#    si $TWGIT_UPDATE_NB_DAYS jours ne se sont pas écoulés depuis le dernier test.
+#    Mettre une autre valeur pour une mise à jour non forcée.
+# @param string $2..$n éventuelle commande twgit avec ses paramètres à réexécuter après mise à jour non forcée.
 #
 function autoupdate () {
-    local is_forced="$1"
+    local is_forced=0
+    [ $1 = 'force' ] && is_forced=1
+    shift
+
     cd "$TWGIT_ROOT_DIR"
     if git rev-parse --git-dir 1>/dev/null 2>&1; then
         [ ! -f "$TWGIT_UPDATE_PATH" ] && touch "$TWGIT_UPDATE_PATH"
@@ -1290,7 +1295,7 @@ function autoupdate () {
         local interval=$(( $TWGIT_UPDATE_NB_DAYS * 86400 ))
         local answer=''
 
-        if [ "$elapsed_time" -gt "$interval" ] || [ ! -z "$is_forced" ]; then
+        if [ "$elapsed_time" -gt "$interval" ] || [ "$is_forced" = 1 ]; then
             # Update Git :
             CUI_displayMsg processing "Fetch twgit repository for auto-update check..."
             git fetch
@@ -1307,18 +1312,18 @@ function autoupdate () {
             # If new update:
             if [ "$current_tag$current_ref_on_top" != "$last_tag" ]; then
 
-                echo -e 'New content of CHANGELOG.md:\n'
-                displayChangelogSection "$current_tag" "$last_tag"
-                echo
-
                 # Question:
                 local question
                 if [ "$current_tag" != "$last_tag" ]; then
+                    echo -e 'New content of CHANGELOG.md:\n'
+                    displayChangelogSection "$current_tag" "$last_tag"
+                    echo
                     question="Do you want to update twgit from <b>$current_tag</b> to <b>$last_tag</b> (or manually: twgit update)? [Y/N] "
                 else
-                    question="Twgit update. You are ahead of last tag <b>$last_tag</b>. Would you like to return to it? [Y/N] "
+                    question="You are ahead of last tag <b>$last_tag</b>. Would you like to return to it? [Y/N] "
                 fi
-                echo -n $(CUI_displayMsg question "$question")
+                echo -n $(CUI_displayMsg question "\033[4m/!\ <b>twgit update</b>")
+                echo -n $(CUI_displayMsg question ": $question")
 
                 # Read answer:
                 read answer
@@ -1355,7 +1360,12 @@ then consequently update '<b>$TWGIT_CONF_DIR/twgit.sh</b>':";
 
             # Invite :
             if [ "$answer" = "Y" ] || [ "$answer" = "y" ]; then
-                [ -z "$is_forced" ] && echo 'Thank you for re-entering your request.'
+                if [ "$is_forced" = 0 ]; then
+                    echo 'Continuing with your initial request...'
+                    echo
+                    cd - 1>/dev/null
+                    $TWGIT_EXEC $*
+                fi
                 exit 0
             fi
         fi

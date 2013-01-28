@@ -183,7 +183,7 @@ function main () {
     fi
 }
 
-[ "$1" != "update" ] && [ "$TWGIT_UPDATE_AUTO" = "1" ] && autoupdate
+[ "$1" != "update" ] && [ "$TWGIT_UPDATE_AUTO" = "1" ] && autoupdate 'no-force' $*
 assert_git_configured
 assert_connectors_well_configured
 main "$@"

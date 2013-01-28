@@ -1087,9 +1087,11 @@ function displayTag () {
     features="$(echo "$msg" | grep -F "$pattern" | sedRegexpExtended "s/^.*$TWGIT_PREFIX_FEATURE//")"
     if [ -z "$features" ]; then
         local previous_tag="$(git describe --abbrev=0 $tag^2)"
-        last_commit="$(git log --no-merges  --pretty='%s' $previous_tag..$tag | grep -v 'twgit')"
-        echo -n "    - $TWGIT_ORIGIN/$TWGIT_PREFIX_HOTFIX$tag "
-        CUI_displayMsg feature_subject $last_commit
+        commits="$(git log --no-merges  --pretty='%s' $previous_tag..$tag | grep -v 'twgit')"
+        echo "$commits" | while read line; do
+            echo -n "    - $TWGIT_ORIGIN/$TWGIT_PREFIX_HOTFIX$tag "
+            CUI_displayMsg feature_subject $line
+        done
     else
         CUI_displayMsg info 'Included features:'
         echo "$features" | while read line; do

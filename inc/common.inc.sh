@@ -1086,7 +1086,9 @@ function displayTag () {
     pattern="${TWGIT_PREFIX_COMMIT_MSG}Contains $TWGIT_PREFIX_FEATURE"
     features="$(echo "$msg" | grep -F "$pattern" | sedRegexpExtended "s/^.*$TWGIT_PREFIX_FEATURE//")"
     if [ -z "$features" ]; then
-        CUI_displayMsg info 'No feature included.'
+        last_commit="$(git log --no-merges  --pretty='%s' -n 1 $tag)"
+        echo -n "    - $TWGIT_ORIGIN/$TWGIT_PREFIX_HOTFIX$tag "
+        CUI_displayMsg feature_subject $last_commit
     else
         CUI_displayMsg info 'Included features:'
         echo "$features" | while read line; do

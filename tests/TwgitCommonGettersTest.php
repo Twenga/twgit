@@ -17,9 +17,11 @@ class TwgitCommonGettersTest extends TwgitTestCase
         $o->remove(TWGIT_REPOSITORY_ORIGIN_DIR);
         $o->remove(TWGIT_REPOSITORY_LOCAL_DIR);
         $o->remove(TWGIT_REPOSITORY_SECOND_REMOTE_DIR);
+        $o->remove(TWGIT_REPOSITORY_THIRD_REMOTE_DIR);
         $o->mkdir(TWGIT_REPOSITORY_ORIGIN_DIR, '0777');
         $o->mkdir(TWGIT_REPOSITORY_LOCAL_DIR, '0777');
         $o->mkdir(TWGIT_REPOSITORY_SECOND_REMOTE_DIR, '0777');
+        $o->mkdir(TWGIT_REPOSITORY_THIRD_REMOTE_DIR, '0777');
     }
 
     /**
@@ -32,6 +34,8 @@ class TwgitCommonGettersTest extends TwgitTestCase
         $this->_localExec(TWGIT_EXEC . ' init 1.2.3 ' . TWGIT_REPOSITORY_ORIGIN_DIR);
         $this->_localExec('cd ' . TWGIT_REPOSITORY_SECOND_REMOTE_DIR . ' && git init');
         $this->_localExec('git remote add second ' . TWGIT_REPOSITORY_SECOND_REMOTE_DIR);
+        $this->_localExec('cd ' . TWGIT_REPOSITORY_THIRD_REMOTE_DIR . ' && git init');
+        $this->_localExec('git remote add third ' . TWGIT_REPOSITORY_THIRD_REMOTE_DIR);
 
         $this->_localExec($sLocalCmd);
         $sMsg = $this->_localFunctionCall('get_dissident_remote_branches');
@@ -55,6 +59,11 @@ class TwgitCommonGettersTest extends TwgitTestCase
             array(
                 'git checkout -b outofprocess && git push origin outofprocess && git push second outofprocess'
                     . ' && git checkout -b out2 && git push origin out2 && git push second out2',
+                'origin/out2' . "\n" . 'origin/outofprocess'
+            ),
+            array(
+                'git checkout -b outofprocess && git push origin outofprocess && git push second outofprocess'
+                    . ' && git checkout -b out2 && git push origin out2 && git push third out2',
                 'origin/out2' . "\n" . 'origin/outofprocess'
             ),
         );

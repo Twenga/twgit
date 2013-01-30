@@ -37,9 +37,9 @@ function usage () {
     CUI_displayMsg help_detail '    List first <b><max></b> committers (authors in fact) into the specified remote'
     CUI_displayMsg help_detail "    feature. Default value of <b><max></b>: $TWGIT_DEFAULT_NB_COMMITTERS. Add <b>-F</b> to do not make fetch."
     CUI_displayMsg help_detail '    If no <b><featurename></b> is specified, then use current feature.'; echo
-    CUI_displayMsg help_detail '<b>list [-c|-F|-x]</b>'
-    CUI_displayMsg help_detail '    List remote features. Add <b>-F</b> to do not make fetch, <b>-c</b> to compact display'
-    CUI_displayMsg help_detail '    and <b>-x</b> (eXtremely compact) to CSV display.'; echo
+    CUI_displayMsg help_detail '<b>list [-c|-d|-F|-x]</b>'
+    CUI_displayMsg help_detail '    List remote features. Add <b>-F</b> to do not make fetch, <b>-c</b> to compact display,'
+    CUI_displayMsg help_detail '    <b>-d</b> to force detailed display and <b>-x</b> (eXtremely compact) to CSV display.'; echo
     CUI_displayMsg help_detail '<b>merge-into-release [<featurename>]</b>'
     CUI_displayMsg help_detail '    Try to merge specified feature into current release.'
     CUI_displayMsg help_detail '    If no <b><featurename></b> is specified, then ask to use current feature.'; echo
@@ -118,14 +118,17 @@ function cmd_committers () {
 ##
 # Liste les features et leur statut par rapport aux releases.
 # Gère l'option '-F' permettant d'éviter le fetch.
+# Gère l'option '-d' forçant l'affichage détaillé.
 # Gère l'option '-c' compactant l'affichage en masquant les détails de commit auteur et date.
 # Gère l'option '-x' (eXtremely compact) retournant un affichage CVS.
 #
 function cmd_list () {
     process_options "$@"
-
-    if ! isset_option '$TWGIT_DEFAULT_RENDERING_OPTION'; then
-        FCT_OPTIONS="$FCT_OPTIONS $(echo $TWGIT_DEFAULT_RENDERING_OPTION | sed 's/\(.\)/\1 /g')"
+    if
+        ! isset_option 'd' && ! isset_option 'c' && ! isset_option 'x' \
+        && [ ! -z '$TWGIT_FEATURE_LIST_DEFAULT_RENDERING_OPTION' ]
+    then
+        set_options "$TWGIT_FEATURE_LIST_DEFAULT_RENDERING_OPTION"
     fi
 
     if isset_option 'x'; then

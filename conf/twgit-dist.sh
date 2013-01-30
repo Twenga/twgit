@@ -57,6 +57,10 @@ TWGIT_GIT_MIN_VERSION='1.7.2.0'
 
 TWGIT_DEFAULT_NB_COMMITTERS='3'
 
+# Default rendering option for twgit feature list, to choose in {'', 'c', 'd', 'x'},
+# where 'c' stands for compact, 'd' for detailed and 'x' for eXtremely compact (CSV).
+TWGIT_FEATURE_LIST_DEFAULT_RENDERING_OPTION=''
+
 TWGIT_EMAIL_DOMAIN_NAME=''	# e.g. twenga.com
 
 TWGIT_MAX_RETRIEVE_TAGS_NOT_MERGED=3

@@ -44,13 +44,20 @@
 
 # Includes :
 path="$0"; while [ -h "$path" ]; do path="$(readlink "$path")"; done
-config_file="$(dirname $path)/conf/twgit.sh"
-if [ ! -f "$config_file" ]; then
-    echo "/!\\ Config file not found: '$config_file'"
-    echo "Try to copy '${config_file%.sh}-dist.sh' to '$config_file' and configure it."
+shared_config_file="$(dirname $path)/conf/twgit.sh"
+template_config_file="${shared_config_file%.sh}-dist.sh"
+local_config_file="$(git rev-parse --show-toplevel)/.twgit"
+if [ ! -f "$shared_config_file" ]; then
+    echo "/!\\ Config file not found: '$shared_config_file'"
+    echo "Try to copy '$template_config_file' to '$shared_config_file' and configure it."
     exit 1
 fi
-. $config_file
+
+. $template_config_file
+. $shared_config_file
+if [ -f "$local_config_file" ]; then
+    . $local_config_file
+fi
 . $TWGIT_INC_DIR/common.inc.sh
 
 

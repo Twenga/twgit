@@ -39,9 +39,10 @@ function usage () {
     CUI_displayMsg help_detail '    or checkout the local demo. Add <b>-d</b> to delete beforehand local demo'
     CUI_displayMsg help_detail '    if exists.'; echo
     CUI_displayMsg help_detail '<b>remove <demoname></b>'
-    CUI_displayMsg help_detail '    Remove both local and remote specified demo branch.'; echo
+    CUI_displayMsg help_detail '    Remove both local and remote specified demo branch. No feature will'
+    CUI_displayMsg help_detail '    be removed.'; echo
     CUI_displayMsg help_detail '<b>merge-feature <featurename> </b>'
-    CUI_displayMsg help_detail '    merge feature on current demo branch.'; echo
+    CUI_displayMsg help_detail '    Try to merge specified feature into current demo.'; echo
     CUI_displayMsg help_detail "Prefix '$TWGIT_PREFIX_DEMO' will be added to <b><demoname></b> parameter."; echo
     CUI_displayMsg help_detail '<b>[help]</b>'
     CUI_displayMsg help_detail '    Display this help.'; echo
@@ -122,52 +123,14 @@ function cmd_merge-feature () {
     assert_clean_working_tree
     process_fetch
 
-    local all_demos=$(git branch -r --no-merged $TWGIT_ORIGIN/$TWGIT_STABLE | grep "$TWGIT_ORIGIN/$TWGIT_PREFIX_DEMO" | sed 's/^[* ]*//' | tr '\n' ' ' | sed 's/ *$//g')
+    get_all_demos
+    local all_demos="$RETVAL"
     local current_branch=$(get_current_branch)
 
     if ! has "$TWGIT_ORIGIN/$current_branch" $all_demos; then
         die "You must be in a demo!"
-    else
-        echo -n $(CUI_displayMsg question "Are you sure to merge '$TWGIT_ORIGIN/$feature_fullname' into '$TWGIT_ORIGIN/$current_branch'? [Y/N] "); read answer
-        [ "$answer" != "Y" ] && [ "$answer" != "y" ] && die 'Merge into current demo aborted!'
     fi
 
-    # Autres tests :
-    CUI_displayMsg processing 'Check remote feature...'
-    if ! has "$TWGIT_ORIGIN/$feature_fullname" $(get_remote_branches); then
-        die "Remote feature '<b>$TWGIT_ORIGIN/$feature_fullname</b>' not found!"
-    fi
-
-    # Merge :
-    local cmds="$TWGIT_EXEC feature start $feature
-git pull $TWGIT_ORIGIN $feature_fullname
-$TWGIT_EXEC demo start ${current_branch:${#TWGIT_PREFIX_DEMO}}
-git pull $TWGIT_ORIGIN $current_branch
-git merge --no-ff $TWGIT_ORIGIN/$TWGIT_PREFIX_FEATURE$1
-git push $TWGIT_ORIGIN $current_branch"
-
-    IFS="$(echo -e "\n\r")"
-    local error=0
-
-    for cmd in $cmds; do
-        if [ "$error" -ne 0 ]; then
-           CUI_displayMsg help_detail "$cmd"
-        else
-            [ "${cmd:0:${#TWGIT_EXEC}+1}" = "$TWGIT_EXEC " ] && msg="shell# twgit ${cmd:${#TWGIT_EXEC}+1}" || msg="${TWGIT_GIT_COMMAND_PROMPT}$cmd"
-            CUI_displayMsg processing "$msg"
-            if ! eval $cmd; then
-                error=1
-                CUI_displayMsg error "Merge '$feature_fullname' into '$current_branch' aborted!"
-                CUI_displayMsg help 'Commands not executed:'
-                CUI_displayMsg help_detail "$cmd"
-                if [ "${cmd:0:10}" = "git merge " ]; then
-                  CUI_displayMsg help_detail "  - resolve conflicts"
-                fi
-            fi
-        fi
-    done
-    echo
-    [ "$error" -eq 0 ] || exit 1
-
+    merge_feature_into_branch "$feature" "$current_branch"
 }
 

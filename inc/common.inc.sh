@@ -292,14 +292,14 @@ function get_features () {
 }
 
 ##
-# Récupère la liste des demos.
+# Récupère la liste des demos, sur une seule ligne séparées par des espaces.
 #
 # Ex. :
 #     get_all_demos
 #     demos="$RETVAL"
 #
 function get_all_demos () {
-    RETVAL="$(git branch -r | grep "$TWGIT_ORIGIN/$TWGIT_PREFIX_DEMO" | sed 's/^[* ]*//')"
+    RETVAL="$(git branch -r --no-merged $TWGIT_ORIGIN/$TWGIT_STABLE | grep "$TWGIT_ORIGIN/$TWGIT_PREFIX_DEMO" | sed 's/^[* ]*//' | tr '\n' ' ' | sed 's/ *$//g')"
 }
 
 
@@ -916,6 +916,64 @@ function start_simple_branch () {
         inform_about_branch_status $branch_fullname
     fi
     alert_old_branch $TWGIT_ORIGIN/$branch_fullname with-help
+}
+
+##
+# Exécutes les commandes de merge de la feature spécifiée dans la branche de destination, release ou demo.
+# Si le merge automatique ne peut se faire à cause de conflits, alors affiche les instructions
+# restantes pour accomplir le merge, puis exécute un "exit 1".
+#
+# @param string $1 nom court de la feature à merger dans la branche de destination
+# @param string $2 nom long de la release ou de la demo devant recevoir la feature, sans le "$TWGIT_ORIGIN/"
+#
+function merge_feature_into_branch () {
+    local feature="$1"
+    local dest_branch_fullname="$2"
+    local feature_fullname="$TWGIT_PREFIX_FEATURE$feature"
+
+    # Tests :
+    CUI_displayMsg processing 'Check remote feature...'
+    if ! has "$TWGIT_ORIGIN/$feature_fullname" $(get_remote_branches); then
+        die "Remote feature '<b>$TWGIT_ORIGIN/$feature_fullname</b>' not found!"
+    fi
+
+    # Merge :
+    local start_branch_cmd
+    if [ "${dest_branch_fullname:0:${#TWGIT_PREFIX_RELEASE}}" = "$TWGIT_PREFIX_RELEASE" ]; then
+        start_branch_cmd="$TWGIT_EXEC release start"
+    else
+        start_branch_cmd="$TWGIT_EXEC demo start ${dest_branch_fullname:${#TWGIT_PREFIX_DEMO}}"
+    fi
+
+    local cmds="$TWGIT_EXEC feature start $feature
+git pull $TWGIT_ORIGIN $feature_fullname
+$start_branch_cmd
+git pull $TWGIT_ORIGIN $dest_branch_fullname
+git merge --no-ff $feature_fullname
+git push $TWGIT_ORIGIN $dest_branch_fullname"
+    IFS="$(echo -e "\n\r")"
+    local error=0
+    for cmd in $cmds; do
+        if [ "$error" -ne 0 ]; then
+            CUI_displayMsg help_detail "$cmd"
+        else
+            [ "${cmd:0:${#TWGIT_EXEC}+1}" = "$TWGIT_EXEC " ] && msg="shell# twgit ${cmd:${#TWGIT_EXEC}+1}" || msg="${TWGIT_GIT_COMMAND_PROMPT}$cmd"
+            CUI_displayMsg processing "$msg"
+            if ! eval $cmd; then
+                error=1
+                CUI_displayMsg error "Merge '$feature_fullname' into '$dest_branch_fullname' aborted!"
+                CUI_displayMsg help 'Commands not executed:'
+                CUI_displayMsg help_detail "$cmd"
+                if [ "${cmd:0:10}" = "git merge " ]; then
+                    CUI_displayMsg help_detail "  - resolve conflicts"
+                    CUI_displayMsg help_detail "  - git add..."
+                    CUI_displayMsg help_detail "  - git commit..."
+                fi
+            fi
+        fi
+    done
+    echo
+    [ "$error" -eq 0 ] || exit 1
 }
 
 

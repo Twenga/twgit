@@ -314,43 +314,7 @@ function cmd_merge-into-release () {
         feature_fullname="$TWGIT_PREFIX_FEATURE$feature"
     fi
 
-    # Autres tests :
-    CUI_displayMsg processing 'Check remote feature...'
-    if ! has "$TWGIT_ORIGIN/$feature_fullname" $(get_remote_branches); then
-        die "Remote feature '<b>$TWGIT_ORIGIN/$feature_fullname</b>' not found!"
-    fi
-
-    # Merge :
-    local cmds="$TWGIT_EXEC feature start $feature
-git pull $TWGIT_ORIGIN $feature_fullname
-$TWGIT_EXEC release start
-git pull $TWGIT_ORIGIN $release_fullname
-git merge --no-ff $feature_fullname
-git push $TWGIT_ORIGIN $release_fullname"
-    IFS="$(echo -e "\n\r")"
-    local error=0
-    local prefix
-    for cmd in $cmds; do
-        if [ "$error" -ne 0 ]; then
-            CUI_displayMsg help_detail "$cmd"
-        else
-            [ "${cmd:0:${#TWGIT_EXEC}+1}" = "$TWGIT_EXEC " ] && msg="shell# twgit ${cmd:${#TWGIT_EXEC}+1}" || msg="${TWGIT_GIT_COMMAND_PROMPT}$cmd"
-            CUI_displayMsg processing "$msg"
-            if ! eval $cmd; then
-                error=1
-                CUI_displayMsg error "Merge '$feature_fullname' into '$release_fullname' aborted!"
-                CUI_displayMsg help 'Commands not executed:'
-                CUI_displayMsg help_detail "$cmd"
-                if [ "${cmd:0:10}" = "git merge " ]; then
-                    CUI_displayMsg help_detail "  - resolve conflicts"
-                    CUI_displayMsg help_detail "  - git add..."
-                    CUI_displayMsg help_detail "  - git commit..."
-                fi
-            fi
-        fi
-    done
-    echo
-    [ "$error" -eq 0 ] || exit 1
+    merge_feature_into_branch "$feature" "$release_fullname"
 }
 
 ##

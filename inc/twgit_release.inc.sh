@@ -43,9 +43,9 @@ function usage () {
     CUI_displayMsg help_detail '    If no <b><tagname></b> is specified then current release name will be used.'
     CUI_displayMsg help_detail '    Add <b>-I</b> to run in non-interactive mode (always say yes).'; echo
     CUI_displayMsg help_detail '<b>remove <releasename></b>'
-    CUI_displayMsg help_detail '    Remove both local and remote specified release branch.'
-    CUI_displayMsg help_detail '    Despite that, create the same tag as finish action to clearly distinguish'
-    CUI_displayMsg help_detail '    the next release from this one.'; echo
+    CUI_displayMsg help_detail '    Remove both local and remote specified release branch. No feature will'
+    CUI_displayMsg help_detail '    be removed. Despite that, create the same tag as finish action to clearly'
+    CUI_displayMsg help_detail '    distinguish the next release from this one.'; echo
     CUI_displayMsg help_detail '<b>reset <releasename> [-I|-M|-m]</b>'
     CUI_displayMsg help_detail '    Call <b>twgit remove <releasename></b>, then <b>twgit start [-I|-M|-m]</b>.'
     CUI_displayMsg help_detail '    Handle options of <b>twgit start</b>.'; echo

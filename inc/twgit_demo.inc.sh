@@ -5,9 +5,8 @@
 #
 #
 #
-# Copyright (c) 2011 Twenga SA
-# Copyright (c) 2012 Geoffroy Aubry <geoffroy.aubry@free.fr>
-# Copyright (c) 2012 Cyrille Hemidy
+# Copyright (c) 2013 Geoffroy Aubry <geoffroy.aubry@free.fr>
+# Copyright (c) 2013 Cyrille Hemidy
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance
 # with the License. You may obtain a copy of the License at
@@ -18,9 +17,8 @@
 # on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License
 # for the specific language governing permissions and limitations under the License.
 #
-# @copyright 2011 Twenga SA
-# @copyright 2012 Geoffroy Aubry <geoffroy.aubry@free.fr>
-# @copyright 2012 Cyrille Hemidy
+# @copyright 2013 Geoffroy Aubry <geoffroy.aubry@free.fr>
+# @copyright 2013 Cyrille Hemidy
 # @license http://www.apache.org/licenses/LICENSE-2.0
 #
 
@@ -69,16 +67,16 @@ function cmd_list () {
         process_fetch 'F'
     fi
 
-    get_demos
+    get_all_demos
     local demos="$RETVAL"
     local add_empty_line=0
-  
+
     CUI_displayMsg help "Remote demos in progress:"
     if [ ! -z "$demos" ]; then
         for d in $demos; do
-            if ! isset_option 'c'; then                       
-                [ "$add_empty_line" = "0" ] && add_empty_line=1 || echo 
-            fi 
+            if ! isset_option 'c'; then
+                [ "$add_empty_line" = "0" ] && add_empty_line=1 || echo
+            fi
             display_demo $d
         done
     else
@@ -97,20 +95,20 @@ function cmd_start () {
     require_parameter 'demo'
     local demo="$RETVAL"
     local demo_fullname="$TWGIT_PREFIX_DEMO$demo"
- 
+
     assert_valid_ref_name $demo
     assert_clean_working_tree
     process_fetch
- 
+
     if isset_option 'd'; then
         if has $demo_fullname $(get_local_branches); then
             assert_working_tree_is_not_on_delete_branch $demo_fullname
             remove_local_branch $demo_fullname
-        fi  
+        fi
     else
         assert_new_local_branch $demo_fullname
-    fi  
- 
+    fi
+
     CUI_displayMsg processing 'Check remote demos...'
     if has "$TWGIT_ORIGIN/$demo_fullname" $(get_remote_branches); then
         CUI_displayMsg processing "Remote demo '$demo_fullname' detected."
@@ -119,14 +117,14 @@ function cmd_start () {
         assert_tag_exists
         local last_tag=$(get_last_tag)
         exec_git_command "git checkout -b $demo_fullname tags/$last_tag" "Could not check out tag '$last_tag'!"
- 
+
         local subject="$(getFeatureSubject "$demo")"
         [ ! -z "$subject" ] && subject=": $subject"
         process_first_commit 'feature' "$demo_fullname" "$subject"
- 
+
         process_push_branch $demo_fullname
         inform_about_branch_status $demo_fullname
-    fi  
+    fi
     alert_old_branch $TWGIT_ORIGIN/$demo_fullname with-help
     echo
 }
@@ -140,7 +138,6 @@ function cmd_remove () {
     local demo="$RETVAL"
     remove_demo "$demo"
     echo
-
 }
 
 ##
@@ -175,7 +172,7 @@ function cmd_merge-feature () {
     # Merge :
     local cmds="$TWGIT_EXEC feature start $feature
 git pull $TWGIT_ORIGIN $feature_fullname
-$TWGIT_EXEC demo start ${current_branch:${#TWGIT_PREFIX_DEMO}} 
+$TWGIT_EXEC demo start ${current_branch:${#TWGIT_PREFIX_DEMO}}
 git pull $TWGIT_ORIGIN $current_branch
 git merge --no-ff $TWGIT_ORIGIN/$TWGIT_PREFIX_FEATURE$1
 git push $TWGIT_ORIGIN $current_branch"
@@ -186,7 +183,7 @@ git push $TWGIT_ORIGIN $current_branch"
     for cmd in $cmds; do
         if [ "$error" -ne 0 ]; then
            CUI_displayMsg help_detail "$cmd"
-        else 
+        else
             [ "${cmd:0:${#TWGIT_EXEC}+1}" = "$TWGIT_EXEC " ] && msg="shell# twgit ${cmd:${#TWGIT_EXEC}+1}" || msg="${TWGIT_GIT_COMMAND_PROMPT}$cmd"
             CUI_displayMsg processing "$msg"
             if ! eval $cmd; then
@@ -196,11 +193,11 @@ git push $TWGIT_ORIGIN $current_branch"
                 CUI_displayMsg help_detail "$cmd"
                 if [ "${cmd:0:10}" = "git merge " ]; then
                   CUI_displayMsg help_detail "  - resolve conflicts"
-                fi 
+                fi
             fi
         fi
     done
-    echo        
+    echo
     [ "$error" -eq 0 ] || exit 1
 
 }

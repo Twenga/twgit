@@ -8,6 +8,7 @@
 # Copyright (c) 2011 Twenga SA
 # Copyright (c) 2012 Geoffroy Aubry <geoffroy.aubry@free.fr>
 # Copyright (c) 2012 Laurent Toussaint <lt.laurent.toussaint@gmail.com>
+# Copyright (c) 2013 Cyrille Hemidy
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance
 # with the License. You may obtain a copy of the License at
@@ -22,6 +23,7 @@
 # @copyright 2012 Geoffroy Aubry <geoffroy.aubry@free.fr>
 # @copyright 2012 Jérémie Havret <jhavret@hi-media.com>
 # @copyright 2012 Laurent Toussaint <lt.laurent.toussaint@gmail.com>
+# @copyright 2013 Cyrille Hemidy
 # @license http://www.apache.org/licenses/LICENSE-2.0
 #
 
@@ -290,10 +292,14 @@ function get_features () {
 }
 
 ##
-# Recupere la liste des demos
+# Récupère la liste des demos.
 #
-function get_demos () {
-  RETVAL="$(git branch -r | grep "$TWGIT_ORIGIN/$TWGIT_PREFIX_DEMO" | sed 's/^[* ]*//')"
+# Ex. :
+#     get_all_demos
+#     demos="$RETVAL"
+#
+function get_all_demos () {
+    RETVAL="$(git branch -r | grep "$TWGIT_ORIGIN/$TWGIT_PREFIX_DEMO" | sed 's/^[* ]*//')"
 }
 
 
@@ -579,6 +585,7 @@ function assert_new_local_branch () {
 
 ##
 # S'assure que le dépôt git courant est dans le status 'working directory clean'.
+# @testedby TwgitCommonAssertsTest
 #
 function assert_clean_working_tree () {
     CUI_displayMsg processing 'Check clean working tree...'
@@ -650,6 +657,7 @@ function assert_new_and_valid_tag_name () {
 # auquel cas on checkout sur $TWGIT_STABLE.
 #
 # @param string $1 nom complet de la branche locale en instance de suppression
+# @testedby TwgitCommonAssertsTest
 #
 function assert_working_tree_is_not_on_delete_branch () {
     local branch="$1"
@@ -761,6 +769,7 @@ function process_push_branch () {
 #
 # @param string $1 commande à exécuter
 # @param string $2 message d'erreur pour le cas où...
+# @testedby TwgitCommonProcessingTest
 #
 function exec_git_command () {
     local cmd="$1"
@@ -773,6 +782,7 @@ function exec_git_command () {
 # Supprime la branche locale spécifiée.
 #
 # @param string $1 nom complet de la branche locale
+# @testedby TwgitCommonProcessingTest
 #
 function remove_local_branch () {
     local branch="$1"
@@ -786,55 +796,58 @@ function remove_local_branch () {
 ##
 # Supprime la branche distante spécifiée.
 #
-# @param string $1 nom de la branche distante sans le '$TWGIT_ORIGIN/'
+# @param string $1 nom complet de la branche distante sans le '$TWGIT_ORIGIN/'
+# @testedby TwgitCommonProcessingTest
 #
 function remove_remote_branch () {
     local branch="$1"
     if has "$TWGIT_ORIGIN/$branch" $(get_remote_branches); then
         exec_git_command "git push $TWGIT_ORIGIN :$branch" "Delete remote branch '$TWGIT_ORIGIN/$branch' failed!"
-        if [ $? -ne 0 ]; then
-            CUI_displayMsg processing "Remove remote branch '$TWGIT_ORIGIN/$branch' failed! Maybe already deleted... so:"
-            exec_git_command "git remote prune $TWGIT_ORIGIN" "Prune failed!"
-        fi
     else
         die "Remote branch '<b>$TWGIT_ORIGIN/$branch</b>' not found!"
     fi
 }
 
 ##
+# Supprime la branche spécifiée, à la fois locale et distante.
+# Suppose que les noms local et distant sont identiques.
+#
+# @param string $1 nom court de la branche locale
+# @param string $2 préfixe de branche, par exemple $TWGIT_PREFIX_FEATURE
+# @testedby TwgitCommonProcessingTest
+#
+function remove_branch () {
+    local branch="$1"
+    local branch_prefix="$2"
+    local branch_fullname="$branch_prefix$branch"
+
+    assert_valid_ref_name $branch
+    assert_clean_working_tree
+    assert_working_tree_is_not_on_delete_branch $branch_fullname
+
+    process_fetch
+    remove_local_branch $branch_fullname
+    remove_remote_branch $branch_fullname
+}
+
+##
 # Supprime la branche locale et distante de la feature spécifiée.
 #
 # @param string $1 nom court de la feature
+# @testedby TwgitCommonProcessingTest
 #
 function remove_feature () {
-    local feature="$1"
-    local feature_fullname="$TWGIT_PREFIX_FEATURE$feature"
-
-    assert_valid_ref_name $feature
-    assert_clean_working_tree
-    assert_working_tree_is_not_on_delete_branch $feature_fullname
-
-    process_fetch
-    remove_local_branch $feature_fullname
-    remove_remote_branch $feature_fullname
+    remove_branch $1 $TWGIT_PREFIX_FEATURE
 }
 
 ##
 # Supprime la branche locale et distante de la demo spécifiée.
 #
 # @param string $1 nom court de la demo
+# @testedby TwgitCommonProcessingTest
 #
 function remove_demo () {
-    local demo="$1"
-    local demo_fullname="$TWGIT_PREFIX_DEMO$demo"
-              
-    assert_valid_ref_name $demo
-    assert_clean_working_tree
-    assert_working_tree_is_not_on_delete_branch $demo_fullname
-                              
-    process_fetch
-    remove_local_branch $demo_fullname
-    remove_remote_branch $demo_fullname
+    remove_branch $1 $TWGIT_PREFIX_DEMO
 }
 
 ##
@@ -1004,27 +1017,27 @@ function display_demo () {
     echo -n $(CUI_displayMsg help_detail " (from <b>$stable_origin</b>) ")
     displayFeatureSubject "${demo:${#demo_prefix}}" || echo
 
-    if [ ! -z "$GET_FEATURES_RETURN_VALUE" ]; then                             
-        local prefix="$TWGIT_ORIGIN/$TWGIT_PREFIX_FEATURE"                       
-        for f in $GET_FEATURES_RETURN_VALUE; do        
-            echo -n "    - $f "                                                    
-            echo -n $(CUI_displayMsg ok '[merged]')' '                             
-            displayFeatureSubject "${f:${#prefix}}"                                
-        done 
+    if [ ! -z "$GET_FEATURES_RETURN_VALUE" ]; then
+        local prefix="$TWGIT_ORIGIN/$TWGIT_PREFIX_FEATURE"
+        for f in $GET_FEATURES_RETURN_VALUE; do
+            echo -n "    - $f "
+            echo -n $(CUI_displayMsg ok '[merged]')' '
+            displayFeatureSubject "${f:${#prefix}}"
+        done
 
         get_features merged_in_progress ${demo:${#origin_prefix}}
-        for f in $GET_FEATURES_RETURN_VALUE; do             
-            echo -n "    - $f "                                                    
+        for f in $GET_FEATURES_RETURN_VALUE; do
+            echo -n "    - $f "
             echo -n $(CUI_displayMsg warning 'merged, then in progress.')' '
-            displayFeatureSubject "${f:${#prefix}}"                                     
+            displayFeatureSubject "${f:${#prefix}}"
         done
 
         alert_old_branch $demo_prerix$demo with-help
-    else                                                                       
-        echo -n "    -  "                                                    
+    else
+        echo -n "    -  "
         echo -n $(CUI_displayMsg ok '[no features merged]')' '
         echo
-    fi 
+    fi
 }
 
 ##

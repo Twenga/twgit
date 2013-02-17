@@ -979,6 +979,7 @@ function display_branches () {
         [feature]='Feature: '
         [release]='Release: '
         [hotfix]='Hotfix: '
+        [demo]='Demo: '
     )
 
     if [ -z "$branches" ]; then
@@ -1005,40 +1006,38 @@ function display_branches () {
 }
 
 ##
-# Affiche la liste des features merged dans la demo
-# @param string $1 nom de la branche de demo
+# Affiche une release ou une branche de démo avec les features incluses
+# et catégorisées en 'merged' ou 'merged, then in progress'.
 #
-function display_demo () {
-    local demo="$1"
-    local origin_prefix="$TWGIT_ORIGIN/"
-    local demo_prefix="$TWGIT_ORIGIN/$TWGIT_PREFIX_DEMO"
-    GET_FEATURES_RETURN_VALUE="$(git branch -r --merged "$demo" | grep -v "$demo" | grep -v stable 2>/dev/null)"
+# @param string $1 type type de super branche, parmi {'release', 'demo'}
+# @param string $2 nom complet de la branche distante, sans le "$TWGIT_ORIGIN/"
+#
+function display_super_branch () {
+    local type="$1"	# 'release', 'demo'
+    local super_branch="$2"	# 'demo-X', 'release-Y'
+    display_branches "$type" "$TWGIT_ORIGIN/$super_branch" # | head -n -1
+    CUI_displayMsg info 'Features:'
 
-    local stable_origin="$(git describe --abbrev=0 $demo)"
-    echo -n $(CUI_displayMsg info "Demo: $demo")
-    echo -n $(CUI_displayMsg help_detail " (from <b>$stable_origin</b>) ")
-    displayFeatureSubject "${demo:${#demo_prefix}}" || echo
+    get_merged_features $super_branch
+    local merged_features="$GET_MERGED_FEATURES_RETURN_VALUE"
 
-    if [ ! -z "$GET_FEATURES_RETURN_VALUE" ]; then
-        local prefix="$TWGIT_ORIGIN/$TWGIT_PREFIX_FEATURE"
-        for f in $GET_FEATURES_RETURN_VALUE; do
-            echo -n "    - $f "
-            echo -n $(CUI_displayMsg ok '[merged]')' '
-            displayFeatureSubject "${f:${#prefix}}"
-        done
+    local prefix="$TWGIT_ORIGIN/$TWGIT_PREFIX_FEATURE"
+    for f in $merged_features; do
+        echo -n "    - $f "
+        echo -n $(CUI_displayMsg ok '[merged]')' '
+        displayFeatureSubject "${f:${#prefix}}"
+    done
 
-        get_features merged_in_progress ${demo:${#origin_prefix}}
-        for f in $GET_FEATURES_RETURN_VALUE; do
-            echo -n "    - $f "
-            echo -n $(CUI_displayMsg warning 'merged, then in progress.')' '
-            displayFeatureSubject "${f:${#prefix}}"
-        done
+    get_features merged_in_progress $super_branch
+    local merged_in_progress_features="$GET_FEATURES_RETURN_VALUE"
 
-        alert_old_branch $demo_prerix$demo with-help
-    else
-        echo -n "    -  "
-        echo -n $(CUI_displayMsg ok '[no features merged]')' '
-        echo
+    for f in $merged_in_progress_features; do
+        echo -n "    - $f ";
+        echo -n $(CUI_displayMsg warning 'merged, then in progress.')' '
+        displayFeatureSubject "${f:${#prefix}}"
+    done
+    if [ -z "$merged_features" ] && [ -z "$merged_in_progress_features" ]; then
+        CUI_displayMsg info '    - No such branch exists.'
     fi
 }
 

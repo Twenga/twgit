@@ -31,9 +31,9 @@ function usage () {
     echo; CUI_displayMsg help 'Usage:'
     CUI_displayMsg help_detail '<b>twgit demo <action></b>'
     echo; CUI_displayMsg help 'Available actions are:'
-    CUI_displayMsg help_detail '<b>list [-c|-F]</b>'
+    CUI_displayMsg help_detail '<b>list [-F]</b>'
     CUI_displayMsg help_detail '    List remote demos with merged features.';
-    CUI_displayMsg help_detail '    Add <b>-F</b> to do not make fetch, <b>-c</b> to compact display.'; echo
+    CUI_displayMsg help_detail '    Add <b>-F</b> to do not make fetch.'; echo
     CUI_displayMsg help_detail '<b>start <demoname> [-d]</b>'
     CUI_displayMsg help_detail '    Create both a new local and remote demo, or fetch the remote demo,'
     CUI_displayMsg help_detail '    or checkout the local demo. Add <b>-d</b> to delete beforehand local demo'
@@ -61,32 +61,30 @@ function cmd_help () {
 #
 function cmd_list () {
     process_options "$@"
-    if isset_option 'x'; then
-        process_fetch 'F' 1>/dev/null
-    else
-        process_fetch 'F'
-    fi
+    process_fetch 'F'
 
     get_all_demos
     local demos="$RETVAL"
-    local add_empty_line=0
 
     CUI_displayMsg help "Remote demos in progress:"
     if [ ! -z "$demos" ]; then
+        local add_empty_line=0
+        local origin_prefix="$TWGIT_ORIGIN/"
         for d in $demos; do
             if ! isset_option 'c'; then
                 [ "$add_empty_line" = "0" ] && add_empty_line=1 || echo
             fi
-            display_demo $d
+            display_super_branch 'demo' "${d:${#origin_prefix}}"
         done
     else
-        CUI_displayMsg info 'No demos exists.'; echo
+        display_branches 'demo' ''
     fi
+    echo
 }
 
 ##
 # Crée une nouvelle demo à partir du dernier tag.
-# Gère l'option '-d' supprimant préalablement la demo locale, afin de forcer le récréation de la branche.
+# Gère l'option '-d' supprimant préalablement la demo locale, afin de forcer le recréation de la branche.
 #
 # @param string $1 nom court de la nouvelle demo.
 #
@@ -130,7 +128,9 @@ function cmd_start () {
 }
 
 ##
+# Suppression de la démo spécifiée.
 #
+# @param string $1 nom court de la démo à supprimer
 #
 function cmd_remove () {
     process_options "$@"

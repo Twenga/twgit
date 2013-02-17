@@ -109,30 +109,7 @@ function cmd_list () {
     local release="$(get_current_release_in_progress)"
     CUI_displayMsg help "Remote release NOT merged into '<b>$TWGIT_STABLE</b>':"
     if [ ! -z "$release" ]; then
-        display_branches 'release' "$TWGIT_ORIGIN/$release" # | head -n -1
-        CUI_displayMsg info 'Features:'
-
-        get_merged_features $release
-        local merged_features="$GET_MERGED_FEATURES_RETURN_VALUE"
-
-        local prefix="$TWGIT_ORIGIN/$TWGIT_PREFIX_FEATURE"
-        for f in $merged_features; do
-            echo -n "    - $f "
-            echo -n $(CUI_displayMsg ok '[merged]')' '
-            displayFeatureSubject "${f:${#prefix}}"
-        done
-
-        get_features merged_in_progress $release
-        local merged_in_progress_features="$GET_FEATURES_RETURN_VALUE"
-
-        for f in $merged_in_progress_features; do
-            echo -n "    - $f ";
-            echo -n $(CUI_displayMsg warning 'merged, then in progress.')' '
-            displayFeatureSubject "${f:${#prefix}}"
-        done
-        if [ -z "$merged_features" ] && [ -z "$merged_in_progress_features" ]; then
-            CUI_displayMsg info '    - No such branch exists.'
-        fi
+        display_super_branch 'release' "$release"
     else
         display_branches 'release' ''
     fi

@@ -236,38 +236,7 @@ function cmd_start () {
     process_options "$@"
     require_parameter 'feature'
     local feature="$RETVAL"
-    local feature_fullname="$TWGIT_PREFIX_FEATURE$feature"
-
-    assert_valid_ref_name $feature
-    assert_clean_working_tree
-    process_fetch
-
-    if isset_option 'd'; then
-        if has $feature_fullname $(get_local_branches); then
-            assert_working_tree_is_not_on_delete_branch $feature_fullname
-            remove_local_branch $feature_fullname
-        fi
-    else
-        assert_new_local_branch $feature_fullname
-    fi
-
-    CUI_displayMsg processing 'Check remote features...'
-    if has "$TWGIT_ORIGIN/$feature_fullname" $(get_remote_branches); then
-        CUI_displayMsg processing "Remote feature '$feature_fullname' detected."
-        exec_git_command "git checkout --track -b $feature_fullname $TWGIT_ORIGIN/$feature_fullname" "Could not check out feature '$TWGIT_ORIGIN/$feature_fullname'!"
-    else
-        assert_tag_exists
-        local last_tag=$(get_last_tag)
-        exec_git_command "git checkout -b $feature_fullname tags/$last_tag" "Could not check out tag '$last_tag'!"
-
-        local subject="$(getFeatureSubject "$feature")"
-        [ ! -z "$subject" ] && subject=": $subject"
-        process_first_commit 'feature' "$feature_fullname" "$subject"
-
-        process_push_branch $feature_fullname
-        inform_about_branch_status $feature_fullname
-    fi
-    alert_old_branch $TWGIT_ORIGIN/$feature_fullname with-help
+    start_simple_branch "$feature" "$TWGIT_PREFIX_FEATURE"
     echo
 }
 
@@ -353,43 +322,7 @@ function cmd_merge-into-release () {
         feature_fullname="$TWGIT_PREFIX_FEATURE$feature"
     fi
 
-    # Autres tests :
-    CUI_displayMsg processing 'Check remote feature...'
-    if ! has "$TWGIT_ORIGIN/$feature_fullname" $(get_remote_branches); then
-        die "Remote feature '<b>$TWGIT_ORIGIN/$feature_fullname</b>' not found!"
-    fi
-
-    # Merge :
-    local cmds="$TWGIT_EXEC feature start $feature
-git pull $TWGIT_ORIGIN $feature_fullname
-$TWGIT_EXEC release start
-git pull $TWGIT_ORIGIN $release_fullname
-git merge --no-ff $feature_fullname
-git push $TWGIT_ORIGIN $release_fullname"
-    IFS="$(echo -e "\n\r")"
-    local error=0
-    local prefix
-    for cmd in $cmds; do
-        if [ "$error" -ne 0 ]; then
-            CUI_displayMsg help_detail "$cmd"
-        else
-            [ "${cmd:0:${#TWGIT_EXEC}+1}" = "$TWGIT_EXEC " ] && msg="shell# twgit ${cmd:${#TWGIT_EXEC}+1}" || msg="${TWGIT_GIT_COMMAND_PROMPT}$cmd"
-            CUI_displayMsg processing "$msg"
-            if ! eval $cmd; then
-                error=1
-                CUI_displayMsg error "Merge '$feature_fullname' into '$release_fullname' aborted!"
-                CUI_displayMsg help 'Commands not executed:'
-                CUI_displayMsg help_detail "$cmd"
-                if [ "${cmd:0:10}" = "git merge " ]; then
-                    CUI_displayMsg help_detail "  - resolve conflicts"
-                    CUI_displayMsg help_detail "  - git add..."
-                    CUI_displayMsg help_detail "  - git commit..."
-                fi
-            fi
-        fi
-    done
-    echo
-    [ "$error" -eq 0 ] || exit 1
+    merge_feature_into_branch "$feature" "$release_fullname"
 }
 
 ##

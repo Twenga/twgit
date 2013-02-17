@@ -43,9 +43,9 @@ function usage () {
     CUI_displayMsg help_detail '    If no <b><tagname></b> is specified then current release name will be used.'
     CUI_displayMsg help_detail '    Add <b>-I</b> to run in non-interactive mode (always say yes).'; echo
     CUI_displayMsg help_detail '<b>remove <releasename></b>'
-    CUI_displayMsg help_detail '    Remove both local and remote specified release branch.'
-    CUI_displayMsg help_detail '    Despite that, create the same tag as finish action to clearly distinguish'
-    CUI_displayMsg help_detail '    the next release from this one.'; echo
+    CUI_displayMsg help_detail '    Remove both local and remote specified release branch. No feature will'
+    CUI_displayMsg help_detail '    be removed. Despite that, create the same tag as finish action to clearly'
+    CUI_displayMsg help_detail '    distinguish the next release from this one.'; echo
     CUI_displayMsg help_detail '<b>reset <releasename> [-I|-M|-m]</b>'
     CUI_displayMsg help_detail '    Call <b>twgit remove <releasename></b>, then <b>twgit start [-I|-M|-m]</b>.'
     CUI_displayMsg help_detail '    Handle options of <b>twgit start</b>.'; echo
@@ -109,30 +109,7 @@ function cmd_list () {
     local release="$(get_current_release_in_progress)"
     CUI_displayMsg help "Remote release NOT merged into '<b>$TWGIT_STABLE</b>':"
     if [ ! -z "$release" ]; then
-        display_branches 'release' "$TWGIT_ORIGIN/$release" # | head -n -1
-        CUI_displayMsg info 'Features:'
-
-        get_merged_features $release
-        local merged_features="$GET_MERGED_FEATURES_RETURN_VALUE"
-
-        local prefix="$TWGIT_ORIGIN/$TWGIT_PREFIX_FEATURE"
-        for f in $merged_features; do
-            echo -n "    - $f "
-            echo -n $(CUI_displayMsg ok '[merged]')' '
-            displayFeatureSubject "${f:${#prefix}}"
-        done
-
-        get_features merged_in_progress $release
-        local merged_in_progress_features="$GET_FEATURES_RETURN_VALUE"
-
-        for f in $merged_in_progress_features; do
-            echo -n "    - $f ";
-            echo -n $(CUI_displayMsg warning 'merged, then in progress.')' '
-            displayFeatureSubject "${f:${#prefix}}"
-        done
-        if [ -z "$merged_features" ] && [ -z "$merged_in_progress_features" ]; then
-            CUI_displayMsg info '    - No such branch exists.'
-        fi
+        display_super_branch 'release' "$release"
     else
         display_branches 'release' ''
     fi

@@ -195,4 +195,84 @@ class TwgitCommonAssertsTest extends TwgitTestCase
         $sMsg = $this->_localFunctionCall('assert_tag_exists');
         $this->assertEquals("Get last tag...\nLast tag: v1.3.0", $sMsg);
     }
+
+    /**
+     * @shcovers inc/common.inc.sh::assert_clean_working_tree
+     */
+    public function testAssertCleanWorkingTree_WhenWorkingTreeEmpty ()
+    {
+        $this->_localExec('git init && git commit --allow-empty -m init');
+        $sMsg = $this->_localFunctionCall('assert_clean_working_tree');
+        $this->assertEquals("Check clean working tree...", $sMsg);
+    }
+
+    /**
+     * @shcovers inc/common.inc.sh::assert_clean_working_tree
+     */
+    public function testAssertCleanWorkingTree_ThrowExceptionWhenNewFile ()
+    {
+        $this->_localExec('git init && git commit --allow-empty -m init');
+        $this->_localExec('touch a_file');
+        $this->setExpectedException(
+            'RuntimeException',
+            "/!\ Untracked files or changes to be committed in your working tree!"
+        );
+        $this->_localFunctionCall('assert_clean_working_tree');
+    }
+
+    /**
+     * @shcovers inc/common.inc.sh::assert_clean_working_tree
+     */
+    public function testAssertCleanWorkingTree_ThrowExceptionWhenChangesToBeCommitted ()
+    {
+        $this->_localExec('git init && git commit --allow-empty -m init');
+        $this->_localExec('touch a_file && git add .');
+        $this->setExpectedException(
+            'RuntimeException',
+            "/!\ Untracked files or changes to be committed in your working tree!"
+        );
+        $this->_localFunctionCall('assert_clean_working_tree');
+    }
+
+    /**
+     * @shcovers inc/common.inc.sh::assert_clean_working_tree
+     */
+    public function testAssertCleanWorkingTree_AfterCommit ()
+    {
+        $this->_localExec('git init && git commit --allow-empty -m init');
+        $this->_localExec('touch a_file && git add . && git commit -am comment');
+        $sMsg = $this->_localFunctionCall('assert_clean_working_tree');
+        $this->assertEquals("Check clean working tree...", $sMsg);
+    }
+
+    /**
+     * @shcovers inc/common.inc.sh::assert_working_tree_is_not_on_delete_branch
+     */
+    public function testAssertWorkingTreeIsNotOnDeleteBranch_WhenOnDeleteBranch ()
+    {
+        $this->_remoteExec('git init');
+        $this->_localExec(TWGIT_EXEC . ' init 1.2.3 ' . TWGIT_REPOSITORY_ORIGIN_DIR);
+        $this->_localExec(TWGIT_EXEC . ' feature start 1; ' . TWGIT_EXEC . ' feature start 2');
+        $this->_localExec('git checkout feature-1');
+        $sMsg = $this->_localFunctionCall('assert_working_tree_is_not_on_delete_branch feature-1');
+        $sExpectedMsg =
+            "Check current branch...\n"
+            . "Cannot delete the branch 'feature-1' which you are currently on! So:\n"
+            . "git# git checkout stable\n"
+            . "Switched to branch 'stable'";
+        $this->assertContains($sExpectedMsg, $sMsg);
+    }
+
+    /**
+     * @shcovers inc/common.inc.sh::assert_working_tree_is_not_on_delete_branch
+     */
+    public function testAssertWorkingTreeIsNotOnDeleteBranch_WhenOK ()
+    {
+        $this->_remoteExec('git init');
+        $this->_localExec(TWGIT_EXEC . ' init 1.2.3 ' . TWGIT_REPOSITORY_ORIGIN_DIR);
+        $this->_localExec(TWGIT_EXEC . ' feature start 1; ' . TWGIT_EXEC . ' feature start 2');
+        $this->_localExec('git checkout feature-2');
+        $sMsg = $this->_localFunctionCall('assert_working_tree_is_not_on_delete_branch feature-1');
+        $this->assertNotContains("Cannot delete the branch 'feature-1' which you are currently on!", $sMsg);
+    }
 }

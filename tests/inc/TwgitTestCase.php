@@ -10,6 +10,15 @@ class TwgitTestCase extends PHPUnit_Framework_TestCase
 {
 
     /**
+     * Répertoire des dépôt locaux.
+     * @var array
+     */
+    private static $_aLocalRepositoriesDir = array(
+        1 => TWGIT_REPOSITORY_LOCAL_DIR,
+        2 => TWGIT_REPOSITORY_SECOND_LOCAL_DIR
+    );
+
+    /**
      * @var Shell_Adapter
      */
     protected static $_oShell = NULL;
@@ -103,12 +112,14 @@ class TwgitTestCase extends PHPUnit_Framework_TestCase
      *
      * @param string $sCmd
      * @param bool $bStripBashColors Supprime ou non la coloration Bash de la chaîne retournée
+     * @param int $iWhichLocalDir Spécifie le dépôt local concerné
      * @return string sortie d'exécution sous forme d'une chaîne de caractères.
      * @throws RuntimeException en cas d'erreur shell
+     * @see TwgitTestCase::$_aLocalRepositoriesDir
      */
-    protected function _localExec ($sCmd, $bStripBashColors=true)
+    protected function _localExec ($sCmd, $bStripBashColors=true, $iWhichLocalDir=1)
     {
-        $sLocalCmd = 'cd ' . TWGIT_REPOSITORY_LOCAL_DIR . ' && ' . $sCmd;
+        $sLocalCmd = 'cd ' . self::$_aLocalRepositoriesDir[$iWhichLocalDir] . ' && ' . $sCmd;
         return $this->_exec($sLocalCmd, $bStripBashColors);
     }
 
@@ -124,13 +135,15 @@ class TwgitTestCase extends PHPUnit_Framework_TestCase
      *
      * @param string $sCmd
      * @param bool $bStripBashColors Supprime ou non la coloration Bash de la chaîne retournée
+     * @param int $iWhichLocalDir Spécifie le dépôt local concerné
      * @return string sortie d'exécution sous forme d'une chaîne de caractères.
      * @throws RuntimeException en cas d'erreur shell
+     * @see TwgitTestCase::$_aLocalRepositoriesDir
      */
-    protected function _localFunctionCall ($sCmd, $bStripBashColors=true)
+    protected function _localFunctionCall ($sCmd, $bStripBashColors=true, $iWhichLocalDir=1)
     {
         $sFunctionCall = '/bin/bash ' . TWGIT_TESTS_INC_DIR . '/testFunction.sh ' . $sCmd;
-        return $this->_localExec($sFunctionCall, $bStripBashColors);
+        return $this->_localExec($sFunctionCall, $bStripBashColors, $iWhichLocalDir);
     }
 
     /**
@@ -146,13 +159,15 @@ class TwgitTestCase extends PHPUnit_Framework_TestCase
      *
      * @param string $sCmd
      * @param bool $bStripBashColors Supprime ou non la coloration Bash de la chaîne retournée
+     * @param int $iWhichLocalDir Spécifie le dépôt local concerné
      * @return string sortie d'exécution sous forme d'une chaîne de caractères.
      * @throws RuntimeException en cas d'erreur shell
+     * @see TwgitTestCase::$_aLocalRepositoriesDir
      */
-    protected function _localShellCodeCall ($sCmd, $bStripBashColors=true)
+    protected function _localShellCodeCall ($sCmd, $bStripBashColors=true, $iWhichLocalDir=1)
     {
         $sShellCodeCall = '/bin/bash ' . TWGIT_TESTS_INC_DIR . '/testShellCode.sh "' . $sCmd . '"';
-        return $this->_localExec($sShellCodeCall, $bStripBashColors);
+        return $this->_localExec($sShellCodeCall, $bStripBashColors, $iWhichLocalDir);
     }
 
     /**

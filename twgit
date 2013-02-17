@@ -102,6 +102,7 @@ function usage () {
 
     echo; CUI_displayMsg help 'Available commands are:'
     CUI_displayMsg help_detail '<b>feature</b>   Manage your feature branches.'
+    CUI_displayMsg help_detail '<b>demo</b>      Manage your demo branches.'
     CUI_displayMsg help_detail '<b>release</b>   Manage your release branches.'
     CUI_displayMsg help_detail '<b>hotfix</b>    Manage your hotfix branches.'
     CUI_displayMsg help_detail '<b>tag</b>       Manage your tags.'

@@ -8,6 +8,7 @@
 # Copyright (c) 2011 Twenga SA
 # Copyright (c) 2012 Geoffroy Aubry <geoffroy.aubry@free.fr>
 # Copyright (c) 2012 Laurent Toussaint <lt.laurent.toussaint@gmail.com>
+# Copyright (c) 2013 Cyrille Hemidy
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance
 # with the License. You may obtain a copy of the License at
@@ -22,6 +23,7 @@
 # @copyright 2012 Geoffroy Aubry <geoffroy.aubry@free.fr>
 # @copyright 2012 Jérémie Havret <jhavret@hi-media.com>
 # @copyright 2012 Laurent Toussaint <lt.laurent.toussaint@gmail.com>
+# @copyright 2013 Cyrille Hemidy
 # @license http://www.apache.org/licenses/LICENSE-2.0
 #
 
@@ -288,6 +290,18 @@ function get_features () {
         GET_FEATURES_RETURN_VALUE="${return_features:1}"
     fi
 }
+
+##
+# Récupère la liste des demos, sur une seule ligne séparées par des espaces.
+#
+# Ex. :
+#     get_all_demos
+#     demos="$RETVAL"
+#
+function get_all_demos () {
+    RETVAL="$(git branch -r --no-merged $TWGIT_ORIGIN/$TWGIT_STABLE | grep "$TWGIT_ORIGIN/$TWGIT_PREFIX_DEMO" | sed 's/^[* ]*//' | tr '\n' ' ' | sed 's/ *$//g')"
+}
+
 
 ##
 # Affiche le nom complet de la branche courante, chaîne vide sinon.
@@ -571,6 +585,7 @@ function assert_new_local_branch () {
 
 ##
 # S'assure que le dépôt git courant est dans le status 'working directory clean'.
+# @testedby TwgitCommonAssertsTest
 #
 function assert_clean_working_tree () {
     CUI_displayMsg processing 'Check clean working tree...'
@@ -642,6 +657,7 @@ function assert_new_and_valid_tag_name () {
 # auquel cas on checkout sur $TWGIT_STABLE.
 #
 # @param string $1 nom complet de la branche locale en instance de suppression
+# @testedby TwgitCommonAssertsTest
 #
 function assert_working_tree_is_not_on_delete_branch () {
     local branch="$1"
@@ -753,6 +769,7 @@ function process_push_branch () {
 #
 # @param string $1 commande à exécuter
 # @param string $2 message d'erreur pour le cas où...
+# @testedby TwgitCommonProcessingTest
 #
 function exec_git_command () {
     local cmd="$1"
@@ -765,6 +782,7 @@ function exec_git_command () {
 # Supprime la branche locale spécifiée.
 #
 # @param string $1 nom complet de la branche locale
+# @testedby TwgitCommonProcessingTest
 #
 function remove_local_branch () {
     local branch="$1"
@@ -778,37 +796,58 @@ function remove_local_branch () {
 ##
 # Supprime la branche distante spécifiée.
 #
-# @param string $1 nom de la branche distante sans le '$TWGIT_ORIGIN/'
+# @param string $1 nom complet de la branche distante sans le '$TWGIT_ORIGIN/'
+# @testedby TwgitCommonProcessingTest
 #
 function remove_remote_branch () {
     local branch="$1"
     if has "$TWGIT_ORIGIN/$branch" $(get_remote_branches); then
         exec_git_command "git push $TWGIT_ORIGIN :$branch" "Delete remote branch '$TWGIT_ORIGIN/$branch' failed!"
-        if [ $? -ne 0 ]; then
-            CUI_displayMsg processing "Remove remote branch '$TWGIT_ORIGIN/$branch' failed! Maybe already deleted... so:"
-            exec_git_command "git remote prune $TWGIT_ORIGIN" "Prune failed!"
-        fi
     else
         die "Remote branch '<b>$TWGIT_ORIGIN/$branch</b>' not found!"
     fi
 }
 
 ##
+# Supprime la branche spécifiée, à la fois locale et distante.
+# Suppose que les noms local et distant sont identiques.
+#
+# @param string $1 nom court de la branche locale
+# @param string $2 préfixe de branche, par exemple $TWGIT_PREFIX_FEATURE
+# @testedby TwgitCommonProcessingTest
+#
+function remove_branch () {
+    local branch="$1"
+    local branch_prefix="$2"
+    local branch_fullname="$branch_prefix$branch"
+
+    assert_valid_ref_name $branch
+    assert_clean_working_tree
+    assert_working_tree_is_not_on_delete_branch $branch_fullname
+
+    process_fetch
+    remove_local_branch $branch_fullname
+    remove_remote_branch $branch_fullname
+}
+
+##
 # Supprime la branche locale et distante de la feature spécifiée.
 #
 # @param string $1 nom court de la feature
+# @testedby TwgitCommonProcessingTest
 #
 function remove_feature () {
-    local feature="$1"
-    local feature_fullname="$TWGIT_PREFIX_FEATURE$feature"
+    remove_branch $1 $TWGIT_PREFIX_FEATURE
+}
 
-    assert_valid_ref_name $feature
-    assert_clean_working_tree
-    assert_working_tree_is_not_on_delete_branch $feature_fullname
-
-    process_fetch
-    remove_local_branch $feature_fullname
-    remove_remote_branch $feature_fullname
+##
+# Supprime la branche locale et distante de la demo spécifiée.
+#
+# @param string $1 nom court de la demo
+# @testedby TwgitCommonProcessingTest
+#
+function remove_demo () {
+    remove_branch $1 $TWGIT_PREFIX_DEMO
 }
 
 ##
@@ -827,6 +866,114 @@ function create_and_push_tag () {
 
     # Push tags:
     exec_git_command "git push --tags $TWGIT_ORIGIN $TWGIT_STABLE" "Could not push '$TWGIT_STABLE' on '$TWGIT_ORIGIN'!"
+}
+
+##
+# Crée une branche du type feature ou démo à partir du dernier tag.
+# Gère l'option '-d' supprimant préalablement la feature locale, afin de forcer le récréation de la branche.
+#
+# @param string $1 nom court de la nouvelle branche.
+# @param string $2 préfixe de branche, par exemple $TWGIT_PREFIX_FEATURE ou $TWGIT_PREFIX_DEMO.
+#
+function start_simple_branch () {
+    local branch="$1"
+    local branch_prefix="$2"
+    local branch_fullname="$branch_prefix$branch"
+
+    local -A wording=(
+        [$TWGIT_PREFIX_FEATURE]='feature'
+        [$TWGIT_PREFIX_DEMO]='demo'
+    )
+    local branch_type="${wording[$branch_prefix]}"
+
+    assert_valid_ref_name $branch
+    assert_clean_working_tree
+    process_fetch
+
+    if isset_option 'd'; then
+        if has $branch_fullname $(get_local_branches); then
+            assert_working_tree_is_not_on_delete_branch $branch_fullname
+            remove_local_branch $branch_fullname
+        fi
+    else
+        assert_new_local_branch $branch_fullname
+    fi
+
+    CUI_displayMsg processing "Check remote ${branch_type}s..."
+    if has "$TWGIT_ORIGIN/$branch_fullname" $(get_remote_branches); then
+        CUI_displayMsg processing "Remote $branch_type '$branch_fullname' detected."
+        exec_git_command "git checkout --track -b $branch_fullname $TWGIT_ORIGIN/$branch_fullname" "Could not check out $branch_type '$TWGIT_ORIGIN/$branch_fullname'!"
+    else
+        assert_tag_exists
+        local last_tag=$(get_last_tag)
+        exec_git_command "git checkout -b $branch_fullname tags/$last_tag" "Could not check out tag '$last_tag'!"
+
+        local subject="$(getFeatureSubject "$branch")"
+        [ ! -z "$subject" ] && subject=": $subject"
+        process_first_commit "$branch_type" "$branch_fullname" "$subject"
+
+        process_push_branch $branch_fullname
+        inform_about_branch_status $branch_fullname
+    fi
+    alert_old_branch $TWGIT_ORIGIN/$branch_fullname with-help
+}
+
+##
+# Exécutes les commandes de merge de la feature spécifiée dans la branche de destination, release ou demo.
+# Si le merge automatique ne peut se faire à cause de conflits, alors affiche les instructions
+# restantes pour accomplir le merge, puis exécute un "exit 1".
+#
+# @param string $1 nom court de la feature à merger dans la branche de destination
+# @param string $2 nom long de la release ou de la demo devant recevoir la feature, sans le "$TWGIT_ORIGIN/"
+#
+function merge_feature_into_branch () {
+    local feature="$1"
+    local dest_branch_fullname="$2"
+    local feature_fullname="$TWGIT_PREFIX_FEATURE$feature"
+
+    # Tests :
+    CUI_displayMsg processing 'Check remote feature...'
+    if ! has "$TWGIT_ORIGIN/$feature_fullname" $(get_remote_branches); then
+        die "Remote feature '<b>$TWGIT_ORIGIN/$feature_fullname</b>' not found!"
+    fi
+
+    # Merge :
+    local start_branch_cmd
+    if [ "${dest_branch_fullname:0:${#TWGIT_PREFIX_RELEASE}}" = "$TWGIT_PREFIX_RELEASE" ]; then
+        start_branch_cmd="$TWGIT_EXEC release start"
+    else
+        start_branch_cmd="$TWGIT_EXEC demo start ${dest_branch_fullname:${#TWGIT_PREFIX_DEMO}}"
+    fi
+
+    local cmds="$TWGIT_EXEC feature start $feature
+git pull $TWGIT_ORIGIN $feature_fullname
+$start_branch_cmd
+git pull $TWGIT_ORIGIN $dest_branch_fullname
+git merge --no-ff $feature_fullname
+git push $TWGIT_ORIGIN $dest_branch_fullname"
+    IFS="$(echo -e "\n\r")"
+    local error=0
+    for cmd in $cmds; do
+        if [ "$error" -ne 0 ]; then
+            CUI_displayMsg help_detail "$cmd"
+        else
+            [ "${cmd:0:${#TWGIT_EXEC}+1}" = "$TWGIT_EXEC " ] && msg="shell# twgit ${cmd:${#TWGIT_EXEC}+1}" || msg="${TWGIT_GIT_COMMAND_PROMPT}$cmd"
+            CUI_displayMsg processing "$msg"
+            if ! eval $cmd; then
+                error=1
+                CUI_displayMsg error "Merge '$feature_fullname' into '$dest_branch_fullname' aborted!"
+                CUI_displayMsg help 'Commands not executed:'
+                CUI_displayMsg help_detail "$cmd"
+                if [ "${cmd:0:10}" = "git merge " ]; then
+                    CUI_displayMsg help_detail "  - resolve conflicts"
+                    CUI_displayMsg help_detail "  - git add..."
+                    CUI_displayMsg help_detail "  - git commit..."
+                fi
+            fi
+        fi
+    done
+    echo
+    [ "$error" -eq 0 ] || exit 1
 }
 
 
@@ -940,6 +1087,7 @@ function display_branches () {
         [feature]='Feature: '
         [release]='Release: '
         [hotfix]='Hotfix: '
+        [demo]='Demo: '
     )
 
     if [ -z "$branches" ]; then
@@ -962,6 +1110,42 @@ function display_branches () {
             # Afficher les informations de commit :
             ! isset_option 'c' && git show $branch --pretty=medium | grep -v '^Merge: ' | head -n 3
         done
+    fi
+}
+
+##
+# Affiche une release ou une branche de démo avec les features incluses
+# et catégorisées en 'merged' ou 'merged, then in progress'.
+#
+# @param string $1 type type de super branche, parmi {'release', 'demo'}
+# @param string $2 nom complet de la branche distante, sans le "$TWGIT_ORIGIN/"
+#
+function display_super_branch () {
+    local type="$1"	# 'release', 'demo'
+    local super_branch="$2"	# 'demo-X', 'release-Y'
+    display_branches "$type" "$TWGIT_ORIGIN/$super_branch" # | head -n -1
+    CUI_displayMsg info 'Features:'
+
+    get_merged_features $super_branch
+    local merged_features="$GET_MERGED_FEATURES_RETURN_VALUE"
+
+    local prefix="$TWGIT_ORIGIN/$TWGIT_PREFIX_FEATURE"
+    for f in $merged_features; do
+        echo -n "    - $f "
+        echo -n $(CUI_displayMsg ok '[merged]')' '
+        displayFeatureSubject "${f:${#prefix}}"
+    done
+
+    get_features merged_in_progress $super_branch
+    local merged_in_progress_features="$GET_FEATURES_RETURN_VALUE"
+
+    for f in $merged_in_progress_features; do
+        echo -n "    - $f ";
+        echo -n $(CUI_displayMsg warning 'merged, then in progress.')' '
+        displayFeatureSubject "${f:${#prefix}}"
+    done
+    if [ -z "$merged_features" ] && [ -z "$merged_in_progress_features" ]; then
+        CUI_displayMsg info '    - No such branch exists.'
     fi
 }
 

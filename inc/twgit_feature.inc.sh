@@ -228,38 +228,7 @@ function cmd_start () {
     process_options "$@"
     require_parameter 'feature'
     local feature="$RETVAL"
-    local feature_fullname="$TWGIT_PREFIX_FEATURE$feature"
-
-    assert_valid_ref_name $feature
-    assert_clean_working_tree
-    process_fetch
-
-    if isset_option 'd'; then
-        if has $feature_fullname $(get_local_branches); then
-            assert_working_tree_is_not_on_delete_branch $feature_fullname
-            remove_local_branch $feature_fullname
-        fi
-    else
-        assert_new_local_branch $feature_fullname
-    fi
-
-    CUI_displayMsg processing 'Check remote features...'
-    if has "$TWGIT_ORIGIN/$feature_fullname" $(get_remote_branches); then
-        CUI_displayMsg processing "Remote feature '$feature_fullname' detected."
-        exec_git_command "git checkout --track -b $feature_fullname $TWGIT_ORIGIN/$feature_fullname" "Could not check out feature '$TWGIT_ORIGIN/$feature_fullname'!"
-    else
-        assert_tag_exists
-        local last_tag=$(get_last_tag)
-        exec_git_command "git checkout -b $feature_fullname tags/$last_tag" "Could not check out tag '$last_tag'!"
-
-        local subject="$(getFeatureSubject "$feature")"
-        [ ! -z "$subject" ] && subject=": $subject"
-        process_first_commit 'feature' "$feature_fullname" "$subject"
-
-        process_push_branch $feature_fullname
-        inform_about_branch_status $feature_fullname
-    fi
-    alert_old_branch $TWGIT_ORIGIN/$feature_fullname with-help
+    start_simple_branch "$feature" "$TWGIT_PREFIX_FEATURE"
     echo
 }
 

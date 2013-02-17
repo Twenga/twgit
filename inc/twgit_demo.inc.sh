@@ -92,38 +92,7 @@ function cmd_start () {
     process_options "$@"
     require_parameter 'demo'
     local demo="$RETVAL"
-    local demo_fullname="$TWGIT_PREFIX_DEMO$demo"
-
-    assert_valid_ref_name $demo
-    assert_clean_working_tree
-    process_fetch
-
-    if isset_option 'd'; then
-        if has $demo_fullname $(get_local_branches); then
-            assert_working_tree_is_not_on_delete_branch $demo_fullname
-            remove_local_branch $demo_fullname
-        fi
-    else
-        assert_new_local_branch $demo_fullname
-    fi
-
-    CUI_displayMsg processing 'Check remote demos...'
-    if has "$TWGIT_ORIGIN/$demo_fullname" $(get_remote_branches); then
-        CUI_displayMsg processing "Remote demo '$demo_fullname' detected."
-        exec_git_command "git checkout --track -b $demo_fullname $TWGIT_ORIGIN/$demo_fullname" "Could not check out demo '$TWGIT_ORIGIN/$demo_fullname'!"
-    else
-        assert_tag_exists
-        local last_tag=$(get_last_tag)
-        exec_git_command "git checkout -b $demo_fullname tags/$last_tag" "Could not check out tag '$last_tag'!"
-
-        local subject="$(getFeatureSubject "$demo")"
-        [ ! -z "$subject" ] && subject=": $subject"
-        process_first_commit 'feature' "$demo_fullname" "$subject"
-
-        process_push_branch $demo_fullname
-        inform_about_branch_status $demo_fullname
-    fi
-    alert_old_branch $TWGIT_ORIGIN/$demo_fullname with-help
+    start_simple_branch "$demo" "$TWGIT_PREFIX_DEMO"
     echo
 }
 

@@ -4,7 +4,7 @@
  * @package Tests
  * @author Geoffroy Aubry <geoffroy.aubry@hi-media.com>
  */
-class TwgitCommonGettersTest extends TwgitTestCase
+class TwgitCommonProcessingTest extends TwgitTestCase
 {
 
     /**

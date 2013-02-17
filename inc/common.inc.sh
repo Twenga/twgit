@@ -868,6 +868,56 @@ function create_and_push_tag () {
     exec_git_command "git push --tags $TWGIT_ORIGIN $TWGIT_STABLE" "Could not push '$TWGIT_STABLE' on '$TWGIT_ORIGIN'!"
 }
 
+##
+# Crée une branche du type feature ou démo à partir du dernier tag.
+# Gère l'option '-d' supprimant préalablement la feature locale, afin de forcer le récréation de la branche.
+#
+# @param string $1 nom court de la nouvelle branche.
+# @param string $2 préfixe de branche, par exemple $TWGIT_PREFIX_FEATURE ou $TWGIT_PREFIX_DEMO.
+#
+function start_simple_branch () {
+    local branch="$1"
+    local branch_prefix="$2"
+    local branch_fullname="$branch_prefix$branch"
+
+    local -A wording=(
+        [$TWGIT_PREFIX_FEATURE]='feature'
+        [$TWGIT_PREFIX_DEMO]='demo'
+    )
+    local branch_type="${wording[$branch_prefix]}"
+
+    assert_valid_ref_name $branch
+    assert_clean_working_tree
+    process_fetch
+
+    if isset_option 'd'; then
+        if has $branch_fullname $(get_local_branches); then
+            assert_working_tree_is_not_on_delete_branch $branch_fullname
+            remove_local_branch $branch_fullname
+        fi
+    else
+        assert_new_local_branch $branch_fullname
+    fi
+
+    CUI_displayMsg processing "Check remote ${branch_type}s..."
+    if has "$TWGIT_ORIGIN/$branch_fullname" $(get_remote_branches); then
+        CUI_displayMsg processing "Remote $branch_type '$branch_fullname' detected."
+        exec_git_command "git checkout --track -b $branch_fullname $TWGIT_ORIGIN/$branch_fullname" "Could not check out $branch_type '$TWGIT_ORIGIN/$branch_fullname'!"
+    else
+        assert_tag_exists
+        local last_tag=$(get_last_tag)
+        exec_git_command "git checkout -b $branch_fullname tags/$last_tag" "Could not check out tag '$last_tag'!"
+
+        local subject="$(getFeatureSubject "$branch")"
+        [ ! -z "$subject" ] && subject=": $subject"
+        process_first_commit "$branch_type" "$branch_fullname" "$subject"
+
+        process_push_branch $branch_fullname
+        inform_about_branch_status $branch_fullname
+    fi
+    alert_old_branch $TWGIT_ORIGIN/$branch_fullname with-help
+}
+
 
 
 #--------------------------------------------------------------------

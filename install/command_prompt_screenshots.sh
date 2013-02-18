@@ -49,6 +49,7 @@ function take_snapshot () {
 
 cmds="twgit
 twgit feature
+twgit demo
 twgit hotfix
 twgit release
 twgit tag"

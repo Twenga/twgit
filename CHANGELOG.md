@@ -1,6 +1,28 @@
 ChangeLog
 =========
 
+## Version 1.11.0 (2013-02-??)
+
+Features:
+
+  - #92 Add parameter in config file to control tag list size
+  - #88 Allow config files per repository
+  - #71 Add demo/test branches for marketing teams or other needs
+
+UI:
+
+  - #90 Add source tag on branch description
+  - #89 Add commit description of hotfixes on `twgit tag list`
+  - #84 Allow to parameter the default rendering of `twgit feature list`
+
+Core enhancements:
+
+  - #74: Update of twgit cancels the first called functionality
+
+Unit tests:
+
+  - estimated code coverage: 34% (618 of 1797 lines)
+
 ## Version 1.10.2 (2013-01-07)
 
 Fixes:
@@ -40,7 +62,7 @@ Core enhancements:
 Unit tests:
 
   - #79: Unit tests are now executable on OS X
-  - estimated code coverage: 34%
+  - estimated code coverage: 34% (575 of 1698 lines)
   
 ## Version 1.9.1 (2012-11-12)
 
@@ -67,7 +89,7 @@ Fixes:
  
 Unit tests:
 
-  - estimated code coverage: 29%
+  - estimated code coverage: 29% (471 of 1629 lines)
 
 ## Version 1.8.0 (2012-07-03)
 
@@ -97,7 +119,7 @@ Core enhancements:
 
 Unit tests:
 
-  - estimated code coverage: 25%
+  - estimated code coverage: 25% (401 of 1610 lines)
 
 Quality code:
 
@@ -154,7 +176,7 @@ Core enhancements:
 Unit tests:
 
   - #34: Add unit tests on `get_features()` and other similar functions
-  - estimated code coverage: 22%
+  - estimated code coverage: 22% (327 of 1465 lines)
 
 ## Version 1.5.1 (2012-03-05)
 
@@ -187,7 +209,7 @@ Core enhancements:
 Unit tests:
 
   - #25: Compute estimated Bash code coverage in Travis-ci
-  - Estimated code coverage: 16%
+  - Estimated code coverage: 16% (231 of 1400 lines)
 
 Quality code:
 

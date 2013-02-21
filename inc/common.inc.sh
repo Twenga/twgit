@@ -1099,7 +1099,7 @@ function display_branches () {
             if ! isset_option 'c'; then
                 [ "$add_empty_line" = "0" ] && add_empty_line=1 || echo
             fi
-            local stable_origin="$(git describe --abbrev=0 "$branch")"
+            local stable_origin="$(git describe --abbrev=0 "$branch" 2>/dev/null)"
             echo -n $(CUI_displayMsg info "${titles[$type]}$branch")
             echo -n $(CUI_displayMsg help_detail " (from <b>$stable_origin</b>) ")
 

@@ -68,10 +68,15 @@ function cmd_list () {
     process_fetch 'F'
 
     if [ -z "$demo" ]; then
-      get_all_demos
-      local demos="$RETVAL"
+        get_all_demos
+        local demos="$RETVAL"
     else
-      local demos="$TWGIT_ORIGIN/$TWGIT_PREFIX_DEMO$demo"
+        local demos="$TWGIT_ORIGIN/$TWGIT_PREFIX_DEMO$demo"
+    fi
+
+    demo_fullname="$TWGIT_PREFIX_DEMO$demo"
+    if ! has $demo_fullname $(get_local_branches); then
+        die "Local branch '<b>$demo_fullname</b>' does not exist and is required!"
     fi
 
     CUI_displayMsg help "Remote demos in progress:"

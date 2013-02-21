@@ -72,11 +72,10 @@ function cmd_list () {
         local demos="$RETVAL"
     else
         local demos="$TWGIT_ORIGIN/$TWGIT_PREFIX_DEMO$demo"
-    fi
-
-    demo_fullname="$TWGIT_PREFIX_DEMO$demo"
-    if ! has $demo_fullname $(get_local_branches); then
-        die "Local branch '<b>$demo_fullname</b>' does not exist and is required!"
+        demo_fullname="$TWGIT_PREFIX_DEMO$demo"
+        if ! has $demo_fullname $(get_local_branches); then
+            die "Local branch '<b>$demo_fullname</b>' does not exist and is required!"
+        fi
     fi
 
     CUI_displayMsg help "Remote demos in progress:"

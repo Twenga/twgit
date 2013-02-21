@@ -62,10 +62,17 @@ function cmd_help () {
 #
 function cmd_list () {
     process_options "$@"
+    require_parameter '-'
+    local demo="$RETVAL"
+
     process_fetch 'F'
 
-    get_all_demos
-    local demos="$RETVAL"
+    if [ -z "$demo" ]; then
+      get_all_demos
+      local demos="$RETVAL"
+    else
+      local demos="$TWGIT_ORIGIN/$TWGIT_PREFIX_DEMO$demo"
+    fi
 
     CUI_displayMsg help "Remote demos in progress:"
     if [ ! -z "$demos" ]; then

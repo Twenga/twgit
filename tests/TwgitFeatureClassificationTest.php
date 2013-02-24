@@ -728,6 +728,51 @@ class TwgitFeatureClassificationTest extends TwgitTestCase
     }
 
     /**
+     * -o---A--->         Stable
+     *   \   \
+     *    \   o---o--->   Release
+     *     \     /
+     *      o---B---C---> F1
+     * puis merge du tag A dans la feature en C.
+     *
+     * Le problème ici est que le merge-base de (R, F1) est A ou B (plusieurs possibilités).
+     * Par défaut, sans l'option --all, git merge-base retourne ici A qui induit (avant fix) une disparition de F1
+     * de la release (ou des démos).
+     *
+     * @shcovers inc/common.inc.sh::get_features
+     * @shcovers inc/common.inc.sh::get_merged_features
+     */
+    public function testGetFeatures_WithLastTagMergedIntoFeature ()
+    {
+        $this->_localExec(
+            TWGIT_EXEC . ' feature start 1; '
+            . TWGIT_EXEC . ' release start -I; '
+            . TWGIT_EXEC . ' release finish; '
+            . TWGIT_EXEC . ' release start -I; '
+            . TWGIT_EXEC . ' feature merge-into-release 1; '
+        );
+
+        $aMsg = array();
+        $aFeatureTypes = array('free', 'merged', 'merged_in_progress');
+        $aOut = array('', 'origin/feature-1', '');
+        foreach ($aFeatureTypes as $sType) {
+            $sCmd = 'get_features ' . $sType . ' release-1.2.0; echo \$GET_FEATURES_RETURN_VALUE';
+            $aMsg[] = $this->_localShellCodeCall($sCmd);
+        }
+        $this->assertEquals($aOut, $aMsg);
+
+        $this->_localExec(TWGIT_EXEC . ' feature start 1; git merge --no-ff stable; git push origin feature-1');
+        $aMsg = array();
+        $aFeatureTypes = array('free', 'merged', 'merged_in_progress');
+        $aOut = array('', '', 'origin/feature-1');
+        foreach ($aFeatureTypes as $sType) {
+            $sCmd = 'get_features ' . $sType . ' release-1.2.0; echo \$GET_FEATURES_RETURN_VALUE';
+            $aMsg[] = $this->_localShellCodeCall($sCmd);
+        }
+        $this->assertEquals($aOut, $aMsg);
+    }
+
+    /**
      * Désactivé car en fait get_merged_features et get_features s'appellent mutuellement,
      * ce qui n'est pas terrible...
      *

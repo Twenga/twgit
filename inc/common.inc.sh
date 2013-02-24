@@ -183,15 +183,26 @@ declare -A MERGE_BASE
 #
 # @param string $1 référence (SHA1) git
 # @param string $2 référence (SHA1) git
+# @param string $3 si 1 alors considérer tous les merge-base potentiels et ne garder que le premier
+#     de ceux appartenant aux first-parents (la branche source) de $2
+#     cf. TwgitFeatureClassificationTest::testGetFeatures_WithLastTagMergedIntoFeature()
 # @see MERGE_BASE
 # @testedby TwgitFeatureClassificationTest
 #
 function get_git_merge_base () {
     local rev1="$1"
     local rev2="$2"
+    local forced="$3"
     local key="$rev1|$rev2"
     if [ "$key" != '|' ] && [ -z "${MERGE_BASE[$key]}" ]; then
-        MERGE_BASE[$key]="$(git merge-base $rev1 $rev2 2>/dev/null)"
+        if [ "$forced" = '1' ]; then
+            MERGE_BASE[$key]="$( \
+                (git rev-list --first-parent $rev2; git merge-base --all $rev1 $rev2 2>/dev/null) \
+                | sort | uniq -d | head -n1 \
+            )"
+        else
+            MERGE_BASE[$key]="$(git merge-base $rev1 $rev2 2>/dev/null)"
+        fi
     fi
 }
 
@@ -269,7 +280,7 @@ function get_features () {
             get_git_rev_parse $f
             f_rev="${REV_PARSE[$f]}"
 
-            get_git_merge_base $release_rev $f_rev
+            get_git_merge_base $release_rev $f_rev 1
             release_merge_base="${MERGE_BASE[$release_rev|$f_rev]}"
 
             if [ "$release_merge_base" = "$f_rev" ] && [ -n "$(echo "$merged_branches" | grep $f)" ]; then

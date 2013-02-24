@@ -31,9 +31,9 @@ function usage () {
     echo; CUI_displayMsg help 'Usage:'
     CUI_displayMsg help_detail '<b>twgit demo <action></b>'
     echo; CUI_displayMsg help 'Available actions are:'
-    CUI_displayMsg help_detail '<b>list [-F]</b>'
-    CUI_displayMsg help_detail '    List remote demos with merged features.';
-    CUI_displayMsg help_detail '    Add <b>-F</b> to do not make fetch.'; echo
+    CUI_displayMsg help_detail '<b>list [<demoname>] [-F]</b>'
+    CUI_displayMsg help_detail '    List remote demos with their merged features. If <b><demoname></b> is';
+    CUI_displayMsg help_detail '    specified, then focus on this demo. Add <b>-F</b> to do not make fetch.'; echo
     CUI_displayMsg help_detail '<b>start <demoname> [-d]</b>'
     CUI_displayMsg help_detail '    Create both a new local and remote demo, or fetch the remote demo,'
     CUI_displayMsg help_detail '    or checkout the local demo. Add <b>-d</b> to delete beforehand local demo'
@@ -64,21 +64,21 @@ function cmd_list () {
     process_options "$@"
     require_parameter '-'
     local demo="$RETVAL"
+    local demos
 
     process_fetch 'F'
 
     if [ -z "$demo" ]; then
         get_all_demos
-        local demos="$RETVAL"
+        demos="$RETVAL"
+        CUI_displayMsg help "Remote demos in progress:"
     else
-        local demos="$TWGIT_ORIGIN/$TWGIT_PREFIX_DEMO$demo"
-        demo_fullname="$TWGIT_PREFIX_DEMO$demo"
-        if ! has $demo_fullname $(get_local_branches); then
-            die "Local branch '<b>$demo_fullname</b>' does not exist and is required!"
+        demos="$TWGIT_ORIGIN/$TWGIT_PREFIX_DEMO$demo"
+        if ! has "$demos" $(get_remote_branches); then
+            die "Remote demo '<b>$demos</b>' not found!"
         fi
     fi
 
-    CUI_displayMsg help "Remote demos in progress:"
     if [ ! -z "$demos" ]; then
         local add_empty_line=0
         local origin_prefix="$TWGIT_ORIGIN/"

@@ -37,7 +37,8 @@ function usage () {
     CUI_displayMsg help_detail '    List first <b><max></b> committers (authors in fact) into the current release.'
     CUI_displayMsg help_detail "    Default value of <b><max></b>: $TWGIT_DEFAULT_NB_COMMITTERS. Add <b>-F</b> to do not make fetch."; echo
     CUI_displayMsg help_detail '<b>list [-F]</b>'
-    CUI_displayMsg help_detail '    List remote releases. Add <b>-F</b> to do not make fetch.'; echo
+    CUI_displayMsg help_detail '    List remote release with their merged features.'
+    CUI_displayMsg help_detail '    Add <b>-F</b> to do not make fetch.'; echo
     CUI_displayMsg help_detail '<b>finish [<tagname>] [-I]</b>'
     CUI_displayMsg help_detail "    Merge current release branch into '$TWGIT_STABLE', create a new tag and push."
     CUI_displayMsg help_detail '    If no <b><tagname></b> is specified then current release name will be used.'

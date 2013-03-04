@@ -8,6 +8,7 @@
 # Copyright (c) 2011 Twenga SA
 # Copyright (c) 2012 Geoffroy Aubry <geoffroy.aubry@free.fr>
 # Copyright (c) 2012 Laurent Toussaint <lt.laurent.toussaint@gmail.com>
+# Copyright (c) 2013 Cyrille Hemidy
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance
 # with the License. You may obtain a copy of the License at
@@ -22,6 +23,7 @@
 # @copyright 2012 Geoffroy Aubry <geoffroy.aubry@free.fr>
 # @copyright 2012 Jérémie Havret <jhavret@hi-media.com>
 # @copyright 2012 Laurent Toussaint <lt.laurent.toussaint@gmail.com>
+# @copyright 2013 Cyrille Hemidy
 # @license http://www.apache.org/licenses/LICENSE-2.0
 #
 
@@ -181,15 +183,26 @@ declare -A MERGE_BASE
 #
 # @param string $1 référence (SHA1) git
 # @param string $2 référence (SHA1) git
+# @param string $3 si 1 alors considérer tous les merge-base potentiels et ne garder que le premier
+#     de ceux appartenant aux first-parents (la branche source) de $2
+#     cf. TwgitFeatureClassificationTest::testGetFeatures_WithLastTagMergedIntoFeature()
 # @see MERGE_BASE
 # @testedby TwgitFeatureClassificationTest
 #
 function get_git_merge_base () {
     local rev1="$1"
     local rev2="$2"
+    local forced="$3"
     local key="$rev1|$rev2"
     if [ "$key" != '|' ] && [ -z "${MERGE_BASE[$key]}" ]; then
-        MERGE_BASE[$key]="$(git merge-base $rev1 $rev2 2>/dev/null)"
+        if [ "$forced" = '1' ]; then
+            MERGE_BASE[$key]="$( \
+                (git rev-list --first-parent $rev2; git merge-base --all $rev1 $rev2 2>/dev/null) \
+                | sort | uniq -d | head -n1 \
+            )"
+        else
+            MERGE_BASE[$key]="$(git merge-base $rev1 $rev2 2>/dev/null)"
+        fi
     fi
 }
 
@@ -267,7 +280,7 @@ function get_features () {
             get_git_rev_parse $f
             f_rev="${REV_PARSE[$f]}"
 
-            get_git_merge_base $release_rev $f_rev
+            get_git_merge_base $release_rev $f_rev 1
             release_merge_base="${MERGE_BASE[$release_rev|$f_rev]}"
 
             if [ "$release_merge_base" = "$f_rev" ] && [ -n "$(echo "$merged_branches" | grep $f)" ]; then
@@ -288,6 +301,18 @@ function get_features () {
         GET_FEATURES_RETURN_VALUE="${return_features:1}"
     fi
 }
+
+##
+# Récupère la liste des demos, sur une seule ligne séparées par des espaces.
+#
+# Ex. :
+#     get_all_demos
+#     demos="$RETVAL"
+#
+function get_all_demos () {
+    RETVAL="$(git branch -r --no-merged $TWGIT_ORIGIN/$TWGIT_STABLE | grep "$TWGIT_ORIGIN/$TWGIT_PREFIX_DEMO" | sed 's/^[* ]*//' | tr '\n' ' ' | sed 's/ *$//g')"
+}
+
 
 ##
 # Affiche le nom complet de la branche courante, chaîne vide sinon.
@@ -571,6 +596,7 @@ function assert_new_local_branch () {
 
 ##
 # S'assure que le dépôt git courant est dans le status 'working directory clean'.
+# @testedby TwgitCommonAssertsTest
 #
 function assert_clean_working_tree () {
     CUI_displayMsg processing 'Check clean working tree...'
@@ -642,6 +668,7 @@ function assert_new_and_valid_tag_name () {
 # auquel cas on checkout sur $TWGIT_STABLE.
 #
 # @param string $1 nom complet de la branche locale en instance de suppression
+# @testedby TwgitCommonAssertsTest
 #
 function assert_working_tree_is_not_on_delete_branch () {
     local branch="$1"
@@ -753,6 +780,7 @@ function process_push_branch () {
 #
 # @param string $1 commande à exécuter
 # @param string $2 message d'erreur pour le cas où...
+# @testedby TwgitCommonProcessingTest
 #
 function exec_git_command () {
     local cmd="$1"
@@ -765,6 +793,7 @@ function exec_git_command () {
 # Supprime la branche locale spécifiée.
 #
 # @param string $1 nom complet de la branche locale
+# @testedby TwgitCommonProcessingTest
 #
 function remove_local_branch () {
     local branch="$1"
@@ -778,37 +807,58 @@ function remove_local_branch () {
 ##
 # Supprime la branche distante spécifiée.
 #
-# @param string $1 nom de la branche distante sans le '$TWGIT_ORIGIN/'
+# @param string $1 nom complet de la branche distante sans le '$TWGIT_ORIGIN/'
+# @testedby TwgitCommonProcessingTest
 #
 function remove_remote_branch () {
     local branch="$1"
     if has "$TWGIT_ORIGIN/$branch" $(get_remote_branches); then
         exec_git_command "git push $TWGIT_ORIGIN :$branch" "Delete remote branch '$TWGIT_ORIGIN/$branch' failed!"
-        if [ $? -ne 0 ]; then
-            CUI_displayMsg processing "Remove remote branch '$TWGIT_ORIGIN/$branch' failed! Maybe already deleted... so:"
-            exec_git_command "git remote prune $TWGIT_ORIGIN" "Prune failed!"
-        fi
     else
         die "Remote branch '<b>$TWGIT_ORIGIN/$branch</b>' not found!"
     fi
 }
 
 ##
+# Supprime la branche spécifiée, à la fois locale et distante.
+# Suppose que les noms local et distant sont identiques.
+#
+# @param string $1 nom court de la branche locale
+# @param string $2 préfixe de branche, par exemple $TWGIT_PREFIX_FEATURE
+# @testedby TwgitCommonProcessingTest
+#
+function remove_branch () {
+    local branch="$1"
+    local branch_prefix="$2"
+    local branch_fullname="$branch_prefix$branch"
+
+    assert_valid_ref_name $branch
+    assert_clean_working_tree
+    assert_working_tree_is_not_on_delete_branch $branch_fullname
+
+    process_fetch
+    remove_local_branch $branch_fullname
+    remove_remote_branch $branch_fullname
+}
+
+##
 # Supprime la branche locale et distante de la feature spécifiée.
 #
 # @param string $1 nom court de la feature
+# @testedby TwgitCommonProcessingTest
 #
 function remove_feature () {
-    local feature="$1"
-    local feature_fullname="$TWGIT_PREFIX_FEATURE$feature"
+    remove_branch $1 $TWGIT_PREFIX_FEATURE
+}
 
-    assert_valid_ref_name $feature
-    assert_clean_working_tree
-    assert_working_tree_is_not_on_delete_branch $feature_fullname
-
-    process_fetch
-    remove_local_branch $feature_fullname
-    remove_remote_branch $feature_fullname
+##
+# Supprime la branche locale et distante de la demo spécifiée.
+#
+# @param string $1 nom court de la demo
+# @testedby TwgitCommonProcessingTest
+#
+function remove_demo () {
+    remove_branch $1 $TWGIT_PREFIX_DEMO
 }
 
 ##
@@ -829,6 +879,114 @@ function create_and_push_tag () {
     exec_git_command "git push --tags $TWGIT_ORIGIN $TWGIT_STABLE" "Could not push '$TWGIT_STABLE' on '$TWGIT_ORIGIN'!"
 }
 
+##
+# Crée une branche du type feature ou démo à partir du dernier tag.
+# Gère l'option '-d' supprimant préalablement la feature locale, afin de forcer le récréation de la branche.
+#
+# @param string $1 nom court de la nouvelle branche.
+# @param string $2 préfixe de branche, par exemple $TWGIT_PREFIX_FEATURE ou $TWGIT_PREFIX_DEMO.
+#
+function start_simple_branch () {
+    local branch="$1"
+    local branch_prefix="$2"
+    local branch_fullname="$branch_prefix$branch"
+
+    local -A wording=(
+        [$TWGIT_PREFIX_FEATURE]='feature'
+        [$TWGIT_PREFIX_DEMO]='demo'
+    )
+    local branch_type="${wording[$branch_prefix]}"
+
+    assert_valid_ref_name $branch
+    assert_clean_working_tree
+    process_fetch
+
+    if isset_option 'd'; then
+        if has $branch_fullname $(get_local_branches); then
+            assert_working_tree_is_not_on_delete_branch $branch_fullname
+            remove_local_branch $branch_fullname
+        fi
+    else
+        assert_new_local_branch $branch_fullname
+    fi
+
+    CUI_displayMsg processing "Check remote ${branch_type}s..."
+    if has "$TWGIT_ORIGIN/$branch_fullname" $(get_remote_branches); then
+        CUI_displayMsg processing "Remote $branch_type '$branch_fullname' detected."
+        exec_git_command "git checkout --track -b $branch_fullname $TWGIT_ORIGIN/$branch_fullname" "Could not check out $branch_type '$TWGIT_ORIGIN/$branch_fullname'!"
+    else
+        assert_tag_exists
+        local last_tag=$(get_last_tag)
+        exec_git_command "git checkout -b $branch_fullname tags/$last_tag" "Could not check out tag '$last_tag'!"
+
+        local subject="$(getFeatureSubject "$branch")"
+        [ ! -z "$subject" ] && subject=": $subject"
+        process_first_commit "$branch_type" "$branch_fullname" "$subject"
+
+        process_push_branch $branch_fullname
+        inform_about_branch_status $branch_fullname
+    fi
+    alert_old_branch $TWGIT_ORIGIN/$branch_fullname with-help
+}
+
+##
+# Exécutes les commandes de merge de la feature spécifiée dans la branche de destination, release ou demo.
+# Si le merge automatique ne peut se faire à cause de conflits, alors affiche les instructions
+# restantes pour accomplir le merge, puis exécute un "exit 1".
+#
+# @param string $1 nom court de la feature à merger dans la branche de destination
+# @param string $2 nom long de la release ou de la demo devant recevoir la feature, sans le "$TWGIT_ORIGIN/"
+#
+function merge_feature_into_branch () {
+    local feature="$1"
+    local dest_branch_fullname="$2"
+    local feature_fullname="$TWGIT_PREFIX_FEATURE$feature"
+
+    # Tests :
+    CUI_displayMsg processing 'Check remote feature...'
+    if ! has "$TWGIT_ORIGIN/$feature_fullname" $(get_remote_branches); then
+        die "Remote feature '<b>$TWGIT_ORIGIN/$feature_fullname</b>' not found!"
+    fi
+
+    # Merge :
+    local start_branch_cmd
+    if [ "${dest_branch_fullname:0:${#TWGIT_PREFIX_RELEASE}}" = "$TWGIT_PREFIX_RELEASE" ]; then
+        start_branch_cmd="$TWGIT_EXEC release start"
+    else
+        start_branch_cmd="$TWGIT_EXEC demo start ${dest_branch_fullname:${#TWGIT_PREFIX_DEMO}}"
+    fi
+
+    local cmds="$TWGIT_EXEC feature start $feature
+git pull $TWGIT_ORIGIN $feature_fullname
+$start_branch_cmd
+git pull $TWGIT_ORIGIN $dest_branch_fullname
+git merge --no-ff $feature_fullname
+git push $TWGIT_ORIGIN $dest_branch_fullname"
+    IFS="$(echo -e "\n\r")"
+    local error=0
+    for cmd in $cmds; do
+        if [ "$error" -ne 0 ]; then
+            CUI_displayMsg help_detail "$cmd"
+        else
+            [ "${cmd:0:${#TWGIT_EXEC}+1}" = "$TWGIT_EXEC " ] && msg="shell# twgit ${cmd:${#TWGIT_EXEC}+1}" || msg="${TWGIT_GIT_COMMAND_PROMPT}$cmd"
+            CUI_displayMsg processing "$msg"
+            if ! eval $cmd; then
+                error=1
+                CUI_displayMsg error "Merge '$feature_fullname' into '$dest_branch_fullname' aborted!"
+                CUI_displayMsg help 'Commands not executed:'
+                CUI_displayMsg help_detail "$cmd"
+                if [ "${cmd:0:10}" = "git merge " ]; then
+                    CUI_displayMsg help_detail "  - resolve conflicts"
+                    CUI_displayMsg help_detail "  - git add..."
+                    CUI_displayMsg help_detail "  - git commit..."
+                fi
+            fi
+        fi
+    done
+    echo
+    [ "$error" -eq 0 ] || exit 1
+}
+
 
 
 #--------------------------------------------------------------------
@@ -847,19 +1005,19 @@ function die () {
 }
 
 ##
-# Echappe les caractères '.+$*' d'une chaîne.
+# Échappe les caractères '.+$*[]' d'une chaîne.
 #
 # @param string $1 chaîne à échapper
 #
 function escape () {
-    echo "$1" | sed 's/\([\.\+\$\*]\)/\\\1/g'
+    echo "$1" | sed 's/\([\.\+\$\*\[]\|\]\)/\\\1/g'
 }
 
 ##
 # Retourne 0 si la chaîne $1 est présente dans la concaténation du reste des paramètres, 1 sinon.
 #
 # @param string $1 chaîne à rechercher
-# @param string $2-n chaînes dans lesquelles rechercher
+# @param string $2..$n chaînes dans lesquelles rechercher
 # @return int 0 si la chaîne $1 est présente dans la concaténation du reste des paramètres, 1 sinon.
 #
 function has () {
@@ -940,6 +1098,7 @@ function display_branches () {
         [feature]='Feature: '
         [release]='Release: '
         [hotfix]='Hotfix: '
+        [demo]='Demo: '
     )
 
     if [ -z "$branches" ]; then
@@ -951,7 +1110,9 @@ function display_branches () {
             if ! isset_option 'c'; then
                 [ "$add_empty_line" = "0" ] && add_empty_line=1 || echo
             fi
-            echo -n $(CUI_displayMsg info "${titles[$type]}$branch ")
+            local stable_origin="$(git describe --abbrev=0 "$branch" 2>/dev/null)"
+            echo -n $(CUI_displayMsg info "${titles[$type]}$branch")
+            echo -n $(CUI_displayMsg help_detail " (from <b>$stable_origin</b>) ")
 
             [ "$type" = "feature" ] && displayFeatureSubject "${branch:${#prefix}}" || echo
 
@@ -960,6 +1121,42 @@ function display_branches () {
             # Afficher les informations de commit :
             ! isset_option 'c' && git show $branch --pretty=medium | grep -v '^Merge: ' | head -n 3
         done
+    fi
+}
+
+##
+# Affiche une release ou une branche de démo avec les features incluses
+# et catégorisées en 'merged' ou 'merged, then in progress'.
+#
+# @param string $1 type type de super branche, parmi {'release', 'demo'}
+# @param string $2 nom complet de la branche distante, sans le "$TWGIT_ORIGIN/"
+#
+function display_super_branch () {
+    local type="$1"	# 'release', 'demo'
+    local super_branch="$2"	# 'demo-X', 'release-Y'
+    display_branches "$type" "$TWGIT_ORIGIN/$super_branch" # | head -n -1
+    CUI_displayMsg info 'Features:'
+
+    get_merged_features $super_branch
+    local merged_features="$GET_MERGED_FEATURES_RETURN_VALUE"
+
+    local prefix="$TWGIT_ORIGIN/$TWGIT_PREFIX_FEATURE"
+    for f in $merged_features; do
+        echo -n "    - $f "
+        echo -n $(CUI_displayMsg ok '[merged]')' '
+        displayFeatureSubject "${f:${#prefix}}"
+    done
+
+    get_features merged_in_progress $super_branch
+    local merged_in_progress_features="$GET_FEATURES_RETURN_VALUE"
+
+    for f in $merged_in_progress_features; do
+        echo -n "    - $f ";
+        echo -n $(CUI_displayMsg warning 'merged, then in progress.')' '
+        displayFeatureSubject "${f:${#prefix}}"
+    done
+    if [ -z "$merged_features" ] && [ -z "$merged_in_progress_features" ]; then
+        CUI_displayMsg info '    - No such branch exists.'
     fi
 }
 
@@ -1086,7 +1283,13 @@ function displayTag () {
     pattern="${TWGIT_PREFIX_COMMIT_MSG}Contains $TWGIT_PREFIX_FEATURE"
     features="$(echo "$msg" | grep -F "$pattern" | sedRegexpExtended "s/^.*$TWGIT_PREFIX_FEATURE//")"
     if [ -z "$features" ]; then
-        CUI_displayMsg info 'No feature included.'
+        if ! git show $tag^2 1>/dev/null 2>&1; then
+            CUI_displayMsg info "No feature included and it's the first tag."
+        else
+            local previous_tag="$(git describe --abbrev=0 $tag^2)"
+            CUI_displayMsg info "Commit logs from $previous_tag tag:"
+            git log --no-merges --pretty='oneline' --abbrev-commit $previous_tag..$tag | grep -v "$(escape "$TWGIT_PREFIX_COMMIT_MSG")"
+        fi
     else
         CUI_displayMsg info 'Included features:'
         echo "$features" | while read line; do
@@ -1127,7 +1330,7 @@ function inform_about_branch_status () {
 # Convertit une liste de valeurs en une ligne CSV au format suivant et l'affiche : "v1";"va""lue2";"v\'3"
 # Attention, les blancs inter et intra paramètre bash sont remplacés par un unique espace.
 #
-# @param string $1...$n liste de valeurs
+# @param string $1..$n liste de valeurs
 # @testedby TwgitCommonToolsTest
 #
 function convertList2CSV () {
@@ -1276,11 +1479,16 @@ function displayChangelogSection () {
 #
 # À des fins de test : "touch -mt 1105200101 ~/twgit/.lastupdate"
 #
-# @param string $1 Si non vide, force la vérification de la présence d'une MAJ même si $TWGIT_UPDATE_NB_DAYS jours
-#    ne se sont pas écoulés depuis le dernier test.
+# @param string $1 Si vaut 'force', alors force la vérification de la présence d'une MAJ même
+#    si $TWGIT_UPDATE_NB_DAYS jours ne se sont pas écoulés depuis le dernier test.
+#    Mettre une autre valeur pour une mise à jour non forcée.
+# @param string $2..$n éventuelle commande twgit avec ses paramètres à réexécuter après mise à jour non forcée.
 #
 function autoupdate () {
-    local is_forced="$1"
+    local is_forced=0
+    [ $1 = 'force' ] && is_forced=1
+    shift
+
     cd "$TWGIT_ROOT_DIR"
     if git rev-parse --git-dir 1>/dev/null 2>&1; then
         [ ! -f "$TWGIT_UPDATE_PATH" ] && touch "$TWGIT_UPDATE_PATH"
@@ -1288,7 +1496,7 @@ function autoupdate () {
         local interval=$(( $TWGIT_UPDATE_NB_DAYS * 86400 ))
         local answer=''
 
-        if [ "$elapsed_time" -gt "$interval" ] || [ ! -z "$is_forced" ]; then
+        if [ "$elapsed_time" -gt "$interval" ] || [ "$is_forced" = 1 ]; then
             # Update Git :
             CUI_displayMsg processing "Fetch twgit repository for auto-update check..."
             git fetch
@@ -1305,18 +1513,18 @@ function autoupdate () {
             # If new update:
             if [ "$current_tag$current_ref_on_top" != "$last_tag" ]; then
 
-                echo -e 'New content of CHANGELOG.md:\n'
-                displayChangelogSection "$current_tag" "$last_tag"
-                echo
-
                 # Question:
                 local question
                 if [ "$current_tag" != "$last_tag" ]; then
+                    echo -e 'New content of CHANGELOG.md:\n'
+                    displayChangelogSection "$current_tag" "$last_tag"
+                    echo
                     question="Do you want to update twgit from <b>$current_tag</b> to <b>$last_tag</b> (or manually: twgit update)? [Y/N] "
                 else
-                    question="Twgit update. You are ahead of last tag <b>$last_tag</b>. Would you like to return to it? [Y/N] "
+                    question="You are ahead of last tag <b>$last_tag</b>. Would you like to return to it? [Y/N] "
                 fi
-                echo -n $(CUI_displayMsg question "$question")
+                echo -n $(CUI_displayMsg question "\033[4m/!\ <b>twgit update</b>")
+                echo -n $(CUI_displayMsg question ": $question")
 
                 # Read answer:
                 read answer
@@ -1353,7 +1561,12 @@ then consequently update '<b>$TWGIT_CONF_DIR/twgit.sh</b>':";
 
             # Invite :
             if [ "$answer" = "Y" ] || [ "$answer" = "y" ]; then
-                [ -z "$is_forced" ] && echo 'Thank you for re-entering your request.'
+                if [ "$is_forced" = 0 ]; then
+                    echo 'Continuing with your initial request...'
+                    echo
+                    cd - 1>/dev/null
+                    $TWGIT_EXEC $*
+                fi
                 exit 0
             fi
         fi

@@ -6,6 +6,22 @@
  */
 class TwgitOptionsHandlerTest extends TwgitTestCase
 {
+
+    /**
+     * Sets up the fixture, for example, open a network connection.
+     * This method is called before a test is executed.
+     */
+    public function setUp ()
+    {
+        $o = self::_getShellInstance();
+        $o->remove(TWGIT_REPOSITORY_ORIGIN_DIR);
+        $o->remove(TWGIT_REPOSITORY_LOCAL_DIR);
+        $o->remove(TWGIT_REPOSITORY_SECOND_REMOTE_DIR);
+        $o->mkdir(TWGIT_REPOSITORY_ORIGIN_DIR, '0777');
+        $o->mkdir(TWGIT_REPOSITORY_LOCAL_DIR, '0777');
+        $o->mkdir(TWGIT_REPOSITORY_SECOND_REMOTE_DIR, '0777');
+    }
+
     /**
      * @dataProvider providerTestProcessOptions
      * @shcovers inc/options_handler.inc.sh::process_options
@@ -57,6 +73,34 @@ class TwgitOptionsHandlerTest extends TwgitTestCase
             array('x -aV', 'X', '1'),
             array('x -aV', 'a', '0'),
             array('x -aV', 'V', '0'),
+        );
+    }
+
+    /**
+     * @dataProvider providerTestSetOptions
+     * @shcovers inc/options_handler.inc.sh::set_options
+     */
+    public function testSetOptions ($sInOptions, $sInOptionsToAdd, $sInOptionToTest, $sOut)
+    {
+        $sCmd = 'process_options ' . $sInOptions . '; set_options ' . $sInOptionsToAdd
+              . '; isset_option ' . $sInOptionToTest . '; echo \$?';
+        $sMsg = $this->_localShellCodeCall($sCmd);
+        $this->assertEquals($sOut, $sMsg);
+    }
+
+    public function providerTestSetOptions ()
+    {
+        return array(
+            array('-a', 'a', 'a', '0'),
+            array('-a', 'a', 'A', '1'),
+            array('-a', 'A', 'a', '0'),
+            array('-a', 'A', 'A', '0'),
+            array('-a', 'a', 'b', '1'),
+            array('-a', 'b', 'b', '0'),
+            array('-a', 'b', 'c', '1'),
+            array('-a', 'bc', 'b', '0'),
+            array('-a', 'bc', 'c', '0'),
+            array('-ab', 'bc', 'c', '0'),
         );
     }
 }

@@ -98,7 +98,7 @@ function usage () {
     echo; CUI_displayMsg help 'Usage:'
     CUI_displayMsg help_detail '<b>twgit <command> [<action>]</b>'
     CUI_displayMsg help_detail '    Always provide branch names without any prefix:'
-    CUI_displayMsg help_detail "     - '$TWGIT_PREFIX_FEATURE', '$TWGIT_PREFIX_DEMO', '$TWGIT_PREFIX_RELEASE', '$TWGIT_PREFIX_HOTFIX', (tag) '$TWGIT_PREFIX_TAG'"
+    CUI_displayMsg help_detail "      – '$TWGIT_PREFIX_FEATURE', '$TWGIT_PREFIX_DEMO', '$TWGIT_PREFIX_RELEASE', '$TWGIT_PREFIX_HOTFIX', (tag) '$TWGIT_PREFIX_TAG'"
 
     echo; CUI_displayMsg help 'Available commands are:'
     CUI_displayMsg help_detail '<b>feature</b>   Manage your feature branches.'

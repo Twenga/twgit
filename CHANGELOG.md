@@ -1,7 +1,7 @@
 ChangeLog
 =========
 
-## Version 1.11.0 (2013-02-??)
+## Version 1.11.0 (2013-03-04)
 
 Features:
 

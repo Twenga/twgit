@@ -43,6 +43,11 @@ function usage () {
     CUI_displayMsg help_detail '    be removed.'; echo
     CUI_displayMsg help_detail '<b>merge-feature <featurename> </b>'
     CUI_displayMsg help_detail '    Try to merge specified feature into current demo.'; echo
+    CUI_displayMsg help_detail '<b>status [<demoname>]</b>'
+    CUI_displayMsg help_detail '    Display information about specified demo: long name if a connector is'
+    CUI_displayMsg help_detail '    setted, last commit, status between local and remote demo and execute'
+    CUI_displayMsg help_detail '    a git status if specified demo is the current branch.'
+    CUI_displayMsg help_detail '    If no <b><demoname></b> is specified, then use current demo.'; echo
     CUI_displayMsg help_detail "Prefix '$TWGIT_PREFIX_DEMO' will be added to <b><demoname></b> parameter."; echo
     CUI_displayMsg help_detail '<b>[help]</b>'
     CUI_displayMsg help_detail '    Display this help.'; echo
@@ -145,3 +150,13 @@ function cmd_merge-feature () {
     merge_feature_into_branch "$feature" "$current_branch"
 }
 
+##
+#
+#
+function cmd_status() {
+    process_options "$@"
+    require_parameter '-' 
+    local demo="$RETVAL"
+    local current_branch=$(get_current_branch)
+                  
+}

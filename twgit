@@ -44,13 +44,20 @@
 
 # Includes :
 path="$0"; while [ -h "$path" ]; do path="$(readlink "$path")"; done
-config_file="$(dirname $path)/conf/twgit.sh"
-if [ ! -f "$config_file" ]; then
-    echo "/!\\ Config file not found: '$config_file'"
-    echo "Try to copy '${config_file%.sh}-dist.sh' to '$config_file' and configure it."
+shared_config_file="$(dirname $path)/conf/twgit.sh"
+template_config_file="${shared_config_file%.sh}-dist.sh"
+local_config_file="$(git rev-parse --show-toplevel)/.twgit"
+if [ ! -f "$shared_config_file" ]; then
+    echo "/!\\ Config file not found: '$shared_config_file'"
+    echo "Try to copy '$template_config_file' to '$shared_config_file' and configure it."
     exit 1
 fi
-. $config_file
+
+. $template_config_file
+. $shared_config_file
+if [ -f "$local_config_file" ]; then
+    . $local_config_file
+fi
 . $TWGIT_INC_DIR/common.inc.sh
 
 
@@ -91,10 +98,11 @@ function usage () {
     echo; CUI_displayMsg help 'Usage:'
     CUI_displayMsg help_detail '<b>twgit <command> [<action>]</b>'
     CUI_displayMsg help_detail '    Always provide branch names without any prefix:'
-    CUI_displayMsg help_detail "     - '$TWGIT_PREFIX_FEATURE', '$TWGIT_PREFIX_RELEASE', '$TWGIT_PREFIX_HOTFIX', (tag) '$TWGIT_PREFIX_TAG'"
+    CUI_displayMsg help_detail "      – '$TWGIT_PREFIX_FEATURE', '$TWGIT_PREFIX_DEMO', '$TWGIT_PREFIX_RELEASE', '$TWGIT_PREFIX_HOTFIX', (tag) '$TWGIT_PREFIX_TAG'"
 
     echo; CUI_displayMsg help 'Available commands are:'
     CUI_displayMsg help_detail '<b>feature</b>   Manage your feature branches.'
+    CUI_displayMsg help_detail '<b>demo</b>      Manage your demo branches.'
     CUI_displayMsg help_detail '<b>release</b>   Manage your release branches.'
     CUI_displayMsg help_detail '<b>hotfix</b>    Manage your hotfix branches.'
     CUI_displayMsg help_detail '<b>tag</b>       Manage your tags.'
@@ -183,7 +191,7 @@ function main () {
     fi
 }
 
-[ "$1" != "update" ] && [ "$TWGIT_UPDATE_AUTO" = "1" ] && autoupdate
+[ "$1" != "update" ] && [ "$TWGIT_UPDATE_AUTO" = "1" ] && autoupdate 'no-force' $*
 assert_git_configured
 assert_connectors_well_configured
 main "$@"

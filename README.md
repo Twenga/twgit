@@ -54,6 +54,8 @@ More [Installation instructions](https://github.com/Twenga/twgit/wiki/Twgit#wiki
 
 ![twgit release](https://github.com/Twenga/twgit/raw/stable/doc/screenshot-twgit-release.png)
 
+![twgit demo](https://github.com/Twenga/twgit/raw/stable/doc/screenshot-twgit-demo.png)
+
 ![twgit tag](https://github.com/Twenga/twgit/raw/stable/doc/screenshot-twgit-tag.png)
 
 ## Copyrights & licensing

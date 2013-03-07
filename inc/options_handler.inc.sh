@@ -45,6 +45,7 @@ RETVAL=''			# global to avoid subshell...
 
 ##
 # Analayse les paramètres et les répartis entre options et paramètres standards.
+# Les options sont précédées du préfixe '-' ou d'une option.
 # Rempli les tableaux globaux $FCT_OPTIONS et $FCT_PARAMETERS.
 #
 # @param string $@ liste de paramètres à analyser
@@ -70,15 +71,28 @@ function process_options {
 }
 
 ##
-# Est-ce que lavaleur spécifiée fait partie de $FCT_OPTIONS ?
+# Est-ce que la valeur spécifiée fait partie de $FCT_OPTIONS ?
 #
-# @param string $1 valeur à rechercher
+# @param string $1 valeur à rechercher, sans le préfixe '-'
 # @return 0 si présent, 1 sinon
 # @testedby TwgitOptionsHandlerTest
 #
 function isset_option () {
     local item=$1; shift
     echo " $FCT_OPTIONS " | grep -q " $(echo "$item" | sed 's/\([\.\+\$\*]\)/\\\1/g') "
+}
+
+##
+# Ajoute les options spécifiées à $FCT_OPTIONS pour les considérer actives.
+#
+# @param string $1 options à ajouter, sans le préfixe '-'
+# @testedby TwgitOptionsHandlerTest
+#
+function set_options () {
+    local items=$(echo $1); shift
+    if [ ${#items} -ge 1 ]; then
+        FCT_OPTIONS="$FCT_OPTIONS $(echo $items | sed 's/\(.\)/\1 /g')"
+    fi
 }
 
 ##

@@ -158,5 +158,21 @@ function cmd_status() {
     require_parameter '-' 
     local demo="$RETVAL"
     local current_branch=$(get_current_branch)
+
+    # Si demo non spécifiée, récupérer la courante :
+    local demo_fullname
+    if [ -z "$demo" ]; then
+        local all_demos=$(git branch -r | grep "$TWGIT_ORIGIN/$TWGIT_PREFIX_DEMO" | sed 's/^[* ]*//' | tr '\n' ' ' | sed 's/ *$//g')
+        if ! has "$TWGIT_ORIGIN/$current_branch" $all_demos; then
+            die "You must be in a demo if you didn't specify one!"
+        fi  
+        demo_fullname="$current_branch"
+    else
+        demo_fullname="$TWGIT_PREFIX_DEMO$demo"
+        if ! has $demo_fullname $(get_local_branches); then
+            die "Local branch '<b>$demo_fullname</b>' does not exist and is required!"
+        fi  
+    fi 
+
                   
 }

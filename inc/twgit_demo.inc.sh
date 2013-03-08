@@ -174,5 +174,18 @@ function cmd_status() {
         fi  
     fi 
 
+    echo     
+    display_branches 'feature' "$TWGIT_ORIGIN/$demo_fullname"
+    echo     
+    inform_about_branch_status $demo_fullname
+    if [ "$demo_fullname" = "$current_branch" ]; then
+        exec_git_command "git status" "Error while git status!"
+        if [ "$(git config --get color.status)" != 'always' ]; then
+            echo
+            CUI_displayMsg help "Try this to get colored status in this command: <b>git config --global color.status always</b>"
+        fi  
+    fi      
+    echo  
+
                   
 }

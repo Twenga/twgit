@@ -90,7 +90,7 @@ function cmd_committers () {
     local feature="$RETVAL"
     local feature_fullname
 
-    local all_features=$(git branch -r | grep "$TWGIT_ORIGIN/$TWGIT_PREFIX_FEATURE" | sed 's/^[* ]*//' | tr '\n' ' ' | sed 's/ *$//g')
+    local all_features=$(git branch --no-color -r | grep "$TWGIT_ORIGIN/$TWGIT_PREFIX_FEATURE" | sed 's/^[* ]*//' | tr '\n' ' ' | sed 's/ *$//g')
     if [ -z "$feature" ]; then
         feature_fullname="$(get_current_branch)"
         if ! has "$TWGIT_ORIGIN/$feature_fullname" $all_features; then
@@ -139,7 +139,7 @@ function cmd_list () {
 
     local features
     local prefix="$TWGIT_ORIGIN/$TWGIT_PREFIX_FEATURE"
-    features=$(git branch -r --merged $TWGIT_ORIGIN/$TWGIT_STABLE | grep "$TWGIT_ORIGIN/$TWGIT_PREFIX_FEATURE" | sed 's/^[* ]*//')
+    features=$(git branch --no-color -r --merged $TWGIT_ORIGIN/$TWGIT_STABLE | grep "$TWGIT_ORIGIN/$TWGIT_PREFIX_FEATURE" | sed 's/^[* ]*//')
     if isset_option 'x'; then
         display_csv_branches "$features" "merged into stable"
     elif [ ! -z "$features" ]; then
@@ -259,7 +259,7 @@ function cmd_status () {
     # Si feature non spécifiée, récupérer la courante :
     local feature_fullname
     if [ -z "$feature" ]; then
-        local all_features=$(git branch -r | grep "$TWGIT_ORIGIN/$TWGIT_PREFIX_FEATURE" | sed 's/^[* ]*//' | tr '\n' ' ' | sed 's/ *$//g')
+        local all_features=$(git branch --no-color -r | grep "$TWGIT_ORIGIN/$TWGIT_PREFIX_FEATURE" | sed 's/^[* ]*//' | tr '\n' ' ' | sed 's/ *$//g')
         if ! has "$TWGIT_ORIGIN/$current_branch" $all_features; then
             die "You must be in a feature if you didn't specify one!"
         fi
@@ -308,7 +308,7 @@ function cmd_merge-into-release () {
     # Si feature non spécifiée, récupérer la courante :
     local feature_fullname
     if [ -z "$feature" ]; then
-        local all_features=$(git branch -r --no-merged $TWGIT_ORIGIN/$TWGIT_STABLE | grep "$TWGIT_ORIGIN/$TWGIT_PREFIX_FEATURE" | sed 's/^[* ]*//' | tr '\n' ' ' | sed 's/ *$//g')
+        local all_features=$(git branch --no-color -r --no-merged $TWGIT_ORIGIN/$TWGIT_STABLE | grep "$TWGIT_ORIGIN/$TWGIT_PREFIX_FEATURE" | sed 's/^[* ]*//' | tr '\n' ' ' | sed 's/ *$//g')
         local current_branch=$(get_current_branch)
         if ! has "$TWGIT_ORIGIN/$current_branch" $all_features; then
             die "You must be in a feature if you didn't specify one!"
@@ -366,7 +366,7 @@ function cmd_what-changed () {
             short_last_ref="${last_ref:0:7}"
         fi
     else
-        local all_features=$(git branch -r --no-merged $TWGIT_ORIGIN/$TWGIT_STABLE | grep "$TWGIT_ORIGIN/$TWGIT_PREFIX_FEATURE" | sed 's/^[* ]*//' | tr '\n' ' ' | sed 's/ *$//g')
+        local all_features=$(git branch --no-color -r --no-merged $TWGIT_ORIGIN/$TWGIT_STABLE | grep "$TWGIT_ORIGIN/$TWGIT_PREFIX_FEATURE" | sed 's/^[* ]*//' | tr '\n' ' ' | sed 's/ *$//g')
         local current_branch=$(get_current_branch)
         if ! has "$TWGIT_ORIGIN/$current_branch" $all_features; then
             die "You must be in a feature if you don't specified one!"

@@ -64,6 +64,7 @@ function cmd_help () {
 # Liste les branches de demo.
 # Détaille les features incluses dans chaque branche demo.
 # Gère l'option '-F' permettant d'éviter le fetch.
+# Gère l'option '-c' compactant l'affichage en masquant les détails de commit auteur et date.
 #
 function cmd_list () {
     process_options "$@"
@@ -127,7 +128,9 @@ function cmd_remove () {
 }
 
 ##
+# Try to merge specified feature into current demo.
 #
+# @param string $1 feature to merge in demo
 #
 function cmd_merge-feature () {
     process_options "$@"
@@ -151,11 +154,16 @@ function cmd_merge-feature () {
 }
 
 ##
+# Display information about specified demo: long name if a connector is
+# setted, last commit, status between local and remote demo and execute
+# a git status if specified demo is the current branch.
+# If no <demoname> is specified, then use current demo.
 #
+# @param string $1 optional demo, if empty then use current demo.
 #
 function cmd_status() {
     process_options "$@"
-    require_parameter '-' 
+    require_parameter '-'
     local demo="$RETVAL"
     local current_branch=$(get_current_branch)
 
@@ -165,27 +173,25 @@ function cmd_status() {
         local all_demos=$(git branch -r | grep "$TWGIT_ORIGIN/$TWGIT_PREFIX_DEMO" | sed 's/^[* ]*//' | tr '\n' ' ' | sed 's/ *$//g')
         if ! has "$TWGIT_ORIGIN/$current_branch" $all_demos; then
             die "You must be in a demo if you didn't specify one!"
-        fi  
+        fi
         demo_fullname="$current_branch"
     else
         demo_fullname="$TWGIT_PREFIX_DEMO$demo"
         if ! has $demo_fullname $(get_local_branches); then
             die "Local branch '<b>$demo_fullname</b>' does not exist and is required!"
-        fi  
-    fi 
+        fi
+    fi
 
-    echo     
+    echo
     display_branches 'feature' "$TWGIT_ORIGIN/$demo_fullname"
-    echo     
+    echo
     inform_about_branch_status $demo_fullname
     if [ "$demo_fullname" = "$current_branch" ]; then
         exec_git_command "git status" "Error while git status!"
         if [ "$(git config --get color.status)" != 'always' ]; then
             echo
             CUI_displayMsg help "Try this to get colored status in this command: <b>git config --global color.status always</b>"
-        fi  
-    fi      
-    echo  
-
-                  
+        fi
+    fi
+    echo
 }

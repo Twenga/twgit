@@ -13,6 +13,9 @@
 # Parameters:
 sCmds="$1"; shift
 
+# Absolute path of the top-level directory of the current user repository:
+TWGIT_USER_REPOSITORY_ROOT_DIR="$(git rev-parse --show-toplevel 2>/dev/null)"
+
 # Includes:
 . $(dirname $0)/../../conf/twgit.sh
 . $TWGIT_INC_DIR/common.inc.sh

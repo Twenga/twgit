@@ -147,12 +147,11 @@ class TwgitReleaseTest extends TwgitTestCase
      */
     public function testFinish_WithMinorRelease ()
     {
-        $this->_localShellCodeCall('echo \'2;The subject\' > \$TWGIT_FEATURES_SUBJECT_PATH');
-
         $this->_remoteExec('git init');
         $this->_localExec(TWGIT_EXEC . ' init 1.2.3 ' . TWGIT_REPOSITORY_ORIGIN_DIR);
         $this->_localExec(TWGIT_EXEC . ' release start -I');
 
+        $this->_localExec('echo \'2;The subject\' > .twgit_features_subject');
         $this->_localExec(TWGIT_EXEC . ' feature start 1');
         $this->_localExec(TWGIT_EXEC . ' feature start 2');
         $this->_localExec('git merge --no-ff feature-1; git commit --allow-empty -m "empty"; git push origin;');

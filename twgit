@@ -42,11 +42,14 @@
 
 
 
+# Absolute path of the top-level directory of the current user repository:
+TWGIT_USER_REPOSITORY_ROOT_DIR="$(git rev-parse --show-toplevel 2>/dev/null)"
+
 # Includes :
 path="$0"; while [ -h "$path" ]; do path="$(readlink "$path")"; done
 shared_config_file="$(dirname $path)/conf/twgit.sh"
 template_config_file="${shared_config_file%.sh}-dist.sh"
-local_config_file="$(git rev-parse --show-toplevel)/.twgit"
+local_config_file="$TWGIT_USER_REPOSITORY_ROOT_DIR/.twgit"
 if [ ! -f "$shared_config_file" ]; then
     echo "/!\\ Config file not found: '$shared_config_file'"
     echo "Try to copy '$template_config_file' to '$shared_config_file' and configure it."

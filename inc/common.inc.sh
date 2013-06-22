@@ -1418,6 +1418,14 @@ function init () {
         process_push_branch $TWGIT_STABLE
     fi
 
+    # Add minimal .gitignore ignoring '/.twgit_features_subject'
+    if [ ! -f '.gitignore' ]; then
+        echo /.twgit_features_subject > .gitignore
+        exec_git_command "git add .gitignore" "Add minimal .gitignore failed!"
+        CUI_displayMsg processing "${TWGIT_GIT_COMMAND_PROMPT}git commit -m 'Add minimal .gitignore'"
+        git commit -m 'Add minimal .gitignore' || die 'Add minimal .gitignore failed!'
+        exec_git_command "git push $TWGIT_ORIGIN $TWGIT_STABLE" "Add minimal .gitignore failed!"
+    fi
     create_and_push_tag "$tag_fullname" "First tag."
 }
 

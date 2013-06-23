@@ -60,7 +60,7 @@ class TwgitFeatureTest extends TwgitTestCase
         $this->_localShellCodeCall('function getFeatureSubject(){ echo;}; . \$TWGIT_INC_DIR/twgit_feature.inc.sh; cmd_start 1');
         $sMsg = $this->_localExec('git show HEAD --format="%s"');
         $this->assertEquals("[twgit] Init feature 'feature-1'.", $sMsg);
-        $sMsg = $this->_localExec('git show HEAD~1 --format="%s"');
+        $sMsg = $this->_localExec('git show HEAD~2 --format="%s"'); // HEAD~1 = 'Add minimal .gitignore'…
         $this->assertEquals("[twgit] Init branch 'stable'.", $sMsg);
     }
 
@@ -74,7 +74,7 @@ class TwgitFeatureTest extends TwgitTestCase
         $this->_localShellCodeCall('function getFeatureSubject(){ echo \"Bla\'\\\\\"bla\";}; . \$TWGIT_INC_DIR/twgit_feature.inc.sh; cmd_start 1');
         $sMsg = $this->_localExec('git show HEAD --format="%s"');
         $this->assertEquals("[twgit] Init feature 'feature-1': Bla'\"bla.", $sMsg);
-        $sMsg = $this->_localExec('git show HEAD~1 --format="%s"');
+        $sMsg = $this->_localExec('git show HEAD~2 --format="%s"'); // HEAD~1 = 'Add minimal .gitignore'…
         $this->assertEquals("[twgit] Init branch 'stable'.", $sMsg);
     }
 

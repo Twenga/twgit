@@ -636,6 +636,7 @@ class TwgitFeatureClassificationTest extends TwgitTestCase
      *      \       \     /
      *       o---o---o---o--->
      *
+     * @medium
      * @shcovers inc/common.inc.sh::get_features
      * @shcovers inc/common.inc.sh::get_merged_features
      */

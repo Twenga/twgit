@@ -83,10 +83,7 @@ class TwgitCommonProcessingTest extends TwgitTestCase
      */
     public function testRemoveRemoteBranch_WhenExistsAndNotAlreadyDeleted ()
     {
-        $this->_localExec(
-            TWGIT_EXEC . ' feature start 1; '
-            . TWGIT_EXEC . ' feature start 2; '
-        );
+        $this->_localExec(TWGIT_EXEC . ' feature start 1; ' . TWGIT_EXEC . ' feature start 2; ');
         $this->_localFunctionCall('remove_remote_branch feature-1');
         $sMsg = $this->_localExec("git branch -a | sed 's/^[* ]*//' | sed 's/ *$//g'");
         $this->assertEquals(

@@ -63,14 +63,12 @@ class TwgitTagTest extends TwgitTestCase
     }
 
     /**
+     * @medium
      * @dataProvider providerTestListWithValidTag
      * @shcovers inc/twgit_tag.inc.sh::cmd_list
      */
     public function testList_WithValidTag ($sSubCmd, $sExpectedResult)
     {
-        $this->_localShellCodeCall('echo \'2;The subject of 2\' > \$TWGIT_FEATURES_SUBJECT_PATH');
-        $this->_localShellCodeCall('echo \'4;The subject of 4\' >> \$TWGIT_FEATURES_SUBJECT_PATH');
-
         $this->_remoteExec('git init');
         $this->_localExec(
             "git init && \\
@@ -80,6 +78,8 @@ class TwgitTagTest extends TwgitTestCase
         $this->_localExec(TWGIT_EXEC . ' init 1.2.3 ' . TWGIT_REPOSITORY_ORIGIN_DIR);
         $this->_localExec(TWGIT_EXEC . ' release start -I');
 
+        $this->_localExec('echo \'2;The subject of 2\' > .twgit_features_subject');
+        $this->_localExec('echo \'4;The subject of 4\' >> .twgit_features_subject');
         $this->_localExec(TWGIT_EXEC . ' feature start 1');
         $this->_localExec(TWGIT_EXEC . ' feature start 2');
         $this->_localExec('git merge --no-ff feature-1; git commit --allow-empty -m "empty"; git push origin;');
@@ -92,8 +92,8 @@ class TwgitTagTest extends TwgitTestCase
         $this->_localExec(TWGIT_EXEC . ' feature merge-into-release 5');
         $this->_localExec(TWGIT_EXEC . ' release finish -I');
 
-        $this->_localShellCodeCall('echo \'1;The NEW subject of 1\' > \$TWGIT_FEATURES_SUBJECT_PATH');
-        $this->_localShellCodeCall('echo \'2;The NEW subject of 2\' >> \$TWGIT_FEATURES_SUBJECT_PATH');
+        $this->_localExec('echo \'1;The NEW subject of 1\' > .twgit_features_subject');
+        $this->_localExec('echo \'2;The NEW subject of 2\' >> .twgit_features_subject');
         $sMsg = $this->_localExec(TWGIT_EXEC . ' tag list' . $sSubCmd);
         $sMsg = preg_replace("/^Date:.*$/mi", 'Date: ---', $sMsg);
         $this->assertContains($sExpectedResult, $sMsg);

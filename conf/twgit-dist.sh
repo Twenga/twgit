@@ -32,7 +32,8 @@ TWGIT_TMP_DIR="/tmp"
 TWGIT_BASH_EXEC="/bin/bash"
 TWGIT_EXEC="$TWGIT_BASH_EXEC $TWGIT_ROOT_DIR/twgit"
 
-TWGIT_FEATURES_SUBJECT_PATH="$TWGIT_ROOT_DIR/.features_subject"
+# Name of file in root directory of each user repository to cache Redmine and Github feature's subject:
+TWGIT_FEATURES_SUBJECT_FILENAME='.twgit_features_subject'
 TWGIT_UPDATE_PATH="$TWGIT_ROOT_DIR/.lastupdate"
 TWGIT_UPDATE_NB_DAYS=2
 TWGIT_UPDATE_AUTO=1	# Laisser à 1 pour autoriser la MAJ auto.

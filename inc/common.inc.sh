@@ -1421,6 +1421,14 @@ function init () {
         process_push_branch $TWGIT_STABLE
     fi
 
+    # Add minimal .gitignore ignoring '/.twgit_features_subject'
+    if [ ! -f '.gitignore' ]; then
+        echo /.twgit_features_subject > .gitignore
+        exec_git_command "git add .gitignore" "Add minimal .gitignore failed!"
+        CUI_displayMsg processing "${TWGIT_GIT_COMMAND_PROMPT}git commit -m 'Add minimal .gitignore'"
+        git commit -m 'Add minimal .gitignore' || die 'Add minimal .gitignore failed!'
+        exec_git_command "git push $TWGIT_ORIGIN $TWGIT_STABLE" "Add minimal .gitignore failed!"
+    fi
     create_and_push_tag "$tag_fullname" "First tag."
 }
 
@@ -1535,7 +1543,6 @@ function autoupdate () {
                     CUI_displayMsg processing 'Update in progress...'
                     exec_git_command 'git reset --hard' 'Hard reset failed!'
                     exec_git_command "git checkout tags/$last_tag" "Could not check out tag '$last_tag'!"
-                    > "$TWGIT_FEATURES_SUBJECT_PATH"
 
                     # Bash autcompletion updated?
                     if ! git diff --quiet "$current_tag" "$last_tag" -- install/bash_completion.sh; then

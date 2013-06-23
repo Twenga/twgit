@@ -1469,7 +1469,10 @@ function displayChangelogSection () {
     local content="$(git show $to_tag:CHANGELOG.md)";
     content="## Version $(echo "${content#*## Version }")";
     content="$(echo "${content%## Version ${from_tag:1}*}")";
-    content="$(echo -e "$content\n" | sedRegexpExtended ':a;N;$!ba;s/\n\n(  -|```)/\n\1/g')";
+    content="$(echo -e "$content\n" \
+		| sedRegexpExtended ':a;N;$!ba;s/\n\n(  -|```)/\n\1/g' \
+		| sedRegexpExtended 's/  - \[#([0-9]+)\]\([^)]+\)/  - #\1/' \
+	)";
 
     local line
     while read line; do

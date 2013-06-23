@@ -344,6 +344,28 @@ class TwgitReleaseTest extends TwgitTestCase
         }
     }
 
+    /**
+     */
+    public function testList_WithFullColoredGit ()
+    {
+        $this->_remoteExec('git init');
+        $this->_localExec(TWGIT_EXEC . ' init 1.2.3 ' . TWGIT_REPOSITORY_ORIGIN_DIR);
+
+        $this->_localExec(TWGIT_EXEC . ' release start -I');
+        $this->_localExec(
+            "git config color.branch always\n"
+            . "git config color.diff always\n"
+            . "git config color.interactive always\n"
+            . "git config color.status always\n"
+            . "git config color.ui always\n"
+        );
+
+        $sMsg = $this->_localExec(TWGIT_EXEC . ' release list');
+        $sExpected = "(i) Remote release NOT merged into 'stable':\n"
+                   . "Release: origin/release-1.3.0 (from v1.2.3)";
+        $this->assertContains($sExpected, $sMsg);
+    }
+
     public function providerTestListAboutBranchesOutOfProcess ()
     {
         return array(

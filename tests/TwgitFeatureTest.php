@@ -79,6 +79,26 @@ class TwgitFeatureTest extends TwgitTestCase
     }
 
     /**
+     */
+    public function testList_WithFullColoredGit ()
+    {
+        $this->_remoteExec('git init');
+        $this->_localExec(TWGIT_EXEC . ' init 1.2.3 ' . TWGIT_REPOSITORY_ORIGIN_DIR);
+
+        $this->_localExec(TWGIT_EXEC . ' feature start 1');
+        $this->_localExec(
+            "git config color.branch always\n"
+            . "git config color.diff always\n"
+            . "git config color.interactive always\n"
+            . "git config color.status always\n"
+            . "git config color.ui always\n"
+        );
+
+        $sMsg = $this->_localExec(TWGIT_EXEC . ' feature list');
+        $this->assertContains("(i) Remote free features:\nFeature: origin/feature-1 (from v1.2.3)", $sMsg);
+    }
+
+    /**
     * @dataProvider providerTestListAboutBranchesOutOfProcess
     */
     public function testList_AboutBranchesOutOfProcess ($sLocalCmd, $sExpectedContent, $sNotExpectedContent)

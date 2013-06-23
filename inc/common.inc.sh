@@ -45,7 +45,7 @@
 # @param int $1 nombre des derniers hotfixes à afficher
 #
 function get_last_hotfixes () {
-    git branch -r --no-color | grep $TWGIT_ORIGIN/$TWGIT_PREFIX_HOTFIX | sed 's/^[* ] //' | sort -n | tail -n $1
+    git branch --no-color -r | grep $TWGIT_ORIGIN/$TWGIT_PREFIX_HOTFIX | sed 's/^[* ] //' | sort -n | tail -n $1
 }
 
 ##
@@ -59,7 +59,7 @@ function get_local_branches () {
 # Affiche la liste locale des branches distantes (nom complet), à raison d'une par ligne.
 #
 function get_remote_branches () {
-    git branch -r --no-color | sed 's/^[* ] //'
+    git branch --no-color -r | sed 's/^[* ] //'
 }
 
 ##
@@ -72,7 +72,7 @@ function get_dissident_remote_branches () {
     local cmd="$(git remote | grep -v "^$TWGIT_ORIGIN$" | sed -e 's/^/ -e "^/' -e 's/$/\/"/' | tr '\n' ' ')"
 
     [ -z "$cmd" ] && cmd='tee /dev/null' || cmd="grep -v $cmd"
-    git branch -r --no-color | sed 's/^[* ] //' | sed -e 's/^/ /' -e 's/$/ /' \
+    git branch --no-color -r | sed 's/^[* ] //' | sed -e 's/^/ /' -e 's/$/ /' \
         | grep -v -e " $TWGIT_ORIGIN/$TWGIT_PREFIX_FEATURE" \
             -e " $TWGIT_ORIGIN/$TWGIT_PREFIX_RELEASE" \
             -e " $TWGIT_ORIGIN/$TWGIT_PREFIX_HOTFIX" \
@@ -89,14 +89,15 @@ function get_dissident_remote_branches () {
 # Affiche le nom complet des releases distantes (avec "$TWGIT_ORIGIN/") non encore mergées à $TWGIT_ORIGIN/$TWGIT_STABLE, à raison d'une par ligne.
 #
 function get_releases_in_progress () {
-    git branch -r --no-merged $TWGIT_ORIGIN/$TWGIT_STABLE | grep "$TWGIT_ORIGIN/$TWGIT_PREFIX_RELEASE" | sed 's/^[* ]*//'
+    git branch --no-color -r --no-merged $TWGIT_ORIGIN/$TWGIT_STABLE \
+    | grep "$TWGIT_ORIGIN/$TWGIT_PREFIX_RELEASE" | sed 's/^[* ]*//'
 }
 
 ##
 # Affiche le nom complet des releases non encore mergées à $TWGIT_ORIGIN/$TWGIT_STABLE, à raison d'une par ligne.
 #
 function get_hotfixes_in_progress () {
-    git branch -r --no-merged $TWGIT_ORIGIN/$TWGIT_STABLE | grep "$TWGIT_ORIGIN/$TWGIT_PREFIX_HOTFIX" | sed 's/^[* ]*//'
+    git branch --no-color -r --no-merged $TWGIT_ORIGIN/$TWGIT_STABLE | grep "$TWGIT_ORIGIN/$TWGIT_PREFIX_HOTFIX" | sed 's/^[* ]*//'
 }
 
 ##
@@ -230,7 +231,7 @@ declare -A MERGED_BRANCHES
 function get_git_merged_branches () {
     local rev="$1"
     if [ ! -z "$rev" ] && [ -z "${MERGED_BRANCHES[$rev]}" ]; then
-        MERGED_BRANCHES[$rev]="$(git branch -r --no-color --merged $rev 2>/dev/null)"
+        MERGED_BRANCHES[$rev]="$(git branch --no-color -r --merged $rev 2>/dev/null)"
     fi
 }
 
@@ -256,14 +257,15 @@ function get_features () {
 
     if [ -z "$release" ]; then
         if [ "$feature_type" = 'free' ]; then
-            GET_FEATURES_RETURN_VALUE="$(git branch -r --no-merged $TWGIT_ORIGIN/$TWGIT_STABLE | grep "$TWGIT_ORIGIN/$TWGIT_PREFIX_FEATURE" | sed 's/^[* ]*//' | tr '\n' ' ' | sed 's/ *$//g')"
+            GET_FEATURES_RETURN_VALUE="$(git branch --no-color -r --no-merged $TWGIT_ORIGIN/$TWGIT_STABLE | grep "$TWGIT_ORIGIN/$TWGIT_PREFIX_FEATURE" | sed 's/^[* ]*//' | tr '\n' ' ' | sed 's/ *$//g')"
         else
             GET_FEATURES_RETURN_VALUE=''
         fi
     else
         release="$TWGIT_ORIGIN/$release"
         local return_features=''
-        local features=$(git branch -r | grep "$TWGIT_ORIGIN/$TWGIT_PREFIX_FEATURE" | sed 's/^[* ]*//')
+
+        local features=$(git branch --no-color -r | grep "$TWGIT_ORIGIN/$TWGIT_PREFIX_FEATURE" | sed 's/^[* ]*//')
 
         get_git_rev_parse "$TWGIT_ORIGIN/$TWGIT_STABLE"
         local head_rev="${REV_PARSE[$TWGIT_ORIGIN/$TWGIT_STABLE]}"
@@ -310,7 +312,7 @@ function get_features () {
 #     demos="$RETVAL"
 #
 function get_all_demos () {
-    RETVAL="$(git branch -r --no-merged $TWGIT_ORIGIN/$TWGIT_STABLE | grep "$TWGIT_ORIGIN/$TWGIT_PREFIX_DEMO" | sed 's/^[* ]*//' | tr '\n' ' ' | sed 's/ *$//g')"
+    RETVAL="$(git branch --no-color -r --no-merged $TWGIT_ORIGIN/$TWGIT_STABLE | grep "$TWGIT_ORIGIN/$TWGIT_PREFIX_DEMO" | sed 's/^[* ]*//' | tr '\n' ' ' | sed 's/ *$//g')"
 }
 
 
@@ -1380,7 +1382,8 @@ function init () {
     local tag_fullname="$TWGIT_PREFIX_TAG$tag"
 
     CUI_displayMsg processing "Check need for git init..."
-    if [ ! -z "$(git rev-parse --git-dir 2>&1 1>/dev/null)" ]; then
+    git rev-parse --git-dir 1>/dev/null 2>&1
+    if [ $? -ne 0 ]; then
         exec_git_command 'git init' 'Initialization of git repository failed!'
     else
         assert_clean_working_tree

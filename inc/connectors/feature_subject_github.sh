@@ -35,7 +35,7 @@ url="$(printf "https://api.github.com/repos/%s/%s/issues/%s" \
         "$TWGIT_FEATURE_SUBJECT_GITHUB_USER" \
         "$TWGIT_FEATURE_SUBJECT_GITHUB_REPOSITORY" \
         "$issue")"
-wget_cmd='wget --no-check-certificate --timeout=3 -q -O - --no-cache'
+wget_cmd='wget --no-check-certificate --timeout=3 --user-agent=Twenga-twgit -q -O - --no-cache'
 
 # Python or PHP ?
 language='?'

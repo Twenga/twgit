@@ -36,6 +36,27 @@ class TwgitHotfixTest extends TwgitTestCase
     }
 
     /**
+     */
+    public function testStart_WithFullColoredGit ()
+    {
+        $this->_remoteExec('git init');
+        $this->_localExec(TWGIT_EXEC . ' init 1.2.3 ' . TWGIT_REPOSITORY_ORIGIN_DIR);
+
+        $this->_localExec(TWGIT_EXEC . ' hotfix start -I');
+        $this->_localExec(
+            "git config color.branch always\n"
+            . "git config color.diff always\n"
+            . "git config color.interactive always\n"
+            . "git config color.status always\n"
+            . "git config color.ui always\n"
+        );
+
+        $sMsg = $this->_localExec(TWGIT_EXEC . ' hotfix start');
+        $sExpected = "(i) Local branch 'hotfix-1.2.4' up-to-date with remote 'origin/hotfix-1.2.4'.";
+        $this->assertContains($sExpected, $sMsg);
+    }
+
+    /**
      * @shcovers inc/common.inc.sh::assert_clean_stable_branch_and_checkout
      */
     public function testFinish_ThrowExceptionWhenExtraCommitIntoStable ()

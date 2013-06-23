@@ -3,7 +3,7 @@
 
 #### [Homepage](http://twgit.twenga.com/)
 
-#### Continuous integration [![travis-ci.org](https://github.com/Twenga/twgit/raw/stable/doc/travis-favicon.png)](http://travis-ci.org/Twenga/twgit)&nbsp;[![Build Status](https://secure.travis-ci.org/Twenga/twgit.png?branch=stable)](http://travis-ci.org/Twenga/twgit)
+#### Continuous integration [![travis-ci.org](doc/travis-favicon.png)](http://travis-ci.org/Twenga/twgit)&nbsp;[![Build Status](https://secure.travis-ci.org/Twenga/twgit.png?branch=stable)](http://travis-ci.org/Twenga/twgit)
 To run the test suite, simply:
 
 ```bash
@@ -39,28 +39,28 @@ More [Installation instructions](https://github.com/Twenga/twgit/wiki/Twgit#wiki
 
 ## Getting started
 
-![Getting started](https://github.com/Twenga/twgit/raw/stable/doc/getting-started.png)
+![Getting started](doc/getting-started.png)
 
 ## Documentation
 [French documentation](https://github.com/Twenga/twgit/wiki) is available in wiki, waiting English translation...
 
 ### Help on command prompt
 
-![twgit](https://github.com/Twenga/twgit/raw/stable/doc/screenshot-twgit.png)
+![twgit](doc/screenshot-twgit.png)
 
-![twgit feature](https://github.com/Twenga/twgit/raw/stable/doc/screenshot-twgit-feature.png)
+![twgit feature](doc/screenshot-twgit-feature.png)
 
-![twgit hotfix](https://github.com/Twenga/twgit/raw/stable/doc/screenshot-twgit-hotfix.png)
+![twgit hotfix](doc/screenshot-twgit-hotfix.png)
 
-![twgit release](https://github.com/Twenga/twgit/raw/stable/doc/screenshot-twgit-release.png)
+![twgit release](doc/screenshot-twgit-release.png)
 
-![twgit demo](https://github.com/Twenga/twgit/raw/stable/doc/screenshot-twgit-demo.png)
+![twgit demo](doc/screenshot-twgit-demo.png)
 
-![twgit tag](https://github.com/Twenga/twgit/raw/stable/doc/screenshot-twgit-tag.png)
+![twgit tag](doc/screenshot-twgit-tag.png)
 
 ## Copyrights & licensing
 Licensed under the Apache License 2.0.
-See [LICENSE](https://github.com/Twenga/twgit/blob/stable/LICENSE) file for details.
+See [LICENSE](LICENSE) file for details.
 
 ## ChangeLog
-See [CHANGELOG](https://github.com/Twenga/twgit/blob/stable/CHANGELOG.md) file for details.
+See [CHANGELOG](CHANGELOG.md) file for details.

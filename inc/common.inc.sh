@@ -1540,7 +1540,6 @@ function autoupdate () {
                     CUI_displayMsg processing 'Update in progress...'
                     exec_git_command 'git reset --hard' 'Hard reset failed!'
                     exec_git_command "git checkout tags/$last_tag" "Could not check out tag '$last_tag'!"
-                    > "$TWGIT_FEATURES_SUBJECT_PATH"
 
                     # Bash autcompletion updated?
                     if ! git diff --quiet "$current_tag" "$last_tag" -- install/bash_completion.sh; then

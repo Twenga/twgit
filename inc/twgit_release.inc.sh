@@ -39,6 +39,8 @@ function usage () {
     CUI_displayMsg help_detail '<b>list [-F]</b>'
     CUI_displayMsg help_detail '    List remote release with their merged features.'
     CUI_displayMsg help_detail '    Add <b>-F</b> to do not make fetch.'; echo
+    CUI_displayMsg help_detail '<b>push</b>'
+    CUI_displayMsg help_detail '    Push release to origin'; echo
     CUI_displayMsg help_detail '<b>finish [<tagname>] [-I]</b>'
     CUI_displayMsg help_detail "    Merge current release branch into '$TWGIT_STABLE', create a new tag and push."
     CUI_displayMsg help_detail '    If no <b><tagname></b> is specified then current release name will be used.'
@@ -118,6 +120,19 @@ function cmd_list () {
 
     alert_dissident_branches
 }
+
+##
+# push de la release
+#
+function cmd_push () {
+    process_options "$@"
+    local current_branch=$(get_current_branch)
+
+    assert_clean_working_tree
+    process_push_branch $current_branch
+
+}
+
 
 ##
 # Crée une nouvelle release à partir du dernier tag.

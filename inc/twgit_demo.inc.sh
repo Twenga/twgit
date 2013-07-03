@@ -43,6 +43,8 @@ function usage () {
     CUI_displayMsg help_detail '    be removed.'; echo
     CUI_displayMsg help_detail '<b>merge-feature <featurename> </b>'
     CUI_displayMsg help_detail '    Try to merge specified feature into current demo.'; echo
+    CUI_displayMsg help_detail '<b>push</b>'
+    CUI_displayMsg help_detail '    Push demo to origin'; echo
     CUI_displayMsg help_detail '<b>status [<demoname>]</b>'
     CUI_displayMsg help_detail '    Display information about specified demo: long name if a connector is'
     CUI_displayMsg help_detail '    setted, last commit, status between local and remote demo and execute'
@@ -99,6 +101,19 @@ function cmd_list () {
     fi
     echo
 }
+
+##
+# push de la demo
+#
+function cmd_push () {
+    process_options "$@"
+    local current_branch=$(get_current_branch)
+
+    assert_clean_working_tree
+    process_push_branch $current_branch
+
+}
+
 
 ##
 # Crée une nouvelle demo à partir du dernier tag.

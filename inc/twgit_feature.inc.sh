@@ -46,6 +46,8 @@ function usage () {
     CUI_displayMsg help_detail '<b>migrate <oldfeaturefullname> <newfeaturename></b>'
     CUI_displayMsg help_detail '    Migrate old branch to new process.'
     CUI_displayMsg help_detail '    For example: "twgit feature migrate rm7880 7880"'; echo
+    CUI_displayMsg help_detail '<b>push</b>'
+    CUI_displayMsg help_detail '    Push feature to origin'; echo
     CUI_displayMsg help_detail '<b>remove <featurename></b>'
     CUI_displayMsg help_detail '    Remove both local and remote specified feature branch.'; echo
     CUI_displayMsg help_detail '<b>start <featurename> [-d]</b>'
@@ -323,6 +325,18 @@ function cmd_merge-into-release () {
     fi
 
     merge_feature_into_branch "$feature" "$release_fullname"
+}
+
+##
+# push de la feature.
+#
+function cmd_push () {
+    process_options "$@"
+    local current_branch=$(get_current_branch)
+
+    assert_clean_working_tree
+    process_push_branch $current_branch
+
 }
 
 ##

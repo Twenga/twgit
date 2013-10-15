@@ -74,7 +74,7 @@ class TwgitCommonGettersTest extends TwgitTestCase
      */
     public function testGetFeatureSubject_WithNoParameter ()
     {
-        $sCmd = 'TWGIT_FEATURES_SUBJECT_PATH="$(tempfile -d ' . TWGIT_TMP_DIR . ')"; '
+        $sCmd = 'TWGIT_FEATURES_SUBJECT_PATH="$(mktemp ' . TWGIT_TMP_DIR . '/XXXXXXXXXX)"; '
               . 'echo \'2;The subject of 2\' > \$TWGIT_FEATURES_SUBJECT_PATH; '
               . 'config_file=\'F\'; TWGIT_FEATURE_SUBJECT_CONNECTOR=\'github\'; '
               . 'getFeatureSubject; '
@@ -88,7 +88,7 @@ class TwgitCommonGettersTest extends TwgitTestCase
      */
     public function testGetFeatureSubject_WithParameterButNoSubjectNorConnector ()
     {
-        $sCmd = 'TWGIT_FEATURES_SUBJECT_PATH="$(tempfile -d ' . TWGIT_TMP_DIR . ')"; '
+        $sCmd = 'TWGIT_FEATURES_SUBJECT_PATH="$(mktemp ' . TWGIT_TMP_DIR . '/XXXXXXXXXX)"; '
               . 'config_file=\'F\'; TWGIT_FEATURE_SUBJECT_CONNECTOR=\'no_connector\'; '
               . 'getFeatureSubject 2; '
               . 'rm -f "\$TWGIT_FEATURES_SUBJECT_PATH"';
@@ -101,7 +101,7 @@ class TwgitCommonGettersTest extends TwgitTestCase
      */
     public function testGetFeatureSubject_WithParameterAndSubject ()
     {
-        $sCmd = 'TWGIT_FEATURES_SUBJECT_PATH="$(tempfile -d ' . TWGIT_TMP_DIR . ')"; '
+        $sCmd = 'TWGIT_FEATURES_SUBJECT_PATH="$(mktemp ' . TWGIT_TMP_DIR . '/XXXXXXXXXX)"; '
               . 'echo \'2;The subject of 2\' > \$TWGIT_FEATURES_SUBJECT_PATH; '
               . 'config_file=\'F\'; TWGIT_FEATURE_SUBJECT_CONNECTOR=\'no_connector\'; '
               . 'getFeatureSubject 2; '
@@ -115,7 +115,7 @@ class TwgitCommonGettersTest extends TwgitTestCase
      */
 //     public function testGetFeatureSubject_WithParameterAndConnector ()
 //     {
-//         $sCmd = 'TWGIT_FEATURES_SUBJECT_PATH="$(tempfile -d ' . TWGIT_TMP_DIR . ')"; '
+//         $sCmd = 'TWGIT_FEATURES_SUBJECT_PATH="$(mktemp ' . TWGIT_TMP_DIR . '/XXXXXXXXXX)"; '
 //               . 'config_file=\'F\'; TWGIT_FEATURE_SUBJECT_CONNECTOR=\'github\'; '
 //               . 'getFeatureSubject 2; '
 //               . 'rm -f "\$TWGIT_FEATURES_SUBJECT_PATH"';

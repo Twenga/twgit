@@ -142,7 +142,7 @@ class TwgitTestCase extends PHPUnit_Framework_TestCase
      */
     protected function _localFunctionCall ($sCmd, $bStripBashColors=true, $iWhichLocalDir=1)
     {
-        $sFunctionCall = '/bin/bash ' . TWGIT_TESTS_INC_DIR . '/testFunction.sh ' . $sCmd;
+        $sFunctionCall = TWGIT_BASH_EXEC . ' ' . TWGIT_TESTS_INC_DIR . '/testFunction.sh ' . $sCmd;
         return $this->_localExec($sFunctionCall, $bStripBashColors, $iWhichLocalDir);
     }
 
@@ -166,7 +166,7 @@ class TwgitTestCase extends PHPUnit_Framework_TestCase
      */
     protected function _localShellCodeCall ($sCmd, $bStripBashColors=true, $iWhichLocalDir=1)
     {
-        $sShellCodeCall = '/bin/bash ' . TWGIT_TESTS_INC_DIR . '/testShellCode.sh "' . $sCmd . '"';
+        $sShellCodeCall = TWGIT_BASH_EXEC . ' ' . TWGIT_TESTS_INC_DIR . '/testShellCode.sh "' . $sCmd . '"';
         return $this->_localExec($sShellCodeCall, $bStripBashColors, $iWhichLocalDir);
     }
 

@@ -165,7 +165,7 @@ class TwgitFeatureTest extends TwgitTestCase
 
         $sMsg = $this->_localExec(TWGIT_EXEC . ' feature merge-into-release 42');
         $sExpectedMsg = "git# git pull origin release-1.3.0\n"
-            . "From /tmp/origin\n"
+            . "From " . TWGIT_REPOSITORY_ORIGIN_DIR . "\n"
             . " * branch            release-1.3.0 -> FETCH_HEAD\n"
             . "Already up-to-date.\n"
             . "git# git merge --no-ff feature-42\n"

@@ -22,8 +22,12 @@ define('TWGIT_AUTH_ERROR_SUPPR_OP', true);
 define('TWGIT_BASH_EXEC', '/bin/bash');
 define('TWGIT_EXEC', TWGIT_BASH_EXEC . ' ' . TWGIT_ROOT_DIR . '/twgit');
 
+// Branches
+define('TWGIT_ORIGIN', 'origin');
+define('TWGIT_STABLE', 'stable');
+
 // Other
-define('TWGIT_REPOSITORY_ORIGIN_DIR', TWGIT_TMP_DIR . '/origin');
+define('TWGIT_REPOSITORY_ORIGIN_DIR', TWGIT_TMP_DIR . '/' . TWGIT_ORIGIN);
 define('TWGIT_REPOSITORY_LOCAL_DIR', TWGIT_TMP_DIR . '/local');
 define('TWGIT_REPOSITORY_SECOND_LOCAL_DIR', TWGIT_TMP_DIR . '/local2');
 define('TWGIT_REPOSITORY_SECOND_REMOTE_DIR', TWGIT_TMP_DIR . '/second');

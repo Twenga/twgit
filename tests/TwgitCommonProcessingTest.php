@@ -64,7 +64,9 @@ class TwgitCommonProcessingTest extends TwgitTestCase
         $this->_localFunctionCall('remove_local_branch feature-1');
         $sMsg = $this->_localExec("git branch -a | sed 's/^[* ]*//' | sed 's/ *$//g'");
         $this->assertEquals(
-            "feature-2\nstable\nremotes/origin/feature-1\nremotes/origin/feature-2\nremotes/origin/stable",
+            "feature-2\n" .
+            self::STABLE . "\n" .
+            implode("\n", self::_remotes(array('feature-1', 'feature-2', self::STABLE))),
             $sMsg
         );
     }
@@ -74,7 +76,7 @@ class TwgitCommonProcessingTest extends TwgitTestCase
      */
     public function testRemoveRemoteBranch_ThrowExceptionWhenNotExists ()
     {
-        $this->setExpectedException('RuntimeException', "/!\ Remote branch 'origin/notexists' not found!");
+        $this->setExpectedException('RuntimeException', "/!\ Remote branch '" . self::ORIGIN . "/notexists' not found!");
         $sMsg = $this->_localFunctionCall('remove_remote_branch notexists');
     }
 
@@ -87,7 +89,10 @@ class TwgitCommonProcessingTest extends TwgitTestCase
         $this->_localFunctionCall('remove_remote_branch feature-1');
         $sMsg = $this->_localExec("git branch -a | sed 's/^[* ]*//' | sed 's/ *$//g'");
         $this->assertEquals(
-            "feature-1\nfeature-2\nstable\nremotes/origin/feature-2\nremotes/origin/stable",
+            "feature-1\n" .
+            "feature-2\n" .
+            self::STABLE . "\n" .
+            implode("\n", self::_remotes(array('feature-2', self::STABLE))),
             $sMsg
         );
     }
@@ -99,12 +104,12 @@ class TwgitCommonProcessingTest extends TwgitTestCase
     {
         $this->_localExec(TWGIT_EXEC . ' feature start 1; ' . TWGIT_EXEC . ' feature start 2; ');
         $this->_localExec(
-            'git init && git remote add origin ' . TWGIT_REPOSITORY_ORIGIN_DIR . ' && git fetch origin'
+            'git init && git remote add ' . self::ORIGIN . ' ' . TWGIT_REPOSITORY_ORIGIN_DIR . ' && git fetch ' . self::ORIGIN
             , true, 2
         );
         $this->_localFunctionCall('remove_remote_branch feature-1');
 
-        $this->setExpectedException('RuntimeException', "/!\ Delete remote branch 'origin/feature-1' failed!");
+        $this->setExpectedException('RuntimeException', "/!\ Delete remote branch '" . self::ORIGIN . "/feature-1' failed!");
         $sMsg = $this->_localFunctionCall('remove_remote_branch feature-1', true, 2);
     }
 
@@ -118,11 +123,13 @@ class TwgitCommonProcessingTest extends TwgitTestCase
         $this->assertContains('Check valid ref name...', $sMsg);
         $this->assertContains('Check clean working tree...', $sMsg);
         $this->assertContains('Check current branch...', $sMsg);
-        $this->assertContains('git# git fetch --prune origin', $sMsg);
+        $this->assertContains('git# git fetch --prune ' . self::ORIGIN, $sMsg);
 
         $sMsg = $this->_localExec("git branch -a | sed 's/^[* ]*//' | sed 's/ *$//g'");
         $this->assertEquals(
-            "feature-2\nstable\nremotes/origin/feature-2\nremotes/origin/stable",
+            "feature-2\n" .
+            self::STABLE . "\n" .
+            implode("\n", self::_remotes(array('feature-2', self::STABLE))),
             $sMsg
         );
     }
@@ -137,11 +144,13 @@ class TwgitCommonProcessingTest extends TwgitTestCase
         $this->assertContains('Check valid ref name...', $sMsg);
         $this->assertContains('Check clean working tree...', $sMsg);
         $this->assertContains('Check current branch...', $sMsg);
-        $this->assertContains('git# git fetch --prune origin', $sMsg);
+        $this->assertContains('git# git fetch --prune ' . self::ORIGIN, $sMsg);
 
         $sMsg = $this->_localExec("git branch -a | sed 's/^[* ]*//' | sed 's/ *$//g'");
         $this->assertEquals(
-            "demo-2\nstable\nremotes/origin/demo-2\nremotes/origin/stable",
+            "demo-2\n" .
+            self::STABLE . "\n" .
+            implode("\n", self::_remotes(array('demo-2', self::STABLE))),
             $sMsg
         );
     }
@@ -156,11 +165,13 @@ class TwgitCommonProcessingTest extends TwgitTestCase
         $this->assertContains('Check valid ref name...', $sMsg);
         $this->assertContains('Check clean working tree...', $sMsg);
         $this->assertContains('Check current branch...', $sMsg);
-        $this->assertContains('git# git fetch --prune origin', $sMsg);
+        $this->assertContains('git# git fetch --prune ' . self::ORIGIN, $sMsg);
 
         $sMsg = $this->_localExec("git branch -a | sed 's/^[* ]*//' | sed 's/ *$//g'");
         $this->assertEquals(
-            "feature-2\nstable\nremotes/origin/feature-2\nremotes/origin/stable",
+            "feature-2\n" .
+            self::STABLE . "\n" .
+            implode("\n", self::_remotes(array('feature-2', self::STABLE))),
             $sMsg
         );
     }

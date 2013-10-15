@@ -8,6 +8,20 @@
  */
 class TwgitTestCase extends PHPUnit_Framework_TestCase
 {
+    /**
+     * The name of the Git "stable" branch
+     */
+    const STABLE = TWGIT_STABLE;
+
+    /**
+     * The shortname of the Git remote
+     */
+    const ORIGIN = TWGIT_ORIGIN;
+
+    /**
+     * @var string The name of the remote "stable" branch
+     */
+    protected static $_remoteStable;
 
     /**
      * Répertoire des dépôt locaux.
@@ -58,7 +72,48 @@ class TwgitTestCase extends PHPUnit_Framework_TestCase
      */
     public function __construct($sName=NULL, array $aData=array(), $sDataName='')
     {
+        self::$_remoteStable = self::ORIGIN . '/' . self::STABLE;
         parent::__construct($sName, $aData, $sDataName);
+    }
+
+    /**
+     * Get the name of a remote branch.
+     *
+     * @param string $name   The branch name (e.g. master, stable, hotfix-42)
+     * @param string $remote The name of the Remote (e.g. origin)
+     *
+     * @return string Returns the name of the remote branch
+     */
+    protected static function _remote($name, $remote = null)
+    {
+        if ($remote === null) {
+            $remote = TWGIT_ORIGIN;
+        }
+
+        return $remote . '/' . $name;
+    }
+
+    /**
+     * Get a list of remote branches.
+     *
+     * @param array  $branches The branches names (e.g. master, issues, feature-1)
+     * @param string $remote   The name of the Remote (e.g. origin)
+     *
+     * @return array Returns a list of remote branches
+     */
+    protected static function _remotes(array $branches, $remote = null)
+    {
+        if ($remote === null) {
+            $remote = TWGIT_ORIGIN;
+        }
+
+        $result = array();
+
+        foreach ($branches as $branch) {
+            $result[] = 'remotes/' . $remote . '/' . $branch;
+        }
+
+        return $result;
     }
 
     /**

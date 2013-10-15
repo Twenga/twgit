@@ -258,8 +258,8 @@ class TwgitCommonAssertsTest extends TwgitTestCase
         $sExpectedMsg =
             "Check current branch...\n"
             . "Cannot delete the branch 'feature-1' which you are currently on! So:\n"
-            . "git# git checkout stable\n"
-            . "Switched to branch 'stable'";
+            . "git# git checkout " . self::STABLE . "\n"
+            . "Switched to branch '" . self::STABLE . "'";
         $this->assertContains($sExpectedMsg, $sMsg);
     }
 

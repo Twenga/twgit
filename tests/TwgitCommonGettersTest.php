@@ -47,24 +47,24 @@ class TwgitCommonGettersTest extends TwgitTestCase
         return array(
             array(':', ''),
             array(
-                'git checkout -b feature-X && git push origin feature-X'
-                    . ' && git checkout -b release-X && git push origin release-X'
-                    . ' && git checkout -b hotfix-X && git push origin hotfix-X'
-                    . ' && git checkout -b demo-X && git push origin demo-X'
-                    . ' && git checkout -b master && git push origin master'
-                    . ' && git checkout -b outofprocess && git push origin outofprocess'
-                    . ' && git remote set-head origin stable',
-                'origin/outofprocess'
+                'git checkout -b feature-X && git push ' . self::ORIGIN . ' feature-X'
+                    . ' && git checkout -b release-X && git push ' . self::ORIGIN . ' release-X'
+                    . ' && git checkout -b hotfix-X && git push ' . self::ORIGIN . ' hotfix-X'
+                    . ' && git checkout -b demo-X && git push ' . self::ORIGIN . ' demo-X'
+                    . ' && git checkout -b master && git push ' . self::ORIGIN . ' master'
+                    . ' && git checkout -b outofprocess && git push ' . self::ORIGIN . ' outofprocess'
+                    . ' && git remote set-head ' . self::ORIGIN . ' ' . self::STABLE,
+                self::_remote('outofprocess')
             ),
             array(
-                'git checkout -b outofprocess && git push origin outofprocess && git push second outofprocess'
-                    . ' && git checkout -b out2 && git push origin out2 && git push second out2',
-                'origin/out2' . "\n" . 'origin/outofprocess'
+                'git checkout -b outofprocess && git push ' . self::ORIGIN . ' outofprocess && git push second outofprocess'
+                    . ' && git checkout -b out2 && git push ' . self::ORIGIN . ' out2 && git push second out2',
+                self::_remote('out2') . "\n" . self::_remote('outofprocess')
             ),
             array(
-                'git checkout -b outofprocess && git push origin outofprocess && git push second outofprocess'
-                    . ' && git checkout -b out2 && git push origin out2 && git push third out2',
-                'origin/out2' . "\n" . 'origin/outofprocess'
+                'git checkout -b outofprocess && git push ' . self::ORIGIN . ' outofprocess && git push second outofprocess'
+                    . ' && git checkout -b out2 && git push ' . self::ORIGIN . ' out2 && git push third out2',
+                self::_remote('out2') . "\n" . self::_remote('outofprocess')
             ),
         );
     }

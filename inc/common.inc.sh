@@ -40,35 +40,35 @@
 #--------------------------------------------------------------------
 
 ##
-# Affiche les $1 derniers hotfixes (nom complet), à raison d'un par ligne.
+# Display the $1 last hotfix (full name), one on each row
 #
-# @param int $1 nombre des derniers hotfixes à afficher
+# @param int $1 amount of hotfix to display
 #
 function get_last_hotfixes () {
     git branch --no-color -r | grep $TWGIT_ORIGIN/$TWGIT_PREFIX_HOTFIX | sed 's/^[* ] //' | sort -n | tail -n $1
 }
 
 ##
-# Affiche les branches locales (nom complet), à raison d'une par ligne.
+# Display the local branches (full name), one on each row.
 #
 function get_local_branches () {
     git branch --no-color | sed 's/^[* ] //'
 }
 
 ##
-# Affiche la liste locale des branches distantes (nom complet), à raison d'une par ligne.
+# Display the local listing of distant branches (full name), one on each row.
 #
 function get_remote_branches () {
     git branch --no-color -r | sed 's/^[* ] //'
 }
 
 ##
-# Affiche la liste des branches distantes qui ne sont pas catégorisables dans le process.
+# Display the listing of distant branches which are not in any category in the process.
 #
 # @testedby TwgitCommonGettersTest
 #
 function get_dissident_remote_branches () {
-    # génère une chaîne du genre : ' -e "^second/" -e "^third/"'
+    # return a string like : ' -e "^second/" -e "^third/"'
     local cmd="$(git remote | grep -v "^$TWGIT_ORIGIN$" | sed -e 's/^/ -e "^/' -e 's/$/\/"/' | tr '\n' ' ')"
 
     [ -z "$cmd" ] && cmd='tee /dev/null' || cmd="grep -v $cmd"
@@ -86,7 +86,7 @@ function get_dissident_remote_branches () {
 }
 
 ##
-# Affiche le nom complet des releases distantes (avec "$TWGIT_ORIGIN/") non encore mergées à $TWGIT_ORIGIN/$TWGIT_STABLE, à raison d'une par ligne.
+# Display the full name of distant releases (with $TWGIT_ORIGIN/") not yet merged in $TWGIT_ORIGIN/$TWGIT_STABLE, one on each row.
 #
 function get_releases_in_progress () {
     git branch --no-color -r --no-merged $TWGIT_ORIGIN/$TWGIT_STABLE \
@@ -94,24 +94,27 @@ function get_releases_in_progress () {
 }
 
 ##
-# Affiche le nom complet des releases non encore mergées à $TWGIT_ORIGIN/$TWGIT_STABLE, à raison d'une par ligne.
+# Display full name releases not yet merged in $TWGIT_ORIGIN/$TWGIT_STABLE, one on each row.
 #
 function get_hotfixes_in_progress () {
     git branch --no-color -r --no-merged $TWGIT_ORIGIN/$TWGIT_STABLE | grep "$TWGIT_ORIGIN/$TWGIT_PREFIX_HOTFIX" | sed 's/^[* ]*//'
 }
 
 ##
-# Affiche la release distante courante (nom complet sans "$TWGIT_ORIGIN/"), c.-à-d. celle normalement unique à ne pas avoir été encore mergée à $TWGIT_ORIGIN/$TWGIT_STABLE.
-# Chaîne vide sinon.
+# Display current distant release (full name without "$TWGIT_ORIGIN/"), ie. the only one to not have yet been merged in $TWGIT_ORIGIN/$TWGIT_STABLE.
+# Or else empty string.
 #
 function get_current_release_in_progress () {
     local releases="$(get_releases_in_progress)"
     local release="$(echo $releases | tr '\n' ' ' | cut -d' ' -f1)"
     [[ $(echo $releases | wc -w) > 1 ]] && die "More than one release in progress detected: $(echo $releases | sed 's/ /, /g')! Only '$release' will be treated here."
-    echo ${release:((${#TWGIT_ORIGIN}+1))}	# supprime le préfixe 'origin/'
+    echo ${release:((${#TWGIT_ORIGIN}+1))}	# delete prefix 'origin/'
 }
 
 ##
+# ,
+# ,
+# .
 # Calcule la liste locale des features distantes (nom complet avec "$TWGIT_ORIGIN/") mergées à la release distante $1,
 # sur une seule ligne séparées par des espaces,
 # et enregistre le résultat dans la globale GET_MERGED_FEATURES_RETURN_VALUE afin d'éviter les subshells.

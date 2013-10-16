@@ -90,18 +90,20 @@ function get_dissident_remote_branches () {
 #
 function get_releases_in_progress () {
     git branch --no-color -r --no-merged $TWGIT_ORIGIN/$TWGIT_STABLE \
-    | grep "$TWGIT_ORIGIN/$TWGIT_PREFIX_RELEASE" | sed 's/^[* ]*//'
+        | grep "$TWGIT_ORIGIN/$TWGIT_PREFIX_RELEASE" | sed 's/^[* ]*//'
 }
 
 ##
 # Affiche le nom complet des releases non encore mergées à $TWGIT_ORIGIN/$TWGIT_STABLE, à raison d'une par ligne.
 #
 function get_hotfixes_in_progress () {
-    git branch --no-color -r --no-merged $TWGIT_ORIGIN/$TWGIT_STABLE | grep "$TWGIT_ORIGIN/$TWGIT_PREFIX_HOTFIX" | sed 's/^[* ]*//'
+    git branch --no-color -r --no-merged $TWGIT_ORIGIN/$TWGIT_STABLE \
+        | grep "$TWGIT_ORIGIN/$TWGIT_PREFIX_HOTFIX" | sed 's/^[* ]*//'
 }
 
 ##
-# Affiche la release distante courante (nom complet sans "$TWGIT_ORIGIN/"), c.-à-d. celle normalement unique à ne pas avoir été encore mergée à $TWGIT_ORIGIN/$TWGIT_STABLE.
+# Affiche la release distante courante (nom complet sans "$TWGIT_ORIGIN/"),
+# c.-à-d. celle normalement unique à ne pas avoir été encore mergée à $TWGIT_ORIGIN/$TWGIT_STABLE.
 # Chaîne vide sinon.
 #
 function get_current_release_in_progress () {
@@ -1470,9 +1472,9 @@ function displayChangelogSection () {
     content="## Version $(echo "${content#*## Version }")";
     content="$(echo "${content%## Version ${from_tag:1}*}")";
     content="$(echo -e "$content\n" \
-		| sedRegexpExtended ':a;N;$!ba;s/\n\n(  -|```)/\n\1/g' \
-		| sedRegexpExtended 's/  - \[#([0-9]+)\]\([^)]+\)/  - #\1/' \
-	)";
+        | sedRegexpExtended ':a;N;$!ba;s/\n\n(  -|```)/\n\1/g' \
+        | sedRegexpExtended 's/  - \[#([0-9]+)\]\([^)]+\)/  - #\1/' \
+    )";
 
     local line
     while read line; do

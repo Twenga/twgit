@@ -333,6 +333,10 @@ function cmd_merge-into-release () {
 #
 function cmd_push () {
     local current_branch=$(get_current_branch)
+    local all_features=$(git branch --no-color -r --no-merged $TWGIT_ORIGIN/$TWGIT_STABLE | grep "$TWGIT_ORIGIN/$TWGIT_PREFIX_FEATURE" | sed 's/^[* ]*//' | tr '\n' ' ' | sed 's/ *$//g')
+    if ! has "$TWGIT_ORIGIN/$current_branch" $all_features; then
+        die "You must be in a feature to launch this command!"
+    fi
     process_push_branch "$current_branch"
 }
 

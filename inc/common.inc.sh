@@ -1371,7 +1371,7 @@ function clean_branches () {
 # A remote repository must exists.
 #
 # @param string $1 tag name. Format: \d+.\d+.\d+
-# @param string $2 optional url of remote repository. Used only if not already setted.
+# @param string $2 optional url of remote repository. Used only if not already set.
 # @testedby TwgitMainTest
 #
 function init () {

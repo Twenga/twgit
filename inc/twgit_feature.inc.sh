@@ -54,7 +54,7 @@ function usage () {
     CUI_displayMsg help_detail '    if exists.'; echo
     CUI_displayMsg help_detail '<b>status [<featurename>]</b>'
     CUI_displayMsg help_detail '    Display information about specified feature: long name if a connector is'
-    CUI_displayMsg help_detail '    setted, last commit, status between local and remote feature and execute'
+    CUI_displayMsg help_detail '    set, last commit, status between local and remote feature and execute'
     CUI_displayMsg help_detail '    a git status if specified feature is the current branch.'
     CUI_displayMsg help_detail '    If no <b><featurename></b> is specified, then use current feature.'; echo
     CUI_displayMsg help_detail '<b>what-changed [<featurename>]</b>'

@@ -1116,7 +1116,9 @@ function display_branches () {
             fi
 
             echo -n $(CUI_displayMsg info "${titles[$type]}$branch")
-            [ "$current_branch" == "${branch#$TWGIT_ORIGIN/}" ] && echo -n $(CUI_displayMsg current_branch '*')
+            if [[ $type = 'feature' && $current_branch = "${branch#$TWGIT_ORIGIN/}" ]]; then
+                echo -n $(CUI_displayMsg current_branch '*')
+            fi
             stable_origin="$(git describe --abbrev=0 "$branch" 2>/dev/null)"
             echo -n $(CUI_displayMsg help_detail " (from <b>$stable_origin</b>) ")
 

@@ -257,7 +257,7 @@ function get_features () {
 
     if [ -z "$release" ]; then
         if [ "$feature_type" = 'free' ]; then
-            GET_FEATURES_RETURN_VALUE="$(git branch --no-color -r --no-merged $TWGIT_ORIGIN/$TWGIT_STABLE | grep "$TWGIT_ORIGIN/$TWGIT_PREFIX_FEATURE" | sed 's/^[* ]*//' | tr '\n' ' ' | sed 's/ *$//g')"
+            GET_FEATURES_RETURN_VALUE="$(git branch --no-color -r --no-merged $TWGIT_ORIGIN/$TWGIT_STABLE | sort --sort=version | grep "$TWGIT_ORIGIN/$TWGIT_PREFIX_FEATURE" | sed 's/^[* ]*//' | tr '\n' ' ' | sed 's/ *$//g')"
         else
             GET_FEATURES_RETURN_VALUE=''
         fi
@@ -312,7 +312,7 @@ function get_features () {
 #     demos="$RETVAL"
 #
 function get_all_demos () {
-    RETVAL="$(git branch --no-color -r --no-merged $TWGIT_ORIGIN/$TWGIT_STABLE | grep "$TWGIT_ORIGIN/$TWGIT_PREFIX_DEMO" | sed 's/^[* ]*//' | tr '\n' ' ' | sed 's/ *$//g')"
+    RETVAL="$(git branch --no-color -r --no-merged $TWGIT_ORIGIN/$TWGIT_STABLE | sort --sort=version | grep "$TWGIT_ORIGIN/$TWGIT_PREFIX_DEMO" | sed 's/^[* ]*//' | tr '\n' ' ' | sed 's/ *$//g')"
 }
 
 

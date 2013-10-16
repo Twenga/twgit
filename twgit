@@ -61,11 +61,26 @@ if [ ! -f "$shared_config_file" ]; then
     exit 1
 fi
 
+# Load default config:
 . $template_config_file
+
+# Load user config with color overloading management:
+declare -A colors_copy
+for key in "${!CUI_COLORS[@]}"; do colors_copy[$key]="${CUI_COLORS[$key]}"; done
 . $shared_config_file
+for key in "${!colors_copy[@]}"; do
+    [ -z "${CUI_COLORS[$key]-}" ] && CUI_COLORS[$key]="${colors_copy[$key]}"
+done
+
+# Load repository config with color overloading management:
 if [ -f "$local_config_file" ]; then
+    for key in "${!CUI_COLORS[@]}"; do colors_copy[$key]="${CUI_COLORS[$key]}"; done
     . $local_config_file
+    for key in "${!colors_copy[@]}"; do
+        [ -z "${CUI_COLORS[$key]-}" ] && CUI_COLORS[$key]="${colors_copy[$key]}"
+    done
 fi
+
 . $TWGIT_INC_DIR/common.inc.sh
 
 # Post config:

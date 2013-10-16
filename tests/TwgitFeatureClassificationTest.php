@@ -369,9 +369,9 @@ class TwgitFeatureClassificationTest extends TwgitTestCase
             array('origin/feature-1', 'origin/feature-2', 'origin/feature-3', 'origin/feature-4');
 
         return array(
-            array($aFeatureTypes, '', array('', '', "$f1 $f2 $f3 $f4", '', '')),
-            array($aFeatureTypes, 'unknow-release', array('', '', "$f1 $f2 $f3 $f4", '', '')),
-            array($aFeatureTypes, 'release-1.1.0', array('', '', "$f2 $f3", $f1, $f4)),
+            array($aFeatureTypes, '', array('', '', "$f4 $f3 $f2 $f1", '', '')),
+            array($aFeatureTypes, 'unknow-release', array('', '', "$f4 $f3 $f2 $f1", '', '')),
+            array($aFeatureTypes, 'release-1.1.0', array('', '', "$f3 $f2", $f1, $f4)),
         );
     }
 
@@ -437,7 +437,7 @@ class TwgitFeatureClassificationTest extends TwgitTestCase
 
         $aMsg = array();
         $aFeatureTypes = array('free', 'merged', 'merged_in_progress');
-        $aOut = array('origin/feature-2 origin/feature-3', '', 'origin/feature-1');
+        $aOut = array('origin/feature-3 origin/feature-2', '', 'origin/feature-1');
         foreach ($aFeatureTypes as $sType) {
             $sCmd = 'get_features ' . $sType . ' release-1.1.0; echo \$GET_FEATURES_RETURN_VALUE';
             $aMsg[] = $this->_localShellCodeCall($sCmd);
@@ -477,7 +477,7 @@ class TwgitFeatureClassificationTest extends TwgitTestCase
 
         $aMsg = array();
         $aFeatureTypes = array('free', 'merged', 'merged_in_progress');
-        $aOut = array('origin/feature-2 origin/feature-3', '', 'origin/feature-1');
+        $aOut = array('origin/feature-3 origin/feature-2', '', 'origin/feature-1');
         foreach ($aFeatureTypes as $sType) {
             $sCmd = 'get_features ' . $sType . ' release-1.1.0; echo \$GET_FEATURES_RETURN_VALUE';
             $aMsg[] = $this->_localShellCodeCall($sCmd);
@@ -543,7 +543,7 @@ class TwgitFeatureClassificationTest extends TwgitTestCase
 
         $aMsg = array();
         $aFeatureTypes = array('free', 'merged', 'merged_in_progress');
-        $aOut = array('', 'origin/feature-1 origin/feature-2', '');
+        $aOut = array('', 'origin/feature-2 origin/feature-1', '');
         foreach ($aFeatureTypes as $sType) {
             $sCmd = 'get_features ' . $sType . ' release-1.1.0; echo \$GET_FEATURES_RETURN_VALUE';
             $aMsg[] = $this->_localShellCodeCall($sCmd);
@@ -653,7 +653,7 @@ class TwgitFeatureClassificationTest extends TwgitTestCase
 
         $aMsg = array();
         $aFeatureTypes = array('free', 'merged', 'merged_in_progress');
-        $aOut = array('', '', 'origin/feature-1 origin/feature-2');
+        $aOut = array('', '', 'origin/feature-2 origin/feature-1');
         foreach ($aFeatureTypes as $sType) {
             $sCmd = 'get_features ' . $sType . ' release-1.1.0; echo \$GET_FEATURES_RETURN_VALUE';
             $aMsg[] = $this->_localShellCodeCall($sCmd);

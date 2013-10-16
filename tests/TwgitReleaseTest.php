@@ -165,9 +165,9 @@ class TwgitReleaseTest extends TwgitTestCase
         $sMsg = $this->_localExec('git show v1.3.0');
         $this->assertContains(
             "\n[twgit] Release finish: release-1.3.0"
-            . "\n[twgit] Contains feature-1"
+            . "\n[twgit] Contains feature-4"
             . "\n[twgit] Contains feature-2: \"The subject\""
-            . "\n[twgit] Contains feature-4\n\n"
+            . "\n[twgit] Contains feature-1\n\n"
             , $sMsg);
         $this->assertContains("Merge branch 'release-1.3.0' into stable", $sMsg);
     }

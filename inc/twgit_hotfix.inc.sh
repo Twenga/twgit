@@ -191,5 +191,9 @@ function cmd_finish () {
 #
 function cmd_push () {
     local current_branch=$(get_current_branch)
+    local remote_hotfix="$(get_hotfixes_in_progress)"
+    if [ "$TWGIT_ORIGIN/$current_branch" != "$remote_hotfix" ]; then
+        die "You must be in a hotfix to launch this command!"
+    fi
     process_push_branch "$current_branch"
 }

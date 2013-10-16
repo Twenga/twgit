@@ -40,7 +40,8 @@ function usage () {
     CUI_displayMsg help_detail '    List remote release with their merged features.'
     CUI_displayMsg help_detail '    Add <b>-F</b> to do not make fetch.'; echo
     CUI_displayMsg help_detail '<b>push</b>'
-    CUI_displayMsg help_detail '    Push release to origin'; echo
+    CUI_displayMsg help_detail "    Push current release to '$TWGIT_ORIGIN' repository."
+    CUI_displayMsg help_detail "    It's a shortcut for: \"git push $TWGIT_ORIGIN $TWGIT_PREFIX_RELEASE…\""; echo
     CUI_displayMsg help_detail '<b>finish [<tagname>] [-I]</b>'
     CUI_displayMsg help_detail "    Merge current release branch into '$TWGIT_STABLE', create a new tag and push."
     CUI_displayMsg help_detail '    If no <b><tagname></b> is specified then current release name will be used.'

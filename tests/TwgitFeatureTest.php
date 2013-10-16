@@ -60,7 +60,7 @@ class TwgitFeatureTest extends TwgitTestCase
         $this->_localShellCodeCall('function getFeatureSubject(){ echo;}; . \$TWGIT_INC_DIR/twgit_feature.inc.sh; cmd_start 1');
         $sMsg = $this->_localExec('git show HEAD --format="%s"');
         $this->assertEquals("[twgit] Init feature 'feature-1'.", $sMsg);
-        $sMsg = $this->_localExec('git show HEAD~1 --format="%s"');
+        $sMsg = $this->_localExec('git show HEAD~2 --format="%s"'); // HEAD~1 = 'Add minimal .gitignore'…
         $this->assertEquals("[twgit] Init branch 'stable'.", $sMsg);
     }
 
@@ -74,8 +74,28 @@ class TwgitFeatureTest extends TwgitTestCase
         $this->_localShellCodeCall('function getFeatureSubject(){ echo \"Bla\'\\\\\"bla\";}; . \$TWGIT_INC_DIR/twgit_feature.inc.sh; cmd_start 1');
         $sMsg = $this->_localExec('git show HEAD --format="%s"');
         $this->assertEquals("[twgit] Init feature 'feature-1': Bla'\"bla.", $sMsg);
-        $sMsg = $this->_localExec('git show HEAD~1 --format="%s"');
+        $sMsg = $this->_localExec('git show HEAD~2 --format="%s"'); // HEAD~1 = 'Add minimal .gitignore'…
         $this->assertEquals("[twgit] Init branch 'stable'.", $sMsg);
+    }
+
+    /**
+     */
+    public function testList_WithFullColoredGit ()
+    {
+        $this->_remoteExec('git init');
+        $this->_localExec(TWGIT_EXEC . ' init 1.2.3 ' . TWGIT_REPOSITORY_ORIGIN_DIR);
+
+        $this->_localExec(TWGIT_EXEC . ' feature start 1');
+        $this->_localExec(
+            "git config color.branch always\n"
+            . "git config color.diff always\n"
+            . "git config color.interactive always\n"
+            . "git config color.status always\n"
+            . "git config color.ui always\n"
+        );
+
+        $sMsg = $this->_localExec(TWGIT_EXEC . ' feature list');
+        $this->assertContains("(i) Remote free features:\nFeature: origin/feature-1 (from v1.2.3)", $sMsg);
     }
 
     /**

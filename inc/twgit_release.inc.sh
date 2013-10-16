@@ -99,7 +99,7 @@ function cmd_list () {
     process_options "$@"
     process_fetch 'F'
 
-    local releases=$(git branch -r --merged $TWGIT_ORIGIN/$TWGIT_STABLE | grep "$TWGIT_ORIGIN/$TWGIT_PREFIX_RELEASE" | sed 's/^[* ]*//')
+    local releases=$(git branch --no-color -r --merged $TWGIT_ORIGIN/$TWGIT_STABLE | grep "$TWGIT_ORIGIN/$TWGIT_PREFIX_RELEASE" | sed 's/^[* ]*//')
     if [ ! -z "$releases" ]; then
         CUI_displayMsg help "Remote releases merged into '<b>$TWGIT_STABLE</b>':"
         CUI_displayMsg warning "A release must be deleted after merge into '<b>$TWGIT_STABLE</b>'! Following releases should not exists!"

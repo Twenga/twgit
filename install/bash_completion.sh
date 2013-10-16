@@ -42,7 +42,7 @@ function _twgit () {
                 COMPREPLY=( $(compgen -W "${opts}" -- ${cur}) )
                 ;;
             demo)
-                local opts="help list merge-feature remove start"
+                local opts="help list merge-feature remove start status"
                 COMPREPLY=( $(compgen -W "${opts}" -- ${cur}) )
                 ;;
             hotfix)
@@ -67,7 +67,7 @@ function _twgit () {
                 case "${action}" in
                     committers)
                          if [[ ${cur} != -* ]] ; then
-                            local opts=$((git branch -r | grep "feature-" | sed 's/^[* ]*//' | sed 's#^origin/feature-##' | tr '\n' ' ') 2>/dev/null)
+                            local opts=$((git branch --no-color -r | grep "feature-" | sed 's/^[* ]*//' | sed 's#^origin/feature-##' | tr '\n' ' ') 2>/dev/null)
                             COMPREPLY=( $(compgen -W "${opts}" -- ${cur}) )
                         else
                             local opts="-F"
@@ -110,7 +110,7 @@ function _twgit () {
                 case "${action}" in
                     xxxxxxx)
                          if [[ ${cur} != -* ]] ; then
-                            local opts=$((git branch -r | grep "hotfix-" | sed 's/^[* ]*//' | sed 's#^origin/hotfix-##' | tr '\n' ' ') 2>/dev/null)
+                            local opts=$((git branch --no-color -r | grep "hotfix-" | sed 's/^[* ]*//' | sed 's#^origin/hotfix-##' | tr '\n' ' ') 2>/dev/null)
                             COMPREPLY=( $(compgen -W "${opts}" -- ${cur}) )
                         fi
                         ;;
@@ -139,7 +139,7 @@ function _twgit () {
                         ;;
                     finish)
                          if [[ ${cur} != -* ]] ; then
-                            local opts=$((git branch -r | grep "release-" | sed 's/^[* ]*//' | sed 's#^origin/release-##' | tr '\n' ' ') 2>/dev/null)
+                            local opts=$((git branch --no-color -r | grep "release-" | sed 's/^[* ]*//' | sed 's#^origin/release-##' | tr '\n' ' ') 2>/dev/null)
                             COMPREPLY=( $(compgen -W "${opts}" -- ${cur}) )
                         else
                             local opts="-I"

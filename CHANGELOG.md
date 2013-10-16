@@ -1,6 +1,32 @@
 ChangeLog
 =========
 
+## Version 1.12.0 (2013-06-23)
+
+Features:
+
+  - #100 Add command `twgit demo status` to know if we are up to date with the remote branch.
+  
+Fixes:
+
+  - #102 Add `--no-color` option to all `git branch` commands to fix 
+    the problem with colored git when `color.ui=always` is setted in git config.
+  
+Core enhancements:
+
+  - \#107 Now have a cache file of feature's subject per repository
+    and remove `.features_subject` central file from install directory ⇒ new parameter in `conf/twgit.sh`:
+
+    ```bash
+    TWGIT_FEATURES_SUBJECT_FILENAME='.twgit_features_subject'
+    ```
+
+  - \#97 Add a `.twgit` configuration file for github.
+  
+Unit tests:
+
+  - estimated code coverage: 34% (642 of 1891 lines).
+
 ## Version 1.11.0 (2013-03-04)
 
 Features:
@@ -27,7 +53,7 @@ Unit tests:
 
 Fixes:
 
-  - #83: Fix Interrupted system call from time to time in inc/common.inc::get_dissident_remote_branches()
+  - #83: Fix Interrupted system call from time to time in `inc/common.inc::get_dissident_remote_branches()`
 
 ## Version 1.10.1 (2012-12-28)
 
@@ -40,8 +66,8 @@ Fixes:
 Features:
 
   - #82: `twgit feature show-modified-files` is renamed `twgit feature what-changed` and now handles opened as well as closed features.
-Display initial commit and final commit if exists. List created, modified and deleted files in the specified feature branch since its creation.
-If no <featurename> is specified, then use current feature.
+    Display initial commit and final commit if exists. List created, modified and deleted files in the specified feature branch since its creation.
+    If no <featurename> is specified, then use current feature.
   
 Fixes:
 
@@ -97,10 +123,10 @@ Note:
 
   - Due to update system's enhancement, the following message will appear during update. ***Ignore it***:
 
-```bash
-/!\ New autocompletion update system request you execute just once this line (to adapt):
-    sudo rm /etc/bash_completion.d/twgit && sudo ln -s ~/twgit/install/.bash_completion /etc/bash_completion.d/twgit && source ~/.bashrc
-```
+    ```bash
+    /!\ New autocompletion update system request you execute just once this line (to adapt):
+        sudo rm /etc/bash_completion.d/twgit && sudo ln -s ~/twgit/install/.bash_completion /etc/bash_completion.d/twgit && source ~/.bashrc
+    ```
 
 Features:
 
@@ -149,14 +175,14 @@ Core enhancements:
 
 Features:
 
-  - #41: Add subject in commit messages of `twgit feature start` when a connector (github, redmine) is setted.
+  - \#41: Add subject in commit messages of `twgit feature start` when a connector (github, redmine) is setted.
 **Must update** `TWGIT_FIRST_COMMIT_MSG` parameter of `conf/twgit.sh`:
 
-```bash
-TWGIT_FIRST_COMMIT_MSG="${TWGIT_PREFIX_COMMIT_MSG}Init %s '%s'%s."
-```
+    ```bash
+    TWGIT_FIRST_COMMIT_MSG="${TWGIT_PREFIX_COMMIT_MSG}Init %s '%s'%s."
+    ```
 
-  - #38: Add `twgit feature status [<featurename>]`
+  - \#38: Add `twgit feature status [<featurename>]`
 
 Fixes:
 

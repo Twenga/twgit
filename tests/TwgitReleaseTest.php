@@ -147,12 +147,11 @@ class TwgitReleaseTest extends TwgitTestCase
      */
     public function testFinish_WithMinorRelease ()
     {
-        $this->_localShellCodeCall('echo \'2;The subject\' > \$TWGIT_FEATURES_SUBJECT_PATH');
-
         $this->_remoteExec('git init');
         $this->_localExec(TWGIT_EXEC . ' init 1.2.3 ' . TWGIT_REPOSITORY_ORIGIN_DIR);
         $this->_localExec(TWGIT_EXEC . ' release start -I');
 
+        $this->_localExec('echo \'2;The subject\' > .twgit_features_subject');
         $this->_localExec(TWGIT_EXEC . ' feature start 1');
         $this->_localExec(TWGIT_EXEC . ' feature start 2');
         $this->_localExec('git merge --no-ff feature-1; git commit --allow-empty -m "empty"; git push origin;');
@@ -342,6 +341,28 @@ class TwgitReleaseTest extends TwgitTestCase
         if ( ! empty($sNotExpectedContent)) {
             $this->assertNotContains($sNotExpectedContent, $sMsg);
         }
+    }
+
+    /**
+     */
+    public function testList_WithFullColoredGit ()
+    {
+        $this->_remoteExec('git init');
+        $this->_localExec(TWGIT_EXEC . ' init 1.2.3 ' . TWGIT_REPOSITORY_ORIGIN_DIR);
+
+        $this->_localExec(TWGIT_EXEC . ' release start -I');
+        $this->_localExec(
+            "git config color.branch always\n"
+            . "git config color.diff always\n"
+            . "git config color.interactive always\n"
+            . "git config color.status always\n"
+            . "git config color.ui always\n"
+        );
+
+        $sMsg = $this->_localExec(TWGIT_EXEC . ' release list');
+        $sExpected = "(i) Remote release NOT merged into 'stable':\n"
+                   . "Release: origin/release-1.3.0 (from v1.2.3)";
+        $this->assertContains($sExpected, $sMsg);
     }
 
     public function providerTestListAboutBranchesOutOfProcess ()

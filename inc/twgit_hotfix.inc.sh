@@ -187,15 +187,11 @@ function cmd_finish () {
 }
 
 ##
-# push du hotfix
+# Push du hotfix.
 #
 function cmd_push () {
     process_options "$@"
     local current_branch=$(get_current_branch)
-
     assert_clean_working_tree
     process_push_branch $current_branch
-
 }
-
-

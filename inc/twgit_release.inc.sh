@@ -123,17 +123,14 @@ function cmd_list () {
 }
 
 ##
-# push de la release
+# Push de la release.
 #
 function cmd_push () {
     process_options "$@"
     local current_branch=$(get_current_branch)
-
     assert_clean_working_tree
     process_push_branch $current_branch
-
 }
-
 
 ##
 # Crée une nouvelle release à partir du dernier tag.

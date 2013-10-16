@@ -329,15 +329,13 @@ function cmd_merge-into-release () {
 }
 
 ##
-# push de la feature.
+# Push de la feature courante.
 #
 function cmd_push () {
     process_options "$@"
     local current_branch=$(get_current_branch)
-
     assert_clean_working_tree
     process_push_branch $current_branch
-
 }
 
 ##

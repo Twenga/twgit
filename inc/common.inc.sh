@@ -1102,6 +1102,7 @@ function display_branches () {
         [hotfix]='Hotfix: '
         [demo]='Demo: '
     )
+    local current_branch=$(get_current_branch)
 
     if [ -z "$branches" ]; then
         CUI_displayMsg info 'No such branch exists.';
@@ -1109,10 +1110,15 @@ function display_branches () {
         local prefix="$TWGIT_ORIGIN/$TWGIT_PREFIX_FEATURE"
         local add_empty_line=0
         for branch in $branches; do
+    	    local branch_short="${branch#$TWGIT_ORIGIN/}"
+
             if ! isset_option 'c'; then
                 [ "$add_empty_line" = "0" ] && add_empty_line=1 || echo
             fi
             local stable_origin="$(git describe --abbrev=0 "$branch" 2>/dev/null)"
+	    if [ "$current_branch" == "$branch_short" ]; then
+		echo -n $(CUI_displayMsg ok "*==> ")
+	    fi
             echo -n $(CUI_displayMsg info "${titles[$type]}$branch")
             echo -n $(CUI_displayMsg help_detail " (from <b>$stable_origin</b>) ")
 

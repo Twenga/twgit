@@ -127,6 +127,10 @@ function cmd_list () {
 #
 function cmd_push () {
     local current_branch=$(get_current_branch)
+    local remote_release="$(get_releases_in_progress)"
+    if [ "$TWGIT_ORIGIN/$current_branch" != "$remote_release" ]; then
+        die "You must be in a release to launch this command!"
+    fi
     process_push_branch "$current_branch"
 }
 

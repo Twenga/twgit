@@ -95,7 +95,7 @@ class TwgitFeatureTest extends TwgitTestCase
         );
 
         $sMsg = $this->_localExec(TWGIT_EXEC . ' feature list');
-        $this->assertContains("(i) Remote free features:\nFeature: origin/feature-1 (from v1.2.3)", $sMsg);
+        $this->assertContains("(i) Remote free features:\nFeature: origin/feature-1* (from v1.2.3)", $sMsg);
     }
 
     /**

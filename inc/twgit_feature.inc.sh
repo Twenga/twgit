@@ -278,6 +278,7 @@ function cmd_status () {
     display_branches 'feature' "$TWGIT_ORIGIN/$feature_fullname"
     echo
     inform_about_branch_status $feature_fullname
+    alert_old_branch $TWGIT_ORIGIN/$feature_fullname with-help
     if [ "$feature_fullname" = "$current_branch" ]; then
         exec_git_command "git status" "Error while git status!"
         if [ "$(git config --get color.status)" != 'always' ]; then

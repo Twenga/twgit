@@ -1109,17 +1109,15 @@ function display_branches () {
     else
         local prefix="$TWGIT_ORIGIN/$TWGIT_PREFIX_FEATURE"
         local add_empty_line=0
+        local stable_origin
         for branch in $branches; do
-    	    local branch_short="${branch#$TWGIT_ORIGIN/}"
-
             if ! isset_option 'c'; then
                 [ "$add_empty_line" = "0" ] && add_empty_line=1 || echo
             fi
-            local stable_origin="$(git describe --abbrev=0 "$branch" 2>/dev/null)"
-	    if [ "$current_branch" == "$branch_short" ]; then
-		echo -n $(CUI_displayMsg ok "*==> ")
-	    fi
+
             echo -n $(CUI_displayMsg info "${titles[$type]}$branch")
+            [ "$current_branch" == "${branch#$TWGIT_ORIGIN/}" ] && echo -n $(CUI_displayMsg current_branch '*')
+            stable_origin="$(git describe --abbrev=0 "$branch" 2>/dev/null)"
             echo -n $(CUI_displayMsg help_detail " (from <b>$stable_origin</b>) ")
 
             [ "$type" = "feature" ] && displayFeatureSubject "${branch:${#prefix}}" || echo
@@ -1476,9 +1474,9 @@ function displayChangelogSection () {
     content="## Version $(echo "${content#*## Version }")";
     content="$(echo "${content%## Version ${from_tag:1}*}")";
     content="$(echo -e "$content\n" \
-		| sedRegexpExtended ':a;N;$!ba;s/\n\n(  -|```)/\n\1/g' \
-		| sedRegexpExtended 's/  - \[#([0-9]+)\]\([^)]+\)/  - #\1/' \
-	)";
+        | sedRegexpExtended ':a;N;$!ba;s/\n\n(  -|```)/\n\1/g' \
+        | sedRegexpExtended 's/  - \[#([0-9]+)\]\([^)]+\)/  - #\1/' \
+    )";
 
     local line
     while read line; do

@@ -125,7 +125,7 @@ function get_merged_features () {
     get_git_merged_branches $TWGIT_ORIGIN/$release
     local merged_branches="${MERGED_BRANCHES[$TWGIT_ORIGIN/$release]}"
 
-    local features="$(echo "$merged_branches" | grep $TWGIT_ORIGIN/$TWGIT_PREFIX_FEATURE | sed 's/^[* ]*//' | tr '\n' ' ' | sed 's/ *$//g')"
+    local features="$(echo "$merged_branches" | grep $TWGIT_ORIGIN/$TWGIT_PREFIX_FEATURE | sort --field-separator="-" -k1rn -k2rn | sed 's/^[* ]*//' | tr '\n' ' ' | sed 's/ *$//g')"
 
     get_features merged $release
     local features_v2="$GET_FEATURES_RETURN_VALUE"
@@ -257,7 +257,7 @@ function get_features () {
 
     if [ -z "$release" ]; then
         if [ "$feature_type" = 'free' ]; then
-            GET_FEATURES_RETURN_VALUE="$(git branch --no-color -r --no-merged $TWGIT_ORIGIN/$TWGIT_STABLE | sort --field-separator="-" -k1rn -k2rn | grep "$TWGIT_ORIGIN/$TWGIT_PREFIX_FEATURE" | sed 's/^[* ]*//' | tr '\n' ' ' | sed 's/ *$//g')"
+            GET_FEATURES_RETURN_VALUE="$(git branch --no-color -r --no-merged $TWGIT_ORIGIN/$TWGIT_STABLE | grep "$TWGIT_ORIGIN/$TWGIT_PREFIX_FEATURE" | sort --field-separator="-" -k1rn -k2rn | sed 's/^[* ]*//' | tr '\n' ' ' | sed 's/ *$//g')"
         else
             GET_FEATURES_RETURN_VALUE=''
         fi
@@ -265,7 +265,7 @@ function get_features () {
         release="$TWGIT_ORIGIN/$release"
         local return_features=''
 
-        local features=$(git branch --no-color -r | grep "$TWGIT_ORIGIN/$TWGIT_PREFIX_FEATURE" | sed 's/^[* ]*//')
+        local features=$(git branch --no-color -r | grep "$TWGIT_ORIGIN/$TWGIT_PREFIX_FEATURE" | sort --field-separator="-" -k1rn -k2rn | sed 's/^[* ]*//')
 
         get_git_rev_parse "$TWGIT_ORIGIN/$TWGIT_STABLE"
         local head_rev="${REV_PARSE[$TWGIT_ORIGIN/$TWGIT_STABLE]}"
@@ -312,7 +312,7 @@ function get_features () {
 #     demos="$RETVAL"
 #
 function get_all_demos () {
-    RETVAL="$(git branch --no-color -r --no-merged $TWGIT_ORIGIN/$TWGIT_STABLE | sort --field-separator="-" -k1rn -k2rn | grep "$TWGIT_ORIGIN/$TWGIT_PREFIX_DEMO" | sed 's/^[* ]*//' | tr '\n' ' ' | sed 's/ *$//g')"
+    RETVAL="$(git branch --no-color -r --no-merged $TWGIT_ORIGIN/$TWGIT_STABLE | grep "$TWGIT_ORIGIN/$TWGIT_PREFIX_DEMO" | sort --field-separator="-" -k1rn -k2rn | sed 's/^[* ]*//' | tr '\n' ' ' | sed 's/ *$//g')"
 }
 
 

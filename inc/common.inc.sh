@@ -257,7 +257,7 @@ function get_features () {
 
     if [ -z "$release" ]; then
         if [ "$feature_type" = 'free' ]; then
-            GET_FEATURES_RETURN_VALUE="$(git branch --no-color -r --no-merged $TWGIT_ORIGIN/$TWGIT_STABLE | sort --sort=version | grep "$TWGIT_ORIGIN/$TWGIT_PREFIX_FEATURE" | sed 's/^[* ]*//' | tr '\n' ' ' | sed 's/ *$//g')"
+            GET_FEATURES_RETURN_VALUE="$(git branch --no-color -r --no-merged $TWGIT_ORIGIN/$TWGIT_STABLE | sort --field-separator="-" -k1rn -k2rn | grep "$TWGIT_ORIGIN/$TWGIT_PREFIX_FEATURE" | sed 's/^[* ]*//' | tr '\n' ' ' | sed 's/ *$//g')"
         else
             GET_FEATURES_RETURN_VALUE=''
         fi
@@ -312,7 +312,7 @@ function get_features () {
 #     demos="$RETVAL"
 #
 function get_all_demos () {
-    RETVAL="$(git branch --no-color -r --no-merged $TWGIT_ORIGIN/$TWGIT_STABLE | sort --sort=version | grep "$TWGIT_ORIGIN/$TWGIT_PREFIX_DEMO" | sed 's/^[* ]*//' | tr '\n' ' ' | sed 's/ *$//g')"
+    RETVAL="$(git branch --no-color -r --no-merged $TWGIT_ORIGIN/$TWGIT_STABLE | sort --field-separator="-" -k1rn -k2rn | grep "$TWGIT_ORIGIN/$TWGIT_PREFIX_DEMO" | sed 's/^[* ]*//' | tr '\n' ' ' | sed 's/ *$//g')"
 }
 
 
@@ -1470,9 +1470,9 @@ function displayChangelogSection () {
     content="## Version $(echo "${content#*## Version }")";
     content="$(echo "${content%## Version ${from_tag:1}*}")";
     content="$(echo -e "$content\n" \
-		| sedRegexpExtended ':a;N;$!ba;s/\n\n(  -|```)/\n\1/g' \
-		| sedRegexpExtended 's/  - \[#([0-9]+)\]\([^)]+\)/  - #\1/' \
-	)";
+        | sedRegexpExtended ':a;N;$!ba;s/\n\n(  -|```)/\n\1/g' \
+        | sedRegexpExtended 's/  - \[#([0-9]+)\]\([^)]+\)/  - #\1/' \
+    )";
 
     local line
     while read line; do

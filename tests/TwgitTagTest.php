@@ -114,10 +114,10 @@ class TwgitTagTest extends TwgitTestCase
                 . "\nTagger: Firstname Lastname <firstname.lastname@xyz.com>"
                 . "\nDate: ---"
                 . "\nIncluded features:"
-                . "\n    - origin/feature-1 The NEW subject of 1"
-                . "\n    - origin/feature-2 The NEW subject of 2"
-                . "\n    - origin/feature-4 The subject of 4"
                 . "\n    - origin/feature-5"
+                . "\n    - origin/feature-4 The subject of 4"
+                . "\n    - origin/feature-2 The NEW subject of 2"
+                . "\n    - origin/feature-1 The NEW subject of 1"
                 . "\n"
             ),
             array(
@@ -142,10 +142,10 @@ class TwgitTagTest extends TwgitTestCase
                 . "\nTagger: Firstname Lastname <firstname.lastname@xyz.com>"
                 . "\nDate: ---"
                 . "\nIncluded features:"
-                . "\n    - origin/feature-1 The NEW subject of 1"
-                . "\n    - origin/feature-2 The NEW subject of 2"
-                . "\n    - origin/feature-4 The subject of 4"
                 . "\n    - origin/feature-5"
+                . "\n    - origin/feature-4 The subject of 4"
+                . "\n    - origin/feature-2 The NEW subject of 2"
+                . "\n    - origin/feature-1 The NEW subject of 1"
                 . "\n"
             ),
         );

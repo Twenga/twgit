@@ -10,7 +10,7 @@ Features:
 Fixes:
 
   - #102 Add `--no-color` option to all `git branch` commands to fix 
-    the problem with colored git when `color.ui=always` is setted in git config.
+    the problem with colored git when `color.ui=always` is set in git config.
   
 Core enhancements:
 
@@ -175,7 +175,7 @@ Core enhancements:
 
 Features:
 
-  - \#41: Add subject in commit messages of `twgit feature start` when a connector (github, redmine) is setted.
+  - \#41: Add subject in commit messages of `twgit feature start` when a connector (github, redmine) is set.
 **Must update** `TWGIT_FIRST_COMMIT_MSG` parameter of `conf/twgit.sh`:
 
     ```bash

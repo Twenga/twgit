@@ -45,7 +45,7 @@ function usage () {
     CUI_displayMsg help_detail '    Try to merge specified feature into current demo.'; echo
     CUI_displayMsg help_detail '<b>status [<demoname>]</b>'
     CUI_displayMsg help_detail '    Display information about specified demo: long name if a connector is'
-    CUI_displayMsg help_detail '    setted, last commit, status between local and remote demo and execute'
+    CUI_displayMsg help_detail '    set, last commit, status between local and remote demo and execute'
     CUI_displayMsg help_detail '    a git status if specified demo is the current branch.'
     CUI_displayMsg help_detail '    If no <b><demoname></b> is specified, then use current demo.'; echo
     CUI_displayMsg help_detail "Prefix '$TWGIT_PREFIX_DEMO' will be added to <b><demoname></b> parameter."; echo
@@ -155,7 +155,7 @@ function cmd_merge-feature () {
 
 ##
 # Display information about specified demo: long name if a connector is
-# setted, last commit, status between local and remote demo and execute
+# set, last commit, status between local and remote demo and execute
 # a git status if specified demo is the current branch.
 # If no <demoname> is specified, then use current demo.
 #

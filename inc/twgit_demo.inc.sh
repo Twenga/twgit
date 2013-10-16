@@ -108,6 +108,11 @@ function cmd_list () {
 #
 function cmd_push () {
     local current_branch=$(get_current_branch)
+    get_all_demos
+    local all_demos="$RETVAL"
+    if ! has "$TWGIT_ORIGIN/$current_branch" $all_demos; then
+        die "You must be in a demo to launch this command!"
+    fi
     process_push_branch "$current_branch"
 }
 

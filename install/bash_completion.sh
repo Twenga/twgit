@@ -38,19 +38,19 @@ function _twgit () {
         local command="${COMP_WORDS[COMP_CWORD-1]}"
         case "${command}" in
             feature)
-                local opts="committers help list merge-into-release migrate remove start status what-changed"
+                local opts="committers help list merge-into-release migrate push remove start status what-changed"
                 COMPREPLY=( $(compgen -W "${opts}" -- ${cur}) )
                 ;;
             demo)
-                local opts="help list merge-feature remove start status"
+                local opts="help list merge-feature push remove start status"
                 COMPREPLY=( $(compgen -W "${opts}" -- ${cur}) )
                 ;;
             hotfix)
-                local opts="finish help list remove start"
+                local opts="finish help list push remove start"
                 COMPREPLY=( $(compgen -W "${opts}" -- ${cur}) )
                 ;;
             release)
-                local opts="committers finish help list remove reset start"
+                local opts="committers finish help list push remove reset start"
                 COMPREPLY=( $(compgen -W "${opts}" -- ${cur}) )
                 ;;
             tag)

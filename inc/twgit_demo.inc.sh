@@ -43,6 +43,9 @@ function usage () {
     CUI_displayMsg help_detail '    be removed.'; echo
     CUI_displayMsg help_detail '<b>merge-feature <featurename> </b>'
     CUI_displayMsg help_detail '    Try to merge specified feature into current demo.'; echo
+    CUI_displayMsg help_detail '<b>push</b>'
+    CUI_displayMsg help_detail "    Push current demo to '$TWGIT_ORIGIN' repository."
+    CUI_displayMsg help_detail "    It's a shortcut for: \"git push $TWGIT_ORIGIN $TWGIT_PREFIX_DEMO…\""; echo
     CUI_displayMsg help_detail '<b>status [<demoname>]</b>'
     CUI_displayMsg help_detail '    Display information about specified demo: long name if a connector is'
     CUI_displayMsg help_detail '    set, last commit, status between local and remote demo and execute'
@@ -98,6 +101,19 @@ function cmd_list () {
         display_branches 'demo' ''
     fi
     echo
+}
+
+##
+# Push de la demo courante.
+#
+function cmd_push () {
+    local current_branch=$(get_current_branch)
+    get_all_demos
+    local all_demos="$RETVAL"
+    if ! has "$TWGIT_ORIGIN/$current_branch" $all_demos; then
+        die "You must be in a demo to launch this command!"
+    fi
+    process_push_branch "$current_branch"
 }
 
 ##

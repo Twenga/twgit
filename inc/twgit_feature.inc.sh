@@ -46,6 +46,9 @@ function usage () {
     CUI_displayMsg help_detail '<b>migrate <oldfeaturefullname> <newfeaturename></b>'
     CUI_displayMsg help_detail '    Migrate old branch to new process.'
     CUI_displayMsg help_detail '    For example: "twgit feature migrate rm7880 7880"'; echo
+    CUI_displayMsg help_detail '<b>push</b>'
+    CUI_displayMsg help_detail "    Push current feature to '$TWGIT_ORIGIN' repository."
+    CUI_displayMsg help_detail "    It's a shortcut for: \"git push $TWGIT_ORIGIN $TWGIT_PREFIX_FEATURE…\""; echo
     CUI_displayMsg help_detail '<b>remove <featurename></b>'
     CUI_displayMsg help_detail '    Remove both local and remote specified feature branch.'; echo
     CUI_displayMsg help_detail '<b>start <featurename> [-d]</b>'
@@ -323,6 +326,18 @@ function cmd_merge-into-release () {
     fi
 
     merge_feature_into_branch "$feature" "$release_fullname"
+}
+
+##
+# Push de la feature courante.
+#
+function cmd_push () {
+    local current_branch=$(get_current_branch)
+    local all_features=$(git branch --no-color -r --no-merged $TWGIT_ORIGIN/$TWGIT_STABLE | grep "$TWGIT_ORIGIN/$TWGIT_PREFIX_FEATURE" | sed 's/^[* ]*//' | tr '\n' ' ' | sed 's/ *$//g')
+    if ! has "$TWGIT_ORIGIN/$current_branch" $all_features; then
+        die "You must be in a feature to launch this command!"
+    fi
+    process_push_branch "$current_branch"
 }
 
 ##

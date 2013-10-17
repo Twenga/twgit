@@ -1,5 +1,0 @@
-#!/bin/bash
-
-TWGIT_FEATURE_SUBJECT_CONNECTOR='github'			# in {'', 'github', 'redmine'}
-TWGIT_FEATURE_SUBJECT_GITHUB_USER='Twenga'		# e.g. 'Twenga'
-TWGIT_FEATURE_SUBJECT_GITHUB_REPOSITORY='twgit'	# e.g. 'twgit'

@@ -144,6 +144,7 @@ class TwgitFeatureTest extends TwgitTestCase
         $this->_localExec(TWGIT_EXEC . ' feature start 42');
         $sMsg = $this->_localExec('cd ' . TWGIT_REPOSITORY_SECOND_LOCAL_DIR
             . ' && git init && git remote add ' . self::ORIGIN . ' ' . TWGIT_REPOSITORY_ORIGIN_DIR
+            . ' && git pull ' . self::ORIGIN . ' ' . self::STABLE . ':' . self::STABLE
             . ' && ' . TWGIT_EXEC . ' release start -I');
 
         $sMsg = $this->_localExec(TWGIT_EXEC . ' feature merge-into-release 42');

@@ -186,7 +186,7 @@ class TwgitCommonAssertsTest extends TwgitTestCase
      */
     public function testAssertCleanWorkingTree_WhenWorkingTreeEmpty ()
     {
-        $this->_localExec('git init && git commit --allow-empty -m init');
+        $this->_localExec('rm .twgit && git init && git commit --allow-empty -m init');
         $sMsg = $this->_localFunctionCall('assert_clean_working_tree');
         $this->assertEquals("Check clean working tree...", $sMsg);
     }

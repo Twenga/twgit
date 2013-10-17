@@ -62,6 +62,7 @@ class TwgitTagTest extends TwgitTestCase
             git config user.name 'Firstname Lastname' && \\
             git config user.email 'firstname.lastname@xyz.com'"
         );
+        $this->_localExec('git add .twgit && git commit -am init');
         $this->_localExec(TWGIT_EXEC . ' init 1.2.3 ' . TWGIT_REPOSITORY_ORIGIN_DIR);
         $this->_localExec(TWGIT_EXEC . ' release start -I');
 

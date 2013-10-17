@@ -107,6 +107,8 @@ class TwgitTestCase extends PHPUnit_Framework_TestCase
         }
 
         $this->_rawExec(self::$_sSetUpCmd);
+        copy(TWGIT_TMP_DIR . '/conf-twgit.sh', TWGIT_REPOSITORY_LOCAL_DIR . '/.twgit');
+        copy(TWGIT_TMP_DIR . '/conf-twgit.sh', TWGIT_REPOSITORY_SECOND_LOCAL_DIR . '/.twgit');
     }
 
     /**

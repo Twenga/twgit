@@ -62,7 +62,7 @@ class TwgitMainTest extends TwgitTestCase
     public function testInit_WithGitInit ()
     {
         $this->_remoteExec('git init');
-        $this->_localExec('git init');
+        $this->_localExec('git init && git add .twgit && git commit -am init && git branch -m non-master');
         $sMsg = $this->_localExec(TWGIT_EXEC . ' init 1.2.3 ' . TWGIT_REPOSITORY_ORIGIN_DIR);
 
         $this->assertNotContains("Initialized empty Git repository in " . TWGIT_REPOSITORY_LOCAL_DIR . "/.git/", $sMsg);
@@ -85,6 +85,7 @@ class TwgitMainTest extends TwgitTestCase
     {
         $this->_remoteExec('git init');
         $this->_localExec('git init && git remote add ' . self::ORIGIN . ' ' . TWGIT_REPOSITORY_ORIGIN_DIR);
+        $this->_localExec('git add .twgit && git commit -am init && git branch -m non-master');
         $sMsg = $this->_localExec(TWGIT_EXEC . ' init 1.2.3');
 
         $this->assertNotContains("Initialized empty Git repository in " . TWGIT_REPOSITORY_LOCAL_DIR . "/.git/", $sMsg);

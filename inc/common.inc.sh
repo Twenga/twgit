@@ -1423,7 +1423,7 @@ function init () {
 
     # Add minimal .gitignore ignoring '/.twgit_features_subject'
     if [ ! -f '.gitignore' ]; then
-        echo /.twgit_features_subject > .gitignore
+        echo -e "/.twgit_features_subject\n/.twgit" > .gitignore
         exec_git_command "git add .gitignore" "Add minimal .gitignore failed!"
         CUI_displayMsg processing "${TWGIT_GIT_COMMAND_PROMPT}git commit -m 'Add minimal .gitignore'"
         git commit -m 'Add minimal .gitignore' || die 'Add minimal .gitignore failed!'

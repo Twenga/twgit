@@ -8,19 +8,6 @@ class TwgitTagTest extends TwgitTestCase
 {
 
     /**
-     * Sets up the fixture, for example, open a network connection.
-     * This method is called before a test is executed.
-     */
-    public function setUp ()
-    {
-        $o = self::_getShellInstance();
-        $o->remove(TWGIT_REPOSITORY_ORIGIN_DIR);
-        $o->remove(TWGIT_REPOSITORY_LOCAL_DIR);
-        $o->mkdir(TWGIT_REPOSITORY_ORIGIN_DIR, '0777');
-        $o->mkdir(TWGIT_REPOSITORY_LOCAL_DIR, '0777');
-    }
-
-    /**
      * @shcovers inc/twgit_tag.inc.sh::cmd_list
      */
     public function testList_WithAmbiguousRef ()
@@ -75,6 +62,7 @@ class TwgitTagTest extends TwgitTestCase
             git config user.name 'Firstname Lastname' && \\
             git config user.email 'firstname.lastname@xyz.com'"
         );
+        $this->_localExec('git add .twgit && git commit -am init');
         $this->_localExec(TWGIT_EXEC . ' init 1.2.3 ' . TWGIT_REPOSITORY_ORIGIN_DIR);
         $this->_localExec(TWGIT_EXEC . ' release start -I');
 
@@ -82,7 +70,7 @@ class TwgitTagTest extends TwgitTestCase
         $this->_localExec('echo \'4;The subject of 4\' >> .twgit_features_subject');
         $this->_localExec(TWGIT_EXEC . ' feature start 1');
         $this->_localExec(TWGIT_EXEC . ' feature start 2');
-        $this->_localExec('git merge --no-ff feature-1; git commit --allow-empty -m "empty"; git push origin;');
+        $this->_localExec('git merge --no-ff feature-1; git commit --allow-empty -m "empty"; git push ' . self::ORIGIN . ';');
         $this->_localExec(TWGIT_EXEC . ' feature start 3');
         $this->_localExec(TWGIT_EXEC . ' feature start 4');
         $this->_localExec(TWGIT_EXEC . ' feature start 5');
@@ -102,7 +90,7 @@ class TwgitTagTest extends TwgitTestCase
     public function providerTestListWithValidTag () {
         return array(
             array(
-                '', "git# git fetch --prune origin"
+                '', "git# git fetch --prune " . self::ORIGIN
                 . "\n"
                 . "\n(i) List 5 last tags:"
                 . "\nTag: v1.2.3"
@@ -114,14 +102,14 @@ class TwgitTagTest extends TwgitTestCase
                 . "\nTagger: Firstname Lastname <firstname.lastname@xyz.com>"
                 . "\nDate: ---"
                 . "\nIncluded features:"
-                . "\n    - origin/feature-5"
-                . "\n    - origin/feature-4 The subject of 4"
-                . "\n    - origin/feature-2 The NEW subject of 2"
-                . "\n    - origin/feature-1 The NEW subject of 1"
+                . "\n    - " . self::ORIGIN . "/feature-5"
+                . "\n    - " . self::ORIGIN . "/feature-4 The subject of 4"
+                . "\n    - " . self::ORIGIN . "/feature-2 The NEW subject of 2"
+                . "\n    - " . self::ORIGIN . "/feature-1 The NEW subject of 1"
                 . "\n"
             ),
             array(
-                ' 1.2.3', "git# git fetch --prune origin"
+                ' 1.2.3', "git# git fetch --prune " . self::ORIGIN
                 . "\n"
                 . "\nCheck valid ref name..."
                 . "\nCheck valid tag name..."
@@ -133,7 +121,7 @@ class TwgitTagTest extends TwgitTestCase
                 . "\n"
             ),
             array(
-                ' 1.3.0', "git# git fetch --prune origin"
+                ' 1.3.0', "git# git fetch --prune " . self::ORIGIN
                 . "\n"
                 . "\nCheck valid ref name..."
                 . "\nCheck valid tag name..."
@@ -142,10 +130,10 @@ class TwgitTagTest extends TwgitTestCase
                 . "\nTagger: Firstname Lastname <firstname.lastname@xyz.com>"
                 . "\nDate: ---"
                 . "\nIncluded features:"
-                . "\n    - origin/feature-5"
-                . "\n    - origin/feature-4 The subject of 4"
-                . "\n    - origin/feature-2 The NEW subject of 2"
-                . "\n    - origin/feature-1 The NEW subject of 1"
+                . "\n    - " . self::ORIGIN . "/feature-5"
+                . "\n    - " . self::ORIGIN . "/feature-4 The subject of 4"
+                . "\n    - " . self::ORIGIN . "/feature-2 The NEW subject of 2"
+                . "\n    - " . self::ORIGIN . "/feature-1 The NEW subject of 1"
                 . "\n"
             ),
         );

@@ -8,21 +8,6 @@ class TwgitCommonAssertsTest extends TwgitTestCase
 {
 
     /**
-    * Sets up the fixture, for example, open a network connection.
-    * This method is called before a test is executed.
-    */
-    public function setUp ()
-    {
-        $o = self::_getShellInstance();
-        $o->remove(TWGIT_REPOSITORY_ORIGIN_DIR);
-        $o->remove(TWGIT_REPOSITORY_LOCAL_DIR);
-        $o->remove(TWGIT_REPOSITORY_SECOND_REMOTE_DIR);
-        $o->mkdir(TWGIT_REPOSITORY_ORIGIN_DIR, '0777');
-        $o->mkdir(TWGIT_REPOSITORY_LOCAL_DIR, '0777');
-        $o->mkdir(TWGIT_REPOSITORY_SECOND_REMOTE_DIR, '0777');
-    }
-
-    /**
      * @dataProvider providerTestAssertValidRefName
      * @shcovers inc/common.inc.sh::assert_valid_ref_name
      */
@@ -201,7 +186,7 @@ class TwgitCommonAssertsTest extends TwgitTestCase
      */
     public function testAssertCleanWorkingTree_WhenWorkingTreeEmpty ()
     {
-        $this->_localExec('git init && git commit --allow-empty -m init');
+        $this->_localExec('rm .twgit && git init && git commit --allow-empty -m init');
         $sMsg = $this->_localFunctionCall('assert_clean_working_tree');
         $this->assertEquals("Check clean working tree...", $sMsg);
     }
@@ -258,8 +243,8 @@ class TwgitCommonAssertsTest extends TwgitTestCase
         $sExpectedMsg =
             "Check current branch...\n"
             . "Cannot delete the branch 'feature-1' which you are currently on! So:\n"
-            . "git# git checkout stable\n"
-            . "Switched to branch 'stable'";
+            . "git# git checkout " . self::STABLE . "\n"
+            . "Switched to branch '" . self::STABLE . "'";
         $this->assertContains($sExpectedMsg, $sMsg);
     }
 

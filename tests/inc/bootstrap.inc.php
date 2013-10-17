@@ -27,3 +27,15 @@ $GLOBALS['oErrorHandler'] = new ErrorHandler(
 
 // Avoid update process of Twgit:
 touch(TWGIT_ROOT_DIR . '/.lastupdate');
+
+// Overload conf/twgit.sh with PHP defines in conf/phpunit.php.
+// Result into TWGIT_TMP_DIR . '/conf-twgit.sh'
+$sConf = file_get_contents(TWGIT_ROOT_DIR . '/conf/twgit.sh');
+$aAllDefines = get_defined_constants(true);
+$aUserDefines = $aAllDefines['user'];
+foreach ($aUserDefines as $sKey => $sValue) {
+    if (strpos($sKey, 'TWGIT_') === 0) {
+        $sConf = preg_replace("/^$sKey=.*$/m", "$sKey='$sValue'", $sConf);
+    }
+}
+file_put_contents(TWGIT_TMP_DIR . '/conf-twgit.sh', $sConf);

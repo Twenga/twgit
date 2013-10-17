@@ -8,23 +8,6 @@ class TwgitFeatureTest extends TwgitTestCase
 {
 
     /**
-     * Sets up the fixture, for example, open a network connection.
-     * This method is called before a test is executed.
-     */
-    public function setUp ()
-    {
-        $o = self::_getShellInstance();
-        $o->remove(TWGIT_REPOSITORY_ORIGIN_DIR);
-        $o->remove(TWGIT_REPOSITORY_LOCAL_DIR);
-        $o->remove(TWGIT_REPOSITORY_SECOND_LOCAL_DIR);
-        $o->remove(TWGIT_REPOSITORY_SECOND_REMOTE_DIR);
-        $o->mkdir(TWGIT_REPOSITORY_ORIGIN_DIR, '0777');
-        $o->mkdir(TWGIT_REPOSITORY_LOCAL_DIR, '0777');
-        $o->mkdir(TWGIT_REPOSITORY_SECOND_LOCAL_DIR, '0777');
-        $o->mkdir(TWGIT_REPOSITORY_SECOND_REMOTE_DIR, '0777');
-    }
-
-    /**
      */
     public function testStart_WithAmbiguousRef ()
     {
@@ -95,7 +78,7 @@ class TwgitFeatureTest extends TwgitTestCase
         );
 
         $sMsg = $this->_localExec(TWGIT_EXEC . ' feature list');
-        $this->assertContains("(i) Remote free features:\nFeature: origin/feature-1* (from v1.2.3)", $sMsg);
+        $this->assertContains("(i) Remote free features:\nFeature: " . self::_remote('feature-1') . "* (from v1.2.3)", $sMsg);
     }
 
     /**
@@ -124,20 +107,20 @@ class TwgitFeatureTest extends TwgitTestCase
             array(':', '', 'Following branches are out of process'),
             array(':', '', 'Following local branches are ambiguous'),
             array(
-                'git checkout -b feature-X && git push origin feature-X'
-                    . ' && git checkout -b release-X && git push origin release-X'
-                    . ' && git checkout -b hotfix-X && git push origin hotfix-X'
-                    . ' && git checkout -b demo-X && git push origin demo-X'
-                    . ' && git checkout -b master && git push origin master'
-                    . ' && git checkout -b outofprocess && git push origin outofprocess'
-                    . ' && git remote set-head origin stable',
-                "/!\ Following branches are out of process: 'origin/outofprocess'!",
+                'git checkout -b feature-X && git push ' . self::ORIGIN . ' feature-X'
+                    . ' && git checkout -b release-X && git push ' . self::ORIGIN . ' release-X'
+                    . ' && git checkout -b hotfix-X && git push ' . self::ORIGIN . ' hotfix-X'
+                    . ' && git checkout -b demo-X && git push ' . self::ORIGIN . ' demo-X'
+                    . ' && git checkout -b master && git push ' . self::ORIGIN . ' master'
+                    . ' && git checkout -b outofprocess && git push ' . self::ORIGIN . ' outofprocess'
+                    . ' && git remote set-head ' . self::ORIGIN . ' ' . self::STABLE,
+                "/!\ Following branches are out of process: '" . self::_remote('outofprocess') . "'!",
                 'Following local branches are ambiguous'
             ),
             array(
-                'git checkout -b outofprocess && git push origin outofprocess && git push second outofprocess'
-                    . ' && git checkout -b out2 && git push origin out2 && git push second out2',
-                "/!\ Following branches are out of process: 'origin/out2', 'origin/outofprocess'!",
+                'git checkout -b outofprocess && git push ' . self::ORIGIN . ' outofprocess && git push second outofprocess'
+                    . ' && git checkout -b out2 && git push ' . self::ORIGIN . ' out2 && git push second out2',
+                "/!\ Following branches are out of process: '" . self::_remote('out2') . "', '" . self::_remote('outofprocess') . "'!",
                 'Following local branches are ambiguous'
             ),
             array(
@@ -146,8 +129,8 @@ class TwgitFeatureTest extends TwgitTestCase
                 'Following branches are out of process'
             ),
             array(
-                'git checkout -b outofprocess && git push origin outofprocess && git branch v1.2.3 v1.2.3',
-                "/!\ Following branches are out of process: 'origin/outofprocess'!\n"
+                'git checkout -b outofprocess && git push ' . self::ORIGIN . ' outofprocess && git branch v1.2.3 v1.2.3',
+                "/!\ Following branches are out of process: '" . self::_remote('outofprocess') . "'!\n"
                     . "/!\ Following local branches are ambiguous: 'v1.2.3'!",
                 ''
             ),
@@ -160,17 +143,18 @@ class TwgitFeatureTest extends TwgitTestCase
         $this->_localExec(TWGIT_EXEC . ' init 1.2.3 ' . TWGIT_REPOSITORY_ORIGIN_DIR);
         $this->_localExec(TWGIT_EXEC . ' feature start 42');
         $sMsg = $this->_localExec('cd ' . TWGIT_REPOSITORY_SECOND_LOCAL_DIR
-            . ' && git init && git remote add origin ' . TWGIT_REPOSITORY_ORIGIN_DIR
+            . ' && git init && git remote add ' . self::ORIGIN . ' ' . TWGIT_REPOSITORY_ORIGIN_DIR
+            . ' && git pull ' . self::ORIGIN . ' ' . self::STABLE . ':' . self::STABLE
             . ' && ' . TWGIT_EXEC . ' release start -I');
 
         $sMsg = $this->_localExec(TWGIT_EXEC . ' feature merge-into-release 42');
-        $sExpectedMsg = "git# git pull origin release-1.3.0\n"
-            . "From /tmp/origin\n"
+        $sExpectedMsg = "git# git pull " . self::ORIGIN . " release-1.3.0\n"
+            . "From " . TWGIT_REPOSITORY_ORIGIN_DIR . "\n"
             . " * branch            release-1.3.0 -> FETCH_HEAD\n"
             . "Already up-to-date.\n"
             . "git# git merge --no-ff feature-42\n"
             . "Already up-to-date!";
         $this->assertContains($sExpectedMsg, $sMsg);
-        $this->assertContains("git# git push origin release-1.3.0", $sMsg);
+        $this->assertContains("git# git push " . self::ORIGIN . " release-1.3.0", $sMsg);
     }
 }

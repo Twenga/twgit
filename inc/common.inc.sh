@@ -1402,7 +1402,7 @@ function init () {
     CUI_displayMsg processing "Check presence of remote '$TWGIT_ORIGIN' repository..."
     if [ "$(git remote | grep -E "^$TWGIT_ORIGIN$" | wc -l)" -ne 1 ]; then
         [ -z "$remote_url" ] && die "Remote '<b>$TWGIT_ORIGIN</b>' repository url required!"
-        exec_git_command "git remote add origin $remote_url" 'Add remote repository failed!'
+        exec_git_command "git remote add $TWGIT_ORIGIN $remote_url" 'Add remote repository failed!'
     fi
     process_fetch
 
@@ -1431,7 +1431,7 @@ function init () {
 
     # Add minimal .gitignore ignoring '/.twgit_features_subject'
     if [ ! -f '.gitignore' ]; then
-        echo /.twgit_features_subject > .gitignore
+        echo -e "/.twgit_features_subject\n/.twgit" > .gitignore
         exec_git_command "git add .gitignore" "Add minimal .gitignore failed!"
         CUI_displayMsg processing "${TWGIT_GIT_COMMAND_PROMPT}git commit -m 'Add minimal .gitignore'"
         git commit -m 'Add minimal .gitignore' || die 'Add minimal .gitignore failed!'

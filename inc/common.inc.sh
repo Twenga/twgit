@@ -1423,7 +1423,7 @@ function init () {
 
     # Add minimal .gitignore ignoring '/.twgit_features_subject'
     if [ ! -f '.gitignore' ]; then
-        echo /.twgit_features_subject > .gitignore
+        echo -e "/.twgit_features_subject\n/.twgit" > .gitignore
         exec_git_command "git add .gitignore" "Add minimal .gitignore failed!"
         CUI_displayMsg processing "${TWGIT_GIT_COMMAND_PROMPT}git commit -m 'Add minimal .gitignore'"
         git commit -m 'Add minimal .gitignore' || die 'Add minimal .gitignore failed!'
@@ -1470,9 +1470,9 @@ function displayChangelogSection () {
     content="## Version $(echo "${content#*## Version }")";
     content="$(echo "${content%## Version ${from_tag:1}*}")";
     content="$(echo -e "$content\n" \
-		| sedRegexpExtended ':a;N;$!ba;s/\n\n(  -|```)/\n\1/g' \
-		| sedRegexpExtended 's/  - \[#([0-9]+)\]\([^)]+\)/  - #\1/' \
-	)";
+        | sedRegexpExtended ':a;N;$!ba;s/\n\n(  -|```)/\n\1/g' \
+        | sedRegexpExtended 's/  - \[#([0-9]+)\]\([^)]+\)/  - #\1/' \
+    )";
 
     local line
     while read line; do

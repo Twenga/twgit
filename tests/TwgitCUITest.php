@@ -8,19 +8,6 @@ class TwgitCUITest extends TwgitTestCase
 {
 
     /**
-    * Sets up the fixture, for example, open a network connection.
-    * This method is called before a test is executed.
-    */
-    public function setUp ()
-    {
-        $o = self::_getShellInstance();
-        $o->remove(TWGIT_REPOSITORY_ORIGIN_DIR);
-        $o->remove(TWGIT_REPOSITORY_LOCAL_DIR);
-        $o->mkdir(TWGIT_REPOSITORY_ORIGIN_DIR, '0777');
-        $o->mkdir(TWGIT_REPOSITORY_LOCAL_DIR, '0777');
-    }
-
-    /**
      * @shcovers inc/coloredUI.inc.sh::CUI_isSet
      * @shcovers inc/coloredUI.inc.sh::CUI_displayMsg
      */

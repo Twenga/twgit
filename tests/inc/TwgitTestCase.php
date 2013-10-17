@@ -38,6 +38,12 @@ class TwgitTestCase extends PHPUnit_Framework_TestCase
     protected static $_oShell = NULL;
 
     /**
+     * @var string
+     * @see setUp();
+     */
+    private static $_sSetUpCmd = '';
+
+    /**
      * Singleton.
      *
      * @return Shell_Adapter
@@ -72,8 +78,35 @@ class TwgitTestCase extends PHPUnit_Framework_TestCase
      */
     public function __construct($sName=NULL, array $aData=array(), $sDataName='')
     {
-        self::$_remoteStable = self::ORIGIN . '/' . self::STABLE;
         parent::__construct($sName, $aData, $sDataName);
+        self::$_remoteStable = self::ORIGIN . '/' . self::STABLE;
+    }
+
+    /**
+     * Sets up the fixture, for example, open a network connection.
+     * This method is called before a test is executed.
+     */
+    public function setUp ()
+    {
+        if (empty(self::$_sSetUpCmd)) {
+            $aDir = array(
+                TWGIT_REPOSITORY_ORIGIN_DIR,
+                TWGIT_REPOSITORY_LOCAL_DIR,
+                TWGIT_REPOSITORY_SECOND_LOCAL_DIR,
+                TWGIT_REPOSITORY_SECOND_REMOTE_DIR,
+                TWGIT_REPOSITORY_THIRD_REMOTE_DIR
+            );
+            $aCmd = array();
+            foreach ($aDir as $sDir) {
+                if (strpos($sDir, TWGIT_TMP_DIR . '/') !== 0) {
+                    throw new RuntimeException("Security check before 'rm -rf'…");
+                }
+                $aCmd[] = "rm -rf '$sDir' && mkdir -p '$sDir' && chmod 0777 '$sDir'";
+            }
+            self::$_sSetUpCmd = implode(' && ', $aCmd);
+        }
+
+        $this->_rawExec(self::$_sSetUpCmd);
     }
 
     /**

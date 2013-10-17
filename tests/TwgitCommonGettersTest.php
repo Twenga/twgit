@@ -8,23 +8,6 @@ class TwgitCommonGettersTest extends TwgitTestCase
 {
 
     /**
-    * Sets up the fixture, for example, open a network connection.
-    * This method is called before a test is executed.
-    */
-    public function setUp ()
-    {
-        $o = self::_getShellInstance();
-        $o->remove(TWGIT_REPOSITORY_ORIGIN_DIR);
-        $o->remove(TWGIT_REPOSITORY_LOCAL_DIR);
-        $o->remove(TWGIT_REPOSITORY_SECOND_REMOTE_DIR);
-        $o->remove(TWGIT_REPOSITORY_THIRD_REMOTE_DIR);
-        $o->mkdir(TWGIT_REPOSITORY_ORIGIN_DIR, '0777');
-        $o->mkdir(TWGIT_REPOSITORY_LOCAL_DIR, '0777');
-        $o->mkdir(TWGIT_REPOSITORY_SECOND_REMOTE_DIR, '0777');
-        $o->mkdir(TWGIT_REPOSITORY_THIRD_REMOTE_DIR, '0777');
-    }
-
-    /**
      * @dataProvider providerTestGetDissidentRemoteBranches
      * @shcovers inc/common.inc.sh::get_dissident_remote_branches
      */

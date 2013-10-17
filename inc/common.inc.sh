@@ -1394,7 +1394,7 @@ function init () {
     CUI_displayMsg processing "Check presence of remote '$TWGIT_ORIGIN' repository..."
     if [ "$(git remote | grep -E "^$TWGIT_ORIGIN$" | wc -l)" -ne 1 ]; then
         [ -z "$remote_url" ] && die "Remote '<b>$TWGIT_ORIGIN</b>' repository url required!"
-        exec_git_command "git remote add origin $remote_url" 'Add remote repository failed!'
+        exec_git_command "git remote add $TWGIT_ORIGIN $remote_url" 'Add remote repository failed!'
     fi
     process_fetch
 
@@ -1470,9 +1470,9 @@ function displayChangelogSection () {
     content="## Version $(echo "${content#*## Version }")";
     content="$(echo "${content%## Version ${from_tag:1}*}")";
     content="$(echo -e "$content\n" \
-		| sedRegexpExtended ':a;N;$!ba;s/\n\n(  -|```)/\n\1/g' \
-		| sedRegexpExtended 's/  - \[#([0-9]+)\]\([^)]+\)/  - #\1/' \
-	)";
+        | sedRegexpExtended ':a;N;$!ba;s/\n\n(  -|```)/\n\1/g' \
+        | sedRegexpExtended 's/  - \[#([0-9]+)\]\([^)]+\)/  - #\1/' \
+    )";
 
     local line
     while read line; do

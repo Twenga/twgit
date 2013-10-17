@@ -110,7 +110,7 @@ class TwgitSetupTest extends TwgitTestCase
         $this->_remoteExec('git init');
         $this->_localExec('git init && git remote add ' . self::ORIGIN . ' ' . TWGIT_REPOSITORY_ORIGIN_DIR);
         $sMsg = $this->_localFunctionCall('process_fetch x');
-        $this->assertEquals('git# git fetch --prune origin' . "\n", $sMsg);
+        $this->assertEquals('git# git fetch --prune ' . self::ORIGIN . "\n", $sMsg);
     }
 
     /**

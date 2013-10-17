@@ -721,11 +721,11 @@ function assert_recent_git_version () {
 function assert_clean_stable_branch_and_checkout () {
     exec_git_command "git checkout $TWGIT_STABLE" "Could not checkout '$TWGIT_STABLE'!"
     CUI_displayMsg processing "Check health of '$TWGIT_STABLE' branch..."
-    local extra_commits="$(git log origin/stable..stable --oneline | wc -l)"
+    local extra_commits="$(git log ${TWGIT_ORIGIN}/${TWGIT_STABLE}..${TWGIT_STABLE} --oneline | wc -l)"
     if [ "$extra_commits" -gt 0 ]; then
         die "Local '<b>$TWGIT_STABLE</b>' branch is ahead of '<b>$TWGIT_ORIGIN/$TWGIT_STABLE</b>'!" \
             "Commits on '<b>$TWGIT_STABLE</b>' are out of process." \
-            "Try: git checkout stable && git reset $TWGIT_ORIGIN/$TWGIT_STABLE"
+            "Try: git checkout $TWGIT_STABLE && git reset $TWGIT_ORIGIN/$TWGIT_STABLE"
     fi
     exec_git_command "git merge $TWGIT_ORIGIN/$TWGIT_STABLE" \
         "Could not merge '$TWGIT_ORIGIN/$TWGIT_STABLE' into '$TWGIT_STABLE'!"

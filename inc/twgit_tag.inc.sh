@@ -62,6 +62,10 @@ function cmd_list () {
     process_options "$@"
     require_parameter '-'
     local tag="$RETVAL"
+
+    clean_prefixes $tag 'tag'
+    tag="$RETVAL"
+
     local tag_fullname="$TWGIT_PREFIX_TAG$tag"
     process_fetch 'F'
 

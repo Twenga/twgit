@@ -26,6 +26,16 @@ class TwgitFeatureTest extends TwgitTestCase
 
     /**
      */
+    public function testStart_WithPrefixNaming ()
+    {
+        $this->_remoteExec('git init');
+        $this->_localExec(TWGIT_EXEC . ' init 1.2.3 ' . TWGIT_REPOSITORY_ORIGIN_DIR);
+        $this->_localExec('git branch v1.2.3 v1.2.3');
+
+        $sMsg = $this->_localExec(TWGIT_EXEC . ' feature start feature-42');
+        $this->assertContains("assume tag was 42 instead of feature-42", $sMsg);
+    }
+
     public function testStart_WithAmbiguousRef ()
     {
         $this->_remoteExec('git init');
@@ -172,5 +182,18 @@ class TwgitFeatureTest extends TwgitTestCase
             . "Already up-to-date!";
         $this->assertContains($sExpectedMsg, $sMsg);
         $this->assertContains("git# git push origin release-1.3.0", $sMsg);
+    }
+
+    public function testMergeIntoRelease_WithPrefixes ()
+    {
+        $this->_remoteExec('git init');
+        $this->_localExec(TWGIT_EXEC . ' init 1.2.3 ' . TWGIT_REPOSITORY_ORIGIN_DIR);
+        $this->_localExec(TWGIT_EXEC . ' feature start 42');
+        $sMsg = $this->_localExec('cd ' . TWGIT_REPOSITORY_SECOND_LOCAL_DIR
+            . ' && git init && git remote add origin ' . TWGIT_REPOSITORY_ORIGIN_DIR
+            . ' && ' . TWGIT_EXEC . ' release start -I');
+
+        $sMsg = $this->_localExec(TWGIT_EXEC . ' feature merge-into-release feature-42');
+        $this->assertContains("assume tag was 42 instead of feature-42", $sMsg);
     }
 }

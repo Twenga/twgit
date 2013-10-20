@@ -88,6 +88,10 @@ function cmd_committers () {
     process_options "$@"
     require_parameter '-'
     local feature="$RETVAL"
+
+    clean_prefixes $feature 'feature-'
+    feature="$RETVAL"
+
     local feature_fullname
 
     local all_features=$(git branch --no-color -r | grep "$TWGIT_ORIGIN/$TWGIT_PREFIX_FEATURE" | sed 's/^[* ]*//' | tr '\n' ' ' | sed 's/ *$//g')
@@ -197,6 +201,10 @@ function cmd_migrate () {
     local oldfeature_fullname="$RETVAL"
     require_parameter 'newfeaturename'
     local feature="$RETVAL"
+
+    clean_prefixes $feature 'feature-'
+    feature="$RETVAL"
+
     local feature_fullname="$TWGIT_PREFIX_FEATURE$feature"
 
     assert_valid_ref_name $feature
@@ -254,6 +262,10 @@ function cmd_status () {
     process_options "$@"
     require_parameter '-'
     local feature="$RETVAL"
+
+    clean_prefixes $feature 'feature-'
+    feature="$RETVAL"
+
     local current_branch=$(get_current_branch)
 
     # Si feature non spécifiée, récupérer la courante :
@@ -295,6 +307,9 @@ function cmd_merge-into-release () {
     require_parameter '-'
     local feature="$RETVAL"
 
+    clean_prefixes $feature 'feature-'
+    feature="$RETVAL"
+
     # Tests préliminaires :
     assert_clean_working_tree
     process_fetch
@@ -334,6 +349,10 @@ function cmd_remove () {
     process_options "$@"
     require_parameter 'feature'
     local feature="$RETVAL"
+
+    clean_prefixes $feature 'feature-'
+    feature="$RETVAL"
+
     remove_feature "$feature"
     echo
 }
@@ -348,6 +367,10 @@ function cmd_what-changed () {
     process_options "$@"
     require_parameter '-'
     local feature="$RETVAL"
+
+    clean_prefixes $feature 'feature-'
+    feature="$RETVAL"
+
     local last_ref
 
     process_fetch

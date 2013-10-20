@@ -70,6 +70,10 @@ function cmd_list () {
     process_options "$@"
     require_parameter '-'
     local demo="$RETVAL"
+
+    clean_prefixes $demo 'demo-'
+    demo="$RETVAL"
+
     local demos
 
     process_fetch 'F'
@@ -110,6 +114,10 @@ function cmd_start () {
     process_options "$@"
     require_parameter 'demo'
     local demo="$RETVAL"
+
+    clean_prefixes $demo 'demo-'
+    demo="$RETVAL"
+
     start_simple_branch "$demo" "$TWGIT_PREFIX_DEMO"
     echo
 }
@@ -123,6 +131,10 @@ function cmd_remove () {
     process_options "$@"
     require_parameter 'demo'
     local demo="$RETVAL"
+
+    clean_prefixes $demo 'demo-'
+    demo="$RETVAL"
+
     remove_demo "$demo"
     echo
 }
@@ -136,6 +148,10 @@ function cmd_merge-feature () {
     process_options "$@"
     require_parameter 'feature'
     local feature="$RETVAL"
+
+    clean_prefixes $feature 'feature-'
+    feature="$RETVAL"
+
     local feature_fullname="$TWGIT_PREFIX_FEATURE$feature"
 
     # Tests préliminaires :
@@ -165,6 +181,10 @@ function cmd_status() {
     process_options "$@"
     require_parameter '-'
     local demo="$RETVAL"
+
+    clean_prefixes $demo 'demo-'
+    demo="$RETVAL"
+
     local current_branch=$(get_current_branch)
 
     # Si demo non spécifiée, récupérer la courante :

@@ -116,6 +116,10 @@ function cmd_remove () {
     process_options "$@"
     require_parameter 'hotfix'
     local hotfix="$RETVAL"
+
+    clean_prefixes $hotfix 'hotfix-'
+    hotfix="$RETVAL"
+
     local hotfix_fullname="$TWGIT_PREFIX_HOTFIX$hotfix"
     local tag="$hotfix"
     local tag_fullname="$TWGIT_PREFIX_TAG$tag"

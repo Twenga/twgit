@@ -75,6 +75,17 @@ class TwgitReleaseTest extends TwgitTestCase
         $sMsg = $this->_localExec(TWGIT_EXEC . ' release list');
         $this->assertContains("Release: origin/release-2.0.0", $sMsg);
     }
+        
+    public function testReset_WithPrefix ()
+    {
+        $this->_remoteExec('git init');
+        $this->_localExec(TWGIT_EXEC . ' init 1.2.3 ' . TWGIT_REPOSITORY_ORIGIN_DIR);
+        $this->_localExec(TWGIT_EXEC . ' release start -I');
+
+        $sMsg = $this->_localExec(TWGIT_EXEC . ' release reset release-1.3.0 -IM');
+	$this->assertContains("assume tag was 1.3.0 instead of release-1.3.0", $sMsg);
+    }
+
 
     /**
      */
@@ -127,6 +138,16 @@ class TwgitReleaseTest extends TwgitTestCase
         $sMsg = $this->_localExec(TWGIT_EXEC . ' release start -I 10.0.2');
         $sMsg = $this->_localExec(TWGIT_EXEC . ' release list');
         $this->assertContains("Release: origin/release-10.0.2", $sMsg);
+    }
+
+    public function testStart_WithSpecifiedTagAndPrefix ()
+    {
+        $this->_remoteExec('git init');
+        $this->_localExec(TWGIT_EXEC . ' init 1.2.3 ' . TWGIT_REPOSITORY_ORIGIN_DIR);
+        $this->_localExec('git branch v1.2.3 v1.2.3');
+
+        $sMsg = $this->_localExec(TWGIT_EXEC . ' release start -I release-10.0.2');
+	$this->assertContains("assume tag was 10.0.2 instead of release-10.0.2", $sMsg);
     }
 
     /**

@@ -146,6 +146,24 @@ class TwgitCommonProcessingTest extends TwgitTestCase
         );
     }
 
+    public function testRemoveDemo_WithPrefix ()
+    {
+        $sMsg = $this->_localExec(TWGIT_EXEC . ' demo start 1; ' . TWGIT_EXEC . ' demo start demo-2; ');
+        $this->assertContains('assume tag was 2 instead of demo-2', $sMsg); 
+        $sMsg = $this->_localFunctionCall('remove_demo demo-1');
+        $this->assertContains('assume tag was 1 instead of demo-1', $sMsg);
+        $this->assertContains('Check valid ref name...', $sMsg);
+        $this->assertContains('Check clean working tree...', $sMsg);
+        $this->assertContains('Check current branch...', $sMsg);
+        $this->assertContains('git# git fetch --prune origin', $sMsg);
+
+        $sMsg = $this->_localExec("git branch -a | sed 's/^[* ]*//' | sed 's/ *$//g'");
+        $this->assertEquals(
+            "demo-2\nstable\nremotes/origin/demo-2\nremotes/origin/stable",
+            $sMsg
+        );
+    }
+
     /**
      * @shcovers inc/common.inc.sh::remove_feature
      */
@@ -153,6 +171,24 @@ class TwgitCommonProcessingTest extends TwgitTestCase
     {
         $this->_localExec(TWGIT_EXEC . ' feature start 1; ' . TWGIT_EXEC . ' feature start 2; ');
         $sMsg = $this->_localFunctionCall('remove_feature 1');
+        $this->assertContains('Check valid ref name...', $sMsg);
+        $this->assertContains('Check clean working tree...', $sMsg);
+        $this->assertContains('Check current branch...', $sMsg);
+        $this->assertContains('git# git fetch --prune origin', $sMsg);
+
+        $sMsg = $this->_localExec("git branch -a | sed 's/^[* ]*//' | sed 's/ *$//g'");
+        $this->assertEquals(
+            "feature-2\nstable\nremotes/origin/feature-2\nremotes/origin/stable",
+            $sMsg
+        );
+    }
+    
+    public function testRemoveFeature_WithPrefix ()
+    {
+        $sMsg = $this->_localExec(TWGIT_EXEC . ' feature start 1; ' . TWGIT_EXEC . ' feature start feature-2; ');
+        $this->assertContains('assume tag was 2 instead of feature-2', $sMsg); 
+        $sMsg = $this->_localFunctionCall('remove_feature feature-1');
+        $this->assertContains('assume tag was 1 instead of feature-1', $sMsg);
         $this->assertContains('Check valid ref name...', $sMsg);
         $this->assertContains('Check clean working tree...', $sMsg);
         $this->assertContains('Check current branch...', $sMsg);

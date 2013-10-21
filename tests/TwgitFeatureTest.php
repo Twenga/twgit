@@ -196,4 +196,53 @@ class TwgitFeatureTest extends TwgitTestCase
         $sMsg = $this->_localExec(TWGIT_EXEC . ' feature merge-into-release feature-42');
         $this->assertContains("assume tag was 42 instead of feature-42", $sMsg);
     }
+
+    public function testCommiters_WithPrefixes ()
+    {
+        $this->_remoteExec('git init');
+        $this->_localExec(TWGIT_EXEC . ' init 1.2.3 ' . TWGIT_REPOSITORY_ORIGIN_DIR);
+        $this->_localExec(TWGIT_EXEC . ' feature start 42');
+        $sMsg = $this->_localExec(TWGIT_EXEC . ' feature committers feature-42');
+        $this->assertContains("assume tag was 42 instead of feature-42", $sMsg);
+    }
+
+    public function testMigrate_WithPrefixes ()
+    {
+        $this->_remoteExec('git init');
+        $this->_localExec(TWGIT_EXEC . ' init 1.2.3 ' . TWGIT_REPOSITORY_ORIGIN_DIR);
+        $this->_remoteExec('git checkout stable && git branch toto');
+        $sMsg = $this->_localExec('yes | ' . TWGIT_EXEC . ' feature migrate toto feature-42');
+        $this->assertContains("assume tag was 42 instead of feature-42", $sMsg);
+    }
+
+    public function testRemove_WithPrefixes ()
+    {
+        $this->_remoteExec('git init');
+        $this->_localExec(TWGIT_EXEC . ' init 1.2.3 ' . TWGIT_REPOSITORY_ORIGIN_DIR);
+        $this->_localExec(TWGIT_EXEC . ' feature start 42');
+        $this->_localExec('git checkout stable');
+        $sMsg = $this->_localExec(TWGIT_EXEC . ' feature remove feature-42');
+        $this->assertContains("assume tag was 42 instead of feature-42", $sMsg);
+        $sMsg = $this->_localExec(TWGIT_EXEC . ' feature list');
+        $this->assertNotContains("feature-42", $sMsg);
+    }
+
+    public function testStatus_WithPrefixes ()
+    {
+        $this->_remoteExec('git init');
+        $this->_localExec(TWGIT_EXEC . ' init 1.2.3 ' . TWGIT_REPOSITORY_ORIGIN_DIR);
+        $this->_localExec(TWGIT_EXEC . ' feature start 42');
+        $sMsg = $this->_localExec(TWGIT_EXEC . ' feature status feature-42');
+        $this->assertContains("assume tag was 42 instead of feature-42", $sMsg);
+    }
+
+    public function testWhatChanged_WithPrefixes ()
+    {
+        $this->_remoteExec('git init');
+        $this->_localExec(TWGIT_EXEC . ' init 1.2.3 ' . TWGIT_REPOSITORY_ORIGIN_DIR);
+        $this->_localExec(TWGIT_EXEC . ' feature start 42');
+        $sMsg = $this->_localExec(TWGIT_EXEC . ' feature what-changed feature-42');
+        $this->assertContains("assume tag was 42 instead of feature-42", $sMsg);
+    }
 }
+

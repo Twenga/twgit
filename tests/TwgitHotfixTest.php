@@ -140,8 +140,8 @@ class TwgitHotfixTest extends TwgitTestCase
             "Local 'stable' branch is ahead of 'origin/stable'! Commits on 'stable' are out of process."
                 . " Try: git checkout stable && git reset origin/stable"
         );
-        $sMsg = $this->_localExec(TWGIT_EXEC . ' hotfix remove v1.2.4');
-        $this->assertContains("assume tag was 1.2.4 instead of v1.2.4", $sMsg);
+        $sMsg = $this->_localExec(TWGIT_EXEC . ' hotfix remove hotfix-1.2.4');
+        $this->assertContains("assume tag was 1.2.4 instead of hotfix-1.2.4", $sMsg);
     }
 
     /**

@@ -9,6 +9,16 @@ class TwgitFeatureTest extends TwgitTestCase
 
     /**
      */
+    public function testStart_WithPrefixNaming ()
+    {
+        $this->_remoteExec('git init');
+        $this->_localExec(TWGIT_EXEC . ' init 1.2.3 ' . TWGIT_REPOSITORY_ORIGIN_DIR);
+        $this->_localExec('git branch v1.2.3 v1.2.3');
+
+        $sMsg = $this->_localExec(TWGIT_EXEC . ' feature start feature-42');
+        $this->assertContains("Assume feature was '42' instead of 'feature-42'", $sMsg);
+    }
+
     public function testStart_WithAmbiguousRef ()
     {
         $this->_remoteExec('git init');
@@ -157,4 +167,67 @@ class TwgitFeatureTest extends TwgitTestCase
         $this->assertContains($sExpectedMsg, $sMsg);
         $this->assertContains("git# git push " . self::ORIGIN . " release-1.3.0", $sMsg);
     }
+
+    public function testMergeIntoRelease_WithPrefixes ()
+    {
+        $this->_remoteExec('git init');
+        $this->_localExec(TWGIT_EXEC . ' init 1.2.3 ' . TWGIT_REPOSITORY_ORIGIN_DIR);
+        $this->_localExec(TWGIT_EXEC . ' feature start 42');
+        $sMsg = $this->_localExec('cd ' . TWGIT_REPOSITORY_SECOND_LOCAL_DIR
+            . ' && git init && git remote add ' . self::ORIGIN . ' ' . TWGIT_REPOSITORY_ORIGIN_DIR
+            . ' && git pull ' . self::ORIGIN . ' ' . self::STABLE . ':' . self::STABLE
+            . ' && ' . TWGIT_EXEC . ' release start -I');
+
+        $sMsg = $this->_localExec(TWGIT_EXEC . ' feature merge-into-release feature-42');
+        $this->assertContains("Assume feature was '42' instead of 'feature-42'", $sMsg);
+    }
+
+    public function testCommiters_WithPrefixes ()
+    {
+        $this->_remoteExec('git init');
+        $this->_localExec(TWGIT_EXEC . ' init 1.2.3 ' . TWGIT_REPOSITORY_ORIGIN_DIR);
+        $this->_localExec(TWGIT_EXEC . ' feature start 42');
+        $sMsg = $this->_localExec(TWGIT_EXEC . ' feature committers feature-42');
+        $this->assertContains("Assume feature was '42' instead of 'feature-42'", $sMsg);
+    }
+
+    public function testMigrate_WithPrefixes ()
+    {
+        $this->_remoteExec('git init');
+        $this->_localExec(TWGIT_EXEC . ' init 1.2.3 ' . TWGIT_REPOSITORY_ORIGIN_DIR);
+        $this->_remoteExec('git checkout ' . self::STABLE . ' && git branch toto');
+        $sMsg = $this->_localExec('yes | ' . TWGIT_EXEC . ' feature migrate toto feature-42');
+        $this->assertContains("Assume feature was '42' instead of 'feature-42'", $sMsg);
+    }
+
+    public function testRemove_WithPrefixes ()
+    {
+        $this->_remoteExec('git init');
+        $this->_localExec(TWGIT_EXEC . ' init 1.2.3 ' . TWGIT_REPOSITORY_ORIGIN_DIR);
+        $this->_localExec(TWGIT_EXEC . ' feature start 42');
+        $this->_localExec('git checkout ' . self::STABLE);
+        $sMsg = $this->_localExec(TWGIT_EXEC . ' feature remove feature-42');
+        $this->assertContains("Assume feature was '42' instead of 'feature-42'", $sMsg);
+        $sMsg = $this->_localExec(TWGIT_EXEC . ' feature list');
+        $this->assertNotContains("feature-42", $sMsg);
+    }
+
+    public function testStatus_WithPrefixes ()
+    {
+        $this->_remoteExec('git init');
+        $this->_localExec(TWGIT_EXEC . ' init 1.2.3 ' . TWGIT_REPOSITORY_ORIGIN_DIR);
+        $this->_localExec(TWGIT_EXEC . ' feature start 42');
+        $sMsg = $this->_localExec(TWGIT_EXEC . ' feature status feature-42');
+        $this->assertContains("Assume feature was '42' instead of 'feature-42'", $sMsg);
 }
+
+    public function testWhatChanged_WithPrefixes ()
+    {
+        $this->_remoteExec('git init');
+        $this->_localExec(TWGIT_EXEC . ' init 1.2.3 ' . TWGIT_REPOSITORY_ORIGIN_DIR);
+        $this->_localExec(TWGIT_EXEC . ' feature start 42');
+        $sMsg = $this->_localExec(TWGIT_EXEC . ' feature what-changed feature-42');
+        $this->assertContains("Assume feature was '42' instead of 'feature-42'", $sMsg);
+    }
+}
+

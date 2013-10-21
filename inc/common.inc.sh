@@ -629,7 +629,7 @@ function assert_valid_ref_name () {
         | grep -v " $TWGIT_PREFIX_HOTFIX" \
         | grep -v " $TWGIT_PREFIX_DEMO" 1>/dev/null
     if [ $? -ne 0 ]; then
-        msg='Unauthorized reference! Pick another name without using any prefix'
+        msg="Unauthorized reference: '$1'! Pick another name without using any prefix"
         msg="$msg ('$TWGIT_PREFIX_FEATURE', '$TWGIT_PREFIX_RELEASE', '$TWGIT_PREFIX_HOTFIX', '$TWGIT_PREFIX_DEMO')."
         die "$msg"
     fi
@@ -1092,7 +1092,7 @@ function display_csv_branches () {
 #    Author: Geoffroy Aubry <geoffroy.aubry@twenga.com>
 #    Date:   Wed May 25 18:58:05 2011 +0200
 #
-# @param string $1 type type de branches affichées, parmi {'feature', 'release', 'hotfix'}
+# @param string $1 type type de branches affichées, parmi {'demo', 'feature', 'release', 'hotfix'}
 # @param string $2 liste des branches à présenter, à raison d'une par ligne, au format 'origin/xxx'
 #
 function display_branches () {
@@ -1385,6 +1385,7 @@ function clean_branches () {
 function init () {
     process_options "$@"
     require_parameter 'tag'
+    clean_prefixes "$RETVAL" 'tag'
     local tag="$RETVAL"
     local remote_url="$2"
     local tag_fullname="$TWGIT_PREFIX_TAG$tag"
@@ -1492,6 +1493,36 @@ function displayChangelogSection () {
             echo "  $line"
         fi;
     done <<< "$content"
+}
+
+##
+# This add-on cleans the <<tag>> name sent to twgit.
+# In case of call with use of prefix v (for init & tag), feature- (for feature),
+# hotfix- (for hotfix) or demo- (for demos), then this function will automatically
+# remove the 'unneeded' prefix and allows twgit to continue its execution.
+# Result in $RETVAL.
+#
+# @param string $1 Full name of branch
+# @param string $2 Branch type in {'demo', 'feature', 'hotfix', 'release', 'tag'}
+#
+function clean_prefixes () {
+    local branch_name="$1"
+    local type="$2"
+    local -A prefixes=(
+        [demo]="$TWGIT_PREFIX_DEMO"
+        [feature]="$TWGIT_PREFIX_FEATURE"
+        [hotfix]="$TWGIT_PREFIX_HOTFIX"
+        [release]="$TWGIT_PREFIX_RELEASE"
+        [tag]="$TWGIT_PREFIX_TAG"
+    )
+
+    RETVAL="$branch_name"
+    if [ ! -z "${prefixes[$type]-}" ]; then
+        if [[ $branch_name == ${prefixes[$type]}* ]]; then
+            RETVAL=$(echo $branch_name | sed -e 's/^'"${prefixes[$type]}"'//')
+            CUI_displayMsg warning "Assume $type was '<b>$RETVAL</b>' instead of '<b>$branch_name</b>'…"
+        fi
+    fi
 }
 
 ##

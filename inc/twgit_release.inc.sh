@@ -147,6 +147,7 @@ function cmd_push () {
 function cmd_start () {
     process_options "$@"
     require_parameter '-'
+    clean_prefixes "$RETVAL" 'release'
     local release="$RETVAL"
     local release_fullname
 
@@ -203,8 +204,8 @@ function cmd_start () {
 function cmd_finish () {
     process_options "$@"
     require_parameter '-'
+    clean_prefixes "$RETVAL" 'tag'
     local tag="$RETVAL"
-
     assert_clean_working_tree
     process_fetch
 
@@ -286,6 +287,7 @@ function cmd_finish () {
 function cmd_remove () {
     process_options "$@"
     require_parameter 'release'
+    clean_prefixes "$RETVAL" 'release'
     local release="$RETVAL"
     local release_fullname="$TWGIT_PREFIX_RELEASE$release"
     local tag="$release"
@@ -319,7 +321,7 @@ function cmd_remove () {
 function cmd_reset () {
     process_options "$@"
     require_parameter 'release'
+    clean_prefixes "$RETVAL" 'release'
     local release="$RETVAL"
-
     cmd_remove "$release" && cmd_start
 }

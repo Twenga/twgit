@@ -59,6 +59,16 @@ class TwgitReleaseTest extends TwgitTestCase
         $this->assertContains("Release: " . self::_remote('release-2.0.0'), $sMsg);
     }
 
+    public function testReset_WithPrefix ()
+    {
+        $this->_remoteExec('git init');
+        $this->_localExec(TWGIT_EXEC . ' init 1.2.3 ' . TWGIT_REPOSITORY_ORIGIN_DIR);
+        $this->_localExec(TWGIT_EXEC . ' release start -I');
+
+        $sMsg = $this->_localExec(TWGIT_EXEC . ' release reset release-1.3.0 -IM');
+    $this->assertContains("Assume release was '1.3.0' instead of 'release-1.3.0'", $sMsg);
+    }
+
     /**
      */
     public function testStart_WithAmbiguousRef ()
@@ -112,6 +122,16 @@ class TwgitReleaseTest extends TwgitTestCase
         $this->assertContains("Release: " . self::_remote('release-10.0.2'), $sMsg);
     }
 
+    public function testStart_WithSpecifiedTagAndPrefix ()
+    {
+        $this->_remoteExec('git init');
+        $this->_localExec(TWGIT_EXEC . ' init 1.2.3 ' . TWGIT_REPOSITORY_ORIGIN_DIR);
+        $this->_localExec('git branch v1.2.3 v1.2.3');
+
+        $sMsg = $this->_localExec(TWGIT_EXEC . ' release start -I release-10.0.2');
+    $this->assertContains("Assume release was '10.0.2' instead of 'release-10.0.2'", $sMsg);
+    }
+
     /**
      */
     public function testStart_WithNoSpecifiedTag ()
@@ -151,6 +171,22 @@ class TwgitReleaseTest extends TwgitTestCase
             . "\n[twgit] Contains feature-4"
             . "\n[twgit] Contains feature-2: \"The subject\""
             . "\n[twgit] Contains feature-1\n\n"
+            , $sMsg);
+        $this->assertContains("Merge branch 'release-1.3.0' into " . self::STABLE, $sMsg);
+    }
+
+    public function testFinish_WithPrefix ()
+    {
+        $this->_remoteExec('git init');
+        $this->_localExec(TWGIT_EXEC . ' init 1.2.3 ' . TWGIT_REPOSITORY_ORIGIN_DIR);
+        $sMsg = $this->_localExec(TWGIT_EXEC . ' release start release-1.3.0 -I');
+        $this->assertContains("Assume release was '1.3.0' instead of 'release-1.3.0'", $sMsg);
+        $sMsg = $this->_localExec(TWGIT_EXEC . ' release finish v1.3.0 -I');
+        $this->assertContains("Assume tag was '1.3.0' instead of 'v1.3.0'", $sMsg);
+
+        $sMsg = $this->_localExec('git show v1.3.0');
+        $this->assertContains(
+            "\n[twgit] Release finish: release-1.3.0"
             , $sMsg);
         $this->assertContains("Merge branch 'release-1.3.0' into " . self::STABLE, $sMsg);
     }
@@ -264,6 +300,22 @@ class TwgitReleaseTest extends TwgitTestCase
         $this->_localExec('git checkout ' . self::STABLE . ' && git reset ' . self::$_remoteStable);
 
         $this->_localExec(TWGIT_EXEC . ' release remove 1.3.0');
+        $sMsg = $this->_localExec('git tag');
+        $this->assertContains('v1.3.0', $sMsg);
+    }
+
+    public function testRemove_WithPrefix ()
+    {
+        $this->_remoteExec('git init');
+        $this->_localExec(TWGIT_EXEC . ' init 1.2.3 ' . TWGIT_REPOSITORY_ORIGIN_DIR);
+        $this->_localExec(TWGIT_EXEC . ' release start -I');
+
+        $this->_localExec('git checkout ' . self::STABLE);
+        $this->_localExec('git commit --allow-empty -m "extra commit!"');
+        $this->_localExec('git checkout ' . self::STABLE . ' && git reset ' . self::$_remoteStable);
+
+        $sMsg = $this->_localExec(TWGIT_EXEC . ' release remove release-1.3.0');
+        $this->assertContains("Assume release was '1.3.0' instead of 'release-1.3.0'", $sMsg);
         $sMsg = $this->_localExec('git tag');
         $this->assertContains('v1.3.0', $sMsg);
     }

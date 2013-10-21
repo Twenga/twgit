@@ -90,6 +90,7 @@ function cmd_help () {
 function cmd_committers () {
     process_options "$@"
     require_parameter '-'
+    clean_prefixes "$RETVAL" 'feature'
     local feature="$RETVAL"
     local feature_fullname
 
@@ -199,6 +200,7 @@ function cmd_migrate () {
     require_parameter 'oldfeaturefullname'
     local oldfeature_fullname="$RETVAL"
     require_parameter 'newfeaturename'
+    clean_prefixes "$RETVAL" 'feature'
     local feature="$RETVAL"
     local feature_fullname="$TWGIT_PREFIX_FEATURE$feature"
 
@@ -238,6 +240,7 @@ function cmd_migrate () {
 function cmd_start () {
     process_options "$@"
     require_parameter 'feature'
+    clean_prefixes "$RETVAL" 'feature'
     local feature="$RETVAL"
     start_simple_branch "$feature" "$TWGIT_PREFIX_FEATURE"
     echo
@@ -256,6 +259,7 @@ function cmd_start () {
 function cmd_status () {
     process_options "$@"
     require_parameter '-'
+    clean_prefixes "$RETVAL" 'feature'
     local feature="$RETVAL"
     local current_branch=$(get_current_branch)
 
@@ -297,6 +301,7 @@ function cmd_status () {
 function cmd_merge-into-release () {
     process_options "$@"
     require_parameter '-'
+    clean_prefixes "$RETVAL" 'feature'
     local feature="$RETVAL"
 
     # Tests préliminaires :
@@ -349,6 +354,7 @@ function cmd_push () {
 function cmd_remove () {
     process_options "$@"
     require_parameter 'feature'
+    clean_prefixes "$RETVAL" 'feature'
     local feature="$RETVAL"
     remove_feature "$feature"
     echo
@@ -363,6 +369,7 @@ function cmd_remove () {
 function cmd_what-changed () {
     process_options "$@"
     require_parameter '-'
+    clean_prefixes "$RETVAL" 'feature'
     local feature="$RETVAL"
     local last_ref
 

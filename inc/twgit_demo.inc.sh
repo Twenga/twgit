@@ -72,6 +72,7 @@ function cmd_help () {
 function cmd_list () {
     process_options "$@"
     require_parameter '-'
+    clean_prefixes "$RETVAL" 'demo'
     local demo="$RETVAL"
     local demos
 
@@ -125,6 +126,7 @@ function cmd_push () {
 function cmd_start () {
     process_options "$@"
     require_parameter 'demo'
+    clean_prefixes "$RETVAL" 'demo'
     local demo="$RETVAL"
     start_simple_branch "$demo" "$TWGIT_PREFIX_DEMO"
     echo
@@ -138,6 +140,7 @@ function cmd_start () {
 function cmd_remove () {
     process_options "$@"
     require_parameter 'demo'
+    clean_prefixes "$RETVAL" 'demo'
     local demo="$RETVAL"
     remove_demo "$demo"
     echo
@@ -151,6 +154,7 @@ function cmd_remove () {
 function cmd_merge-feature () {
     process_options "$@"
     require_parameter 'feature'
+    clean_prefixes "$RETVAL" 'feature'
     local feature="$RETVAL"
     local feature_fullname="$TWGIT_PREFIX_FEATURE$feature"
 
@@ -180,6 +184,7 @@ function cmd_merge-feature () {
 function cmd_status() {
     process_options "$@"
     require_parameter '-'
+    clean_prefixes "$RETVAL" 'demo'
     local demo="$RETVAL"
     local current_branch=$(get_current_branch)
 

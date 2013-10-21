@@ -111,6 +111,25 @@ class TwgitHotfixTest extends TwgitTestCase
         $sMsg = $this->_localExec(TWGIT_EXEC . ' hotfix remove 1.2.4');
     }
 
+    public function testRemove_ThrowExceptionWhenExtraCommitIntoStableWithPrefixes ()
+    {
+        $this->_remoteExec('git init');
+        $this->_localExec(TWGIT_EXEC . ' init 1.2.3 ' . TWGIT_REPOSITORY_ORIGIN_DIR);
+        $this->_localExec(TWGIT_EXEC . ' hotfix start -I');
+
+        $this->_localExec('git checkout ' . self::STABLE);
+        $this->_localExec('git commit --allow-empty -m "extra commit!"');
+
+        $this->setExpectedException(
+            'RuntimeException',
+            "Local '" . self::STABLE . "' branch is ahead of '" . self::$_remoteStable . "'!"
+                . " Commits on '" . self::STABLE . "' are out of process."
+                . " Try: git checkout " . self::STABLE . " && git reset " . self::$_remoteStable
+        );
+        $sMsg = $this->_localExec(TWGIT_EXEC . ' hotfix remove hotfix-1.2.4');
+        $this->assertContains("Assume hotfix was '1.2.4' instead of 'hotfix-1.2.4'", $sMsg);
+    }
+
     /**
      * @shcovers inc/common.inc.sh::assert_clean_stable_branch_and_checkout
      */

@@ -40,7 +40,7 @@ class TwgitCommonAssertsTest extends TwgitTestCase
     public function providerTestAssertValidRefName ()
     {
         $sErrorGitCheckRefMsg = ' is not a valid reference name! See git check-ref-format for more details.';
-        $sErrorPrefixMsg = '/!\ Unauthorized reference! Pick another name without using any prefix'
+        $sErrorPrefixMsg = "/!\ Unauthorized reference: '%s'! Pick another name without using any prefix"
                          . " ('feature-', 'release-', 'hotfix-', 'demo-').";
 
         return array(
@@ -59,13 +59,13 @@ class TwgitCommonAssertsTest extends TwgitTestCase
             array('a@{b', $sErrorGitCheckRefMsg),
             array('a b', $sErrorGitCheckRefMsg),
 
-            array('feature-a', $sErrorPrefixMsg),
+            array('feature-a', sprintf($sErrorPrefixMsg, 'feature-a')),
             array('xfeature-a', ''),
-            array('release-a', $sErrorPrefixMsg),
+            array('release-a', sprintf($sErrorPrefixMsg, 'release-a')),
             array('xrelease-a', ''),
-            array('hotfix-a', $sErrorPrefixMsg),
+            array('hotfix-a', sprintf($sErrorPrefixMsg, 'hotfix-a')),
             array('xhotfix-a', ''),
-            array('demo-a', $sErrorPrefixMsg),
+            array('demo-a', sprintf($sErrorPrefixMsg, 'demo-a')),
             array('xdemo-a', ''),
             array('0.0.1', ''),
         );
@@ -89,8 +89,8 @@ class TwgitCommonAssertsTest extends TwgitTestCase
     public function providerTestAssertValidTagName ()
     {
         $sErrorGitCheckRefMsg = ' is not a valid reference name! See git check-ref-format for more details.';
-        $sErrorPrefixMsg = '/!\ Unauthorized reference! Pick another name without using any prefix'
-            . " ('feature-', 'release-', 'hotfix-', 'demo-').";
+        $sErrorPrefixMsg = "/!\ Unauthorized reference: 'feature-a'! Pick another name without using any prefix"
+                         . " ('feature-', 'release-', 'hotfix-', 'demo-').";
         $sErrorUnauthorizedMsg = 'Unauthorized tag name:';
 
         return array(
@@ -139,8 +139,8 @@ class TwgitCommonAssertsTest extends TwgitTestCase
     public function providerTestAssertNewAndValidTagName ()
     {
         $sErrorGitCheckRefMsg = ' is not a valid reference name! See git check-ref-format for more details.';
-        $sErrorPrefixMsg = '/!\ Unauthorized reference! Pick another name without using any prefix'
-            . " ('feature-', 'release-', 'hotfix-', 'demo-').";
+        $sErrorPrefixMsg = "/!\ Unauthorized reference: 'feature-a'! Pick another name without using any prefix"
+                         . " ('feature-', 'release-', 'hotfix-', 'demo-').";
         $sErrorUnauthorizedMsg = 'Unauthorized tag name:';
         $sErrorAlreadyExistsMsg = "/!\ Tag 'v1.2.3' already exists! Try: twgit tag list";
 

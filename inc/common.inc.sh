@@ -627,7 +627,7 @@ function assert_valid_ref_name () {
         | grep -v " $TWGIT_PREFIX_HOTFIX" \
         | grep -v " $TWGIT_PREFIX_DEMO" 1>/dev/null
     if [ $? -ne 0 ]; then
-        msg='Unauthorized reference! Pick another name without using any prefix'
+        msg="Unauthorized reference: '$1'! Pick another name without using any prefix"
         msg="$msg ('$TWGIT_PREFIX_FEATURE', '$TWGIT_PREFIX_RELEASE', '$TWGIT_PREFIX_HOTFIX', '$TWGIT_PREFIX_DEMO')."
         die "$msg"
     fi

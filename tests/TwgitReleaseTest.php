@@ -86,7 +86,6 @@ class TwgitReleaseTest extends TwgitTestCase
     $this->assertContains("Assume release was '1.3.0' instead of 'release-1.3.0'", $sMsg);
     }
 
-
     /**
      */
     public function testStart_WithAmbiguousRef ()
@@ -189,6 +188,22 @@ class TwgitReleaseTest extends TwgitTestCase
             . "\n[twgit] Contains feature-1"
             . "\n[twgit] Contains feature-2: \"The subject\""
             . "\n[twgit] Contains feature-4\n\n"
+            , $sMsg);
+        $this->assertContains("Merge branch 'release-1.3.0' into stable", $sMsg);
+    }
+
+    public function testFinish_WithPrefix ()
+    {
+        $this->_remoteExec('git init');
+        $this->_localExec(TWGIT_EXEC . ' init 1.2.3 ' . TWGIT_REPOSITORY_ORIGIN_DIR);
+        $sMsg = $this->_localExec(TWGIT_EXEC . ' release start release-1.3.0 -I');
+        $this->assertContains("Assume release was '1.3.0' instead of 'release-1.3.0'", $sMsg);
+        $sMsg = $this->_localExec(TWGIT_EXEC . ' release finish v1.3.0 -I');
+        $this->assertContains("Assume tag was '1.3.0' instead of 'v1.3.0'", $sMsg);
+
+        $sMsg = $this->_localExec('git show v1.3.0');
+        $this->assertContains(
+            "\n[twgit] Release finish: release-1.3.0"
             , $sMsg);
         $this->assertContains("Merge branch 'release-1.3.0' into stable", $sMsg);
     }
@@ -302,6 +317,22 @@ class TwgitReleaseTest extends TwgitTestCase
         $this->_localExec('git checkout stable && git reset origin/stable');
 
         $this->_localExec(TWGIT_EXEC . ' release remove 1.3.0');
+        $sMsg = $this->_localExec('git tag');
+        $this->assertContains('v1.3.0', $sMsg);
+    }
+
+    public function testRemove_WithPrefix ()
+    {
+        $this->_remoteExec('git init');
+        $this->_localExec(TWGIT_EXEC . ' init 1.2.3 ' . TWGIT_REPOSITORY_ORIGIN_DIR);
+        $this->_localExec(TWGIT_EXEC . ' release start -I');
+
+        $this->_localExec('git checkout stable');
+        $this->_localExec('git commit --allow-empty -m "extra commit!"');
+        $this->_localExec('git checkout stable && git reset origin/stable');
+
+        $sMsg = $this->_localExec(TWGIT_EXEC . ' release remove release-1.3.0');
+        $this->assertContains("Assume release was '1.3.0' instead of 'release-1.3.0'", $sMsg);
         $sMsg = $this->_localExec('git tag');
         $this->assertContains('v1.3.0', $sMsg);
     }

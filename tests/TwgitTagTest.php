@@ -148,6 +148,9 @@ class TwgitTagTest extends TwgitTestCase
                 . "\n    - origin/feature-5"
                 . "\n"
             ),
+            array(
+                ' v1.3.0', "Assume tag was '1.3.0' instead of 'v1.3.0'"
+            ),
         );
     }
 

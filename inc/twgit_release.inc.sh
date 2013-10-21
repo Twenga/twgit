@@ -194,7 +194,6 @@ function cmd_finish () {
     require_parameter '-'
     local tag="$RETVAL"
 
-
     clean_prefixes "$tag" 'tag'
     tag="$RETVAL"
 

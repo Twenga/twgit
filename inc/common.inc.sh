@@ -832,10 +832,6 @@ function remove_remote_branch () {
 function remove_branch () {
     local branch="$1"
     local branch_prefix="$2"
-
-    clean_prefixes "$branch" "$branch_prefix"
-    branch="$RETVAL"
-
     local branch_fullname="$branch_prefix$branch"
 
     assert_valid_ref_name $branch

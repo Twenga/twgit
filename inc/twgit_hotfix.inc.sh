@@ -6,7 +6,9 @@
 #
 #
 # Copyright (c) 2011 Twenga SA
-# Copyright (c) 2012 Geoffroy Aubry <geoffroy.aubry@free.fr>
+# Copyright (c) 2012-2013 Geoffroy Aubry <geoffroy.aubry@free.fr>
+# Copyright (c) 2013 Cyrille Hemidy
+# Copyright (c) 2013 Sebastien Hanicotte <shanicotte@hi-media.com>
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance
 # with the License. You may obtain a copy of the License at
@@ -18,7 +20,9 @@
 # for the specific language governing permissions and limitations under the License.
 #
 # @copyright 2011 Twenga SA
-# @copyright 2012 Geoffroy Aubry <geoffroy.aubry@free.fr>
+# @copyright 2012-2013 Geoffroy Aubry <geoffroy.aubry@free.fr>
+# @copyright 2013 Cyrille Hemidy
+# @copyright 2013 Sebastien Hanicotte <shanicotte@hi-media.com>
 # @license http://www.apache.org/licenses/LICENSE-2.0
 #
 
@@ -38,6 +42,9 @@ function usage () {
     CUI_displayMsg help_detail '    Add <b>-I</b> to run in non-interactive mode (always say yes).'; echo
     CUI_displayMsg help_detail '<b>list [-F]</b>'
     CUI_displayMsg help_detail '    List current hotfix. Add <b>-F</b> to do not make fetch.'; echo
+    CUI_displayMsg help_detail '<b>push</b>'
+    CUI_displayMsg help_detail "    Push current hotfix to '$TWGIT_ORIGIN' repository."
+    CUI_displayMsg help_detail "    It's a shortcut for: \"git push $TWGIT_ORIGIN $TWGIT_PREFIX_HOTFIX…\""; echo
     CUI_displayMsg help_detail '<b>remove <hotfixname></b>'
     CUI_displayMsg help_detail '    Remove both local and remote specified hotfix branch.'
     CUI_displayMsg help_detail '    Despite that, create the same tag as finish action to clearly distinguish'
@@ -115,6 +122,7 @@ function cmd_start () {
 function cmd_remove () {
     process_options "$@"
     require_parameter 'hotfix'
+    clean_prefixes "$RETVAL" 'hotfix'
     local hotfix="$RETVAL"
     local hotfix_fullname="$TWGIT_PREFIX_HOTFIX$hotfix"
     local tag="$hotfix"
@@ -183,3 +191,14 @@ function cmd_finish () {
     echo
 }
 
+##
+# Push du hotfix.
+#
+function cmd_push () {
+    local current_branch=$(get_current_branch)
+    local remote_hotfix="$(get_hotfixes_in_progress)"
+    if [ "$TWGIT_ORIGIN/$current_branch" != "$remote_hotfix" ]; then
+        die "You must be in a hotfix to launch this command!"
+    fi
+    process_push_branch "$current_branch"
+}

@@ -6,7 +6,7 @@
 #
 #
 # Copyright (c) 2011 Twenga SA
-# Copyright (c) 2012 Geoffroy Aubry <geoffroy.aubry@free.fr>
+# Copyright (c) 2012-2013 Geoffroy Aubry <geoffroy.aubry@free.fr>
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance
 # with the License. You may obtain a copy of the License at
@@ -18,7 +18,7 @@
 # for the specific language governing permissions and limitations under the License.
 #
 # @copyright 2011 Twenga SA
-# @copyright 2012 Geoffroy Aubry <geoffroy.aubry@free.fr>
+# @copyright 2012-2013 Geoffroy Aubry <geoffroy.aubry@free.fr>
 # @license http://www.apache.org/licenses/LICENSE-2.0
 #
 
@@ -109,4 +109,5 @@ declare -A CUI_COLORS=(
     [warning]='\033[0;33m'
     [warning.bold]='\033[1;33m'
     [warning.header]='\033[1m\033[4;33m/!\\\033[0;37m '
+    [current_branch]='\033[1;31m'
 )

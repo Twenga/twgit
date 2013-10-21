@@ -6,7 +6,7 @@
 #
 #
 # Copyright (c) 2011 Twenga SA
-# Copyright (c) 2012 Geoffroy Aubry <geoffroy.aubry@free.fr>
+# Copyright (c) 2012-2013 Geoffroy Aubry <geoffroy.aubry@free.fr>
 # Copyright (c) 2012 Laurent Toussaint <lt.laurent.toussaint@gmail.com>
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance
@@ -19,7 +19,7 @@
 # for the specific language governing permissions and limitations under the License.
 #
 # @copyright 2011 Twenga SA
-# @copyright 2012 Geoffroy Aubry <geoffroy.aubry@free.fr>
+# @copyright 2012-2013 Geoffroy Aubry <geoffroy.aubry@free.fr>
 # @copyright 2012 Laurent Toussaint <lt.laurent.toussaint@gmail.com>
 # @license http://www.apache.org/licenses/LICENSE-2.0
 #

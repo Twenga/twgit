@@ -6,9 +6,11 @@
 #
 #
 # Copyright (c) 2011 Twenga SA
-# Copyright (c) 2012 Geoffroy Aubry <geoffroy.aubry@free.fr>
+# Copyright (c) 2012-2013 Geoffroy Aubry <geoffroy.aubry@free.fr>
 # Copyright (c) 2012 Laurent Toussaint <lt.laurent.toussaint@gmail.com>
 # Copyright (c) 2013 Cyrille Hemidy
+# Copyright (c) 2013 Geoffroy Letournel <gletournel@hi-media.com>
+# Copyright (c) 2013 Sebastien Hanicotte <shanicotte@hi-media.com>
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance
 # with the License. You may obtain a copy of the License at
@@ -20,10 +22,12 @@
 # for the specific language governing permissions and limitations under the License.
 #
 # @copyright 2011 Twenga SA
-# @copyright 2012 Geoffroy Aubry <geoffroy.aubry@free.fr>
+# @copyright 2012-2013 Geoffroy Aubry <geoffroy.aubry@free.fr>
 # @copyright 2012 Jérémie Havret <jhavret@hi-media.com>
 # @copyright 2012 Laurent Toussaint <lt.laurent.toussaint@gmail.com>
 # @copyright 2013 Cyrille Hemidy
+# @copyright 2013 Geoffroy Letournel <gletournel@hi-media.com>
+# @copyright 2013 Sebastien Hanicotte <shanicotte@hi-media.com>
 # @license http://www.apache.org/licenses/LICENSE-2.0
 #
 
@@ -90,18 +94,20 @@ function get_dissident_remote_branches () {
 #
 function get_releases_in_progress () {
     git branch --no-color -r --no-merged $TWGIT_ORIGIN/$TWGIT_STABLE \
-    | grep "$TWGIT_ORIGIN/$TWGIT_PREFIX_RELEASE" | sed 's/^[* ]*//'
+        | grep "$TWGIT_ORIGIN/$TWGIT_PREFIX_RELEASE" | sed 's/^[* ]*//'
 }
 
 ##
 # Affiche le nom complet des releases non encore mergées à $TWGIT_ORIGIN/$TWGIT_STABLE, à raison d'une par ligne.
 #
 function get_hotfixes_in_progress () {
-    git branch --no-color -r --no-merged $TWGIT_ORIGIN/$TWGIT_STABLE | grep "$TWGIT_ORIGIN/$TWGIT_PREFIX_HOTFIX" | sed 's/^[* ]*//'
+    git branch --no-color -r --no-merged $TWGIT_ORIGIN/$TWGIT_STABLE \
+        | grep "$TWGIT_ORIGIN/$TWGIT_PREFIX_HOTFIX" | sed 's/^[* ]*//'
 }
 
 ##
-# Affiche la release distante courante (nom complet sans "$TWGIT_ORIGIN/"), c.-à-d. celle normalement unique à ne pas avoir été encore mergée à $TWGIT_ORIGIN/$TWGIT_STABLE.
+# Affiche la release distante courante (nom complet sans "$TWGIT_ORIGIN/"),
+# c.-à-d. celle normalement unique à ne pas avoir été encore mergée à $TWGIT_ORIGIN/$TWGIT_STABLE.
 # Chaîne vide sinon.
 #
 function get_current_release_in_progress () {
@@ -125,7 +131,7 @@ function get_merged_features () {
     get_git_merged_branches $TWGIT_ORIGIN/$release
     local merged_branches="${MERGED_BRANCHES[$TWGIT_ORIGIN/$release]}"
 
-    local features="$(echo "$merged_branches" | grep $TWGIT_ORIGIN/$TWGIT_PREFIX_FEATURE | sed 's/^[* ]*//' | tr '\n' ' ' | sed 's/ *$//g')"
+    local features="$(echo "$merged_branches" | grep $TWGIT_ORIGIN/$TWGIT_PREFIX_FEATURE | sort --field-separator="-" -k1rn -k2rn | sed 's/^[* ]*//' | tr '\n' ' ' | sed 's/ *$//g')"
 
     get_features merged $release
     local features_v2="$GET_FEATURES_RETURN_VALUE"
@@ -257,7 +263,7 @@ function get_features () {
 
     if [ -z "$release" ]; then
         if [ "$feature_type" = 'free' ]; then
-            GET_FEATURES_RETURN_VALUE="$(git branch --no-color -r --no-merged $TWGIT_ORIGIN/$TWGIT_STABLE | grep "$TWGIT_ORIGIN/$TWGIT_PREFIX_FEATURE" | sed 's/^[* ]*//' | tr '\n' ' ' | sed 's/ *$//g')"
+            GET_FEATURES_RETURN_VALUE="$(git branch --no-color -r --no-merged $TWGIT_ORIGIN/$TWGIT_STABLE | grep "$TWGIT_ORIGIN/$TWGIT_PREFIX_FEATURE" | sort --field-separator="-" -k1rn -k2rn | sed 's/^[* ]*//' | tr '\n' ' ' | sed 's/ *$//g')"
         else
             GET_FEATURES_RETURN_VALUE=''
         fi
@@ -265,7 +271,7 @@ function get_features () {
         release="$TWGIT_ORIGIN/$release"
         local return_features=''
 
-        local features=$(git branch --no-color -r | grep "$TWGIT_ORIGIN/$TWGIT_PREFIX_FEATURE" | sed 's/^[* ]*//')
+        local features=$(git branch --no-color -r | grep "$TWGIT_ORIGIN/$TWGIT_PREFIX_FEATURE" | sort --field-separator="-" -k1rn -k2rn | sed 's/^[* ]*//')
 
         get_git_rev_parse "$TWGIT_ORIGIN/$TWGIT_STABLE"
         local head_rev="${REV_PARSE[$TWGIT_ORIGIN/$TWGIT_STABLE]}"
@@ -312,7 +318,7 @@ function get_features () {
 #     demos="$RETVAL"
 #
 function get_all_demos () {
-    RETVAL="$(git branch --no-color -r --no-merged $TWGIT_ORIGIN/$TWGIT_STABLE | grep "$TWGIT_ORIGIN/$TWGIT_PREFIX_DEMO" | sed 's/^[* ]*//' | tr '\n' ' ' | sed 's/ *$//g')"
+    RETVAL="$(git branch --no-color -r --no-merged $TWGIT_ORIGIN/$TWGIT_STABLE | grep "$TWGIT_ORIGIN/$TWGIT_PREFIX_DEMO" | sort --field-separator="-" -k1rn -k2rn | sed 's/^[* ]*//' | tr '\n' ' ' | sed 's/ *$//g')"
 }
 
 
@@ -627,7 +633,7 @@ function assert_valid_ref_name () {
         | grep -v " $TWGIT_PREFIX_HOTFIX" \
         | grep -v " $TWGIT_PREFIX_DEMO" 1>/dev/null
     if [ $? -ne 0 ]; then
-        msg='Unauthorized reference! Pick another name without using any prefix'
+        msg="Unauthorized reference: '$1'! Pick another name without using any prefix"
         msg="$msg ('$TWGIT_PREFIX_FEATURE', '$TWGIT_PREFIX_RELEASE', '$TWGIT_PREFIX_HOTFIX', '$TWGIT_PREFIX_DEMO')."
         die "$msg"
     fi
@@ -719,11 +725,11 @@ function assert_recent_git_version () {
 function assert_clean_stable_branch_and_checkout () {
     exec_git_command "git checkout $TWGIT_STABLE" "Could not checkout '$TWGIT_STABLE'!"
     CUI_displayMsg processing "Check health of '$TWGIT_STABLE' branch..."
-    local extra_commits="$(git log origin/stable..stable --oneline | wc -l)"
+    local extra_commits="$(git log ${TWGIT_ORIGIN}/${TWGIT_STABLE}..${TWGIT_STABLE} --oneline | wc -l)"
     if [ "$extra_commits" -gt 0 ]; then
         die "Local '<b>$TWGIT_STABLE</b>' branch is ahead of '<b>$TWGIT_ORIGIN/$TWGIT_STABLE</b>'!" \
             "Commits on '<b>$TWGIT_STABLE</b>' are out of process." \
-            "Try: git checkout stable && git reset $TWGIT_ORIGIN/$TWGIT_STABLE"
+            "Try: git checkout $TWGIT_STABLE && git reset $TWGIT_ORIGIN/$TWGIT_STABLE"
     fi
     exec_git_command "git merge $TWGIT_ORIGIN/$TWGIT_STABLE" \
         "Could not merge '$TWGIT_ORIGIN/$TWGIT_STABLE' into '$TWGIT_STABLE'!"
@@ -1090,7 +1096,7 @@ function display_csv_branches () {
 #    Author: Geoffroy Aubry <geoffroy.aubry@twenga.com>
 #    Date:   Wed May 25 18:58:05 2011 +0200
 #
-# @param string $1 type type de branches affichées, parmi {'feature', 'release', 'hotfix'}
+# @param string $1 type type de branches affichées, parmi {'demo', 'feature', 'release', 'hotfix'}
 # @param string $2 liste des branches à présenter, à raison d'une par ligne, au format 'origin/xxx'
 #
 function display_branches () {
@@ -1102,18 +1108,24 @@ function display_branches () {
         [hotfix]='Hotfix: '
         [demo]='Demo: '
     )
+    local current_branch=$(get_current_branch)
 
     if [ -z "$branches" ]; then
         CUI_displayMsg info 'No such branch exists.';
     else
         local prefix="$TWGIT_ORIGIN/$TWGIT_PREFIX_FEATURE"
         local add_empty_line=0
+        local stable_origin
         for branch in $branches; do
             if ! isset_option 'c'; then
                 [ "$add_empty_line" = "0" ] && add_empty_line=1 || echo
             fi
-            local stable_origin="$(git describe --abbrev=0 "$branch" 2>/dev/null)"
+
             echo -n $(CUI_displayMsg info "${titles[$type]}$branch")
+            if [[ $type = 'feature' && $current_branch = "${branch#$TWGIT_ORIGIN/}" ]]; then
+                echo -n $(CUI_displayMsg current_branch '*')
+            fi
+            stable_origin="$(git describe --abbrev=0 "$branch" 2>/dev/null)"
             echo -n $(CUI_displayMsg help_detail " (from <b>$stable_origin</b>) ")
 
             [ "$type" = "feature" ] && displayFeatureSubject "${branch:${#prefix}}" || echo
@@ -1371,12 +1383,13 @@ function clean_branches () {
 # A remote repository must exists.
 #
 # @param string $1 tag name. Format: \d+.\d+.\d+
-# @param string $2 optional url of remote repository. Used only if not already setted.
+# @param string $2 optional url of remote repository. Used only if not already set.
 # @testedby TwgitMainTest
 #
 function init () {
     process_options "$@"
     require_parameter 'tag'
+    clean_prefixes "$RETVAL" 'tag'
     local tag="$RETVAL"
     local remote_url="$2"
     local tag_fullname="$TWGIT_PREFIX_TAG$tag"
@@ -1394,7 +1407,7 @@ function init () {
     CUI_displayMsg processing "Check presence of remote '$TWGIT_ORIGIN' repository..."
     if [ "$(git remote | grep -E "^$TWGIT_ORIGIN$" | wc -l)" -ne 1 ]; then
         [ -z "$remote_url" ] && die "Remote '<b>$TWGIT_ORIGIN</b>' repository url required!"
-        exec_git_command "git remote add origin $remote_url" 'Add remote repository failed!'
+        exec_git_command "git remote add $TWGIT_ORIGIN $remote_url" 'Add remote repository failed!'
     fi
     process_fetch
 
@@ -1423,7 +1436,7 @@ function init () {
 
     # Add minimal .gitignore ignoring '/.twgit_features_subject'
     if [ ! -f '.gitignore' ]; then
-        echo /.twgit_features_subject > .gitignore
+        echo -e "/.twgit_features_subject\n/.twgit" > .gitignore
         exec_git_command "git add .gitignore" "Add minimal .gitignore failed!"
         CUI_displayMsg processing "${TWGIT_GIT_COMMAND_PROMPT}git commit -m 'Add minimal .gitignore'"
         git commit -m 'Add minimal .gitignore' || die 'Add minimal .gitignore failed!'
@@ -1470,9 +1483,9 @@ function displayChangelogSection () {
     content="## Version $(echo "${content#*## Version }")";
     content="$(echo "${content%## Version ${from_tag:1}*}")";
     content="$(echo -e "$content\n" \
-		| sedRegexpExtended ':a;N;$!ba;s/\n\n(  -|```)/\n\1/g' \
-		| sedRegexpExtended 's/  - \[#([0-9]+)\]\([^)]+\)/  - #\1/' \
-	)";
+        | sedRegexpExtended ':a;N;$!ba;s/\n\n(  -|```)/\n\1/g' \
+        | sedRegexpExtended 's/  - \[#([0-9]+)\]\([^)]+\)/  - #\1/' \
+    )";
 
     local line
     while read line; do
@@ -1484,6 +1497,36 @@ function displayChangelogSection () {
             echo "  $line"
         fi;
     done <<< "$content"
+}
+
+##
+# This add-on cleans the <<tag>> name sent to twgit.
+# In case of call with use of prefix v (for init & tag), feature- (for feature),
+# hotfix- (for hotfix) or demo- (for demos), then this function will automatically
+# remove the 'unneeded' prefix and allows twgit to continue its execution.
+# Result in $RETVAL.
+#
+# @param string $1 Full name of branch
+# @param string $2 Branch type in {'demo', 'feature', 'hotfix', 'release', 'tag'}
+#
+function clean_prefixes () {
+    local branch_name="$1"
+    local type="$2"
+    local -A prefixes=(
+        [demo]="$TWGIT_PREFIX_DEMO"
+        [feature]="$TWGIT_PREFIX_FEATURE"
+        [hotfix]="$TWGIT_PREFIX_HOTFIX"
+        [release]="$TWGIT_PREFIX_RELEASE"
+        [tag]="$TWGIT_PREFIX_TAG"
+    )
+
+    RETVAL="$branch_name"
+    if [ ! -z "${prefixes[$type]-}" ]; then
+        if [[ $branch_name == ${prefixes[$type]}* ]]; then
+            RETVAL=$(echo $branch_name | sed -e 's/^'"${prefixes[$type]}"'//')
+            CUI_displayMsg warning "Assume $type was '<b>$RETVAL</b>' instead of '<b>$branch_name</b>'…"
+        fi
+    fi
 }
 
 ##

@@ -22,6 +22,13 @@ define('TWGIT_AUTH_ERROR_SUPPR_OP', true);
 define('TWGIT_BASH_EXEC', '/bin/bash');
 define('TWGIT_EXEC', TWGIT_BASH_EXEC . ' ' . TWGIT_ROOT_DIR . '/twgit');
 
+// Branches
+define('TWGIT_ORIGIN', 'testorigin');
+define('TWGIT_STABLE', 'teststable');
+
+// Connector
+define('TWGIT_FEATURE_SUBJECT_CONNECTOR', ''); // deactivated!
+
 // Other
 define('TWGIT_REPOSITORY_ORIGIN_DIR', TWGIT_TMP_DIR . '/origin');
 define('TWGIT_REPOSITORY_LOCAL_DIR', TWGIT_TMP_DIR . '/local');

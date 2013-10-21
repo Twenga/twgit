@@ -3,26 +3,10 @@
 /**
  * @package Tests
  * @author Geoffroy Aubry <geoffroy.aubry@hi-media.com>
+ * @author Geoffroy Letournel <gletournel@hi-media.com>
  */
 class TwgitCommonGettersTest extends TwgitTestCase
 {
-
-    /**
-    * Sets up the fixture, for example, open a network connection.
-    * This method is called before a test is executed.
-    */
-    public function setUp ()
-    {
-        $o = self::_getShellInstance();
-        $o->remove(TWGIT_REPOSITORY_ORIGIN_DIR);
-        $o->remove(TWGIT_REPOSITORY_LOCAL_DIR);
-        $o->remove(TWGIT_REPOSITORY_SECOND_REMOTE_DIR);
-        $o->remove(TWGIT_REPOSITORY_THIRD_REMOTE_DIR);
-        $o->mkdir(TWGIT_REPOSITORY_ORIGIN_DIR, '0777');
-        $o->mkdir(TWGIT_REPOSITORY_LOCAL_DIR, '0777');
-        $o->mkdir(TWGIT_REPOSITORY_SECOND_REMOTE_DIR, '0777');
-        $o->mkdir(TWGIT_REPOSITORY_THIRD_REMOTE_DIR, '0777');
-    }
 
     /**
      * @dataProvider providerTestGetDissidentRemoteBranches
@@ -47,24 +31,24 @@ class TwgitCommonGettersTest extends TwgitTestCase
         return array(
             array(':', ''),
             array(
-                'git checkout -b feature-X && git push origin feature-X'
-                    . ' && git checkout -b release-X && git push origin release-X'
-                    . ' && git checkout -b hotfix-X && git push origin hotfix-X'
-                    . ' && git checkout -b demo-X && git push origin demo-X'
-                    . ' && git checkout -b master && git push origin master'
-                    . ' && git checkout -b outofprocess && git push origin outofprocess'
-                    . ' && git remote set-head origin stable',
-                'origin/outofprocess'
+                'git checkout -b feature-X && git push ' . self::ORIGIN . ' feature-X'
+                    . ' && git checkout -b release-X && git push ' . self::ORIGIN . ' release-X'
+                    . ' && git checkout -b hotfix-X && git push ' . self::ORIGIN . ' hotfix-X'
+                    . ' && git checkout -b demo-X && git push ' . self::ORIGIN . ' demo-X'
+                    . ' && git checkout -b master && git push ' . self::ORIGIN . ' master'
+                    . ' && git checkout -b outofprocess && git push ' . self::ORIGIN . ' outofprocess'
+                    . ' && git remote set-head ' . self::ORIGIN . ' ' . self::STABLE,
+                self::_remote('outofprocess')
             ),
             array(
-                'git checkout -b outofprocess && git push origin outofprocess && git push second outofprocess'
-                    . ' && git checkout -b out2 && git push origin out2 && git push second out2',
-                'origin/out2' . "\n" . 'origin/outofprocess'
+                'git checkout -b outofprocess && git push ' . self::ORIGIN . ' outofprocess && git push second outofprocess'
+                    . ' && git checkout -b out2 && git push ' . self::ORIGIN . ' out2 && git push second out2',
+                self::_remote('out2') . "\n" . self::_remote('outofprocess')
             ),
             array(
-                'git checkout -b outofprocess && git push origin outofprocess && git push second outofprocess'
-                    . ' && git checkout -b out2 && git push origin out2 && git push third out2',
-                'origin/out2' . "\n" . 'origin/outofprocess'
+                'git checkout -b outofprocess && git push ' . self::ORIGIN . ' outofprocess && git push second outofprocess'
+                    . ' && git checkout -b out2 && git push ' . self::ORIGIN . ' out2 && git push third out2',
+                self::_remote('out2') . "\n" . self::_remote('outofprocess')
             ),
         );
     }
@@ -74,7 +58,7 @@ class TwgitCommonGettersTest extends TwgitTestCase
      */
     public function testGetFeatureSubject_WithNoParameter ()
     {
-        $sCmd = 'TWGIT_FEATURES_SUBJECT_PATH="$(tempfile -d ' . TWGIT_TMP_DIR . ')"; '
+        $sCmd = 'TWGIT_FEATURES_SUBJECT_PATH="$(mktemp ' . TWGIT_TMP_DIR . '/XXXXXXXXXX)"; '
               . 'echo \'2;The subject of 2\' > \$TWGIT_FEATURES_SUBJECT_PATH; '
               . 'config_file=\'F\'; TWGIT_FEATURE_SUBJECT_CONNECTOR=\'github\'; '
               . 'getFeatureSubject; '
@@ -88,7 +72,7 @@ class TwgitCommonGettersTest extends TwgitTestCase
      */
     public function testGetFeatureSubject_WithParameterButNoSubjectNorConnector ()
     {
-        $sCmd = 'TWGIT_FEATURES_SUBJECT_PATH="$(tempfile -d ' . TWGIT_TMP_DIR . ')"; '
+        $sCmd = 'TWGIT_FEATURES_SUBJECT_PATH="$(mktemp ' . TWGIT_TMP_DIR . '/XXXXXXXXXX)"; '
               . 'config_file=\'F\'; TWGIT_FEATURE_SUBJECT_CONNECTOR=\'no_connector\'; '
               . 'getFeatureSubject 2; '
               . 'rm -f "\$TWGIT_FEATURES_SUBJECT_PATH"';
@@ -101,7 +85,7 @@ class TwgitCommonGettersTest extends TwgitTestCase
      */
     public function testGetFeatureSubject_WithParameterAndSubject ()
     {
-        $sCmd = 'TWGIT_FEATURES_SUBJECT_PATH="$(tempfile -d ' . TWGIT_TMP_DIR . ')"; '
+        $sCmd = 'TWGIT_FEATURES_SUBJECT_PATH="$(mktemp ' . TWGIT_TMP_DIR . '/XXXXXXXXXX)"; '
               . 'echo \'2;The subject of 2\' > \$TWGIT_FEATURES_SUBJECT_PATH; '
               . 'config_file=\'F\'; TWGIT_FEATURE_SUBJECT_CONNECTOR=\'no_connector\'; '
               . 'getFeatureSubject 2; '
@@ -115,7 +99,7 @@ class TwgitCommonGettersTest extends TwgitTestCase
      */
 //     public function testGetFeatureSubject_WithParameterAndConnector ()
 //     {
-//         $sCmd = 'TWGIT_FEATURES_SUBJECT_PATH="$(tempfile -d ' . TWGIT_TMP_DIR . ')"; '
+//         $sCmd = 'TWGIT_FEATURES_SUBJECT_PATH="$(mktemp ' . TWGIT_TMP_DIR . '/XXXXXXXXXX)"; '
 //               . 'config_file=\'F\'; TWGIT_FEATURE_SUBJECT_CONNECTOR=\'github\'; '
 //               . 'getFeatureSubject 2; '
 //               . 'rm -f "\$TWGIT_FEATURES_SUBJECT_PATH"';

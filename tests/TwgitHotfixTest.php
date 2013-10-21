@@ -3,24 +3,11 @@
 /**
  * @package Tests
  * @author Geoffroy Aubry <geoffroy.aubry@hi-media.com>
+ * @author Geoffroy Letournel <gletournel@hi-media.com>
+ * @author Sebastien Hanicotte <shanicotte@hi-media.com>
  */
 class TwgitHotfixTest extends TwgitTestCase
 {
-
-    /**
-     * Sets up the fixture, for example, open a network connection.
-     * This method is called before a test is executed.
-     */
-    public function setUp ()
-    {
-        $o = self::_getShellInstance();
-        $o->remove(TWGIT_REPOSITORY_ORIGIN_DIR);
-        $o->remove(TWGIT_REPOSITORY_LOCAL_DIR);
-        $o->remove(TWGIT_REPOSITORY_SECOND_REMOTE_DIR);
-        $o->mkdir(TWGIT_REPOSITORY_ORIGIN_DIR, '0777');
-        $o->mkdir(TWGIT_REPOSITORY_LOCAL_DIR, '0777');
-        $o->mkdir(TWGIT_REPOSITORY_SECOND_REMOTE_DIR, '0777');
-    }
 
     /**
      */
@@ -52,7 +39,7 @@ class TwgitHotfixTest extends TwgitTestCase
         );
 
         $sMsg = $this->_localExec(TWGIT_EXEC . ' hotfix start');
-        $sExpected = "(i) Local branch 'hotfix-1.2.4' up-to-date with remote 'origin/hotfix-1.2.4'.";
+        $sExpected = "(i) Local branch 'hotfix-1.2.4' up-to-date with remote '" . self::_remote('hotfix-1.2.4') . "'.";
         $this->assertContains($sExpected, $sMsg);
     }
 
@@ -65,13 +52,13 @@ class TwgitHotfixTest extends TwgitTestCase
         $this->_localExec(TWGIT_EXEC . ' init 1.2.3 ' . TWGIT_REPOSITORY_ORIGIN_DIR);
         $this->_localExec(TWGIT_EXEC . ' hotfix start -I');
 
-        $this->_localExec('git checkout stable');
+        $this->_localExec('git checkout ' . self::STABLE);
         $this->_localExec('git commit --allow-empty -m "extra commit!"');
 
         $this->setExpectedException(
             'RuntimeException',
-            "Local 'stable' branch is ahead of 'origin/stable'! Commits on 'stable' are out of process."
-                . " Try: git checkout stable && git reset origin/stable"
+            "Local '" . self::STABLE . "' branch is ahead of '" . self::$_remoteStable . "'! Commits on '" . self::STABLE . "' are out of process."
+                . " Try: git checkout " . self::STABLE . " && git reset " . self::$_remoteStable
         );
         $sMsg = $this->_localExec(TWGIT_EXEC . ' hotfix finish');
     }
@@ -85,9 +72,9 @@ class TwgitHotfixTest extends TwgitTestCase
         $this->_localExec(TWGIT_EXEC . ' init 1.2.3 ' . TWGIT_REPOSITORY_ORIGIN_DIR);
         $this->_localExec(TWGIT_EXEC . ' hotfix start -I');
 
-        $this->_localExec('git checkout stable');
+        $this->_localExec('git checkout ' . self::STABLE);
         $this->_localExec('git commit --allow-empty -m "extra commit!"');
-        $this->_localExec('git checkout stable && git reset origin/stable');
+        $this->_localExec('git checkout ' . self::STABLE . ' && git reset ' . self::$_remoteStable);
 
         $this->_localExec(TWGIT_EXEC . ' hotfix finish -I');
         $sMsg = $this->_localExec('git tag');
@@ -115,15 +102,34 @@ class TwgitHotfixTest extends TwgitTestCase
         $this->_localExec(TWGIT_EXEC . ' init 1.2.3 ' . TWGIT_REPOSITORY_ORIGIN_DIR);
         $this->_localExec(TWGIT_EXEC . ' hotfix start -I');
 
-        $this->_localExec('git checkout stable');
+        $this->_localExec('git checkout ' . self::STABLE);
         $this->_localExec('git commit --allow-empty -m "extra commit!"');
 
         $this->setExpectedException(
             'RuntimeException',
-            "Local 'stable' branch is ahead of 'origin/stable'! Commits on 'stable' are out of process."
-                . " Try: git checkout stable && git reset origin/stable"
+            "Local '" . self::STABLE . "' branch is ahead of '" . self::$_remoteStable . "'! Commits on '" . self::STABLE . "' are out of process."
+                . " Try: git checkout " . self::STABLE . " && git reset " . self::$_remoteStable
         );
         $sMsg = $this->_localExec(TWGIT_EXEC . ' hotfix remove 1.2.4');
+    }
+
+    public function testRemove_ThrowExceptionWhenExtraCommitIntoStableWithPrefixes ()
+    {
+        $this->_remoteExec('git init');
+        $this->_localExec(TWGIT_EXEC . ' init 1.2.3 ' . TWGIT_REPOSITORY_ORIGIN_DIR);
+        $this->_localExec(TWGIT_EXEC . ' hotfix start -I');
+
+        $this->_localExec('git checkout ' . self::STABLE);
+        $this->_localExec('git commit --allow-empty -m "extra commit!"');
+
+        $this->setExpectedException(
+            'RuntimeException',
+            "Local '" . self::STABLE . "' branch is ahead of '" . self::$_remoteStable . "'!"
+                . " Commits on '" . self::STABLE . "' are out of process."
+                . " Try: git checkout " . self::STABLE . " && git reset " . self::$_remoteStable
+        );
+        $sMsg = $this->_localExec(TWGIT_EXEC . ' hotfix remove hotfix-1.2.4');
+        $this->assertContains("Assume hotfix was '1.2.4' instead of 'hotfix-1.2.4'", $sMsg);
     }
 
     /**
@@ -135,9 +141,9 @@ class TwgitHotfixTest extends TwgitTestCase
         $this->_localExec(TWGIT_EXEC . ' init 1.2.3 ' . TWGIT_REPOSITORY_ORIGIN_DIR);
         $this->_localExec(TWGIT_EXEC . ' hotfix start -I');
 
-        $this->_localExec('git checkout stable');
+        $this->_localExec('git checkout ' . self::STABLE);
         $this->_localExec('git commit --allow-empty -m "extra commit!"');
-        $this->_localExec('git checkout stable && git reset origin/stable');
+        $this->_localExec('git checkout ' . self::STABLE . ' && git reset ' . self::$_remoteStable);
 
         $this->_localExec(TWGIT_EXEC . ' hotfix remove 1.2.4');
         $sMsg = $this->_localExec('git tag');
@@ -170,20 +176,20 @@ class TwgitHotfixTest extends TwgitTestCase
             array(':', '', 'Following branches are out of process'),
             array(':', '', 'Following local branches are ambiguous'),
             array(
-                'git checkout -b feature-X && git push origin feature-X'
-                    . ' && git checkout -b release-X && git push origin release-X'
-                    . ' && git checkout -b hotfix-X && git push origin hotfix-X'
-                    . ' && git checkout -b demo-X && git push origin demo-X'
-                    . ' && git checkout -b master && git push origin master'
-                    . ' && git checkout -b outofprocess && git push origin outofprocess'
-                    . ' && git remote set-head origin stable',
-                "/!\ Following branches are out of process: 'origin/outofprocess'!",
+                'git checkout -b feature-X && git push ' . self::ORIGIN . ' feature-X'
+                    . ' && git checkout -b release-X && git push ' . self::ORIGIN . ' release-X'
+                    . ' && git checkout -b hotfix-X && git push ' . self::ORIGIN . ' hotfix-X'
+                    . ' && git checkout -b demo-X && git push ' . self::ORIGIN . ' demo-X'
+                    . ' && git checkout -b master && git push ' . self::ORIGIN . ' master'
+                    . ' && git checkout -b outofprocess && git push ' . self::ORIGIN . ' outofprocess'
+                    . ' && git remote set-head ' . self::ORIGIN . ' ' . self::STABLE,
+                "/!\ Following branches are out of process: '" . self::_remote('outofprocess') . "'!",
                 'Following local branches are ambiguous'
             ),
             array(
-                'git checkout -b outofprocess && git push origin outofprocess && git push second outofprocess'
-                    . ' && git checkout -b out2 && git push origin out2 && git push second out2',
-                "/!\ Following branches are out of process: 'origin/out2', 'origin/outofprocess'!",
+                'git checkout -b outofprocess && git push ' . self::ORIGIN . ' outofprocess && git push second outofprocess'
+                    . ' && git checkout -b out2 && git push ' . self::ORIGIN . ' out2 && git push second out2',
+                "/!\ Following branches are out of process: '" . self::_remote('out2') . "', '" . self::_remote('outofprocess') . "'!",
                 'Following local branches are ambiguous'
             ),
             array(
@@ -192,8 +198,8 @@ class TwgitHotfixTest extends TwgitTestCase
                 'Following branches are out of process'
             ),
             array(
-                'git checkout -b outofprocess && git push origin outofprocess && git branch v1.2.3 v1.2.3',
-                "/!\ Following branches are out of process: 'origin/outofprocess'!\n"
+                'git checkout -b outofprocess && git push ' . self::ORIGIN . ' outofprocess && git branch v1.2.3 v1.2.3',
+                "/!\ Following branches are out of process: '" . self::_remote('outofprocess') . "'!\n"
                     . "/!\ Following local branches are ambiguous: 'v1.2.3'!",
                 ''
             ),

@@ -7,6 +7,7 @@
 #
 # Copyright (c) 2013 Geoffroy Aubry <geoffroy.aubry@free.fr>
 # Copyright (c) 2013 Cyrille Hemidy
+# Copyright (c) 2013 Sebastien Hanicotte <shanicotte@hi-media.com>
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance
 # with the License. You may obtain a copy of the License at
@@ -19,6 +20,7 @@
 #
 # @copyright 2013 Geoffroy Aubry <geoffroy.aubry@free.fr>
 # @copyright 2013 Cyrille Hemidy
+# @copyright 2013 Sebastien Hanicotte <shanicotte@hi-media.com>
 # @license http://www.apache.org/licenses/LICENSE-2.0
 #
 
@@ -34,18 +36,21 @@ function usage () {
     CUI_displayMsg help_detail '<b>list [<demoname>] [-F]</b>'
     CUI_displayMsg help_detail '    List remote demos with their merged features. If <b><demoname></b> is';
     CUI_displayMsg help_detail '    specified, then focus on this demo. Add <b>-F</b> to do not make fetch.'; echo
+    CUI_displayMsg help_detail '<b>merge-feature <featurename> </b>'
+    CUI_displayMsg help_detail '    Try to merge specified feature into current demo.'; echo
+    CUI_displayMsg help_detail '<b>push</b>'
+    CUI_displayMsg help_detail "    Push current demo to '$TWGIT_ORIGIN' repository."
+    CUI_displayMsg help_detail "    It's a shortcut for: \"git push $TWGIT_ORIGIN $TWGIT_PREFIX_DEMO…\""; echo
+    CUI_displayMsg help_detail '<b>remove <demoname></b>'
+    CUI_displayMsg help_detail '    Remove both local and remote specified demo branch. No feature will'
+    CUI_displayMsg help_detail '    be removed.'; echo
     CUI_displayMsg help_detail '<b>start <demoname> [-d]</b>'
     CUI_displayMsg help_detail '    Create both a new local and remote demo, or fetch the remote demo,'
     CUI_displayMsg help_detail '    or checkout the local demo. Add <b>-d</b> to delete beforehand local demo'
     CUI_displayMsg help_detail '    if exists.'; echo
-    CUI_displayMsg help_detail '<b>remove <demoname></b>'
-    CUI_displayMsg help_detail '    Remove both local and remote specified demo branch. No feature will'
-    CUI_displayMsg help_detail '    be removed.'; echo
-    CUI_displayMsg help_detail '<b>merge-feature <featurename> </b>'
-    CUI_displayMsg help_detail '    Try to merge specified feature into current demo.'; echo
     CUI_displayMsg help_detail '<b>status [<demoname>]</b>'
     CUI_displayMsg help_detail '    Display information about specified demo: long name if a connector is'
-    CUI_displayMsg help_detail '    setted, last commit, status between local and remote demo and execute'
+    CUI_displayMsg help_detail '    set, last commit, status between local and remote demo and execute'
     CUI_displayMsg help_detail '    a git status if specified demo is the current branch.'
     CUI_displayMsg help_detail '    If no <b><demoname></b> is specified, then use current demo.'; echo
     CUI_displayMsg help_detail "Prefix '$TWGIT_PREFIX_DEMO' will be added to <b><demoname></b> parameter."; echo
@@ -69,6 +74,7 @@ function cmd_help () {
 function cmd_list () {
     process_options "$@"
     require_parameter '-'
+    clean_prefixes "$RETVAL" 'demo'
     local demo="$RETVAL"
     local demos
 
@@ -101,6 +107,19 @@ function cmd_list () {
 }
 
 ##
+# Push de la demo courante.
+#
+function cmd_push () {
+    local current_branch=$(get_current_branch)
+    get_all_demos
+    local all_demos="$RETVAL"
+    if ! has "$TWGIT_ORIGIN/$current_branch" $all_demos; then
+        die "You must be in a demo to launch this command!"
+    fi
+    process_push_branch "$current_branch"
+}
+
+##
 # Crée une nouvelle demo à partir du dernier tag.
 # Gère l'option '-d' supprimant préalablement la demo locale, afin de forcer le recréation de la branche.
 #
@@ -109,6 +128,7 @@ function cmd_list () {
 function cmd_start () {
     process_options "$@"
     require_parameter 'demo'
+    clean_prefixes "$RETVAL" 'demo'
     local demo="$RETVAL"
     start_simple_branch "$demo" "$TWGIT_PREFIX_DEMO"
     echo
@@ -122,6 +142,7 @@ function cmd_start () {
 function cmd_remove () {
     process_options "$@"
     require_parameter 'demo'
+    clean_prefixes "$RETVAL" 'demo'
     local demo="$RETVAL"
     remove_demo "$demo"
     echo
@@ -135,6 +156,7 @@ function cmd_remove () {
 function cmd_merge-feature () {
     process_options "$@"
     require_parameter 'feature'
+    clean_prefixes "$RETVAL" 'feature'
     local feature="$RETVAL"
     local feature_fullname="$TWGIT_PREFIX_FEATURE$feature"
 
@@ -155,7 +177,7 @@ function cmd_merge-feature () {
 
 ##
 # Display information about specified demo: long name if a connector is
-# setted, last commit, status between local and remote demo and execute
+# set, last commit, status between local and remote demo and execute
 # a git status if specified demo is the current branch.
 # If no <demoname> is specified, then use current demo.
 #
@@ -164,6 +186,7 @@ function cmd_merge-feature () {
 function cmd_status() {
     process_options "$@"
     require_parameter '-'
+    clean_prefixes "$RETVAL" 'demo'
     local demo="$RETVAL"
     local current_branch=$(get_current_branch)
 

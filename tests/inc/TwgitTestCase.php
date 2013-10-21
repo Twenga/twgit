@@ -5,9 +5,24 @@
  *
  * @package Tests
  * @author Geoffroy Aubry <geoffroy.aubry@hi-media.com>
+ * @author Geoffroy Letournel <gletournel@hi-media.com>
  */
 class TwgitTestCase extends PHPUnit_Framework_TestCase
 {
+    /**
+     * The name of the Git "stable" branch
+     */
+    const STABLE = TWGIT_STABLE;
+
+    /**
+     * The shortname of the Git remote
+     */
+    const ORIGIN = TWGIT_ORIGIN;
+
+    /**
+     * @var string The name of the remote "stable" branch
+     */
+    protected static $_remoteStable;
 
     /**
      * Répertoire des dépôt locaux.
@@ -22,6 +37,12 @@ class TwgitTestCase extends PHPUnit_Framework_TestCase
      * @var Shell_Adapter
      */
     protected static $_oShell = NULL;
+
+    /**
+     * @var string
+     * @see setUp();
+     */
+    private static $_sSetUpCmd = '';
 
     /**
      * Singleton.
@@ -59,6 +80,76 @@ class TwgitTestCase extends PHPUnit_Framework_TestCase
     public function __construct($sName=NULL, array $aData=array(), $sDataName='')
     {
         parent::__construct($sName, $aData, $sDataName);
+        self::$_remoteStable = self::ORIGIN . '/' . self::STABLE;
+    }
+
+    /**
+     * Sets up the fixture, for example, open a network connection.
+     * This method is called before a test is executed.
+     */
+    public function setUp ()
+    {
+        if (empty(self::$_sSetUpCmd)) {
+            $aDir = array(
+                TWGIT_REPOSITORY_ORIGIN_DIR,
+                TWGIT_REPOSITORY_LOCAL_DIR,
+                TWGIT_REPOSITORY_SECOND_LOCAL_DIR,
+                TWGIT_REPOSITORY_SECOND_REMOTE_DIR,
+                TWGIT_REPOSITORY_THIRD_REMOTE_DIR
+            );
+            $aCmd = array();
+            foreach ($aDir as $sDir) {
+                if (strpos($sDir, TWGIT_TMP_DIR . '/') !== 0) {
+                    throw new RuntimeException("Security check before 'rm -rf'…");
+                }
+                $aCmd[] = "rm -rf '$sDir' && mkdir -p '$sDir' && chmod 0777 '$sDir'";
+            }
+            self::$_sSetUpCmd = implode(' && ', $aCmd);
+        }
+
+        $this->_rawExec(self::$_sSetUpCmd);
+        copy(TWGIT_TMP_DIR . '/conf-twgit.sh', TWGIT_REPOSITORY_LOCAL_DIR . '/.twgit');
+        copy(TWGIT_TMP_DIR . '/conf-twgit.sh', TWGIT_REPOSITORY_SECOND_LOCAL_DIR . '/.twgit');
+    }
+
+    /**
+     * Get the name of a remote branch.
+     *
+     * @param string $name   The branch name (e.g. master, stable, hotfix-42)
+     * @param string $remote The name of the Remote (e.g. origin)
+     *
+     * @return string Returns the name of the remote branch
+     */
+    protected static function _remote($name, $remote = null)
+    {
+        if ($remote === null) {
+            $remote = TWGIT_ORIGIN;
+        }
+
+        return $remote . '/' . $name;
+    }
+
+    /**
+     * Get a list of remote branches.
+     *
+     * @param array  $branches The branches names (e.g. master, issues, feature-1)
+     * @param string $remote   The name of the Remote (e.g. origin)
+     *
+     * @return array Returns a list of remote branches
+     */
+    protected static function _remotes(array $branches, $remote = null)
+    {
+        if ($remote === null) {
+            $remote = TWGIT_ORIGIN;
+        }
+
+        $result = array();
+
+        foreach ($branches as $branch) {
+            $result[] = 'remotes/' . $remote . '/' . $branch;
+        }
+
+        return $result;
     }
 
     /**
@@ -142,7 +233,7 @@ class TwgitTestCase extends PHPUnit_Framework_TestCase
      */
     protected function _localFunctionCall ($sCmd, $bStripBashColors=true, $iWhichLocalDir=1)
     {
-        $sFunctionCall = '/bin/bash ' . TWGIT_TESTS_INC_DIR . '/testFunction.sh ' . $sCmd;
+        $sFunctionCall = TWGIT_BASH_EXEC . ' ' . TWGIT_TESTS_INC_DIR . '/testFunction.sh ' . $sCmd;
         return $this->_localExec($sFunctionCall, $bStripBashColors, $iWhichLocalDir);
     }
 
@@ -166,7 +257,7 @@ class TwgitTestCase extends PHPUnit_Framework_TestCase
      */
     protected function _localShellCodeCall ($sCmd, $bStripBashColors=true, $iWhichLocalDir=1)
     {
-        $sShellCodeCall = '/bin/bash ' . TWGIT_TESTS_INC_DIR . '/testShellCode.sh "' . $sCmd . '"';
+        $sShellCodeCall = TWGIT_BASH_EXEC . ' ' . TWGIT_TESTS_INC_DIR . '/testShellCode.sh "' . $sCmd . '"';
         return $this->_localExec($sShellCodeCall, $bStripBashColors, $iWhichLocalDir);
     }
 

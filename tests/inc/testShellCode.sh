@@ -18,7 +18,7 @@ sCmds="$1"; shift
 TWGIT_USER_REPOSITORY_ROOT_DIR="$(git rev-parse --show-toplevel 2>/dev/null)"
 
 # Includes:
-. $(dirname $0)/../../conf/twgit.sh
+. /tmp/conf-twgit.sh
 . $TWGIT_INC_DIR/common.inc.sh
 
 # Post config:

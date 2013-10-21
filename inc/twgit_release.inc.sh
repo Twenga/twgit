@@ -6,7 +6,9 @@
 #
 #
 # Copyright (c) 2011 Twenga SA
-# Copyright (c) 2012 Geoffroy Aubry <geoffroy.aubry@free.fr>
+# Copyright (c) 2012-2013 Geoffroy Aubry <geoffroy.aubry@free.fr>
+# Copyright (c) 2013 Cyrille Hemidy
+# Copyright (c) 2013 Sebastien Hanicotte <shanicotte@hi-media.com>
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance
 # with the License. You may obtain a copy of the License at
@@ -18,7 +20,9 @@
 # for the specific language governing permissions and limitations under the License.
 #
 # @copyright 2011 Twenga SA
-# @copyright 2012 Geoffroy Aubry <geoffroy.aubry@free.fr>
+# @copyright 2012-2013 Geoffroy Aubry <geoffroy.aubry@free.fr>
+# @copyright 2013 Cyrille Hemidy
+# @copyright 2013 Sebastien Hanicotte <shanicotte@hi-media.com>
 # @license http://www.apache.org/licenses/LICENSE-2.0
 #
 
@@ -36,13 +40,16 @@ function usage () {
     CUI_displayMsg help_detail '<b>committers [<max>] [-F]</b>'
     CUI_displayMsg help_detail '    List first <b><max></b> committers (authors in fact) into the current release.'
     CUI_displayMsg help_detail "    Default value of <b><max></b>: $TWGIT_DEFAULT_NB_COMMITTERS. Add <b>-F</b> to do not make fetch."; echo
-    CUI_displayMsg help_detail '<b>list [-F]</b>'
-    CUI_displayMsg help_detail '    List remote release with their merged features.'
-    CUI_displayMsg help_detail '    Add <b>-F</b> to do not make fetch.'; echo
     CUI_displayMsg help_detail '<b>finish [<tagname>] [-I]</b>'
     CUI_displayMsg help_detail "    Merge current release branch into '$TWGIT_STABLE', create a new tag and push."
     CUI_displayMsg help_detail '    If no <b><tagname></b> is specified then current release name will be used.'
     CUI_displayMsg help_detail '    Add <b>-I</b> to run in non-interactive mode (always say yes).'; echo
+    CUI_displayMsg help_detail '<b>list [-F]</b>'
+    CUI_displayMsg help_detail '    List remote release with their merged features.'
+    CUI_displayMsg help_detail '    Add <b>-F</b> to do not make fetch.'; echo
+    CUI_displayMsg help_detail '<b>push</b>'
+    CUI_displayMsg help_detail "    Push current release to '$TWGIT_ORIGIN' repository."
+    CUI_displayMsg help_detail "    It's a shortcut for: \"git push $TWGIT_ORIGIN $TWGIT_PREFIX_RELEASE…\""; echo
     CUI_displayMsg help_detail '<b>remove <releasename></b>'
     CUI_displayMsg help_detail '    Remove both local and remote specified release branch. No feature will'
     CUI_displayMsg help_detail '    be removed. Despite that, create the same tag as finish action to clearly'
@@ -120,6 +127,18 @@ function cmd_list () {
 }
 
 ##
+# Push de la release.
+#
+function cmd_push () {
+    local current_branch=$(get_current_branch)
+    local remote_release="$(get_releases_in_progress)"
+    if [ "$TWGIT_ORIGIN/$current_branch" != "$remote_release" ]; then
+        die "You must be in a release to launch this command!"
+    fi
+    process_push_branch "$current_branch"
+}
+
+##
 # Crée une nouvelle release à partir du dernier tag.
 # Si le nom n'est pas spécifié, un nom sera généré automatiquement à partir du dernier tag
 # en incrémentant par défaut d'une version mineure. Ce comportement est modifiable via les
@@ -132,6 +151,7 @@ function cmd_list () {
 function cmd_start () {
     process_options "$@"
     require_parameter '-'
+    clean_prefixes "$RETVAL" 'release'
     local release="$RETVAL"
     local release_fullname
 
@@ -188,8 +208,8 @@ function cmd_start () {
 function cmd_finish () {
     process_options "$@"
     require_parameter '-'
+    clean_prefixes "$RETVAL" 'tag'
     local tag="$RETVAL"
-
     assert_clean_working_tree
     process_fetch
 
@@ -271,6 +291,7 @@ function cmd_finish () {
 function cmd_remove () {
     process_options "$@"
     require_parameter 'release'
+    clean_prefixes "$RETVAL" 'release'
     local release="$RETVAL"
     local release_fullname="$TWGIT_PREFIX_RELEASE$release"
     local tag="$release"
@@ -304,7 +325,7 @@ function cmd_remove () {
 function cmd_reset () {
     process_options "$@"
     require_parameter 'release'
+    clean_prefixes "$RETVAL" 'release'
     local release="$RETVAL"
-
     cmd_remove "$release" && cmd_start
 }

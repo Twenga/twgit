@@ -6,7 +6,9 @@
 #
 #
 # Copyright (c) 2011 Twenga SA
-# Copyright (c) 2012 Geoffroy Aubry <geoffroy.aubry@free.fr>
+# Copyright (c) 2012-2013 Geoffroy Aubry <geoffroy.aubry@free.fr>
+# Copyright (c) 2013 Cyrille Hemidy
+# Copyright (c) 2013 Sebastien Hanicotte <shanicotte@hi-media.com>
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance
 # with the License. You may obtain a copy of the License at
@@ -18,7 +20,9 @@
 # for the specific language governing permissions and limitations under the License.
 #
 # @copyright 2011 Twenga SA
-# @copyright 2012 Geoffroy Aubry <geoffroy.aubry@free.fr>
+# @copyright 2012-2013 Geoffroy Aubry <geoffroy.aubry@free.fr>
+# @copyright 2013 Cyrille Hemidy
+# @copyright 2013 Sebastien Hanicotte <shanicotte@hi-media.com>
 # @license http://www.apache.org/licenses/LICENSE-2.0
 #
 
@@ -46,6 +50,9 @@ function usage () {
     CUI_displayMsg help_detail '<b>migrate <oldfeaturefullname> <newfeaturename></b>'
     CUI_displayMsg help_detail '    Migrate old branch to new process.'
     CUI_displayMsg help_detail '    For example: "twgit feature migrate rm7880 7880"'; echo
+    CUI_displayMsg help_detail '<b>push</b>'
+    CUI_displayMsg help_detail "    Push current feature to '$TWGIT_ORIGIN' repository."
+    CUI_displayMsg help_detail "    It's a shortcut for: \"git push $TWGIT_ORIGIN $TWGIT_PREFIX_FEATURE…\""; echo
     CUI_displayMsg help_detail '<b>remove <featurename></b>'
     CUI_displayMsg help_detail '    Remove both local and remote specified feature branch.'; echo
     CUI_displayMsg help_detail '<b>start <featurename> [-d]</b>'
@@ -54,7 +61,7 @@ function usage () {
     CUI_displayMsg help_detail '    if exists.'; echo
     CUI_displayMsg help_detail '<b>status [<featurename>]</b>'
     CUI_displayMsg help_detail '    Display information about specified feature: long name if a connector is'
-    CUI_displayMsg help_detail '    setted, last commit, status between local and remote feature and execute'
+    CUI_displayMsg help_detail '    set, last commit, status between local and remote feature and execute'
     CUI_displayMsg help_detail '    a git status if specified feature is the current branch.'
     CUI_displayMsg help_detail '    If no <b><featurename></b> is specified, then use current feature.'; echo
     CUI_displayMsg help_detail '<b>what-changed [<featurename>]</b>'
@@ -87,6 +94,7 @@ function cmd_help () {
 function cmd_committers () {
     process_options "$@"
     require_parameter '-'
+    clean_prefixes "$RETVAL" 'feature'
     local feature="$RETVAL"
     local feature_fullname
 
@@ -196,6 +204,7 @@ function cmd_migrate () {
     require_parameter 'oldfeaturefullname'
     local oldfeature_fullname="$RETVAL"
     require_parameter 'newfeaturename'
+    clean_prefixes "$RETVAL" 'feature'
     local feature="$RETVAL"
     local feature_fullname="$TWGIT_PREFIX_FEATURE$feature"
 
@@ -235,6 +244,7 @@ function cmd_migrate () {
 function cmd_start () {
     process_options "$@"
     require_parameter 'feature'
+    clean_prefixes "$RETVAL" 'feature'
     local feature="$RETVAL"
     start_simple_branch "$feature" "$TWGIT_PREFIX_FEATURE"
     echo
@@ -253,6 +263,7 @@ function cmd_start () {
 function cmd_status () {
     process_options "$@"
     require_parameter '-'
+    clean_prefixes "$RETVAL" 'feature'
     local feature="$RETVAL"
     local current_branch=$(get_current_branch)
 
@@ -275,6 +286,7 @@ function cmd_status () {
     display_branches 'feature' "$TWGIT_ORIGIN/$feature_fullname"
     echo
     inform_about_branch_status $feature_fullname
+    alert_old_branch $TWGIT_ORIGIN/$feature_fullname with-help
     if [ "$feature_fullname" = "$current_branch" ]; then
         exec_git_command "git status" "Error while git status!"
         if [ "$(git config --get color.status)" != 'always' ]; then
@@ -293,6 +305,7 @@ function cmd_status () {
 function cmd_merge-into-release () {
     process_options "$@"
     require_parameter '-'
+    clean_prefixes "$RETVAL" 'feature'
     local feature="$RETVAL"
 
     # Tests préliminaires :
@@ -326,6 +339,18 @@ function cmd_merge-into-release () {
 }
 
 ##
+# Push de la feature courante.
+#
+function cmd_push () {
+    local current_branch=$(get_current_branch)
+    local all_features=$(git branch --no-color -r --no-merged $TWGIT_ORIGIN/$TWGIT_STABLE | grep "$TWGIT_ORIGIN/$TWGIT_PREFIX_FEATURE" | sed 's/^[* ]*//' | tr '\n' ' ' | sed 's/ *$//g')
+    if ! has "$TWGIT_ORIGIN/$current_branch" $all_features; then
+        die "You must be in a feature to launch this command!"
+    fi
+    process_push_branch "$current_branch"
+}
+
+##
 # Suppression de la feature spécifiée.
 #
 # @param string $1 nom court de la feature à supprimer
@@ -333,6 +358,7 @@ function cmd_merge-into-release () {
 function cmd_remove () {
     process_options "$@"
     require_parameter 'feature'
+    clean_prefixes "$RETVAL" 'feature'
     local feature="$RETVAL"
     remove_feature "$feature"
     echo
@@ -347,6 +373,7 @@ function cmd_remove () {
 function cmd_what-changed () {
     process_options "$@"
     require_parameter '-'
+    clean_prefixes "$RETVAL" 'feature'
     local feature="$RETVAL"
     local last_ref
 

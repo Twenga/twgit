@@ -3,24 +3,10 @@
 /**
  * @package Tests
  * @author Geoffroy AUBRY <geoffroy.aubry@hi-media.com>
+ * @author Geoffroy Letournel <gletournel@hi-media.com>
  */
 class TwgitCommonAssertsTest extends TwgitTestCase
 {
-
-    /**
-    * Sets up the fixture, for example, open a network connection.
-    * This method is called before a test is executed.
-    */
-    public function setUp ()
-    {
-        $o = self::_getShellInstance();
-        $o->remove(TWGIT_REPOSITORY_ORIGIN_DIR);
-        $o->remove(TWGIT_REPOSITORY_LOCAL_DIR);
-        $o->remove(TWGIT_REPOSITORY_SECOND_REMOTE_DIR);
-        $o->mkdir(TWGIT_REPOSITORY_ORIGIN_DIR, '0777');
-        $o->mkdir(TWGIT_REPOSITORY_LOCAL_DIR, '0777');
-        $o->mkdir(TWGIT_REPOSITORY_SECOND_REMOTE_DIR, '0777');
-    }
 
     /**
      * @dataProvider providerTestAssertValidRefName
@@ -40,7 +26,7 @@ class TwgitCommonAssertsTest extends TwgitTestCase
     public function providerTestAssertValidRefName ()
     {
         $sErrorGitCheckRefMsg = ' is not a valid reference name! See git check-ref-format for more details.';
-        $sErrorPrefixMsg = '/!\ Unauthorized reference! Pick another name without using any prefix'
+        $sErrorPrefixMsg = "/!\ Unauthorized reference: '%s'! Pick another name without using any prefix"
                          . " ('feature-', 'release-', 'hotfix-', 'demo-').";
 
         return array(
@@ -59,13 +45,13 @@ class TwgitCommonAssertsTest extends TwgitTestCase
             array('a@{b', $sErrorGitCheckRefMsg),
             array('a b', $sErrorGitCheckRefMsg),
 
-            array('feature-a', $sErrorPrefixMsg),
+            array('feature-a', sprintf($sErrorPrefixMsg, 'feature-a')),
             array('xfeature-a', ''),
-            array('release-a', $sErrorPrefixMsg),
+            array('release-a', sprintf($sErrorPrefixMsg, 'release-a')),
             array('xrelease-a', ''),
-            array('hotfix-a', $sErrorPrefixMsg),
+            array('hotfix-a', sprintf($sErrorPrefixMsg, 'hotfix-a')),
             array('xhotfix-a', ''),
-            array('demo-a', $sErrorPrefixMsg),
+            array('demo-a', sprintf($sErrorPrefixMsg, 'demo-a')),
             array('xdemo-a', ''),
             array('0.0.1', ''),
         );
@@ -89,7 +75,7 @@ class TwgitCommonAssertsTest extends TwgitTestCase
     public function providerTestAssertValidTagName ()
     {
         $sErrorGitCheckRefMsg = ' is not a valid reference name! See git check-ref-format for more details.';
-        $sErrorPrefixMsg = '/!\ Unauthorized reference! Pick another name without using any prefix'
+        $sErrorPrefixMsg = "/!\ Unauthorized reference: 'feature-a'! Pick another name without using any prefix"
             . " ('feature-', 'release-', 'hotfix-', 'demo-').";
         $sErrorUnauthorizedMsg = 'Unauthorized tag name:';
 
@@ -139,7 +125,7 @@ class TwgitCommonAssertsTest extends TwgitTestCase
     public function providerTestAssertNewAndValidTagName ()
     {
         $sErrorGitCheckRefMsg = ' is not a valid reference name! See git check-ref-format for more details.';
-        $sErrorPrefixMsg = '/!\ Unauthorized reference! Pick another name without using any prefix'
+        $sErrorPrefixMsg = "/!\ Unauthorized reference: 'feature-a'! Pick another name without using any prefix"
             . " ('feature-', 'release-', 'hotfix-', 'demo-').";
         $sErrorUnauthorizedMsg = 'Unauthorized tag name:';
         $sErrorAlreadyExistsMsg = "/!\ Tag 'v1.2.3' already exists! Try: twgit tag list";
@@ -201,7 +187,7 @@ class TwgitCommonAssertsTest extends TwgitTestCase
      */
     public function testAssertCleanWorkingTree_WhenWorkingTreeEmpty ()
     {
-        $this->_localExec('git init && git commit --allow-empty -m init');
+        $this->_localExec('rm .twgit && git init && git commit --allow-empty -m init');
         $sMsg = $this->_localFunctionCall('assert_clean_working_tree');
         $this->assertEquals("Check clean working tree...", $sMsg);
     }
@@ -258,8 +244,8 @@ class TwgitCommonAssertsTest extends TwgitTestCase
         $sExpectedMsg =
             "Check current branch...\n"
             . "Cannot delete the branch 'feature-1' which you are currently on! So:\n"
-            . "git# git checkout stable\n"
-            . "Switched to branch 'stable'";
+            . "git# git checkout " . self::STABLE . "\n"
+            . "Switched to branch '" . self::STABLE . "'";
         $this->assertContains($sExpectedMsg, $sMsg);
     }
 

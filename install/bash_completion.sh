@@ -8,7 +8,8 @@
 #
 #
 # Copyright (c) 2011 Twenga SA
-# Copyright (c) 2012 Geoffroy Aubry <geoffroy.aubry@free.fr>
+# Copyright (c) 2012-2013 Geoffroy Aubry <geoffroy.aubry@free.fr>
+# Copyright (c) 2013 Cyrille Hemidy
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance
 # with the License. You may obtain a copy of the License at
@@ -20,7 +21,8 @@
 # for the specific language governing permissions and limitations under the License.
 #
 # @copyright 2011 Twenga SA
-# @copyright 2012 Geoffroy Aubry <geoffroy.aubry@free.fr>
+# @copyright 2012-2013 Geoffroy Aubry <geoffroy.aubry@free.fr>
+# @copyright 2013 Cyrille Hemidy
 # @license http://www.apache.org/licenses/LICENSE-2.0
 #
 
@@ -38,19 +40,19 @@ function _twgit () {
         local command="${COMP_WORDS[COMP_CWORD-1]}"
         case "${command}" in
             feature)
-                local opts="committers help list merge-into-release migrate remove start status what-changed"
+                local opts="committers help list merge-into-release migrate push remove start status what-changed"
                 COMPREPLY=( $(compgen -W "${opts}" -- ${cur}) )
                 ;;
             demo)
-                local opts="help list merge-feature remove start status"
+                local opts="help list merge-feature push remove start status"
                 COMPREPLY=( $(compgen -W "${opts}" -- ${cur}) )
                 ;;
             hotfix)
-                local opts="finish help list remove start"
+                local opts="finish help list push remove start"
                 COMPREPLY=( $(compgen -W "${opts}" -- ${cur}) )
                 ;;
             release)
-                local opts="committers finish help list remove reset start"
+                local opts="committers finish help list push remove reset start"
                 COMPREPLY=( $(compgen -W "${opts}" -- ${cur}) )
                 ;;
             tag)

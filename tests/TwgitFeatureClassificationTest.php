@@ -3,6 +3,7 @@
 /**
  * @package Tests
  * @author Geoffroy Aubry <geoffroy.aubry@hi-media.com>
+ * @author Geoffroy Letournel <gletournel@hi-media.com>
  * @author Laurent Toussaint <lt.laurent.toussaint@gmail.com>
  */
 class TwgitFeatureClassificationTest extends TwgitTestCase
@@ -14,11 +15,7 @@ class TwgitFeatureClassificationTest extends TwgitTestCase
      */
     public function setUp ()
     {
-        $o = self::_getShellInstance();
-        $o->remove(TWGIT_REPOSITORY_ORIGIN_DIR);
-        $o->remove(TWGIT_REPOSITORY_LOCAL_DIR);
-        $o->mkdir(TWGIT_REPOSITORY_ORIGIN_DIR, '0777');
-        $o->mkdir(TWGIT_REPOSITORY_LOCAL_DIR, '0777');
+        parent::setUp();
         $this->_remoteExec('git init');
         $this->_localExec(TWGIT_EXEC . ' init 1.0.0 ' . TWGIT_REPOSITORY_ORIGIN_DIR);
     }
@@ -59,10 +56,10 @@ class TwgitFeatureClassificationTest extends TwgitTestCase
      */
     public function testGetGitRevParse_WithKnownRef ()
     {
-        $sCmd = 'get_git_rev_parse stable; '
+        $sCmd = 'get_git_rev_parse ' . self::STABLE . '; '
             . 'for key in "\${!REV_PARSE[@]}"; do printf "%s:%s" "\$key" "\${REV_PARSE[\$key]}"; echo; done';
         $sMsg = $this->_localShellCodeCall($sCmd);
-        $this->assertRegExp('/^stable:[0-9a-f]{40}$/', $sMsg);
+        $this->assertRegExp('/^' . self::STABLE . ':[0-9a-f]{40}$/', $sMsg);
     }
 
     /**
@@ -138,10 +135,11 @@ class TwgitFeatureClassificationTest extends TwgitTestCase
      */
     public function testGetGitMergedBranches_WithKnownRef ()
     {
+        $release = self::_remote('release-1.1.0');
         $this->_localExec(TWGIT_EXEC . ' release start -I');
-        $sCmd = 'get_git_merged_branches origin/release-1.1.0; echo \${MERGED_BRANCHES[origin/release-1.1.0]}';
+        $sCmd = 'get_git_merged_branches ' . $release . '; echo \${MERGED_BRANCHES[' . $release . ']}';
         $sMsg = $this->_localShellCodeCall($sCmd);
-        $this->assertEquals('origin/release-1.1.0 origin/stable', $sMsg);
+        $this->assertEquals($release . ' ' . self::$_remoteStable, $sMsg);
     }
 
     /**
@@ -149,10 +147,11 @@ class TwgitFeatureClassificationTest extends TwgitTestCase
      */
     public function testGetGitMergedBranches_WithFailedFirstCall ()
     {
-        $sCmd = 'get_git_merged_branches origin/release-1.1.0; ' . TWGIT_EXEC . ' release start -I 1>/dev/null 2>&1; '
-            . 'get_git_merged_branches origin/release-1.1.0; echo \${MERGED_BRANCHES[origin/release-1.1.0]}';
+        $release = self::_remote('release-1.1.0');
+        $sCmd = 'get_git_merged_branches ' . $release . '; ' . TWGIT_EXEC . ' release start -I 1>/dev/null 2>&1; '
+            . 'get_git_merged_branches ' . $release . '; echo \${MERGED_BRANCHES[' . $release . ']}';
         $sMsg = $this->_localShellCodeCall($sCmd);
-        $this->assertEquals('origin/release-1.1.0 origin/stable', $sMsg);
+        $this->assertEquals($release . ' ' . self::$_remoteStable, $sMsg);
     }
 
     /**
@@ -160,11 +159,12 @@ class TwgitFeatureClassificationTest extends TwgitTestCase
      */
     public function testGetGitMergedBranches_WithFilledCache ()
     {
+        $release = self::_remote('release-1.1.0');
         $this->_localExec(TWGIT_EXEC . ' release start -I');
-        $sCmd = 'get_git_merged_branches origin/release-1.1.0; ' . TWGIT_EXEC . ' release remove 1.1.0 1>/dev/null 2>&1; '
-            . 'get_git_merged_branches origin/release-1.1.0; echo \${MERGED_BRANCHES[origin/release-1.1.0]}';
+        $sCmd = 'get_git_merged_branches ' . $release . '; ' . TWGIT_EXEC . ' release remove 1.1.0 1>/dev/null 2>&1; '
+            . 'get_git_merged_branches ' . $release . '; echo \${MERGED_BRANCHES[' . $release . ']}';
         $sMsg = $this->_localShellCodeCall($sCmd);
-        $this->assertEquals('origin/release-1.1.0 origin/stable', $sMsg);
+        $this->assertEquals($release . ' ' . self::$_remoteStable, $sMsg);
     }
 
     /**
@@ -172,11 +172,12 @@ class TwgitFeatureClassificationTest extends TwgitTestCase
      */
     public function testGetGitMergedBranches_WithNewFeatureAndRelease ()
     {
+        $release = self::_remote('release-1.1.0');
         $this->_localExec(TWGIT_EXEC . ' release start -I');
         $this->_localExec(TWGIT_EXEC . ' feature start 1');
-        $sCmd = 'get_git_merged_branches origin/release-1.1.0; echo \${MERGED_BRANCHES[origin/release-1.1.0]}';
+        $sCmd = 'get_git_merged_branches ' . $release . '; echo \${MERGED_BRANCHES[' . $release . ']}';
         $sMsg = $this->_localShellCodeCall($sCmd);
-        $this->assertEquals('origin/release-1.1.0 origin/stable', $sMsg);
+        $this->assertEquals($release . ' ' . self::$_remoteStable, $sMsg);
     }
 
     /**
@@ -184,12 +185,13 @@ class TwgitFeatureClassificationTest extends TwgitTestCase
      */
     public function testGetGitMergedBranches_WithFeatureMergeIntoRelease ()
     {
+        $release = self::_remote('release-1.1.0');
         $this->_localExec(TWGIT_EXEC . ' release start -I');
         $this->_localExec(TWGIT_EXEC . ' feature start 1');
         $this->_localExec(TWGIT_EXEC . ' feature merge-into-release 1');
-        $sCmd = 'get_git_merged_branches origin/release-1.1.0; echo \${MERGED_BRANCHES[origin/release-1.1.0]}';
+        $sCmd = 'get_git_merged_branches ' . $release . '; echo \${MERGED_BRANCHES[' . $release . ']}';
         $sMsg = $this->_localShellCodeCall($sCmd);
-        $this->assertEquals('origin/feature-1 origin/release-1.1.0 origin/stable', $sMsg);
+        $this->assertEquals(self::_remote('feature-1') . ' ' . $release . ' ' . self::$_remoteStable, $sMsg);
     }
 
     /**
@@ -197,14 +199,15 @@ class TwgitFeatureClassificationTest extends TwgitTestCase
      */
     public function testGetGitMergedBranches_With2InterdependentFeatures1 ()
     {
+        $release = self::_remote('release-1.1.0');
         $this->_localExec(TWGIT_EXEC . ' release start -I');
         $this->_localExec(TWGIT_EXEC . ' feature start 1');
         $this->_localExec(TWGIT_EXEC . ' feature start 2');
         $this->_localExec('git merge feature-1');
         $this->_localExec(TWGIT_EXEC . ' feature merge-into-release 1');
-        $sCmd = 'get_git_merged_branches origin/release-1.1.0; echo \${MERGED_BRANCHES[origin/release-1.1.0]}';
+        $sCmd = 'get_git_merged_branches ' . $release . '; echo \${MERGED_BRANCHES[' . $release . ']}';
         $sMsg = $this->_localShellCodeCall($sCmd);
-        $this->assertEquals('origin/feature-1 origin/release-1.1.0 origin/stable', $sMsg);
+        $this->assertEquals(self::_remote('feature-1') . ' ' . $release . ' ' . self::$_remoteStable, $sMsg);
     }
 
     /**
@@ -212,14 +215,15 @@ class TwgitFeatureClassificationTest extends TwgitTestCase
      */
     public function testGetGitMergedBranches_With2InterdependentFeatures2 ()
     {
+        $release = self::_remote('release-1.1.0');
         $this->_localExec(TWGIT_EXEC . ' release start -I');
         $this->_localExec(TWGIT_EXEC . ' feature start 1');
         $this->_localExec(TWGIT_EXEC . ' feature start 2');
         $this->_localExec('git merge feature-1');
         $this->_localExec(TWGIT_EXEC . ' feature merge-into-release 2');
-        $sCmd = 'get_git_merged_branches origin/release-1.1.0; echo \${MERGED_BRANCHES[origin/release-1.1.0]}';
+        $sCmd = 'get_git_merged_branches ' . $release . '; echo \${MERGED_BRANCHES[' . $release . ']}';
         $sMsg = $this->_localShellCodeCall($sCmd);
-        $this->assertEquals('origin/feature-1 origin/feature-2 origin/release-1.1.0 origin/stable', $sMsg);
+        $this->assertEquals(self::_remote('feature-1') . ' ' . self::_remote('feature-2') . ' ' . $release . ' ' . self::$_remoteStable, $sMsg);
     }
 
 
@@ -260,11 +264,13 @@ class TwgitFeatureClassificationTest extends TwgitTestCase
      */
     public function testGetGitMergedBase_WithKnownRef ()
     {
+        $release = self::_remote('release-1.1.0');
+        $feature = self::_remote('feature-1');
         $this->_localExec(TWGIT_EXEC . ' release start -I');
         $this->_localExec(TWGIT_EXEC . ' feature start 1');
-        $sRev = $this->_localExec('git merge-base origin/release-1.1.0 origin/feature-1');
-        $sCmd = 'r="origin/release-1.1.0"; get_git_rev_parse \$r; r_rev="\${REV_PARSE[\$r]}"; '
-            . 'f="origin/feature-1"; get_git_rev_parse \$f; f_rev="\${REV_PARSE[\$f]}"; '
+        $sRev = $this->_localExec("git merge-base $release $feature");
+        $sCmd = 'r="' . $release . '"; get_git_rev_parse \$r; r_rev="\${REV_PARSE[\$r]}"; '
+            . 'f="' . $feature . '"; get_git_rev_parse \$f; f_rev="\${REV_PARSE[\$f]}"; '
             . 'get_git_merge_base \$r \$f; echo \${MERGE_BASE[\$r|\$f]}';
         $sMsg = $this->_localShellCodeCall($sCmd);
         $this->assertEquals($sRev, $sMsg);
@@ -275,11 +281,13 @@ class TwgitFeatureClassificationTest extends TwgitTestCase
      */
     public function testGetGitMergedBase_WithFilledCache ()
     {
+        $release = self::_remote('release-1.1.0');
+        $feature = self::_remote('feature-1');
         $this->_localExec(TWGIT_EXEC . ' release start -I');
         $this->_localExec(TWGIT_EXEC . ' feature start 1');
-        $sRev = $this->_localExec('git merge-base origin/release-1.1.0 origin/feature-1');
-        $sCmd = 'r="origin/release-1.1.0"; get_git_rev_parse \$r; r_rev="\${REV_PARSE[\$r]}"; '
-            . 'f="origin/feature-1"; get_git_rev_parse \$f; f_rev="\${REV_PARSE[\$f]}"; '
+        $sRev = $this->_localExec("git merge-base $release $feature");
+        $sCmd = 'r="' . $release . '"; get_git_rev_parse \$r; r_rev="\${REV_PARSE[\$r]}"; '
+            . 'f="' . $feature . '"; get_git_rev_parse \$f; f_rev="\${REV_PARSE[\$f]}"; '
             . 'get_git_merge_base \$r \$f; '
             . TWGIT_EXEC . ' feature remove 1 1>/dev/null 2>&1; '
             . 'get_git_merge_base \$r \$f; '
@@ -332,8 +340,8 @@ class TwgitFeatureClassificationTest extends TwgitTestCase
     {
         $aFeatureTypes = array('', 'xyz', 'free', 'merged', 'merged_in_progress');
         return array(
-            array($aFeatureTypes, '', array('', '', 'origin/feature-1', '', '')),
-            array($aFeatureTypes, 'unknow-release', array('', '', 'origin/feature-1', '', '')),
+            array($aFeatureTypes, '', array('', '', self::_remote('feature-1'), '', '')),
+            array($aFeatureTypes, 'unknow-release', array('', '', self::_remote('feature-1'), '', '')),
         );
     }
 
@@ -351,7 +359,7 @@ class TwgitFeatureClassificationTest extends TwgitTestCase
             . TWGIT_EXEC . ' feature start 4; '
             . TWGIT_EXEC . ' feature merge-into-release 1; '
             . TWGIT_EXEC . ' feature merge-into-release 4; '
-            . TWGIT_EXEC . ' feature start 4; git commit --allow-empty -m "empty"; git push origin'
+            . TWGIT_EXEC . ' feature start 4; git commit --allow-empty -m "empty"; git push ' . self::ORIGIN
         );
 
         $aMsg = array();
@@ -365,13 +373,18 @@ class TwgitFeatureClassificationTest extends TwgitTestCase
     public function providerTestGetFeatures_WithFeaturesAndRelease ()
     {
         $aFeatureTypes = array('', 'xyz', 'free', 'merged', 'merged_in_progress');
-        list($f1, $f2, $f3, $f4) =
-            array('origin/feature-1', 'origin/feature-2', 'origin/feature-3', 'origin/feature-4');
+
+        list($f1, $f2, $f3, $f4) = array(
+            self::_remote('feature-1'),
+            self::_remote('feature-2'),
+            self::_remote('feature-3'),
+            self::_remote('feature-4')
+        );
 
         return array(
-            array($aFeatureTypes, '', array('', '', "$f1 $f2 $f3 $f4", '', '')),
-            array($aFeatureTypes, 'unknow-release', array('', '', "$f1 $f2 $f3 $f4", '', '')),
-            array($aFeatureTypes, 'release-1.1.0', array('', '', "$f2 $f3", $f1, $f4)),
+            array($aFeatureTypes, '', array('', '', "$f4 $f3 $f2 $f1", '', '')),
+            array($aFeatureTypes, 'unknow-release', array('', '', "$f4 $f3 $f2 $f1", '', '')),
+            array($aFeatureTypes, 'release-1.1.0', array('', '', "$f3 $f2", $f1, $f4)),
         );
     }
 
@@ -392,13 +405,13 @@ class TwgitFeatureClassificationTest extends TwgitTestCase
         $this->_localExec(
             TWGIT_EXEC . ' release start -I; '
             . TWGIT_EXEC . ' feature start 1; '
-            . TWGIT_EXEC . ' feature start 2; git merge --no-ff feature-1; git push origin; '
+            . TWGIT_EXEC . ' feature start 2; git merge --no-ff feature-1; git push ' . self::ORIGIN . '; '
             . TWGIT_EXEC . ' feature merge-into-release 1'
         );
 
         $aMsg = array();
         $aFeatureTypes = array('free', 'merged', 'merged_in_progress');
-        $aOut = array('origin/feature-2', 'origin/feature-1', '');
+        $aOut = array(self::_remote('feature-2'), self::_remote('feature-1'), '');
         foreach ($aFeatureTypes as $sType) {
             $sCmd = 'get_features ' . $sType . ' release-1.1.0; echo \$GET_FEATURES_RETURN_VALUE';
             $aMsg[] = $this->_localShellCodeCall($sCmd);
@@ -429,15 +442,15 @@ class TwgitFeatureClassificationTest extends TwgitTestCase
         $this->_localExec(
             TWGIT_EXEC . ' release start -I; '
             . TWGIT_EXEC . ' feature start 1; '
-            . TWGIT_EXEC . ' feature start 2; git merge --no-ff feature-1; git push origin; '
+            . TWGIT_EXEC . ' feature start 2; git merge --no-ff feature-1; git push ' . self::ORIGIN . '; '
             . TWGIT_EXEC . ' feature merge-into-release 1; '
-            . TWGIT_EXEC . ' feature start 1; git commit --allow-empty -m "empty"; git push origin; '
-            . TWGIT_EXEC . ' feature start 3; git merge --no-ff feature-1; git push origin; '
+            . TWGIT_EXEC . ' feature start 1; git commit --allow-empty -m "empty"; git push ' . self::ORIGIN . '; '
+            . TWGIT_EXEC . ' feature start 3; git merge --no-ff feature-1; git push ' . self::ORIGIN . '; '
         );
 
         $aMsg = array();
         $aFeatureTypes = array('free', 'merged', 'merged_in_progress');
-        $aOut = array('origin/feature-2 origin/feature-3', '', 'origin/feature-1');
+        $aOut = array(self::_remote('feature-3') . ' ' . self::_remote('feature-2'), '', self::_remote('feature-1'));
         foreach ($aFeatureTypes as $sType) {
             $sCmd = 'get_features ' . $sType . ' release-1.1.0; echo \$GET_FEATURES_RETURN_VALUE';
             $aMsg[] = $this->_localShellCodeCall($sCmd);
@@ -468,16 +481,16 @@ class TwgitFeatureClassificationTest extends TwgitTestCase
         $this->_localExec(
             TWGIT_EXEC . ' release start -I; '
             . TWGIT_EXEC . ' feature start 1; '
-            . TWGIT_EXEC . ' feature start 2; git merge --no-ff feature-1; git push origin; '
+            . TWGIT_EXEC . ' feature start 2; git merge --no-ff feature-1; git push ' . self::ORIGIN . '; '
             . TWGIT_EXEC . ' feature merge-into-release 1; '
-            . TWGIT_EXEC . ' feature start 1; git commit --allow-empty -m "empty"; git push origin; '
-            . TWGIT_EXEC . ' feature start 3; git merge --no-ff feature-1; git push origin; '
-            . TWGIT_EXEC . ' feature start 1; git commit --allow-empty -m "empty"; git push origin; '
+            . TWGIT_EXEC . ' feature start 1; git commit --allow-empty -m "empty"; git push ' . self::ORIGIN . '; '
+            . TWGIT_EXEC . ' feature start 3; git merge --no-ff feature-1; git push ' . self::ORIGIN . '; '
+            . TWGIT_EXEC . ' feature start 1; git commit --allow-empty -m "empty"; git push ' . self::ORIGIN . '; '
         );
 
         $aMsg = array();
         $aFeatureTypes = array('free', 'merged', 'merged_in_progress');
-        $aOut = array('origin/feature-2 origin/feature-3', '', 'origin/feature-1');
+        $aOut = array(self::_remote('feature-3') . ' ' . self::_remote('feature-2'), '', self::_remote('feature-1'));
         foreach ($aFeatureTypes as $sType) {
             $sCmd = 'get_features ' . $sType . ' release-1.1.0; echo \$GET_FEATURES_RETURN_VALUE';
             $aMsg[] = $this->_localShellCodeCall($sCmd);
@@ -503,12 +516,12 @@ class TwgitFeatureClassificationTest extends TwgitTestCase
     {
         $this->_localExec(
             TWGIT_EXEC . ' release start -I; '
-            . TWGIT_EXEC . ' feature start 1; git merge release-1.1.0; git push origin'
+            . TWGIT_EXEC . ' feature start 1; git merge release-1.1.0; git push ' . self::ORIGIN
         );
 
         $aMsg = array();
         $aFeatureTypes = array('free', 'merged', 'merged_in_progress');
-        $aOut = array('origin/feature-1', '', '');
+        $aOut = array(self::_remote('feature-1'), '', '');
         foreach ($aFeatureTypes as $sType) {
             $sCmd = 'get_features ' . $sType . ' release-1.1.0; echo \$GET_FEATURES_RETURN_VALUE';
             $aMsg[] = $this->_localShellCodeCall($sCmd);
@@ -537,13 +550,13 @@ class TwgitFeatureClassificationTest extends TwgitTestCase
         $this->_localExec(
             TWGIT_EXEC . ' release start -I; '
             . TWGIT_EXEC . ' feature start 1; '
-            . TWGIT_EXEC . ' feature start 2; git merge --no-ff feature-1; git push origin; '
+            . TWGIT_EXEC . ' feature start 2; git merge --no-ff feature-1; git push ' . self::ORIGIN . '; '
             . TWGIT_EXEC . ' feature merge-into-release 2'
         );
 
         $aMsg = array();
         $aFeatureTypes = array('free', 'merged', 'merged_in_progress');
-        $aOut = array('', 'origin/feature-1 origin/feature-2', '');
+        $aOut = array('', self::_remote('feature-2') . ' ' . self::_remote('feature-1'), '');
         foreach ($aFeatureTypes as $sType) {
             $sCmd = 'get_features ' . $sType . ' release-1.1.0; echo \$GET_FEATURES_RETURN_VALUE';
             $aMsg[] = $this->_localShellCodeCall($sCmd);
@@ -572,14 +585,14 @@ class TwgitFeatureClassificationTest extends TwgitTestCase
         $this->_localExec(
             TWGIT_EXEC . ' release start -I; '
             . TWGIT_EXEC . ' feature start 1; '
-            . TWGIT_EXEC . ' feature start 2; git merge --no-ff feature-1; git push origin; '
+            . TWGIT_EXEC . ' feature start 2; git merge --no-ff feature-1; git push ' . self::ORIGIN . '; '
             . TWGIT_EXEC . ' feature merge-into-release 2; '
-            . TWGIT_EXEC . ' feature start 2; git commit --allow-empty -m "empty"; git push origin; '
+            . TWGIT_EXEC . ' feature start 2; git commit --allow-empty -m "empty"; git push ' . self::ORIGIN . '; '
         );
 
         $aMsg = array();
         $aFeatureTypes = array('free', 'merged', 'merged_in_progress');
-        $aOut = array('', 'origin/feature-1', 'origin/feature-2');
+        $aOut = array('', self::_remote('feature-1'), self::_remote('feature-2'));
         foreach ($aFeatureTypes as $sType) {
             $sCmd = 'get_features ' . $sType . ' release-1.1.0; echo \$GET_FEATURES_RETURN_VALUE';
             $aMsg[] = $this->_localShellCodeCall($sCmd);
@@ -608,14 +621,14 @@ class TwgitFeatureClassificationTest extends TwgitTestCase
         $this->_localExec(
             TWGIT_EXEC . ' release start -I; '
             . TWGIT_EXEC . ' feature start 1; '
-            . TWGIT_EXEC . ' feature start 2; git merge --no-ff feature-1; git push origin; '
-            . TWGIT_EXEC . ' feature start 1; git commit --allow-empty -m "empty"; git push origin; '
+            . TWGIT_EXEC . ' feature start 2; git merge --no-ff feature-1; git push ' . self::ORIGIN . '; '
+            . TWGIT_EXEC . ' feature start 1; git commit --allow-empty -m "empty"; git push ' . self::ORIGIN . '; '
             . TWGIT_EXEC . ' feature merge-into-release 2'
         );
 
         $aMsg = array();
         $aFeatureTypes = array('free', 'merged', 'merged_in_progress');
-        $aOut = array('', 'origin/feature-2', 'origin/feature-1');
+        $aOut = array('', self::_remote('feature-2'), self::_remote('feature-1'));
         foreach ($aFeatureTypes as $sType) {
             $sCmd = 'get_features ' . $sType . ' release-1.1.0; echo \$GET_FEATURES_RETURN_VALUE';
             $aMsg[] = $this->_localShellCodeCall($sCmd);
@@ -646,14 +659,14 @@ class TwgitFeatureClassificationTest extends TwgitTestCase
             TWGIT_EXEC . ' release start -I; '
             . TWGIT_EXEC . ' feature start 1; '
             . TWGIT_EXEC . ' feature start 2; git merge --no-ff feature-1; '
-            . TWGIT_EXEC . ' feature start 1; git commit --allow-empty -m "empty"; git push origin; '
+            . TWGIT_EXEC . ' feature start 1; git commit --allow-empty -m "empty"; git push ' . self::ORIGIN . '; '
             . TWGIT_EXEC . ' feature merge-into-release 2; '
-            . TWGIT_EXEC . ' feature start 2; git commit --allow-empty -m "empty"; git push origin; '
+            . TWGIT_EXEC . ' feature start 2; git commit --allow-empty -m "empty"; git push ' . self::ORIGIN . '; '
         );
 
         $aMsg = array();
         $aFeatureTypes = array('free', 'merged', 'merged_in_progress');
-        $aOut = array('', '', 'origin/feature-1 origin/feature-2');
+        $aOut = array('', '', self::_remote('feature-2') . ' ' . self::_remote('feature-1'));
         foreach ($aFeatureTypes as $sType) {
             $sCmd = 'get_features ' . $sType . ' release-1.1.0; echo \$GET_FEATURES_RETURN_VALUE';
             $aMsg[] = $this->_localShellCodeCall($sCmd);
@@ -684,7 +697,7 @@ class TwgitFeatureClassificationTest extends TwgitTestCase
 
         $aMsg = array();
         $aFeatureTypes = array('free', 'merged', 'merged_in_progress');
-        $aOut = array('origin/feature-1', '', '');
+        $aOut = array(self::_remote('feature-1'), '', '');
         foreach ($aFeatureTypes as $sType) {
             $sCmd = 'get_features ' . $sType . ' release-1.1.0; echo \$GET_FEATURES_RETURN_VALUE';
             $aMsg[] = $this->_localShellCodeCall($sCmd);
@@ -711,12 +724,12 @@ class TwgitFeatureClassificationTest extends TwgitTestCase
         $this->_localExec(
             TWGIT_EXEC . ' release start -I; '
             . TWGIT_EXEC . ' feature start 1; git merge --no-ff release-1.1.0; '
-            . 'git commit --allow-empty -m "empty"; git push origin; '
+            . 'git commit --allow-empty -m "empty"; git push ' . self::ORIGIN . '; '
         );
 
         $aMsg = array();
         $aFeatureTypes = array('free', 'merged', 'merged_in_progress');
-        $aOut = array('origin/feature-1', '', '');
+        $aOut = array(self::_remote('feature-1'), '', '');
         foreach ($aFeatureTypes as $sType) {
             $sCmd = 'get_features ' . $sType . ' release-1.1.0; echo \$GET_FEATURES_RETURN_VALUE';
             $aMsg[] = $this->_localShellCodeCall($sCmd);
@@ -755,17 +768,17 @@ class TwgitFeatureClassificationTest extends TwgitTestCase
 
         $aMsg = array();
         $aFeatureTypes = array('free', 'merged', 'merged_in_progress');
-        $aOut = array('', 'origin/feature-1', '');
+        $aOut = array('', self::_remote('feature-1'), '');
         foreach ($aFeatureTypes as $sType) {
             $sCmd = 'get_features ' . $sType . ' release-1.2.0; echo \$GET_FEATURES_RETURN_VALUE';
             $aMsg[] = $this->_localShellCodeCall($sCmd);
         }
         $this->assertEquals($aOut, $aMsg);
 
-        $this->_localExec(TWGIT_EXEC . ' feature start 1; git merge --no-ff stable; git push origin feature-1');
+        $this->_localExec(TWGIT_EXEC . ' feature start 1; git merge --no-ff ' . self::STABLE . '; git push ' . self::ORIGIN . ' feature-1');
         $aMsg = array();
         $aFeatureTypes = array('free', 'merged', 'merged_in_progress');
-        $aOut = array('', '', 'origin/feature-1');
+        $aOut = array('', '', self::_remote('feature-1'));
         foreach ($aFeatureTypes as $sType) {
             $sCmd = 'get_features ' . $sType . ' release-1.2.0; echo \$GET_FEATURES_RETURN_VALUE';
             $aMsg[] = $this->_localShellCodeCall($sCmd);
@@ -789,7 +802,7 @@ class TwgitFeatureClassificationTest extends TwgitTestCase
 
 //         $sCmd = 'get_features merged release-1.1.0; echo \$GET_FEATURES_RETURN_VALUE';
 //         $sMsg1 = $this->_localShellCodeCall($sCmd);
-//         $this->assertEquals('origin/feature-1', $sMsg1);
+//         $this->assertEquals(self::_remote('feature-1'), $sMsg1);
 
 //         $sCmd = "eval 'function get_git_merged_branches () { echo y;}'; "
 //             . 'get_merged_features release-1.1.0; echo \$GET_MERGED_FEATURES_RETURN_VALUE';

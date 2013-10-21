@@ -8,6 +8,14 @@ class TwgitHelpTest extends TwgitTestCase
 {
 
     /**
+     * Sets up the fixture, for example, open a network connection.
+     * This method is called before a test is executed.
+     */
+    public function setUp ()
+    {
+    }
+
+    /**
      * @shcovers twgit::usage
      */
     public function testMainHelp_ThrowExcpetionWhenUnknownAction1 ()

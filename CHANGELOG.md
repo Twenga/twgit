@@ -1,6 +1,40 @@
 ChangeLog
 =========
 
+## Version 1.13.0 (2013-10-21)
+
+Features:
+
+  - [#114](https://github.com/Twenga/twgit/issues/114): Making twgit ignoring all `feature-`, `demo-`, `hotfix-`,
+    `release-` and tag prefixes on command launch.
+    For example: `twgit feature start feature-1` will no longer generate an error.
+  - [#113](https://github.com/Twenga/twgit/issues/113): Allow partial color overloading between config files:
+    `twgit/conf/twgit-dist.sh`, `twgit/conf/twgit.sh` and repository's `.twgit`.
+  - [#109](https://github.com/Twenga/twgit/issues/109): Now current branch is highlighted with an asterisk
+    during both feature and demo list.
+  - [#105](https://github.com/Twenga/twgit/issues/105): Add command `twgit <branch-type> push`.
+    For example, `twgit feature push` is a shortcut for: `git push $TWGIT_ORIGIN <current-feature>`.
+  - [#98](https://github.com/Twenga/twgit/issues/98): Add more messages to help to merge last tag on feature.
+
+Fixes:
+
+  - [#112](https://github.com/Twenga/twgit/issues/112): Now always sort features and demos in reverse numerical order.
+  - [#110](https://github.com/Twenga/twgit/issues/110): Found static references to `stable` branch and `origin`
+    repository in code, bypassing `TWGIT_ORIGIN` and `TWGIT_STABLE` parameters.
+
+Core enhancements:
+
+  - [#115](https://github.com/Twenga/twgit/issues/115): Remove `.twgit` configuration file —for github— from repository.
+
+Doc:
+
+  - [#108](https://github.com/Twenga/twgit/issues/108): Insert links to issues in `CHANGELOG.md`.
+
+Unit tests:
+
+  - [#111](https://github.com/Twenga/twgit/issues/111): Now tests ensure that code uses `TWGIT_ORIGIN` and `TWGIT_STABLE`.
+  - estimated code coverage: 33% (653 of 1978 lines).
+
 ## Version 1.12.0 (2013-06-23)
 
 Features:
@@ -175,11 +209,7 @@ Core enhancements:
 
 Features:
 
-<<<<<<< HEAD
-  - \#41: Add subject in commit messages of `twgit feature start` when a connector (github, redmine) is set.
-=======
-  - [#41](https://github.com/Twenga/twgit/issues/41): Add subject in commit messages of `twgit feature start` when a connector (github, redmine) is setted.
->>>>>>> feature-108
+  - [#41](https://github.com/Twenga/twgit/issues/41): Add subject in commit messages of `twgit feature start` when a connector (github, redmine) is set.
 **Must update** `TWGIT_FIRST_COMMIT_MSG` parameter of `conf/twgit.sh`:
 
     ```bash

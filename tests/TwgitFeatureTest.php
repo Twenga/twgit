@@ -33,7 +33,7 @@ class TwgitFeatureTest extends TwgitTestCase
         $this->_localExec('git branch v1.2.3 v1.2.3');
 
         $sMsg = $this->_localExec(TWGIT_EXEC . ' feature start feature-42');
-        $this->assertContains("assume tag was 42 instead of feature-42", $sMsg);
+        $this->assertContains("Assume feature was '42' instead of 'feature-42'", $sMsg);
     }
 
     public function testStart_WithAmbiguousRef ()
@@ -194,6 +194,6 @@ class TwgitFeatureTest extends TwgitTestCase
             . ' && ' . TWGIT_EXEC . ' release start -I');
 
         $sMsg = $this->_localExec(TWGIT_EXEC . ' feature merge-into-release feature-42');
-        $this->assertContains("assume tag was 42 instead of feature-42", $sMsg);
+        $this->assertContains("Assume feature was '42' instead of 'feature-42'", $sMsg);
     }
 }

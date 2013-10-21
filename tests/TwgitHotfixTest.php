@@ -141,7 +141,7 @@ class TwgitHotfixTest extends TwgitTestCase
                 . " Try: git checkout stable && git reset origin/stable"
         );
         $sMsg = $this->_localExec(TWGIT_EXEC . ' hotfix remove hotfix-1.2.4');
-        $this->assertContains("assume tag was 1.2.4 instead of hotfix-1.2.4", $sMsg);
+        $this->assertContains("Assume hotfix was '1.2.4' instead of 'hotfix-1.2.4'", $sMsg);
     }
 
     /**

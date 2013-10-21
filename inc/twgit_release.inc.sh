@@ -134,7 +134,7 @@ function cmd_start () {
     require_parameter '-'
     local release="$RETVAL"
 
-    clean_prefixes "$release" 'release-'
+    clean_prefixes "$release" 'release'
     release="$RETVAL"
 
     local release_fullname
@@ -281,7 +281,7 @@ function cmd_remove () {
     require_parameter 'release'
     local release="$RETVAL"
 
-    clean_prefixes "$release" 'release-'
+    clean_prefixes "$release" 'release'
     release="$RETVAL"
 
     local release_fullname="$TWGIT_PREFIX_RELEASE$release"
@@ -318,7 +318,7 @@ function cmd_reset () {
     require_parameter 'release'
     local release="$RETVAL"
 
-    clean_prefixes "$release" 'release-'
+    clean_prefixes "$release" 'release'
     release="$RETVAL"
 
     cmd_remove "$release" && cmd_start

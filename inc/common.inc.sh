@@ -895,10 +895,6 @@ function create_and_push_tag () {
 function start_simple_branch () {
     local branch="$1"
     local branch_prefix="$2"
-
-    clean_prefixes "$branch" "$branch_prefix"
-    branch="$RETVAL"
-
     local branch_fullname="$branch_prefix$branch"
 
     local -A wording=(
@@ -1098,7 +1094,7 @@ function display_csv_branches () {
 #    Author: Geoffroy Aubry <geoffroy.aubry@twenga.com>
 #    Date:   Wed May 25 18:58:05 2011 +0200
 #
-# @param string $1 type type de branches affichées, parmi {'feature', 'release', 'hotfix'}
+# @param string $1 type type de branches affichées, parmi {'demo', 'feature', 'release', 'hotfix'}
 # @param string $2 liste des branches à présenter, à raison d'une par ligne, au format 'origin/xxx'
 #
 function display_branches () {
@@ -1500,39 +1496,31 @@ function displayChangelogSection () {
 ##
 # This add-on cleans the <<tag>> name sent to twgit.
 # In case of call with use of prefix v (for init & tag), feature- (for feature),
-# hotfix- (for hotfix) or demo- (for demos), then this function will automaticaly
-# remove the 'unneeded' prefix and allow twgit to continu its execution
-# @param string $1 Full name of $tag
-# @param string $2 Functionnality called (ex. init)
+# hotfix- (for hotfix) or demo- (for demos), then this function will automatically
+# remove the 'unneeded' prefix and allows twgit to continue its execution.
+# Result in $RETVAL.
+#
+# @param string $1 Full name of branch
+# @param string $2 Branch type in {'demo', 'feature', 'hotfix', 'release', 'tag'}
 #
 function clean_prefixes () {
-    local tag="$1"
-    local action="$2"
+    local branch_name="$1"
+    local type="$2"
+    local -A prefixes=(
+        [demo]="$TWGIT_PREFIX_DEMO"
+        [feature]="$TWGIT_PREFIX_FEATURE"
+        [hotfix]="$TWGIT_PREFIX_HOTFIX"
+        [release]="$TWGIT_PREFIX_RELEASE"
+        [tag]="$TWGIT_PREFIX_TAG"
+    )
 
-    RETVAL="$tag"
-
-    case $action in
-        "tag")
-            if [[ $tag == v* ]]; then
-                newtag=$(echo $tag | sed -e 's/^v//g')
-                CUI_displayMsg warning "We assume tag was '<b>$newtag</b>' instead of '<b>$tag</b>'"
-                RETVAL=$newtag
-            fi
-            ;;
-        "hotfix-")
-            ;&
-        "feature-")
-            ;&
-        "release-")
-            ;&
-        "demo-")
-            if [[ $tag == "$action"* ]]; then
-                newtag=$(echo $tag | sed -e 's/^'"$action"'//g')
-                CUI_displayMsg warning "We assume tag was '<b>$newtag</b>' instead of '<b>$tag</b>'"
-                RETVAL=$newtag
-            fi
-            ;;
-    esac
+    RETVAL="$branch_name"
+    if [ ! -z "${prefixes[$type]-}" ]; then
+        if [[ $branch_name == ${prefixes[$type]}* ]]; then
+            RETVAL=$(echo $branch_name | sed -e 's/^'"${prefixes[$type]}"'//')
+            CUI_displayMsg warning "Assume $type was '<b>$RETVAL</b>' instead of '<b>$branch_name</b>'…"
+        fi
+    fi
 }
 
 ##

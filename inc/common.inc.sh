@@ -833,7 +833,7 @@ function remove_branch () {
     local branch="$1"
     local branch_prefix="$2"
 
-    clean_prefixes $branch $branch_prefix
+    clean_prefixes "$branch" "$branch_prefix"
     branch="$RETVAL"
 
     local branch_fullname="$branch_prefix$branch"
@@ -896,7 +896,7 @@ function start_simple_branch () {
     local branch="$1"
     local branch_prefix="$2"
 
-    clean_prefixes $branch $branch_prefix
+    clean_prefixes "$branch" "$branch_prefix"
     branch="$RETVAL"
 
     local branch_fullname="$branch_prefix$branch"
@@ -1397,7 +1397,7 @@ function init () {
         assert_clean_working_tree
     fi
 
-    clean_prefixes $tag 'init'
+    clean_prefixes "$tag" 'init'
     tag="$RETVAL"
 
     assert_new_and_valid_tag_name $tag
@@ -1481,9 +1481,9 @@ function displayChangelogSection () {
     content="## Version $(echo "${content#*## Version }")";
     content="$(echo "${content%## Version ${from_tag:1}*}")";
     content="$(echo -e "$content\n" \
-		| sedRegexpExtended ':a;N;$!ba;s/\n\n(  -|```)/\n\1/g' \
-		| sedRegexpExtended 's/  - \[#([0-9]+)\]\([^)]+\)/  - #\1/' \
-	)";
+        | sedRegexpExtended ':a;N;$!ba;s/\n\n(  -|```)/\n\1/g' \
+        | sedRegexpExtended 's/  - \[#([0-9]+)\]\([^)]+\)/  - #\1/' \
+    )";
 
     local line
     while read line; do
@@ -1504,22 +1504,18 @@ function displayChangelogSection () {
 # remove the 'unneeded' prefix and allow twgit to continu its execution
 # @param string $1 Full name of $tag
 # @param string $2 Functionnality called (ex. init)
-
+#
 function clean_prefixes () {
-    process_options "$@"
-    require_parameter 'tag'
-    local tag="$RETVAL"
-    require_parameter 'action'
-    local action="$RETVAL"
-    
-    RETVAL=$tag
-    
+    local tag="$1"
+    local action="$2"
+
+    RETVAL="$tag"
+
     case $action in
         "tag")
             ;&
         "init")
-            if [[ $tag == v* ]] ;
-		then
+            if [[ $tag == v* ]]; then
                 newtag=$(echo $tag | sed -e 's/^v//g')
                 CUI_displayMsg info "We assume tag was $newtag instead of $tag"
                 RETVAL=$newtag
@@ -1532,8 +1528,7 @@ function clean_prefixes () {
         "release-")
             ;&
         "demo-")
-            if [[ $tag == "$action"* ]] ;
-		then
+            if [[ $tag == "$action"* ]]; then
                 newtag=$(echo $tag | sed -e 's/^'"$action"'//g')
                 CUI_displayMsg info "We assume tag was $newtag instead of $tag"
                 RETVAL=$newtag

@@ -63,7 +63,7 @@ function cmd_list () {
     require_parameter '-'
     local tag="$RETVAL"
 
-    clean_prefixes $tag 'tag'
+    clean_prefixes "$tag" 'tag'
     tag="$RETVAL"
 
     local tag_fullname="$TWGIT_PREFIX_TAG$tag"

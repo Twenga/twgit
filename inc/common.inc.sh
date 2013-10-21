@@ -1517,7 +1517,7 @@ function clean_prefixes () {
         "init")
             if [[ $tag == v* ]]; then
                 newtag=$(echo $tag | sed -e 's/^v//g')
-                CUI_displayMsg info "We assume tag was $newtag instead of $tag"
+                CUI_displayMsg warning "We assume tag was '<b>$newtag</b>' instead of '<b>$tag</b>'"
                 RETVAL=$newtag
             fi
             ;;
@@ -1530,7 +1530,7 @@ function clean_prefixes () {
         "demo-")
             if [[ $tag == "$action"* ]]; then
                 newtag=$(echo $tag | sed -e 's/^'"$action"'//g')
-                CUI_displayMsg info "We assume tag was $newtag instead of $tag"
+                CUI_displayMsg warning "We assume tag was '<b>$newtag</b>' instead of '<b>$tag</b>'"
                 RETVAL=$newtag
             fi
             ;;

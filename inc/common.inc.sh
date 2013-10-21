@@ -1397,7 +1397,7 @@ function init () {
         assert_clean_working_tree
     fi
 
-    clean_prefixes "$tag" 'init'
+    clean_prefixes "$tag" 'tag'
     tag="$RETVAL"
 
     assert_new_and_valid_tag_name $tag
@@ -1513,8 +1513,6 @@ function clean_prefixes () {
 
     case $action in
         "tag")
-            ;&
-        "init")
             if [[ $tag == v* ]]; then
                 newtag=$(echo $tag | sed -e 's/^v//g')
                 CUI_displayMsg warning "We assume tag was '<b>$newtag</b>' instead of '<b>$tag</b>'"

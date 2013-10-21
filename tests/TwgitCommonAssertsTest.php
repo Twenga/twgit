@@ -3,6 +3,7 @@
 /**
  * @package Tests
  * @author Geoffroy AUBRY <geoffroy.aubry@hi-media.com>
+ * @author Geoffroy Letournel <gletournel@hi-media.com>
  */
 class TwgitCommonAssertsTest extends TwgitTestCase
 {

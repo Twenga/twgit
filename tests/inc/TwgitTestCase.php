@@ -5,6 +5,7 @@
  *
  * @package Tests
  * @author Geoffroy Aubry <geoffroy.aubry@hi-media.com>
+ * @author Geoffroy Letournel <gletournel@hi-media.com>
  */
 class TwgitTestCase extends PHPUnit_Framework_TestCase
 {

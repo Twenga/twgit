@@ -7,6 +7,7 @@
 #
 # Copyright (c) 2013 Geoffroy Aubry <geoffroy.aubry@free.fr>
 # Copyright (c) 2013 Cyrille Hemidy
+# Copyright (c) 2013 Sebastien Hanicotte <shanicotte@hi-media.com>
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance
 # with the License. You may obtain a copy of the License at
@@ -19,6 +20,7 @@
 #
 # @copyright 2013 Geoffroy Aubry <geoffroy.aubry@free.fr>
 # @copyright 2013 Cyrille Hemidy
+# @copyright 2013 Sebastien Hanicotte <shanicotte@hi-media.com>
 # @license http://www.apache.org/licenses/LICENSE-2.0
 #
 

@@ -3,6 +3,8 @@
 /**
  * @package Tests
  * @author Geoffroy Aubry <geoffroy.aubry@hi-media.com>
+ * @author Geoffroy Letournel <gletournel@hi-media.com>
+ * @author Sebastien Hanicotte <shanicotte@hi-media.com>
  */
 class TwgitFeatureTest extends TwgitTestCase
 {

@@ -4,7 +4,7 @@
  * Pour faciliter l'exécution des commandes shell.
  *
  * @package Lib
- * @copyright 2012 Geoffroy Aubry <geoffroy.aubry@free.fr>
+ * @copyright 2012-2013 Geoffroy Aubry <geoffroy.aubry@free.fr>
  * @license http://www.apache.org/licenses/LICENSE-2.0
  */
 interface Shell_Interface

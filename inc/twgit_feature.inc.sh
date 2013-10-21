@@ -87,11 +87,8 @@ function cmd_help () {
 function cmd_committers () {
     process_options "$@"
     require_parameter '-'
+    clean_prefixes "$RETVAL" 'feature'
     local feature="$RETVAL"
-
-    clean_prefixes "$feature" 'feature'
-    feature="$RETVAL"
-
     local feature_fullname
 
     local all_features=$(git branch --no-color -r | grep "$TWGIT_ORIGIN/$TWGIT_PREFIX_FEATURE" | sed 's/^[* ]*//' | tr '\n' ' ' | sed 's/ *$//g')
@@ -200,11 +197,8 @@ function cmd_migrate () {
     require_parameter 'oldfeaturefullname'
     local oldfeature_fullname="$RETVAL"
     require_parameter 'newfeaturename'
+    clean_prefixes "$RETVAL" 'feature'
     local feature="$RETVAL"
-
-    clean_prefixes "$feature" 'feature'
-    feature="$RETVAL"
-
     local feature_fullname="$TWGIT_PREFIX_FEATURE$feature"
 
     assert_valid_ref_name $feature
@@ -243,11 +237,8 @@ function cmd_migrate () {
 function cmd_start () {
     process_options "$@"
     require_parameter 'feature'
+    clean_prefixes "$RETVAL" 'feature'
     local feature="$RETVAL"
-
-    clean_prefixes "$feature" 'feature'
-    feature="$RETVAL"
-
     start_simple_branch "$feature" "$TWGIT_PREFIX_FEATURE"
     echo
 }
@@ -265,11 +256,8 @@ function cmd_start () {
 function cmd_status () {
     process_options "$@"
     require_parameter '-'
+    clean_prefixes "$RETVAL" 'feature'
     local feature="$RETVAL"
-
-    clean_prefixes "$feature" 'feature'
-    feature="$RETVAL"
-
     local current_branch=$(get_current_branch)
 
     # Si feature non spécifiée, récupérer la courante :
@@ -309,10 +297,8 @@ function cmd_status () {
 function cmd_merge-into-release () {
     process_options "$@"
     require_parameter '-'
+    clean_prefixes "$RETVAL" 'feature'
     local feature="$RETVAL"
-
-    clean_prefixes "$feature" 'feature'
-    feature="$RETVAL"
 
     # Tests préliminaires :
     assert_clean_working_tree
@@ -352,11 +338,8 @@ function cmd_merge-into-release () {
 function cmd_remove () {
     process_options "$@"
     require_parameter 'feature'
+    clean_prefixes "$RETVAL" 'feature'
     local feature="$RETVAL"
-
-    clean_prefixes "$feature" 'feature'
-    feature="$RETVAL"
-
     remove_feature "$feature"
     echo
 }
@@ -370,11 +353,8 @@ function cmd_remove () {
 function cmd_what-changed () {
     process_options "$@"
     require_parameter '-'
+    clean_prefixes "$RETVAL" 'feature'
     local feature="$RETVAL"
-
-    clean_prefixes "$feature" 'feature'
-    feature="$RETVAL"
-
     local last_ref
 
     process_fetch

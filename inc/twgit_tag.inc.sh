@@ -61,11 +61,8 @@ function cmd_help () {
 function cmd_list () {
     process_options "$@"
     require_parameter '-'
+    clean_prefixes "$RETVAL" 'tag'
     local tag="$RETVAL"
-
-    clean_prefixes "$tag" 'tag'
-    tag="$RETVAL"
-
     local tag_fullname="$TWGIT_PREFIX_TAG$tag"
     process_fetch 'F'
 

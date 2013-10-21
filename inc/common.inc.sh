@@ -1377,6 +1377,7 @@ function clean_branches () {
 function init () {
     process_options "$@"
     require_parameter 'tag'
+    clean_prefixes "$RETVAL" 'tag'
     local tag="$RETVAL"
     local remote_url="$2"
     local tag_fullname="$TWGIT_PREFIX_TAG$tag"
@@ -1388,9 +1389,6 @@ function init () {
     else
         assert_clean_working_tree
     fi
-
-    clean_prefixes "$tag" 'tag'
-    tag="$RETVAL"
 
     assert_new_and_valid_tag_name $tag
 

@@ -36,18 +36,18 @@ function usage () {
     CUI_displayMsg help_detail '<b>list [<demoname>] [-F]</b>'
     CUI_displayMsg help_detail '    List remote demos with their merged features. If <b><demoname></b> is';
     CUI_displayMsg help_detail '    specified, then focus on this demo. Add <b>-F</b> to do not make fetch.'; echo
-    CUI_displayMsg help_detail '<b>start <demoname> [-d]</b>'
-    CUI_displayMsg help_detail '    Create both a new local and remote demo, or fetch the remote demo,'
-    CUI_displayMsg help_detail '    or checkout the local demo. Add <b>-d</b> to delete beforehand local demo'
-    CUI_displayMsg help_detail '    if exists.'; echo
-    CUI_displayMsg help_detail '<b>remove <demoname></b>'
-    CUI_displayMsg help_detail '    Remove both local and remote specified demo branch. No feature will'
-    CUI_displayMsg help_detail '    be removed.'; echo
     CUI_displayMsg help_detail '<b>merge-feature <featurename> </b>'
     CUI_displayMsg help_detail '    Try to merge specified feature into current demo.'; echo
     CUI_displayMsg help_detail '<b>push</b>'
     CUI_displayMsg help_detail "    Push current demo to '$TWGIT_ORIGIN' repository."
     CUI_displayMsg help_detail "    It's a shortcut for: \"git push $TWGIT_ORIGIN $TWGIT_PREFIX_DEMO…\""; echo
+    CUI_displayMsg help_detail '<b>remove <demoname></b>'
+    CUI_displayMsg help_detail '    Remove both local and remote specified demo branch. No feature will'
+    CUI_displayMsg help_detail '    be removed.'; echo
+    CUI_displayMsg help_detail '<b>start <demoname> [-d]</b>'
+    CUI_displayMsg help_detail '    Create both a new local and remote demo, or fetch the remote demo,'
+    CUI_displayMsg help_detail '    or checkout the local demo. Add <b>-d</b> to delete beforehand local demo'
+    CUI_displayMsg help_detail '    if exists.'; echo
     CUI_displayMsg help_detail '<b>status [<demoname>]</b>'
     CUI_displayMsg help_detail '    Display information about specified demo: long name if a connector is'
     CUI_displayMsg help_detail '    set, last commit, status between local and remote demo and execute'

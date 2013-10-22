@@ -184,6 +184,7 @@ function main () {
     # load command:
     if [ ! -z "$1" ]; then
         local command="$1"; shift
+        guess_dyslexia "$command" && command="$RETVAL"
         local command_file="$TWGIT_INC_DIR/twgit_$command.inc.sh";
         if [ "$command" = 'help' ]; then
             usage; exit 0
@@ -207,6 +208,7 @@ function main () {
     if [ ! -z "$1" ]; then
         action="$1"; shift
     fi
+    guess_dyslexia $action && action=$RETVAL
     local action_func_name="cmd_$action"
     if ! type "$action_func_name" >/dev/null 2>&1; then
         CUI_displayMsg error "Unknown action: '$action'"

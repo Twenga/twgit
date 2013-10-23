@@ -3,12 +3,28 @@
 ##
 # dyslexia
 #
-# Copyright (c) 2013 Sebastien Hanicotte <shanicotte@hi-media.com>
-#
 # Provide an easy way to detect words in disorder.
 # Just include this script, define new words scheme, then call guess_dyslexia method.
 # This script is using the colored_ui to display Warning message
 #
+#
+#
+# Copyright (c) 2013 Sebastien Hanicotte <shanicotte@hi-media.com>
+#
+# Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance
+# with the License. You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software distributed under the License is distributed
+# on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License
+# for the specific language governing permissions and limitations under the License.
+#
+# @copyright 2013 Sebastien Hanicotte <shanicotte@hi-media.com>
+# @license http://www.apache.org/licenses/LICENSE-2.0
+#
+
+
 
 declare -A dyslexia
 dyslexia['1a2e1f1r1t1u']='feature'
@@ -37,21 +53,19 @@ dyslexia['2e1r1s1t']='reset'
 ##
 # This add-on allows twgit to understand dyslexia
 # This can be usefull when user has some keyboard disorder.
+#
 # @param string $1 action
 #
 function guess_dyslexia () {
     local word="$1"
 
-    explodeWord="$(echo $word | fold -w1 | sort | uniq -c | tr -d '[:space:]\n')"
+    explode_word="$(echo $word | fold -w1 | sort | uniq -c | tr -d '[:space:]\n')"
+    resolve_dyslexia="${dyslexia["$explode_word"]-}"
 
-    resolve_dyslexia="$(echo ${dyslexia["$explodeWord"]})"
-
-    if [[ -z "$resolve_dyslexia" ]];
-    then
+    if [[ -z $resolve_dyslexia ]]; then
         RETVAL="$word";
     else
-        if [[ "$word" != "$resolve_dyslexia" ]];
-        then
+        if [[ $word != $resolve_dyslexia ]]; then
             CUI_displayMsg warning "Assume '<b>$word</b>' was '<b>$resolve_dyslexia</b>'…"
         fi
         RETVAL="$resolve_dyslexia"

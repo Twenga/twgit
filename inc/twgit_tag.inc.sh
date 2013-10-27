@@ -25,7 +25,7 @@
 
 
 ##
-# Affiche l'aide de la commande tag.
+# Display help for the commande 'tag'.
 #
 # @testedby TwgitHelpTest
 #
@@ -42,7 +42,7 @@ function usage () {
 }
 
 ##
-# Action déclenchant l'affichage de l'aide.
+# Action triggering the display of help.
 #
 # @testedby TwgitHelpTest
 #
@@ -51,11 +51,11 @@ function cmd_help () {
 }
 
 ##
-# Liste les derniers tags ou l'un en particulier si spécifié.
-# Détaille les features incluses dans la release à la source du tag.
-# Gère l'option '-F' permettant d'éviter le fetch.
+# List of all last tags or one specificaly if specified.
+# Details all the features included in the release tag's source.
+# Understand '-F' option which allow to avoid fetch.
 #
-# @param string $1 nom court optionnel d'un tag
+# @param string $1 optional short name of a tag
 # @testedby TwgitTagTest
 #
 function cmd_list () {

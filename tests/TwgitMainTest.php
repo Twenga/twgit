@@ -253,6 +253,29 @@ class TwgitMainTest extends TwgitTestCase
         $this->assertContains('git tag -a v1.2.3 -m "[twgit] First tag."', $sMsg);
     }
 
+    public function testInit_WithVersionInfo ()
+    {
+        $this->_remoteExec('git init');
+        $this->_localExec('git init');
+        $this->_localExec('echo "TWGIT_VERSION_INFO_PATH=\'test.php\'" >> .twgit');
+        $this->_localExec('echo "<?php" > test.php');
+        $this->_localExec('echo "\$maVersion = \'\$Id\$\';" >> test.php');
+        $this->_localExec('echo "\$maVersion2 = \'\$Id:1.0.2\$\';" >> test.php');
+        $this->_localExec('echo "\$maVersion3 = \'\$id\$\';" >> test.php');
+        $this->_localExec('echo "echo \$maVersion . \$maVersion2 . \$maVersion3;" >> test.php');
+        $this->_localExec('cp test.php test2.php');
+        $this->_localExec('git add .');
+        $this->_localExec('git commit -m "Adding testing files"');
+        $this->_localExec(TWGIT_EXEC . ' init 1.2.3 ' . TWGIT_REPOSITORY_ORIGIN_DIR);
+        $sMsg = $this->_localExec('php test.php');
+        $sMsg2 = $this->_localExec('php test2.php');
+        /**
+         * Testing init $Id$, former $Id$ and bad written $id$
+         */
+        $this->assertContains('$Id:1.2.3$$Id:1.2.3$$id$', $sMsg);
+        $this->assertContains('$Id$$Id:1.0.2$$id$', $sMsg2);
+    }
+
     /**
      * @dataProvider providerTestGetContributors_WithOnly1Author
      * @shcovers inc/common.inc.sh::get_contributors

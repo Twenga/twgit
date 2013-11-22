@@ -231,5 +231,32 @@ class TwgitFeatureTest extends TwgitTestCase
         $sMsg = $this->_localExec(TWGIT_EXEC . ' feature what-changed feature-42');
         $this->assertContains("Assume feature was '42' instead of 'feature-42'", $sMsg);
     }
+
+    public function testStartWithVersionInfo ()
+    {
+        $this->_remoteExec('git init');
+        $this->_localExec(TWGIT_EXEC . ' init 1.2.3 ' . TWGIT_REPOSITORY_ORIGIN_DIR);
+        $this->_localExec(TWGIT_EXEC . ' feature start 42');
+        $this->_localExec('echo "TWGIT_VERSION_INFO_PATH=\'test.php\'" >> .twgit');
+        $this->_localExec('echo "<?php" > test.php');
+        $this->_localExec('echo "\$maVersion = \'\$Id\$\';" >> test.php');
+        $this->_localExec('echo "\$maVersion2 = \'\$Id:1.2.3\$\';" >> test.php');
+        $this->_localExec('echo "\$maVersion3 = \'\$id\$\';" >> test.php');
+        $this->_localExec('echo "echo \$maVersion . \$maVersion2 . \$maVersion3;" >> test.php');
+        $this->_localExec('cp test.php test2.php');
+        $this->_localExec('git add .');
+        $this->_localExec('git commit -m "Adding testing files"');
+        $this->_localExec(TWGIT_EXEC . ' release start -I');
+        $this->_localExec(TWGIT_EXEC . ' feature merge-into-release 42');
+        $this->_localExec(TWGIT_EXEC . ' release finish -I');
+        $this->_localExec(TWGIT_EXEC . ' release start -I');
+        $sMsg = $this->_localExec('php test.php');
+        $sMsg2 = $this->_localExec('php test2.php');
+        /**
+         * Testing init $Id$, former $Id$ and bad written $id$
+         */
+        $this->assertContains('$Id:1.4.0$$Id:1.4.0$$id$', $sMsg);
+        $this->assertContains('$Id$$Id:1.2.3$$id$', $sMsg2);
+    }
 }
 

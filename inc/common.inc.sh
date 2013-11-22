@@ -1442,6 +1442,9 @@ function init () {
         git commit -m 'Add minimal .gitignore' || die 'Add minimal .gitignore failed!'
         exec_git_command "git push $TWGIT_ORIGIN $TWGIT_STABLE" "Add minimal .gitignore failed!"
     fi
+   
+    update_version_information "$tag"
+
     create_and_push_tag "$tag_fullname" "First tag."
 }
 
@@ -1527,6 +1530,32 @@ function clean_prefixes () {
             CUI_displayMsg warning "Assume $type was '<b>$RETVAL</b>' instead of '<b>$branch_name</b>'…"
         fi
     fi
+}
+
+##
+# This function permits to store the version information inside files designed
+# in a global variable TWGIT_VERSION_INFO_PATH defined in some config file as 
+# .twgit on conf/twgit.sh
+#
+# @param string $version Is the current version 'started' (with Hotfix and/or 
+# Release and/or Init)
+#
+function update_version_information()
+{
+    local version="$1"
+
+    CUI_displayMsg processing 'Testing the parameter TWGIT_VERSION_INFO_PATH...'
+    if [[ ! -z $TWGIT_VERSION_INFO_PATH ]]; then
+        CUI_displayMsg processing 'Parameter not null (coool yeah !?)...'
+        for filepath in $(echo $TWGIT_VERSION_INFO_PATH | tr ',' ' '); do
+            CUI_displayMsg processing 'Found 1 path '$filepath'...'
+            if [[ -f $filepath ]]; then
+                CUI_displayMsg processing 'File existed executing sed...'
+                sed -i 's/\$Id[:v0-9\.]*\$/$Id:'$version'$/' "$filepath"
+                exec_git_command "git add $filepath" "Could not add version info!"
+            fi
+        done
+    fi;
 }
 
 ##

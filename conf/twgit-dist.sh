@@ -29,7 +29,7 @@ TWGIT_INC_DIR="$TWGIT_ROOT_DIR/inc"
 TWGIT_CONF_DIR="$TWGIT_ROOT_DIR/conf"
 TWGIT_TMP_DIR="/tmp"
 
-TWGIT_BASH_EXEC="/bin/bash"
+TWGIT_BASH_EXEC=$(which bash)
 TWGIT_EXEC="$TWGIT_BASH_EXEC $TWGIT_ROOT_DIR/twgit"
 
 # Name of file in root directory of each user repository to cache Redmine and Github feature's subject:

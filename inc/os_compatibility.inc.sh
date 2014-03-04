@@ -48,7 +48,7 @@ fi
 function getLastUpdateTimestamp () {
     local path="$1"
     if [ "$TWGIT_OS" = 'MacOSX' ]; then
-        stat -f %m "$path"
+        stat --printf='%Y\n' "$path"
     else
         date -r "$path" +%s
     fi
@@ -63,11 +63,7 @@ function getLastUpdateTimestamp () {
 #
 function getDateFromTimestamp () {
     local timestamp="$1"
-    if [ "$TWGIT_OS" = 'MacOSX' ]; then
-        date -r "$timestamp" "+%Y-%m-%d %T"
-    else
-        date --date "1970-01-01 $timestamp sec" "+%Y-%m-%d %T"
-    fi
+    date --date="@$timestamp" +"%Y-%m-%d %T"
 }
 
 ##

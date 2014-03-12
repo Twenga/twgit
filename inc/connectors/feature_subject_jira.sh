@@ -5,8 +5,8 @@
 #
 #
 #
-# Copyright (c) 2011 Twenga SA
-# Copyright (c) 2012-2013 Geoffroy Aubry <geoffroy.aubry@free.fr>
+# Copyright (c) 2014 Romain Derocle <rderocle@gmail.com>
+# Copyright (c) 2014 Geoffroy Aubry <geoffroy.aubry@free.fr>
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance
 # with the License. You may obtain a copy of the License at
@@ -17,15 +17,15 @@
 # on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License
 # for the specific language governing permissions and limitations under the License.
 #
-# @copyright 2011 Twenga SA
-# @copyright 2012-2013 Geoffroy Aubry <geoffroy.aubry@free.fr>
+# @copyright 2014 Romain Derocle <rderocle@gmail.com>
+# @copyright 2014 Geoffroy Aubry <geoffroy.aubry@free.fr>
 # @license http://www.apache.org/licenses/LICENSE-2.0
 #
 
 
 
 ##
-# Retrive and display subject of a Jira's issue.
+# Retrieve and display subject of a Jira's issue.
 #
 # @param string $1 issue number or project name
 #

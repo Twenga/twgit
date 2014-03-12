@@ -73,6 +73,8 @@ TWGIT_FEATURE_SUBJECT_REDMINE_API_KEY=''	# API key is a 40-byte hexadecimal stri
 TWGIT_FEATURE_SUBJECT_REDMINE_DOMAIN=''		# e.g. 'www.redmine.org', with optionally scheme: 'http://', 'https://' (default).
 TWGIT_FEATURE_SUBJECT_GITHUB_USER=''		# e.g. 'Twenga'
 TWGIT_FEATURE_SUBJECT_GITHUB_REPOSITORY=''	# e.g. 'twgit'
+TWGIT_FEATURE_SUBJECT_JIRA_DOMAIN=''
+TWGIT_FEATURE_SUBJECT_JIRA_CREDENTIAL_BASE64='' # base64 (login:password)
 
 ##
 # Colors and decorations types.

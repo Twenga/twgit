@@ -54,12 +54,13 @@ fi
 if [ "$language" = 'python' ]; then
     data=$(eval $curl_cmd)
     if [ ! -z "$data" ]; then
-        echo $data | python -c "import json,sys;s=sys.stdin.read();s=s.replace('\r\n', '');s=json.loads(s);print s['fields']['summary'];"
+        echo $data | python -c "import json,sys;s=sys.stdin.read();s=s.replace('\r\n', '');s=json.loads(s);print s['fields']['summary'];" 2>/dev/null
     fi
 elif [ "$language" = 'php' ]; then
-        ($curl_cmd \
-        | php -r '$o = json_decode(file_get_contents("php://stdin")); if ($o !== NULL) {print_r($o->fields->summary);}')
-        2>/dev/null
+    data=$(eval $curl_cmd)
+    if [ ! -z "$data" ]; then
+        echo $data | php -r '$o = json_decode(file_get_contents("php://stdin")); if (!empty($o)){print_r($o->fields->summary);}'
+    fi
 else
     echo "Language '$language' not handled!" >&2
     exit 1

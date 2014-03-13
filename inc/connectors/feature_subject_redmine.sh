@@ -25,7 +25,7 @@
 
 
 ##
-# Retrive and display subject of a Redmine's issue.
+# Retrieve and display subject of a Redmine's issue.
 #
 # @param string $1 issue number or project name
 #

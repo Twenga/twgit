@@ -30,7 +30,7 @@ main() {
             help
             ;;
         *)
-            echo "Uknown method"
+            echo "Uknown method '$1'"
             ;;
     esac
 }

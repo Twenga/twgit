@@ -1,6 +1,7 @@
 # COMPLETION SETTINGS
 # add custom completion scripts
-fpath=($HOME/dev/twenga/twgit/install/completion/zsh $fpath) 
+current_path=$PWD
+fpath=($current_path/zsh $fpath) 
  
 # compsys initialization
 autoload -U compinit

@@ -1,7 +1,10 @@
 # COMPLETION SETTINGS
 # add custom completion scripts
 current_path=$PWD
-fpath=($current_path/zsh $fpath) 
+mypath=$(readlink -f $0)
+current_path=$(dirname "$mypath")
+fpath=("${current_path}/completion/zsh" $fpath) 
+export fpath
  
 # compsys initialization
 autoload -U compinit

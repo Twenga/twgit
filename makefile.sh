@@ -1,16 +1,19 @@
 #!/usr/bin/env sh
 
+SHARE_DIR="/usr/local/share/twgit"
 BIN_DIR="/usr/local/bin"
 ROOT_DIR=$(pwd)
 CONF_DIR="${ROOT_DIR}/conf"
 INSTALL_DIR="${ROOT_DIR}/install"
+
+USER_HOME=$(eval echo ~${SUDO_USER})
 
 CURRENT_SHELL=$(ps -p $$ | tail -n 1 | awk '{print $NF}')
 CURRENT_SHELL_CMD=$(which ${CURRENT_SHELL})
 CURRENT_USER=${USER}
 CURRENT_BRANCH=$(git branch --no-color | grep '^\* ' | grep -v 'no branch' | sed 's/^* //g')
 
-BASH_RC="${HOME}/.${CURRENT_SHELL}rc"
+BASH_RC="${USER_HOME}/.${CURRENT_SHELL}rc"
 
 #
 # Main method
@@ -76,20 +79,45 @@ uninstall() {
 # Install twgit
 #
 install () {
+    install_executable
+    install_completion
+    install_config
+#    install_prompt
+}
 
+#
+# Install executable
+#
+install_executable () {
     echo ""
-    echo "Install executable ${BIN_DIR}/twgit:"
+    echo "1 - Install executable"
+    echo "Check for previous install in '${BIN_DIR}/twgit'"
     if [ -f ${BIN_DIR}/twgit ]; then
-        echo "A previous install has been found and will be removed"
+        echo "Previous install found : clean"
         rm -f ${BIN_DIR}/twgit
     fi
 
-    echo "!#/usr/bin/env ${CURRENT_SHELL}" >> ${BIN_DIR}/twgit
-    echo "${CURRENT_SHELL_CMD} \$@" >> ${BIN_DIR}/twgit
+    echo "Make twgit executable"
+    echo "#!/usr/bin/env ${CURRENT_SHELL}" >> ${BIN_DIR}/twgit
+    echo "${CURRENT_SHELL_CMD} '${ROOT_DIR}/twgit' \$@" >> ${BIN_DIR}/twgit
     chmod 0755 ${BIN_DIR}/twgit
+    return 0
+}
 
+#
+# Install completion
+#
+install_completion () {
     echo ""
-    echo "Install Twgit ${CURRENT_SHELL} completion:"
+    echo "2 - Install completion"
+
+    echo "Do you want to install the completion ? [Y/N]"
+    read answer
+    if [ "${answer}" != "Y" ] && [ "${answer}" != "y" ]; then
+        echo "(i) Skip"
+        return 0
+    fi
+
     if [ $(cat ${BASH_RC} | grep -E "/${CURRENT_SHELL}_completion.sh" | grep -vE '^#' | wc -l) -gt 0 ]; then
         echo "Twgit Bash completion already loaded by '${BASH_RC}'." 
     else
@@ -99,18 +127,28 @@ install () {
         echo ". ${INSTALL_DIR}/${CURRENT_SHELL}_completion.sh" >> ${BASH_RC}
         echo "(i) Restart ${CURRENT_SHELL} session to enable configuration."
     fi
+}
 
+#
+# Install config
+#
+install_config () {
     echo ""
-    echo "Check Twgit config file:"
+    echo "3 - Check Twgit config file:"
     if [ -f "${CONF_DIR}/twgit.sh" ]; then
         echo "Config file '${CONF_DIR}/twgit.sh' already existing."
     else
         echo "Copy config file from '${CONF_DIR}/twgit-dist.sh' to '${CONF_DIR}/twgit.sh'"
-        cp -p -n "${CONF_DIR}/twgit-dist.sh" "${CONF_DIR}/twgit.sh"
+        sudo cp -p -n "${CONF_DIR}/twgit-dist.sh" "${CONF_DIR}/twgit.sh"
     fi
+}
 
+#
+# Install git prompt
+#
+install_prompt () {
     echo ""
-    echo "Install colored git prompt:"
+    echo "4 - Install colored git prompt:"
     if [ $(cat ${BASH_RC} | grep -E "\.bash_git" | grep -vE '^#' | wc -l) -gt 0 ]; then
         echo "Colored Git prompt already loaded by '${BASH_RC}'."
     else
@@ -118,7 +156,7 @@ install () {
         read answer
         if [ "${answer}" = "Y" ] || [ "${answer}" = "y" ]; then
             echo "Install git prompt: ${HOME}/.bash_git"
-            install -m 0644 -o ${SUDO_UID} -g ${SUDO_GID} "${INSTALL_DIR}/bash_git.sh" "${HOME}/.bash_git"
+            sudo install -m 0644 -o ${SUDO_UID} -g ${SUDO_GID} "${INSTALL_DIR}/bash_git.sh" "${HOME}/.bash_git"
             echo "Add line '. ~/.bash_git' at the end of the script '${BASH_RC}'."
             echo "" >> ${BASH_RC}
             echo "# Added by Twgit makefile:" >> ${BASH_RC}

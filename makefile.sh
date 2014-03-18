@@ -14,8 +14,12 @@ CURRENT_USER=${USER}
 CURRENT_BRANCH=$(git branch --no-color | grep '^\* ' | grep -v 'no branch' | sed 's/^* //g')
 CURRENT_OS=$(uname -s)
 
-if [ "${CURRENT_SHELL}" = "bash" ] && [ "${CURRENT_OS}" = "Darwin" ] || [ "${CURRENT_OS}" = "FreeBSD" ]; then
-    BASH_RC="${USER_HOME}/.profile"
+if [ "${CURRENT_SHELL}" = "bash" ]; then
+    if [ "${CURRENT_OS}" = "Darwin" ] || [ "${CURRENT_OS}" = "FreeBSD" ]; then
+        BASH_RC="${USER_HOME}/.profile"
+    else
+        BASH_RC="${USER_HOME}/.${CURRENT_SHELL}rc"
+    fi
 else
     BASH_RC="${USER_HOME}/.${CURRENT_SHELL}rc"
 fi

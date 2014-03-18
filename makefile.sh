@@ -8,12 +8,17 @@ INSTALL_DIR="${ROOT_DIR}/install"
 
 USER_HOME=$(eval echo ~${SUDO_USER})
 
-CURRENT_SHELL=$(ps -p $$ | tail -n 1 | awk '{print $NF}')
-CURRENT_SHELL_CMD=$(which ${CURRENT_SHELL})
+CURRENT_SHELL=$(basename ${SHELL})
+CURRENT_SHELL_CMD=${SHELL}
 CURRENT_USER=${USER}
 CURRENT_BRANCH=$(git branch --no-color | grep '^\* ' | grep -v 'no branch' | sed 's/^* //g')
+CURRENT_OS=$(uname -s)
 
-BASH_RC="${USER_HOME}/.${CURRENT_SHELL}rc"
+if [ "${CURRENT_SHELL}" = "bash" ] && [ "${CURRENT_OS}" = "Darwin" ] || [ "${CURRENT_OS}" = "FreeBSD" ]; then
+    BASH_RC="${USER_HOME}/.profile"
+else
+    BASH_RC="${USER_HOME}/.${CURRENT_SHELL}rc"
+fi
 
 #
 # Main method

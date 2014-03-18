@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 ##
 # Gestionnaire des paramètres et options (avec le tiret simple) des fonctions.

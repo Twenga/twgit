@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 ##
 # Provide an easy way to display colored and decorated messages in Bash: title, question, error, warning, success...

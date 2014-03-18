@@ -8,7 +8,7 @@ INSTALL_DIR="${ROOT_DIR}/install"
 
 USER_HOME=$(eval echo ~${SUDO_USER})
 
-CURRENT_SHELL=$(basename ${SHELL})
+CURRENT_SHELL=$(if [ ! -z $ZSH_NAME ]; then echo 'zsh'; else echo 'bash'; fi)
 CURRENT_SHELL_CMD=${SHELL}
 CURRENT_USER=${USER}
 CURRENT_BRANCH=$(git branch --no-color | grep '^\* ' | grep -v 'no branch' | sed 's/^* //g')

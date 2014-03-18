@@ -31,6 +31,7 @@
 ROOT_DIR:=$(shell pwd)
 BIN_DIR:="/usr/local/bin"
 CURRENT_SHELL=$(shell if [ ! -z "$ZSH_NAME" ]; then echo "zsh"; else echo "bash"; fi)
+CURRENT_SHELL_CMD=$(shell which $(CURRENT_SHELL))
 
 .PHONY: all doc help install uninstall
 
@@ -43,7 +44,7 @@ help:
 	@$(CURRENT_SHELL) $(ROOT_DIR)/makefile.sh help
 
 install:
-	@$(CURRENT_SHELL) $(ROOT_DIR)/makefile.sh install
+	@$(CURRENT_SHELL_CMD) $(ROOT_DIR)/makefile.sh install
 
 uninstall:
 	@$(CURRENT_SHELL) $(ROOT_DIR)/makefile.sh uninstall

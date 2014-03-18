@@ -98,9 +98,7 @@ install_executable () {
     fi
 
     echo "Make twgit executable"
-    echo "#!/usr/bin/env ${CURRENT_SHELL}" >> ${BIN_DIR}/twgit
-    echo "${CURRENT_SHELL_CMD} '${ROOT_DIR}/twgit' \$@" >> ${BIN_DIR}/twgit
-    chmod 0755 ${BIN_DIR}/twgit
+    ln -s ${ROOT_DIR}/twgit ${BIN_DIR}/twgit
     return 0
 }
 

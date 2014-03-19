@@ -81,7 +81,13 @@ help() {
 # Uninstall twgit
 #
 uninstall() {
+    echo ""
+    echo "1 - Remove executable"
     rm -f ${BIN_DIR}/twgit 2> /dev/null
+
+    echo "2 - Remove completion"
+    grep -iv twgit ${BASH_RC} > ${BASH_RC}
+    return 0
 }
 
 #

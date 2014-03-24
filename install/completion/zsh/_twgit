@@ -8,17 +8,18 @@ _twgit() {
     _arguments \
         '1: :->command' \
         '2: :->action' \
-        '*: :->option'
+        '3: :->option'
 
     case $state in
         (command)
-            _arguments '1:Commands:(clean feature demo help init hotfix release tag update)'
+            compadd "$@" clean feature demo help init hotfix release tag update
             ;;
         (action)
             case $words[2] in
                 (clean)     ret=0
                             ;;
-                (feature)   compadd "$@" committers help list merge-into-release migrate push remove start status what-changed
+                (feature)   
+                            compadd "$@" committers help list merge-into-release migrate push remove start status what-changed
                             ;;
                 (demo)      compadd "$@" help list merge-feature push remove start status
                             ;;
@@ -29,6 +30,25 @@ _twgit() {
                 (tag)       compadd "$@" help list
                             ;;
             esac
+            ;;
+        (option)
+            case $words[2] in
+                (feature)
+                    case $words[3] in
+                        (committers)
+                            compadd  $(git branch --no-color -r | grep "feature-" | sed 's/^[* ]*//' | sed 's#^origin/feature-##' | tr '\n' ' ')
+                            ;;
+                    esac
+                    ;;
+                (release)
+                    case $words[3] in
+                        (finish)
+                            compadd  $(git branch --no-color -r | grep "release-" | sed 's/^[* ]*//' | sed 's#^origin/release-##' | tr '\n' ' ')
+                            ;;
+                    esac
+                    ;;
+            esac
+        ;;
     esac 
 }
  

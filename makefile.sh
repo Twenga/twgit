@@ -91,7 +91,7 @@ uninstall() {
     for line in $(grep -in twgit ${BASH_RC} | cut -d: -f1); do
         opt="${opt} -e ${line}d "
     done
-    if [ ! -z ${opt} ]; then
+    if [ ! -z "${opt}" ]; then
         echo ""
         echo "2 - Remove completion"
         cmd="sed -i ${opt} ${BASH_RC}"

@@ -185,19 +185,7 @@ function cmd_start () {
             die "No more one release is authorized at the same time! Try: \"twgit release list\" or \"twgit release start $current_release\""
         else
 
-            # Retrieving Author Email & Name
-            local releaseAuthor=$(git log $TWGIT_ORIGIN/$TWGIT_STABLE..$TWGIT_ORIGIN/$release_fullname --format="%an <%ae>" --date-order --reverse | head -n 1)
-            # Retrieving Local Email & Name
-            local localAuthorEmail=$(git config user.email)
-            local localAuthorName=$(git config user.name)
-            # Comparing Init Committer of Branch to Current Author
-            if [ ! "$localAuthorName <$localAuthorEmail>" = "$releaseAuthor" ]; then
-                CUI_displayMsg warning "Remote hotfix '$release_fullname' was started by $releaseAuthor."
-                if ! isset_option 'I'; then
-                    echo -n $(CUI_displayMsg question 'Do you want to continue? [Y/N] '); read answer
-                    [ "$answer" != "Y" ] && [ "$answer" != "y" ] && die 'Hotfix retrieving aborted!'
-                fi
-            fi
+            is_initial_author $release 'release'
 
             assert_new_local_branch $release_fullname
             exec_git_command "git checkout --track -b $release_fullname $TWGIT_ORIGIN/$release_fullname" "Could not check out release '$TWGIT_ORIGIN/$release_fullname'!"

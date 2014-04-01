@@ -1530,6 +1530,38 @@ function clean_prefixes () {
 }
 
 ##
+# This add-on check if current user is the initial author of a branch creation
+#
+# @param string $1 Name of branch
+# @param string $2 Branch type in {'hotfix', 'release'}
+#
+function is_initial_author() {
+    local branch_name="$1"
+    local type="$2"
+    local -A prefixes=(
+        [demo]="$TWGIT_PREFIX_DEMO"
+        [feature]="$TWGIT_PREFIX_FEATURE"
+        [hotfix]="$TWGIT_PREFIX_HOTFIX"
+        [release]="$TWGIT_PREFIX_RELEASE"
+        [tag]="$TWGIT_PREFIX_TAG"
+    )
+
+    # Retrieving Author Email & Name
+    local branchAuthor=$(git log $TWGIT_ORIGIN/$TWGIT_STABLE..$TWGIT_ORIGIN/${prefixes[$type]}$branch_name --format="%an <%ae>" --date-order --reverse | head -n 1)
+    # Retrieving Local Email & Name
+    local localAuthorEmail=$(git config user.email)
+    local localAuthorName=$(git config user.name)
+    # Comparing Init Committer of Branch to Current Author
+    if [ ! "$localAuthorName <$localAuthorEmail>" = "$branchAuthor" ]; then
+        CUI_displayMsg warning "Remote $type '$TWGIT_ORIGIN/${prefixes[$type]}$branch_name' was started by $branchAuthor."
+        if ! isset_option 'I'; then
+            echo -n $(CUI_displayMsg question 'Do you want to continue? [Y/N] '); read answer
+            [ "$answer" != "Y" ] && [ "$answer" != "y" ] && die ${type^}' retrieving aborted!'
+        fi
+    fi
+}
+
+##
 # Permet la mise à jour automatique de l'application dans le cas où le .git est toujours présent.
 # Tous les $TWGIT_UPDATE_NB_DAYS jours un fetch sera exécuté afin de proposer à l'utilisateur une
 # éventuelle MAJ. Qu'il décline ou non, le prochain passage aura lieu dans à nouveau $TWGIT_UPDATE_NB_DAYS jours.

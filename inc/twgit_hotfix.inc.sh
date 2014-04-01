@@ -111,19 +111,7 @@ function cmd_start () {
         CUI_displayMsg processing "Remote hotfix '$TWGIT_PREFIX_HOTFIX$hotfix' detected."
         assert_valid_ref_name $hotfix
 
-        # Retrieving Author Email & Name
-        local hotfixAuthor=$(git log $TWGIT_ORIGIN/$TWGIT_STABLE..$prefix$hotfix --format="%an <%ae>" --date-order --reverse | head -n 1)
-        # Retrieving Local Email & Name
-        local localAuthorEmail=$(git config user.email)
-        local localAuthorName=$(git config user.name)
-        # Comparing Init Committer of Branch to Current Author
-        if [ ! "$localAuthorName <$localAuthorEmail>" = "$hotfixAuthor" ]; then
-            CUI_displayMsg warning "Remote hotfix '$TWGIT_PREFIX_HOTFIX$hotfix' was started by $hotfixAuthor."
-            if ! isset_option 'I'; then
-                echo -n $(CUI_displayMsg question 'Do you want to continue? [Y/N] '); read answer
-                [ "$answer" != "Y" ] && [ "$answer" != "y" ] && die 'Hotfix retrieving aborted!'
-            fi
-        fi
+        is_initial_author $hotfix 'hotfix'
 
         local hotfix_fullname="$TWGIT_PREFIX_HOTFIX$hotfix"
         assert_new_local_branch $hotfix_fullname

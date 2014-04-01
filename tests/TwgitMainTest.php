@@ -254,6 +254,29 @@ class TwgitMainTest extends TwgitTestCase
     }
 
     /**
+     * @shcovers inc/common.inc.sh::update_version_information
+     */
+    public function testInit_WithVersionInfo ()
+    {
+        $this->_remoteExec('git init');
+        $this->_localExec('git init');
+        $this->_localExec('echo "TWGIT_VERSION_INFO_PATH=\'not_exists,csv_tags\'" >> .twgit');
+        $this->_localExec('cp ' . TWGIT_TESTS_DIR . '/resources/csv_tags csv_tags');
+        $this->_localExec('git add .');
+        $this->_localExec('git commit -m "Adding testing files"');
+        $this->_localExec(TWGIT_EXEC . ' init 1.2.3 ' . TWGIT_REPOSITORY_ORIGIN_DIR);
+        $sResult = $this->_localExec('cat csv_tags');
+        $sExpected = "\$Id:1.2.3\$\n"
+            . "-------\n"
+            . "\$Id:1.2.3\$\n"
+            . "-------\n"
+            . "\$id\$\n"
+            . "-------\n"
+            . "\$Id:1.2.3\$ \$Id:1.2.3\$";
+        $this->assertEquals($sExpected, $sResult);
+    }
+
+    /**
      * @dataProvider providerTestGetContributors_WithOnly1Author
      * @shcovers inc/common.inc.sh::get_contributors
      */

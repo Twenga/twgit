@@ -151,6 +151,33 @@ class TwgitHotfixTest extends TwgitTestCase
     }
 
     /**
+     * @shcovers inc/common.inc.sh::update_version_information
+     */
+    public function testStartWithVersionInfo ()
+    {
+        $this->_remoteExec('git init');
+        $this->_localExec(TWGIT_EXEC . ' init 1.2.3 ' . TWGIT_REPOSITORY_ORIGIN_DIR);
+        $this->_localExec(TWGIT_EXEC . ' feature start 42');
+        $this->_localExec('echo "TWGIT_VERSION_INFO_PATH=\'not_exists,csv_tags\'" >> .twgit');
+        $this->_localExec('cp ' . TWGIT_TESTS_DIR . '/resources/csv_tags csv_tags');
+        $this->_localExec('git add .');
+        $this->_localExec('git commit -m "Adding testing files"');
+        $this->_localExec(TWGIT_EXEC . ' release start -I');
+        $this->_localExec(TWGIT_EXEC . ' feature merge-into-release 42');
+        $this->_localExec(TWGIT_EXEC . ' release finish -I');
+        $this->_localExec(TWGIT_EXEC . ' hotfix start -I');
+        $sResult = $this->_localExec('cat csv_tags');
+        $sExpected = "\$Id:1.3.1\$\n"
+            . "-------\n"
+            . "\$Id:1.3.1\$\n"
+            . "-------\n"
+            . "\$id\$\n"
+            . "-------\n"
+            . "\$Id:1.3.1\$ \$Id:1.3.1\$";
+        $this->assertEquals($sExpected, $sResult);
+    }
+
+    /**
      * @dataProvider providerTestListAboutBranchesOutOfProcess
      */
     public function testList_AboutBranchesOutOfProcess ($sLocalCmd, $sExpectedContent, $sNotExpectedContent)

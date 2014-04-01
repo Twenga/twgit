@@ -55,6 +55,7 @@ dyslexia['2e1r1s1t']='reset'
 # This can be usefull when user has some keyboard disorder.
 #
 # @param string $1 action
+# @testedby TwgitDyslexiaTest
 #
 function guess_dyslexia () {
     local word="$1"

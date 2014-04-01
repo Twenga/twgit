@@ -8,16 +8,15 @@ class TwgitDyslexiaTest extends TwgitTestCase
 {
 
     /**
-    * @shcovers inc/dyslexia.inc.sh::guess_dyslexia
-    * @dataProvider providerTestListAboutDyslexiaActionsAndCommands
-    */
+     * @shcovers inc/dyslexia.inc.sh::guess_dyslexia
+     * @dataProvider providerTestListAboutDyslexiaActionsAndCommands
+     */
     public function testList_AboutDyslexiaActionsAndCommands ($sScrambledCmd, $sExpectedContent, $sNotExpectedContent, $sRetval)
     {
         $sMsg = $this->_localFunctionCall('guess_dyslexia ' . $sScrambledCmd);
         if (strlen($sExpectedContent) > 0) {
             $this->assertContains($sExpectedContent, $sMsg);
         }
-//        $this->assertEquals($RETVAL, $sRetval);
         if (strlen($sNotExpectedContent) > 0) {
             $this->assertNotContains($sNotExpectedContent, $sMsg);
         }
@@ -57,6 +56,6 @@ class TwgitDyslexiaTest extends TwgitTestCase
             array('merge-faeture', "Assume 'merge-faeture' was 'merge-feature'…", '', 'merge-feature'),
             array('seter', "Assume 'seter' was 'reset'…", '', 'reset'),
         );
-    } 
+    }
 }
 

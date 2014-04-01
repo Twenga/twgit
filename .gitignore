@@ -11,3 +11,4 @@
 /conf/phpunit.php
 /conf/twgit.sh
 /.twgit
+/.idea

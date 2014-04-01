@@ -94,6 +94,52 @@ class TwgitHotfixTest extends TwgitTestCase
     }
 
     /**
+     * @shcovers inc/common.inc.sh::is_initial_author
+     */
+    public function testStart_WithExistentHotfixSameAuthor ()
+    {
+        $this->_remoteExec('git init');
+        $this->_localExec(TWGIT_EXEC . ' init 1.2.3 ' . TWGIT_REPOSITORY_ORIGIN_DIR);
+        $this->_localExec(TWGIT_EXEC . ' hotfix start -I');
+        $this->_localExec('git checkout $TWGIT_STABLE');
+
+        $userName = $this->_localExec('git config user.name');
+        $userEmail = $this->_localExec('git config user.email');
+
+        $sResult = $this->_localExec(TWGIT_EXEC . ' hotfix start -I');
+        $sExpected = "Remote hotfix '" . self::ORIGIN . "/hotfix-1.2.4' was started by $userName <$userEmail>.";
+
+        $this->assertContains("Check initial author...", $sResult);
+        $this->assertNotContains($sExpected, $sResult);
+    }
+
+    /**
+     * @shcovers inc/common.inc.sh::is_initial_author
+     */
+    public function testStart_WithExistentHotfixOtherAuthor ()
+    {
+        $this->_remoteExec('git init');
+        $this->_localExec(TWGIT_EXEC . ' init 1.2.3 ' . TWGIT_REPOSITORY_ORIGIN_DIR);
+        $this->_localExec(TWGIT_EXEC . ' hotfix start -I');
+        $this->_localExec('git checkout $TWGIT_STABLE');
+
+        $userName = $this->_localExec('git config user.name');
+        $userEmail = $this->_localExec('git config user.email');
+
+        $this->_localExec("git config --local user.name 'Other Name'");
+        $this->_localExec("git config --local user.email 'Other@Email.com'");
+
+        $sResult = $this->_localExec(TWGIT_EXEC . ' hotfix start -I');
+        $sExpected = "Remote hotfix '" . self::ORIGIN . "/hotfix-1.2.4' was started by $userName <$userEmail>.";
+
+        $this->_localExec("git config --local --unset user.name");
+        $this->_localExec("git config --local --unset user.email");
+
+        $this->assertContains("Check initial author...", $sResult);
+        $this->assertContains($sExpected, $sResult);
+    }
+
+    /**
      * @shcovers inc/common.inc.sh::assert_clean_stable_branch_and_checkout
      */
     public function testRemove_ThrowExceptionWhenExtraCommitIntoStable ()

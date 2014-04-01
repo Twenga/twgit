@@ -36,6 +36,7 @@
 . $TWGIT_INC_DIR/options_handler.inc.sh
 . $TWGIT_INC_DIR/coloredUI.inc.sh
 . $TWGIT_INC_DIR/os_compatibility.inc.sh
+. $TWGIT_INC_DIR/dyslexia.inc.sh
 
 
 

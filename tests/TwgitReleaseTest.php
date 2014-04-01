@@ -148,6 +148,7 @@ class TwgitReleaseTest extends TwgitTestCase
     }
 
     /**
+     * @shcovers inc/common.inc.sh::is_initial_author
      */
     public function testStart_WithExistentReleaseSameAuthor ()
     {
@@ -159,12 +160,15 @@ class TwgitReleaseTest extends TwgitTestCase
         $userName = $this->_localExec('git config user.name');
         $userEmail = $this->_localExec('git config user.email');
 
-        $sMsg = $this->_localExec(TWGIT_EXEC . ' release start -I');
+        $sResult = $this->_localExec(TWGIT_EXEC . ' release start -I');
+        $sExpected = "Remote release '" . self::ORIGIN . "/release-1.3.0' was started by $userName <$userEmail>.";
 
-        $this->assertNotContains("Remote release 'release-1.3.0' was started by '"  . $userName . " <" . $userEmail . ">", $sMsg);
+        $this->assertContains("Check initial author...", $sResult);
+        $this->assertNotContains($sExpected, $sResult);
     }
 
     /**
+     * @shcovers inc/common.inc.sh::is_initial_author
      */
     public function testStart_WithExistentReleaseOtherAuthor ()
     {
@@ -179,12 +183,14 @@ class TwgitReleaseTest extends TwgitTestCase
         $this->_localExec("git config --local user.name 'Other Name'");
         $this->_localExec("git config --local user.email 'Other@Email.com'");
 
-        $sMsg = $this->_localExec(TWGIT_EXEC . ' release start -I');
+        $sResult = $this->_localExec(TWGIT_EXEC . ' release start -I');
+        $sExpected = "Remote release '" . self::ORIGIN . "/release-1.3.0' was started by $userName <$userEmail>.";
 
         $this->_localExec("git config --local --unset user.name");
         $this->_localExec("git config --local --unset user.email");
 
-        $this->assertNotContains("Remote release 'release-1.3.0' was started by "  . $userName . " <" . $userEmail . ">", $sMsg);
+        $this->assertContains("Check initial author...", $sResult);
+        $this->assertContains($sExpected, $sResult);
     }
 
     /**

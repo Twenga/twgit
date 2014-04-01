@@ -94,6 +94,7 @@ class TwgitHotfixTest extends TwgitTestCase
     }
 
     /**
+     * @shcovers inc/common.inc.sh::is_initial_author
      */
     public function testStart_WithExistentHotfixSameAuthor ()
     {
@@ -105,12 +106,15 @@ class TwgitHotfixTest extends TwgitTestCase
         $userName = $this->_localExec('git config user.name');
         $userEmail = $this->_localExec('git config user.email');
 
-        $sMsg = $this->_localExec(TWGIT_EXEC . ' hotfix start -I');
+        $sResult = $this->_localExec(TWGIT_EXEC . ' hotfix start -I');
+        $sExpected = "Remote hotfix '" . self::ORIGIN . "/hotfix-1.2.4' was started by $userName <$userEmail>.";
 
-        $this->assertNotContains("Remote hotfix 'hotfix-1.2.3' was started by '" . $userName . " <" . $userEmail . ">", $sMsg);
+        $this->assertContains("Check initial author...", $sResult);
+        $this->assertNotContains($sExpected, $sResult);
     }
 
     /**
+     * @shcovers inc/common.inc.sh::is_initial_author
      */
     public function testStart_WithExistentHotfixOtherAuthor ()
     {
@@ -125,12 +129,14 @@ class TwgitHotfixTest extends TwgitTestCase
         $this->_localExec("git config --local user.name 'Other Name'");
         $this->_localExec("git config --local user.email 'Other@Email.com'");
 
-        $sMsg = $this->_localExec(TWGIT_EXEC . ' hotfix start -I');
+        $sResult = $this->_localExec(TWGIT_EXEC . ' hotfix start -I');
+        $sExpected = "Remote hotfix '" . self::ORIGIN . "/hotfix-1.2.4' was started by $userName <$userEmail>.";
 
         $this->_localExec("git config --local --unset user.name");
         $this->_localExec("git config --local --unset user.email");
 
-        $this->assertNotContains("Remote hotfix 'hotfix-1.2.3' was started by " . $userName . " <" . $userEmail . ">", $sMsg);
+        $this->assertContains("Check initial author...", $sResult);
+        $this->assertContains($sExpected, $sResult);
     }
 
     /**

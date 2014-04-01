@@ -148,6 +148,46 @@ class TwgitReleaseTest extends TwgitTestCase
     }
 
     /**
+     */
+    public function testStart_WithExistentReleaseSameAuthor ()
+    {
+        $this->_remoteExec('git init');
+        $this->_localExec(TWGIT_EXEC . ' init 1.2.3 ' . TWGIT_REPOSITORY_ORIGIN_DIR);
+        $this->_localExec(TWGIT_EXEC . ' release start -I');
+        $this->_localExec('git checkout $TWGIT_STABLE');
+
+        $userName = $this->_localExec('git config user.name');
+        $userEmail = $this->_localExec('git config user.email');
+
+        $sMsg = $this->_localExec(TWGIT_EXEC . ' release start -I');
+
+        $this->assertNotContains("Remote release 'release-1.3.0' was started by '"  . $userName . " <" . $userEmail . ">", $sMsg);
+    }
+
+    /**
+     */
+    public function testStart_WithExistentReleaseOtherAuthor ()
+    {
+        $this->_remoteExec('git init');
+        $this->_localExec(TWGIT_EXEC . ' init 1.2.3 ' . TWGIT_REPOSITORY_ORIGIN_DIR);
+        $this->_localExec(TWGIT_EXEC . ' release start -I');
+        $this->_localExec('git checkout $TWGIT_STABLE');
+
+        $userName = $this->_localExec('git config user.name');
+        $userEmail = $this->_localExec('git config user.email');
+
+        $this->_localExec("git config --local user.name 'Other Name'");
+        $this->_localExec("git config --local user.email 'Other@Email.com'");
+
+        $sMsg = $this->_localExec(TWGIT_EXEC . ' release start -I');
+
+        $this->_localExec("git config --local --unset user.name");
+        $this->_localExec("git config --local --unset user.email");
+
+        $this->assertNotContains("Remote release 'release-1.3.0' was started by "  . $userName . " <" . $userEmail . ">", $sMsg);
+    }
+
+    /**
      * Currently just check the tag annotation.
      */
     public function testFinish_WithMinorRelease ()

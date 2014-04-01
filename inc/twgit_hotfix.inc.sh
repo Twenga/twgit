@@ -100,9 +100,9 @@ function cmd_start () {
         hotfix=$(get_next_version 'revision')
         local hotfix_fullname="$TWGIT_PREFIX_HOTFIX$hotfix"
         exec_git_command "git checkout -b $hotfix_fullname tags/$last_tag" "Could not check out tag '$last_tag'!"
-        
+
         update_version_information "$hotfix"
-        
+
         process_first_commit 'hotfix' "$hotfix_fullname"
         process_push_branch $hotfix_fullname
     else

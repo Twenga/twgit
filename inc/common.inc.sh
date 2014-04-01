@@ -1442,7 +1442,7 @@ function init () {
         git commit -m 'Add minimal .gitignore' || die 'Add minimal .gitignore failed!'
         exec_git_command "git push $TWGIT_ORIGIN $TWGIT_STABLE" "Add minimal .gitignore failed!"
     fi
-   
+
     update_version_information "$tag"
 
     create_and_push_tag "$tag_fullname" "First tag."
@@ -1533,28 +1533,31 @@ function clean_prefixes () {
 }
 
 ##
-# This function permits to store the version information inside files designed
-# in a global variable TWGIT_VERSION_INFO_PATH defined in some config file as 
-# .twgit on conf/twgit.sh
+# This function permits to update all tags $Id$ with current version X.Y.Z inside files designed
+# in a global variable TWGIT_VERSION_INFO_PATH (defined in some config file as
+# .twgit on conf/twgit.sh).
+# For example being in v1.2.3 and calling twgit release start
+# will result in replacing all tags with $Id:1.3.0$.
 #
-# @param string $version Is the current version 'started' (with Hotfix and/or 
+# @param string $version Is the current version 'started' (with Hotfix and/or
 # Release and/or Init)
 #
-function update_version_information()
-{
+function update_version_information () {
     local version="$1"
 
-    CUI_displayMsg processing 'Testing the parameter TWGIT_VERSION_INFO_PATH...'
     if [[ ! -z $TWGIT_VERSION_INFO_PATH ]]; then
-        CUI_displayMsg processing 'Parameter not null (coool yeah !?)...'
+        CUI_displayMsg processing "Updating \$Id\$ tags in TWGIT_VERSION_INFO_PATH's files..."
         for filepath in $(echo $TWGIT_VERSION_INFO_PATH | tr ',' ' '); do
-            CUI_displayMsg processing 'Found 1 path '$filepath'...'
             if [[ -f $filepath ]]; then
-                CUI_displayMsg processing 'File existed executing sed...'
-                sed -i 's/\$Id[:v0-9\.]*\$/$Id:'$version'$/' "$filepath"
-                exec_git_command "git add $filepath" "Could not add version info!"
+                CUI_displayMsg processing "Updating $Id$ tags in $filepath..."
+                sed -i 's/\$Id[:v0-9\.]*\$/$Id:'$version'$/g' "$filepath"
+                exec_git_command "git add $filepath" "Could not add version info into $filepath!"
+            else
+                CUI_displayMsg warning "TWGIT_VERSION_INFO_PATH contains a non-existing file: $filepath!"
             fi
         done
+    else
+        CUI_displayMsg processing 'TWGIT_VERSION_INFO_PATH is empty: no $Id$ to update.'
     fi;
 }
 

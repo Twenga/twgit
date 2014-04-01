@@ -179,7 +179,7 @@ install_prompt () {
         echo "Add colored Git prompt to '${BASH_RC}' ? [Y/N] "
         read answer
         if [ "${answer}" = "Y" ] || [ "${answer}" = "y" ]; then
-            echo "Install git prompt: ${HOME}/.bash_twgit"
+            echo "Install git prompt: ${USER_HOME}/.bash_twgit"
             sudo install -m 0644 -o ${SUDO_UID} -g ${SUDO_GID} "${INSTALL_DIR}/bash_git.sh" "${USER_HOME}/.bash_twgit"
             echo "Add line '. ~/.bash_twgit' at the end of the script '${BASH_RC}'."
             echo "" >> ${BASH_RC}

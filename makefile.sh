@@ -173,18 +173,18 @@ install_config () {
 install_prompt () {
     echo ""
     echo "4 - Install colored git prompt:"
-    if [ $(cat ${BASH_RC} | grep -E "\.bash_git" | grep -vE '^#' | wc -l) -gt 0 ]; then
+    if [ $(cat ${BASH_RC} | grep -E "\.bash_twgit" | grep -vE '^#' | wc -l) -gt 0 ]; then
         echo "Colored Git prompt already loaded by '${BASH_RC}'."
     else
         echo "Add colored Git prompt to '${BASH_RC}' ? [Y/N] "
         read answer
         if [ "${answer}" = "Y" ] || [ "${answer}" = "y" ]; then
-            echo "Install git prompt: ${HOME}/.bash_git"
-            sudo install -m 0644 -o ${SUDO_UID} -g ${SUDO_GID} "${INSTALL_DIR}/bash_git.sh" "${HOME}/.bash_git"
-            echo "Add line '. ~/.bash_git' at the end of the script '${BASH_RC}'."
+            echo "Install git prompt: ${USER_HOME}/.bash_twgit"
+            sudo install -m 0644 -o ${SUDO_UID} -g ${SUDO_GID} "${INSTALL_DIR}/bash_git.sh" "${USER_HOME}/.bash_twgit"
+            echo "Add line '. ~/.bash_twgit' at the end of the script '${BASH_RC}'."
             echo "" >> ${BASH_RC}
             echo "# Added by Twgit makefile:" >> ${BASH_RC}
-            echo ". ~/.bash_git" >> ${BASH_RC}
+            echo ". ~/.bash_twgit" >> ${BASH_RC}
         fi
     fi
 }

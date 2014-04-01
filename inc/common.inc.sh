@@ -1541,6 +1541,9 @@ function clean_prefixes () {
 #
 # @param string $version Is the current version 'started' (with Hotfix and/or
 # Release and/or Init)
+# @testedby TwgitFeatureTest
+# @testedby TwgitHotfixTest
+# @testedby TwgitMainTest
 #
 function update_version_information () {
     local version="$1"

@@ -35,7 +35,7 @@ dyslexia['1a1g1t']='tag'
 dyslexia['1a1c1e1l1n']='clean'
 dyslexia['2i1n1t']='init'
 dyslexia['1a1d1e1p1t1u']='update'
-dyslexia['1d1e1l1p']='help'
+dyslexia['1e1h1l1p']='help'
 
 dyslexia['1a1r1s2t']='start'
 dyslexia['1f1h2i1n1s']='finish'

@@ -77,9 +77,9 @@ TWGIT_FEATURE_SUBJECT_JIRA_DOMAIN=''            # e.g. 'www.abc.xyz'
 TWGIT_FEATURE_SUBJECT_JIRA_CREDENTIAL_BASE64='' # base64 (login:password)
 
 # All the files designed in the TWGIT_VERSION_INFO_PATH list will be
-# parsed in order to search for $Id$ or $Id:#.#.#$ and replace with
-# the current version (ex. being in v1.2.3 and calling twgit release start
-# will result in replacing all results with $Id:1.3.0$
+# parsed in order to search for $Id$ or $Id:X.Y.Z$ and replace with
+# the current version on twgit init, twgit release start, and twgit hotfix start.
+# Example: being in v1.2.3 and calling twgit release start will result in replacing all tags with $Id:1.3.0$.
 # /!\ File list is comma separated: TWGIT_VERSION_INFO_PATH='file1.php,file2.php'
 TWGIT_VERSION_INFO_PATH=''
 

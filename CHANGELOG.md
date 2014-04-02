@@ -1,6 +1,23 @@
 ChangeLog
 =========
 
+## Version 1.14.0 (2014-04-02)
+
+Features:
+
+  - [#129](https://github.com/Twenga/twgit/issues/129): Add Jira connector.
+  - [#127](https://github.com/Twenga/twgit/issues/127): Support for zsh in addition to bash.
+  - [#118](https://github.com/Twenga/twgit/issues/118): `$Id$` tag substitution à la SVN: replace all tags `$Id$` and `$Id:X.Y.Z$`
+    found in files specified by `TWGIT_VERSION_INFO_PATH` by the next version
+    on `twgit init`, `twgit release start`, and `twgit hotfix start` commands.
+  - [#117](https://github.com/Twenga/twgit/issues/117): Detect words in disorder: `twgit featuer lsit` will work.
+  - [#85](https://github.com/Twenga/twgit/issues/85): Alert on `twgit hotfix start` or `twgit release start`
+    when current user is different from creator.
+
+Unit tests:
+
+  - estimated code coverage: 34% (710 of 2112 lines).
+
 ## Version 1.13.0 (2013-10-21)
 
 Features:

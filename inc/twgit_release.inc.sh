@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 ##
 # twgit
@@ -184,12 +184,18 @@ function cmd_start () {
         if [ "$current_release" != "$release" ]; then
             die "No more one release is authorized at the same time! Try: \"twgit release list\" or \"twgit release start $current_release\""
         else
+
+            is_initial_author $release 'release'
+
             assert_new_local_branch $release_fullname
             exec_git_command "git checkout --track -b $release_fullname $TWGIT_ORIGIN/$release_fullname" "Could not check out release '$TWGIT_ORIGIN/$release_fullname'!"
         fi
     else
         local last_tag=$(get_last_tag)
         exec_git_command "git checkout -b $release_fullname tags/$last_tag" "Could not check out tag '$last_tag'!"
+
+        update_version_information "$release"
+
         process_first_commit 'release' "$release_fullname"
         process_push_branch $release_fullname
     fi

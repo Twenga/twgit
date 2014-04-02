@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 ##
 # Execute code calling functions of common.inc.sh after loading Shell config files.

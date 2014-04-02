@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 ##
 # twgit
@@ -25,7 +25,7 @@
 
 
 ##
-# Retrive and display subject of a Github's issue.
+# Retrieve and display subject of a Github's issue.
 # Compatible Github API v3: http://developer.github.com/v3/.
 #
 # @param string $1 issue name

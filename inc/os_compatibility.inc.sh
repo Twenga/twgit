@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 ##
 # twgit
@@ -64,7 +64,10 @@ function getLastUpdateTimestamp () {
 function getDateFromTimestamp () {
     local timestamp="$1"
     if [ "$TWGIT_OS" = 'MacOSX' ]; then
-        date -r "$timestamp" "+%Y-%m-%d %T"
+        date -r "$timestamp" "+%Y-%m-%d %T" 2> /dev/null
+        if [ $? -ne 0 ]; then
+            date --date "1970-01-01 $timestamp sec" "+%Y-%m-%d %T"
+        fi
     else
         date --date "1970-01-01 $timestamp sec" "+%Y-%m-%d %T"
     fi

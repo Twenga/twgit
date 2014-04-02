@@ -94,6 +94,52 @@ class TwgitHotfixTest extends TwgitTestCase
     }
 
     /**
+     * @shcovers inc/common.inc.sh::is_initial_author
+     */
+    public function testStart_WithExistentHotfixSameAuthor ()
+    {
+        $this->_remoteExec('git init');
+        $this->_localExec(TWGIT_EXEC . ' init 1.2.3 ' . TWGIT_REPOSITORY_ORIGIN_DIR);
+        $this->_localExec(TWGIT_EXEC . ' hotfix start -I');
+        $this->_localExec('git checkout $TWGIT_STABLE');
+
+        $userName = $this->_localExec('git config user.name');
+        $userEmail = $this->_localExec('git config user.email');
+
+        $sResult = $this->_localExec(TWGIT_EXEC . ' hotfix start -I');
+        $sExpected = "Remote hotfix '" . self::ORIGIN . "/hotfix-1.2.4' was started by $userName <$userEmail>.";
+
+        $this->assertContains("Check initial author...", $sResult);
+        $this->assertNotContains($sExpected, $sResult);
+    }
+
+    /**
+     * @shcovers inc/common.inc.sh::is_initial_author
+     */
+    public function testStart_WithExistentHotfixOtherAuthor ()
+    {
+        $this->_remoteExec('git init');
+        $this->_localExec(TWGIT_EXEC . ' init 1.2.3 ' . TWGIT_REPOSITORY_ORIGIN_DIR);
+        $this->_localExec(TWGIT_EXEC . ' hotfix start -I');
+        $this->_localExec('git checkout $TWGIT_STABLE');
+
+        $userName = $this->_localExec('git config user.name');
+        $userEmail = $this->_localExec('git config user.email');
+
+        $this->_localExec("git config --local user.name 'Other Name'");
+        $this->_localExec("git config --local user.email 'Other@Email.com'");
+
+        $sResult = $this->_localExec(TWGIT_EXEC . ' hotfix start -I');
+        $sExpected = "Remote hotfix '" . self::ORIGIN . "/hotfix-1.2.4' was started by $userName <$userEmail>.";
+
+        $this->_localExec("git config --local --unset user.name");
+        $this->_localExec("git config --local --unset user.email");
+
+        $this->assertContains("Check initial author...", $sResult);
+        $this->assertContains($sExpected, $sResult);
+    }
+
+    /**
      * @shcovers inc/common.inc.sh::assert_clean_stable_branch_and_checkout
      */
     public function testRemove_ThrowExceptionWhenExtraCommitIntoStable ()
@@ -148,6 +194,33 @@ class TwgitHotfixTest extends TwgitTestCase
         $this->_localExec(TWGIT_EXEC . ' hotfix remove 1.2.4');
         $sMsg = $this->_localExec('git tag');
         $this->assertContains('v1.2.4', $sMsg);
+    }
+
+    /**
+     * @shcovers inc/common.inc.sh::update_version_information
+     */
+    public function testStartWithVersionInfo ()
+    {
+        $this->_remoteExec('git init');
+        $this->_localExec(TWGIT_EXEC . ' init 1.2.3 ' . TWGIT_REPOSITORY_ORIGIN_DIR);
+        $this->_localExec(TWGIT_EXEC . ' feature start 42');
+        $this->_localExec('echo "TWGIT_VERSION_INFO_PATH=\'not_exists,csv_tags\'" >> .twgit');
+        $this->_localExec('cp ' . TWGIT_TESTS_DIR . '/resources/csv_tags csv_tags');
+        $this->_localExec('git add .');
+        $this->_localExec('git commit -m "Adding testing files"');
+        $this->_localExec(TWGIT_EXEC . ' release start -I');
+        $this->_localExec(TWGIT_EXEC . ' feature merge-into-release 42');
+        $this->_localExec(TWGIT_EXEC . ' release finish -I');
+        $this->_localExec(TWGIT_EXEC . ' hotfix start -I');
+        $sResult = $this->_localExec('cat csv_tags');
+        $sExpected = "\$Id:1.3.1\$\n"
+            . "-------\n"
+            . "\$Id:1.3.1\$\n"
+            . "-------\n"
+            . "\$id\$\n"
+            . "-------\n"
+            . "\$Id:1.3.1\$ \$Id:1.3.1\$";
+        $this->assertEquals($sExpected, $sResult);
     }
 
     /**

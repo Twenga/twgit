@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 ##
 # twgit
@@ -36,6 +36,7 @@
 . $TWGIT_INC_DIR/options_handler.inc.sh
 . $TWGIT_INC_DIR/coloredUI.inc.sh
 . $TWGIT_INC_DIR/os_compatibility.inc.sh
+. $TWGIT_INC_DIR/dyslexia.inc.sh
 
 
 
@@ -1442,6 +1443,9 @@ function init () {
         git commit -m 'Add minimal .gitignore' || die 'Add minimal .gitignore failed!'
         exec_git_command "git push $TWGIT_ORIGIN $TWGIT_STABLE" "Add minimal .gitignore failed!"
     fi
+
+    update_version_information "$tag"
+
     create_and_push_tag "$tag_fullname" "First tag."
 }
 
@@ -1525,6 +1529,72 @@ function clean_prefixes () {
         if [[ $branch_name == ${prefixes[$type]}* ]]; then
             RETVAL=$(echo $branch_name | sed -e 's/^'"${prefixes[$type]}"'//')
             CUI_displayMsg warning "Assume $type was '<b>$RETVAL</b>' instead of '<b>$branch_name</b>'…"
+        fi
+    fi
+}
+
+##
+# This function permits to update all tags $Id$ with current version X.Y.Z inside files designed
+# in a global variable TWGIT_VERSION_INFO_PATH (defined in some config file as
+# .twgit on conf/twgit.sh).
+# For example being in v1.2.3 and calling twgit release start
+# will result in replacing all tags with $Id:1.3.0$.
+#
+# @param string $version Is the current version 'started' (with Hotfix and/or
+# Release and/or Init)
+# @testedby TwgitFeatureTest
+# @testedby TwgitHotfixTest
+# @testedby TwgitMainTest
+#
+function update_version_information () {
+    local version="$1"
+
+    if [[ ! -z $TWGIT_VERSION_INFO_PATH ]]; then
+        CUI_displayMsg processing "Updating \$Id\$ tags in TWGIT_VERSION_INFO_PATH's files..."
+        for filepath in $(echo $TWGIT_VERSION_INFO_PATH | tr ',' ' '); do
+            if [[ -f $filepath ]]; then
+                CUI_displayMsg processing "Updating $Id$ tags in $filepath..."
+                sed -i 's/\$Id[:v0-9\.]*\$/$Id:'$version'$/g' "$filepath"
+                exec_git_command "git add $filepath" "Could not add version info into $filepath!"
+            else
+                CUI_displayMsg warning "TWGIT_VERSION_INFO_PATH contains a non-existing file: $filepath!"
+            fi
+        done
+    else
+        CUI_displayMsg processing 'TWGIT_VERSION_INFO_PATH is empty: no $Id$ to update.'
+    fi;
+}
+
+# This add-on checks if current user is the initial author of a branch creation.
+#
+# @param string $1 Name of branch
+# @param string $2 Branch type in {'hotfix', 'release'}
+# @testedby TwgitHotfixTest
+# @testedby TwgitReleaseTest
+#
+function is_initial_author() {
+    local branch_name="$1"
+    local type="$2"
+    local -A prefixes=(
+        [hotfix]="$TWGIT_PREFIX_HOTFIX"
+        [release]="$TWGIT_PREFIX_RELEASE"
+    )
+
+    CUI_displayMsg processing 'Check initial author...'
+
+    # Retrieving Author Email & Name
+    local branchAuthor=$(git log $TWGIT_ORIGIN/$TWGIT_STABLE..$TWGIT_ORIGIN/${prefixes[$type]}$branch_name --format="%an <%ae>" --date-order --reverse | head -n 1)
+
+    # Retrieving Local Email & Name
+    local localAuthorEmail=$(git config user.email)
+    local localAuthorName=$(git config user.name)
+
+    # Comparing Init Committer of Branch to Current Author
+    if [ ! "$localAuthorName <$localAuthorEmail>" = "$branchAuthor" ]; then
+        CUI_displayMsg warning "Remote $type '$TWGIT_ORIGIN/${prefixes[$type]}$branch_name' was started by $branchAuthor."
+        if ! isset_option 'I'; then
+            echo -n $(CUI_displayMsg question 'Do you want to continue? [Y/N] '); read answer
+            [ "$answer" != "Y" ] && [ "$answer" != "y" ] && die 'Warning, '$type' retrieving aborted!'
         fi
     fi
 }

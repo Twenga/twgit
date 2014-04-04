@@ -51,7 +51,7 @@ main() {
 # Check if current git branch is stable
 #
 check_stable() {
-    if [ "${CURRENT_BRANCH}" = "stable" ]; then
+    if [ "${CURRENT_BRANCH}" != "stable" ]; then
         echo "You must be on 'stable' branch, not on '${CURRENT_BRANCH}' branch! Try: git checkout --track -b stable origin/stable"
         exit 2
     fi

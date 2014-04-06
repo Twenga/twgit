@@ -37,6 +37,7 @@ else
 fi
 issue_url="$scheme$TWGIT_FEATURE_SUBJECT_JIRA_DOMAIN/rest/api/latest/issue/$issue"
 wget_cmd="wget --no-check-certificate --timeout=3 -q -O - --no-cache --header \"Authorization: Basic $TWGIT_FEATURE_SUBJECT_JIRA_CREDENTIAL_BASE64\" --header \"Content-Type: application/json\" $issue_url"
+wget_cmd="curl --insecure --header \"Authorization: Basic $TWGIT_FEATURE_SUBJECT_JIRA_CREDENTIAL_BASE64\" --header \"Content-Type: application/json\" $issue_url"
 
 # Python or PHP ?
 language='?'
@@ -49,6 +50,7 @@ else
         language='php'
     fi
 fi
+language='php'
 
 # Convert JSON with Python or PHP:
 if [ "$language" = 'python' ]; then

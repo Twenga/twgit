@@ -49,13 +49,12 @@ else
         language='php'
     fi
 fi
-language='php'
 
 # Convert JSON with Python or PHP:
 if [ "$language" = 'python' ]; then
     data=$(eval $wget_cmd)
     if [ ! -z "$data" ]; then
-        echo $data | python -c "import json,sys;s=sys.stdin.read();s=s.replace('\r\n', '');s=json.loads(s);print s['fields']['summary'];" 2>/dev/null
+        echo $data | python -c "import json,sys;s=sys.stdin.read().decode('ascii','ignore');s=s.replace('\r\n', '');s=json.loads(s);print s['fields']['summary'];" 2>/dev/null
     fi
 elif [ "$language" = 'php' ]; then
     data=$(eval $wget_cmd)

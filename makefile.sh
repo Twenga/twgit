@@ -86,7 +86,7 @@ uninstall() {
     cmd="rm -f ${BIN_DIR}/twgit 2> /dev/null"
     echo '$> '$cmd
     eval $cmd
-    
+
     opt=""
     for line in $(grep -in twgit ${BASH_RC} | cut -d: -f1); do
         opt="${opt} -e ${line}d "
@@ -143,10 +143,10 @@ install_completion () {
     fi
 
     if [ $(cat ${BASH_RC} | grep -E "/${CURRENT_SHELL}_completion.sh" | grep -vE '^#' | wc -l) -gt 0 ]; then
-        echo "Twgit Bash completion already loaded by '${BASH_RC}'." 
+        echo "Twgit Bash completion already loaded by '${BASH_RC}'."
     else
-        echo "Add line '. ${INSTALL_DIR}/${CURRENT_SHELL}_completion.sh' at the of the script '${BASH_RC}'."
-        echo "" >> ${BASH_RC} 
+        echo "Add line '. ${INSTALL_DIR}/${CURRENT_SHELL}_completion.sh' at the bottom of the script '${BASH_RC}'."
+        echo "" >> ${BASH_RC}
         echo "# Added by Twgit makefile:" >> ${BASH_RC}
         echo ". ${INSTALL_DIR}/${CURRENT_SHELL}_completion.sh" >> ${BASH_RC}
         echo "(i) Restart ${CURRENT_SHELL} session to enable configuration."

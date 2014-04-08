@@ -52,12 +52,12 @@ fi
 
 # Convert JSON with Python or PHP:
 if [ "$language" = 'python' ]; then
-    data=$($wget_cmd)
+    data=$(eval $wget_cmd)
     if [ ! -z "$data" ]; then
         echo $data | python -c "import json,sys;s=sys.stdin.read();s=s.replace('\r\n', '');s=json.loads(s);print s['fields']['summary'].encode('utf8');" 2>/dev/null
     fi
 elif [ "$language" = 'php' ]; then
-    data=$($wget_cmd)
+    data=$(eval $wget_cmd)
     if [ ! -z "$data" ]; then
         echo $data | php -r '$o = json_decode(file_get_contents("php://stdin")); if (!empty($o)){print_r($o->fields->summary);}' 2>/dev/null
     fi

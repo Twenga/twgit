@@ -181,7 +181,49 @@ class TwgitReleaseTest extends TwgitTestCase
         $userEmail = $this->_localExec('git config user.email');
 
         $this->_localExec("git config --local user.name 'Other Name'");
-        $this->_localExec("git config --local user.email 'Other@Email.com'");
+        $this->_localExec("git config --local user.email 'other@email.com'");
+
+        $sResult = $this->_localExec(TWGIT_EXEC . ' release start -I');
+        $sExpected = "Remote release '" . self::ORIGIN . "/release-1.3.0' was started by $userName <$userEmail>.";
+
+        $this->_localExec("git config --local --unset user.name");
+        $this->_localExec("git config --local --unset user.email");
+
+        $this->assertContains("Check initial author...", $sResult);
+        $this->assertContains($sExpected, $sResult);
+    }
+
+    /**
+     * -o---o--->         Stable
+     *   \   \
+     *    \   A---o--->   Release
+     *     \     /
+     *      B---o--->     F1
+     *
+     * La feature-1 a été créée avant la release, puis a été mergée dans la release.
+     * S'assurer que l'on remonte bien le nœud A en tant que source de la release et non pas B.
+     *
+     * @shcovers inc/common.inc.sh::is_initial_author
+     */
+    public function testStart_WithExistentReleaseOtherAuthorAndPreviousFeature ()
+    {
+        $this->_remoteExec('git init');
+        $this->_localExec(TWGIT_EXEC . ' init 1.2.3 ' . TWGIT_REPOSITORY_ORIGIN_DIR);
+
+        $this->_localExec(TWGIT_EXEC . ' feature start -I 1');
+        $this->_localExec('git checkout $TWGIT_STABLE');
+
+        $userName = 'Release Name';
+        $userEmail = 'release@email.com';
+        $this->_localExec("git config --local user.name '$userName'");
+        $this->_localExec("git config --local user.email '$userEmail'");
+
+        $this->_localExec(TWGIT_EXEC . ' release start -I');
+        $this->_localExec(TWGIT_EXEC . ' feature merge-into-release 1');
+        $this->_localExec('git checkout $TWGIT_STABLE');
+
+        $this->_localExec("git config --local user.name 'Other Name'");
+        $this->_localExec("git config --local user.email 'other@email.com'");
 
         $sResult = $this->_localExec(TWGIT_EXEC . ' release start -I');
         $sExpected = "Remote release '" . self::ORIGIN . "/release-1.3.0' was started by $userName <$userEmail>.";

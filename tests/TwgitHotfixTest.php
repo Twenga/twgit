@@ -127,7 +127,7 @@ class TwgitHotfixTest extends TwgitTestCase
         $userEmail = $this->_localExec('git config user.email');
 
         $this->_localExec("git config --local user.name 'Other Name'");
-        $this->_localExec("git config --local user.email 'Other@Email.com'");
+        $this->_localExec("git config --local user.email 'other@email.com'");
 
         $sResult = $this->_localExec(TWGIT_EXEC . ' hotfix start -I');
         $sExpected = "Remote hotfix '" . self::ORIGIN . "/hotfix-1.2.4' was started by $userName <$userEmail>.";

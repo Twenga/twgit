@@ -1572,7 +1572,7 @@ function update_version_information () {
 # @testedby TwgitHotfixTest
 # @testedby TwgitReleaseTest
 #
-function is_initial_author() {
+function is_initial_author () {
     local branch_name="$1"
     local type="$2"
     local -A prefixes=(
@@ -1583,7 +1583,7 @@ function is_initial_author() {
     CUI_displayMsg processing 'Check initial author...'
 
     # Retrieving Author Email & Name
-    local branchAuthor=$(git log $TWGIT_ORIGIN/$TWGIT_STABLE..$TWGIT_ORIGIN/${prefixes[$type]}$branch_name --format="%an <%ae>" --date-order --reverse | head -n 1)
+    local branchAuthor=$(git log $TWGIT_ORIGIN/$TWGIT_STABLE..$TWGIT_ORIGIN/${prefixes[$type]}$branch_name --format="%an <%ae>" --first-parent --no-merges | tail -n1)
 
     # Retrieving Local Email & Name
     local localAuthorEmail=$(git config user.email)

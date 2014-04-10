@@ -1,6 +1,19 @@
 ChangeLog
 =========
 
+## Version 1.14.2 (2014-04-10)
+
+Fixes:
+
+  - Bad detection of release initial author if one of its features is older.
+  - Python version of Jira connector doesn't handle unicode characters.
+
+## Version 1.14.1 (2014-04-04)
+
+Fixes:
+
+  - Remaining code in installation process for testing purpose only.
+
 ## Version 1.14.0 (2014-04-02)
 
 Features:

@@ -6,13 +6,14 @@ ROOT_DIR=$(pwd)
 CONF_DIR="${ROOT_DIR}/conf"
 INSTALL_DIR="${ROOT_DIR}/install"
 
-USER_HOME=$(eval echo ~${SUDO_USER})
-
 CURRENT_SHELL=$(if [ ! -z $ZSH_NAME ]; then echo 'zsh'; else echo 'bash'; fi)
 CURRENT_SHELL_CMD=${SHELL}
 CURRENT_USER=${USER}
 CURRENT_BRANCH=$(git branch --no-color | grep '^\* ' | grep -v 'no branch' | sed 's/^* //g')
 CURRENT_OS=$(uname -s)
+
+USER_NAME=$(logname)
+USER_HOME=$(sudo -u ${USER_NAME} -H sh -c 'echo "$HOME"')
 
 if [ "${CURRENT_SHELL}" = "bash" ]; then
     if [ "${CURRENT_OS}" = "Darwin" ] || [ "${CURRENT_OS}" = "FreeBSD" ]; then
@@ -120,11 +121,11 @@ install_executable () {
     echo "Check for previous install in '${BIN_DIR}/twgit'"
     if [ -f ${BIN_DIR}/twgit ]; then
         echo "Previous install found : clean"
-        rm -f ${BIN_DIR}/twgit
+        sudo rm -f ${BIN_DIR}/twgit
     fi
 
     echo "Make twgit executable"
-    ln -s ${ROOT_DIR}/twgit ${BIN_DIR}/twgit
+    sudo ln -s ${ROOT_DIR}/twgit ${BIN_DIR}/twgit
     return 0
 }
 

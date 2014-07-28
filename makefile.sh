@@ -12,8 +12,8 @@ CURRENT_USER=${USER}
 CURRENT_BRANCH=$(git branch --no-color | grep '^\* ' | grep -v 'no branch' | sed 's/^* //g')
 CURRENT_OS=$(uname -s)
 
-USERNAME=$(logname)
-USER_HOME=$(sudo -u ${USERNAME} -H sh -c 'echo "$HOME"')
+USER_NAME=$(logname)
+USER_HOME=$(sudo -u ${USER_NAME} -H sh -c 'echo "$HOME"')
 
 if [ "${CURRENT_SHELL}" = "bash" ]; then
     if [ "${CURRENT_OS}" = "Darwin" ] || [ "${CURRENT_OS}" = "FreeBSD" ]; then

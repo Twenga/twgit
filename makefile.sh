@@ -1,4 +1,4 @@
-#!/usr/bin/env sh
+#!/usr/bin/env bash
 
 SHARE_DIR="/usr/local/share/twgit"
 BIN_DIR="/usr/local/bin"

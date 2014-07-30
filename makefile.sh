@@ -1,4 +1,4 @@
-#!/usr/bin/env sh
+#!/usr/bin/env bash
 
 SHARE_DIR="/usr/local/share/twgit"
 BIN_DIR="/usr/local/bin"
@@ -6,7 +6,8 @@ ROOT_DIR=$(pwd)
 CONF_DIR="${ROOT_DIR}/conf"
 INSTALL_DIR="${ROOT_DIR}/install"
 
-USER_HOME=$(eval echo ~${SUDO_USER})
+USER_NAME=$(logname)
+USER_HOME=$(sudo -u ${USER_NAME} -H sh -c 'echo "$HOME"')
 
 CURRENT_SHELL=$(if [ ! -z $ZSH_NAME ]; then echo 'zsh'; else echo 'bash'; fi)
 CURRENT_SHELL_CMD=${SHELL}

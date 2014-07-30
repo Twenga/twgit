@@ -1,6 +1,11 @@
 ChangeLog
 =========
 
+## Version 1.14.2 (2014-07-30)
+
+Fixes:
+  - [#141](https://github.com/Twenga/twgit/issues/141): Fix user home detection
+
 ## Version 1.14.2 (2014-04-10)
 
 Fixes:

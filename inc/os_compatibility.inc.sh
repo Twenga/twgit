@@ -70,7 +70,7 @@ function getDateFromTimestamp () {
 #
 function sedRegexpExtended () {
     local pattern="$1"
-    result=$(sed -E "$pattern")
+    result=$(sed -E "$pattern" 2> /dev/null)
     if [ ! -z "${result}" ]; then
         echo ${result};
     else

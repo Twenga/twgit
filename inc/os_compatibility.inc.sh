@@ -38,11 +38,11 @@
 #
 function getLastUpdateTimestamp () {
     local path="$1"
-    result=$(stat -f "%m" "$path" 2> /dev/null)
+    result=$(date -r "$path" +%s 2> /dev/null)
     if [ ! -z "${result}" ] ; then
         echo ${result}
     else
-        date -r "$path" +%s
+        stat -f "%m" "$path"
     fi
 }
 

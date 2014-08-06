@@ -38,8 +38,9 @@
 #
 function getLastUpdateTimestamp () {
     local path="$1"
-    if hash stat -f %m "$path" 2> /dev/null; then
-        stat -f %m "$path"
+    result=$(stat -f "%m" "$path" 2> /dev/null)
+    if [ ! -z "${result}" ] ; then
+        echo ${result}
     else
         date -r "$path" +%s
     fi
@@ -53,8 +54,9 @@ function getLastUpdateTimestamp () {
 #
 function getDateFromTimestamp () {
     local timestamp="$1"
-    if hash date -r "$timestamp" "+%Y-%m-%d %T" 2> /dev/null; then
-        date -r "$timestamp" "+%Y-%m-%d %T" 2> /dev/null
+    result=$(date -r "$timestamp" "+%Y-%m-%d %T" 2> /dev/null)
+    if [ ! -z "${result}" ] ; then
+        echo ${result}
     else
         date --date "1970-01-01 $timestamp sec" "+%Y-%m-%d %T"
     fi
@@ -68,8 +70,9 @@ function getDateFromTimestamp () {
 #
 function sedRegexpExtended () {
     local pattern="$1"
-    if hash sed -E "$pattern" 2> /dev/null; then
-        sed -E "$pattern";
+    result=$(sed -E "$pattern")
+    if [ ! -z "${result}" ]; then
+        echo ${result};
     else
         sed -r "$pattern";
     fi

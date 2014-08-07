@@ -1,7 +1,12 @@
 ChangeLog
 =========
 
-## Version 1.14.2 (2014-07-30)
+## Version 1.14.4 (2014-08-07)
+
+Fixes
+  - [#136](https://github.com:Twenga/twgit/issues/136): Fix os compatibility based on function testing instead of os detection
+
+## Version 1.14.3 (2014-07-30)
 
 Fixes:
   - [#141](https://github.com/Twenga/twgit/issues/141): Fix user home detection

@@ -39,7 +39,7 @@
 function getLastUpdateTimestamp () {
     local path="$1"
     result=$(date -r "$path" +%s 2> /dev/null)
-    if [ ! -z "${result}" ] ; then
+    if [ $? -eq 0 ] ; then
         echo ${result}
     else
         stat -f "%m" "$path"
@@ -55,7 +55,7 @@ function getLastUpdateTimestamp () {
 function getDateFromTimestamp () {
     local timestamp="$1"
     result=$(date -r "$timestamp" "+%Y-%m-%d %T" 2> /dev/null)
-    if [ ! -z "${result}" ] ; then
+    if [ $? -eq 0 ] ; then
         echo ${result}
     else
         date --date "1970-01-01 $timestamp sec" "+%Y-%m-%d %T"
@@ -71,7 +71,7 @@ function getDateFromTimestamp () {
 function sedRegexpExtended () {
     local pattern="$1"
     result=$(sed -E "$pattern" 2> /dev/null)
-    if [ ! -z "${result}" ]; then
+    if [ $? -eq 0 ] ; then
         echo ${result};
     else
         sed -r "$pattern";

@@ -7,7 +7,7 @@
 # @license http://www.apache.org/licenses/LICENSE-2.0
 #
 
-. ./inc/os_compatibility.inc.sh
+. ./inc/compatibility.inc.sh
 
 
 rStats="/tmp/file.$$.$RANDOM"

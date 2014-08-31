@@ -191,38 +191,63 @@ class TwgitSetupTest extends TwgitTestCase
     /**
      * @shcovers inc/common.inc.sh::assert_connectors_well_configured
      */
-    public function testAssertConnectorsWellConfigured_ThrowExceptionWhenWgetNotFound ()
+    public function testAssertConnectorsWellConfigured_ThrowExceptionWhenWgetAndCurlNotFound ()
     {
-        $sMsg = "/!\ Feature's subject not available because wget was not found! "
-              . "Install it (e.g.: apt-get install wget) or switch off connectors in 'F'.";
+        $sMsg = "/!\\ Feature's subject not available because wget or curl was not found! "
+                . "Install wget (e.g.: apt-get install wget) or curl (e.g.: apt-get install curl) or switch off connectors in 'F'.";
         $this->setExpectedException('RuntimeException', $sMsg);
 
-        $sWgetPath = $this->_exec('which wget');
-        $sPath = $this->_exec('echo $PATH');
-        $sPathWOWget = preg_replace('#(^|:)' . substr($sWgetPath, 0, -5) . '(:|$)#', ':', $sPath);
-        $sCmd = "PATH='$sPathWOWget'; "
-              . 'config_file=\'F\'; TWGIT_FEATURE_SUBJECT_CONNECTOR=\'github\'; assert_connectors_well_configured';
-        $sMsg = $this->_localShellCodeCall($sCmd);
+        $sCmd = 'has_curl=false;has_wget=false;'
+                . 'config_file=\'F\'; TWGIT_FEATURE_SUBJECT_CONNECTOR=\'github\'; assert_connectors_well_configured';
+        $this->_localShellCodeCall($sCmd);
     }
 
     /**
-     * @dataProvider providerTestAssertConnectorsWellConfigured_WithConnectorAndWget
+     * @dataProvider providerTestAssertConnectorsWellConfigured_WithConnector
      * @shcovers inc/common.inc.sh::assert_connectors_well_configured
      */
-    public function testAssertConnectorsWellConfigured_WithConnectorAndWget ($sConnector)
+    public function testAssertConnectorsWellConfigured_WithConnectorAndWgetButNotCurl ($sConnector)
     {
-        $sCmd = 'config_file=\'F\'; TWGIT_FEATURE_SUBJECT_CONNECTOR=\''
+        $sCmd = 'has_curl=false;has_wget=true;'
+                . 'config_file=\'F\'; TWGIT_FEATURE_SUBJECT_CONNECTOR=\''
               . $sConnector . '\'; assert_connectors_well_configured';
         $sMsg = $this->_localShellCodeCall($sCmd);
         $this->assertEmpty($sMsg);
     }
 
-    public function providerTestAssertConnectorsWellConfigured_WithConnectorAndWget ()
+    /**
+     * @dataProvider providerTestAssertConnectorsWellConfigured_WithConnector
+     * @shcovers inc/common.inc.sh::assert_connectors_well_configured
+     */
+    public function testAssertConnectorsWellConfigured_WithConnectorAndCurlButNotWget ($sConnector)
+    {
+        $sCmd = 'has_curl=true;has_wget=false;'
+                . 'config_file=\'F\'; TWGIT_FEATURE_SUBJECT_CONNECTOR=\''
+                . $sConnector . '\'; assert_connectors_well_configured';
+        $sMsg = $this->_localShellCodeCall($sCmd);
+        $this->assertEmpty($sMsg);
+    }
+
+    /**
+     * @dataProvider providerTestAssertConnectorsWellConfigured_WithConnector
+     * @shcovers inc/common.inc.sh::assert_connectors_well_configured
+     */
+    public function testAssertConnectorsWellConfigured_WithConnectorAndCurlAndWget ($sConnector)
+    {
+        $sCmd = 'has_curl=true;has_wget=true;'
+                . 'config_file=\'F\'; TWGIT_FEATURE_SUBJECT_CONNECTOR=\''
+                . $sConnector . '\'; assert_connectors_well_configured';
+        $sMsg = $this->_localShellCodeCall($sCmd);
+        $this->assertEmpty($sMsg);
+    }
+
+    public function providerTestAssertConnectorsWellConfigured_WithConnector ()
     {
         return array(
             array(''),
             array('github'),
             array('redmine'),
+            array('jira')
         );
     }
 

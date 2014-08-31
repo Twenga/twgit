@@ -24,7 +24,18 @@
 # @license http://www.apache.org/licenses/LICENSE-2.0
 #
 
+has_wget=false
+has_curl=false
 
+which wget 1>/dev/null 2>&1
+if [ $? -eq 0 ]; then
+    has_wget=true
+fi
+
+which curl 1>/dev/null 2>&1
+if [ $? -eq 0 ]; then
+    has_curl=true
+fi
 
 #--------------------------------------------------------------------
 # Mac OS X compatibility layer

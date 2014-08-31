@@ -67,14 +67,22 @@ TWGIT_EMAIL_DOMAIN_NAME=''	# e.g. twenga.com
 TWGIT_MAX_RETRIEVE_TAGS_NOT_MERGED=3
 TWGIT_MAX_TAG_LIST_TO_SHOW=5
 
-TWGIT_FEATURE_SUBJECT_CONNECTOR=''			    # in {'', 'github', 'redmine', 'jira'}
-TWGIT_FEATURE_SUBJECT_CONNECTOR_PATH="$TWGIT_INC_DIR/connectors/feature_subject_%s.sh"	# où %s est un $TWGIT_FEATURE_SUBJECT_CONNECTOR
-TWGIT_FEATURE_SUBJECT_REDMINE_API_KEY=''	    # API key is a 40-byte hexadecimal string.
-TWGIT_FEATURE_SUBJECT_REDMINE_DOMAIN=''		    # e.g. 'www.redmine.org', with optionally scheme: 'http://', 'https://' (default).
-TWGIT_FEATURE_SUBJECT_GITHUB_USER=''		    # e.g. 'Twenga'
-TWGIT_FEATURE_SUBJECT_GITHUB_REPOSITORY=''	    # e.g. 'twgit'
+TWGIT_FEATURE_SUBJECT_CONNECTOR='' # in {'', 'github', 'redmine', 'jira', 'gitlab'}
+TWGIT_FEATURE_SUBJECT_CONNECTOR_PATH="$TWGIT_INC_DIR/connectors/feature_subject_%s.sh" # où %s est un $TWGIT_FEATURE_SUBJECT_CONNECTOR
+# REDMINE configurations
+TWGIT_FEATURE_SUBJECT_REDMINE_API_KEY=''        # API key is a 40-byte hexadecimal string.
+TWGIT_FEATURE_SUBJECT_REDMINE_DOMAIN=''         # e.g. 'www.redmine.org', with optionally scheme: 'http://', 'https://' (default).
+# GITHUB configurations
+TWGIT_FEATURE_SUBJECT_GITHUB_USER=''            # e.g. 'Twenga'
+TWGIT_FEATURE_SUBJECT_GITHUB_REPOSITORY=''      # e.g. 'twgit'
+# JIRA configurations
 TWGIT_FEATURE_SUBJECT_JIRA_DOMAIN=''            # e.g. 'www.abc.xyz'
 TWGIT_FEATURE_SUBJECT_JIRA_CREDENTIAL_BASE64='' # base64 (login:password)
+# GITLAB configurations
+TWGIT_FEATURE_SUBJECT_GITLAB_DOMAIN=''          # Gitlab domain
+TWGIT_FEATURE_SUBJECT_GITLAB_PRIVATE_TOKEN=''   # Gitlab private token
+TWGIT_FEATURE_SUBJECT_GITLAB_GROUP=''           # Project group
+TWGIT_FEATURE_SUBJECT_GITLAB_REPOSITORY=''      # Project repository
 
 # All the files designed in the TWGIT_VERSION_INFO_PATH list will be
 # parsed in order to search for $Id$ or $Id:X.Y.Z$ and replace with

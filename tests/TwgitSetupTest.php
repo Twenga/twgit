@@ -247,7 +247,8 @@ class TwgitSetupTest extends TwgitTestCase
             array(''),
             array('github'),
             array('redmine'),
-            array('jira')
+            array('jira'),
+            array('gitlab')
         );
     }
 

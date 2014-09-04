@@ -7,6 +7,7 @@
 #
 # Copyright (c) 2011 Twenga SA
 # Copyright (c) 2012-2013 Geoffroy Aubry <geoffroy.aubry@free.fr>
+# Copyright (c) 2014 Laurent Toussaint <lt.laurent.toussaint@gmail.com>
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance
 # with the License. You may obtain a copy of the License at
@@ -19,6 +20,7 @@
 #
 # @copyright 2011 Twenga SA
 # @copyright 2012-2013 Geoffroy Aubry <geoffroy.aubry@free.fr>
+# @copyright 2014 Laurent Toussaint <lt.laurent.toussaint@gmail.com>
 # @license http://www.apache.org/licenses/LICENSE-2.0
 #
 
@@ -35,7 +37,12 @@ url="$(printf "https://api.github.com/repos/%s/%s/issues/%s" \
         "$TWGIT_FEATURE_SUBJECT_GITHUB_USER" \
         "$TWGIT_FEATURE_SUBJECT_GITHUB_REPOSITORY" \
         "$issue")"
-wget_cmd='wget --no-check-certificate --timeout=3 --user-agent=Twenga-twgit -q -O - --no-cache'
+
+if ${has_wget}; then
+    cmd="wget --no-check-certificate --timeout=3 --user-agent=Twenga-twgit -q -O - --no-cache"
+else
+    cmd="curl --insecure --max-time 3 --user-agent Twenga-twgit --silent -H \"Cache-control: no-cache\""
+fi
 
 # Python or PHP ?
 language='?'
@@ -51,11 +58,11 @@ fi
 
 # Convert JSON with Python or PHP:
 if [ "$language" = 'python' ]; then
-    ($wget_cmd $url | python -c 'import sys,json;s=sys.stdin.read();
+    ($cmd $url | python -c 'import sys,json;s=sys.stdin.read();
 if s!="": data=json.loads(s); print data["title"].encode("utf8")')
     2>/dev/null
 elif [ "$language" = 'php' ]; then
-    ($wget_cmd $url \
+    ($cmd $url \
     | php -r '$o = json_decode(file_get_contents("php://stdin")); if ($o !== NULL) {print_r($o->title);}')
     2>/dev/null
 else

@@ -7,7 +7,7 @@
 #
 # Copyright (c) 2011 Twenga SA
 # Copyright (c) 2012-2013 Geoffroy Aubry <geoffroy.aubry@free.fr>
-# Copyright (c) 2012 Laurent Toussaint <lt.laurent.toussaint@gmail.com>
+# Copyright (c) 2012-2014 Laurent Toussaint <lt.laurent.toussaint@gmail.com>
 # Copyright (c) 2013 Cyrille Hemidy
 # Copyright (c) 2013 Geoffroy Letournel <gletournel@hi-media.com>
 # Copyright (c) 2013 Sebastien Hanicotte <shanicotte@hi-media.com>
@@ -24,7 +24,7 @@
 # @copyright 2011 Twenga SA
 # @copyright 2012-2013 Geoffroy Aubry <geoffroy.aubry@free.fr>
 # @copyright 2012 Jérémie Havret <jhavret@hi-media.com>
-# @copyright 2012 Laurent Toussaint <lt.laurent.toussaint@gmail.com>
+# @copyright 2012-2014 Laurent Toussaint <lt.laurent.toussaint@gmail.com>
 # @copyright 2013 Cyrille Hemidy
 # @copyright 2013 Geoffroy Letournel <gletournel@hi-media.com>
 # @copyright 2013 Sebastien Hanicotte <shanicotte@hi-media.com>
@@ -35,7 +35,7 @@
 
 . $TWGIT_INC_DIR/options_handler.inc.sh
 . $TWGIT_INC_DIR/coloredUI.inc.sh
-. $TWGIT_INC_DIR/os_compatibility.inc.sh
+. $TWGIT_INC_DIR/compatibility.inc.sh
 . $TWGIT_INC_DIR/dyslexia.inc.sh
 
 
@@ -501,12 +501,9 @@ function assert_connectors_well_configured () {
         if [ ! -f "$connector" ]; then
             die "'<b>$TWGIT_FEATURE_SUBJECT_CONNECTOR</b>' connector not found!" \
                 "Please adjust <b>TWGIT_FEATURE_SUBJECT_CONNECTOR</b> in '$config_file'."
-        else
-            which wget 1>/dev/null 2>&1
-            if [ $? -ne 0 ]; then
-                die "Feature's subject not available because <b>wget</b> was not found!" \
-                    "Install it (e.g.: apt-get install wget) or switch off connectors in '$config_file'."
-            fi
+        elif ! ${has_wget} && ! ${has_curl} ; then
+            die "Feature's subject not available because <b>wget</b> or <b>curl</b> was not found!" \
+                "Install wget (e.g.: apt-get install wget) or curl (e.g.: apt-get install curl) or switch off connectors in '$config_file'."
         fi
     fi
 }

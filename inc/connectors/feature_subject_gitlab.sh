@@ -46,22 +46,32 @@ fi
 
 # Python or PHP ?
 language='?'
-which php 1>/dev/null 2>&1
+which python 1>/dev/null 2>&1
 if [ $? -eq 0 ]; then
-   language='php'
+    language='python'
+else
+    which php 1>/dev/null 2>&1
+    if [ $? -eq 0 ]; then
+        language='php'
+    fi
 fi
 
 # Convert JSON with Python or PHP:
 if [ "$language" = 'python' ]; then
     if [[ "$ref" =~ ^[0-9]+$ ]]; then
-        ($cmd $issue_url \
-        | python -c 'import sys,json;s=sys.stdin.read();
-if s!="": data=json.loads(s); print data["issue"]["subject"].encode("utf8")')
-        2>/dev/null
-    else
         ($cmd $project_url \
-        | python -c 'import sys,json;s=sys.stdin.read();
-if s!="": data=json.loads(s); print data["project"]["name"].encode("utf8")')
+        | python -c 'import sys,json,urllib;s=sys.stdin.read();
+data=json.loads(s) if s!="" else sys.exit(0)
+projectId=None
+for row in data:
+    if row["path_with_namespace"] == "'$project_addr'" :
+        projectId = row["id"]; break;
+f = urllib.urlopen("http://gitlab.brandzofferz.com/api/v3/projects/%s/issues?private_token=GNR9tuTVGXBTxYkpsQDa" % (projectId))
+s = f.read()
+data=json.loads(s) if s!="" else sys.exit(0);
+for row in data:
+    if row["iid"] == '$ref' :
+        print row["title"].encode("utf8"); break;')
         2>/dev/null
     fi
 elif [ "$language" = 'php' ]; then
@@ -70,10 +80,6 @@ elif [ "$language" = 'php' ]; then
         | php -r '$o = json_decode(file_get_contents("php://stdin"));$projectid=array_reduce($o, function($carry, $item){if($carry==null && $item->path_with_namespace == "'$project_addr'"){return 
 $item->id;}return $carry;}, null);$o=json_decode(file_get_contents(sprintf("'$issue_url'", $projectid,'$ref')));if ($o !== NULL) {array_walk($o, function($item, 
 $key){if($item->iid == '$ref'){print_r($item->title);}});}')
-        2>/dev/null
-    else
-        ($cmd $project_url \
-        | php -r '$o = json_decode(file_get_contents("php://stdin"));array_walk($o, function($item, $key){if($item->path_with_namespace == "'$ref'"){print_r($item->name);}});')
         2>/dev/null
     fi
 else

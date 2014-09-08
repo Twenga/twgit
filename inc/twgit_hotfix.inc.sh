@@ -9,6 +9,7 @@
 # Copyright (c) 2012-2013 Geoffroy Aubry <geoffroy.aubry@free.fr>
 # Copyright (c) 2013 Cyrille Hemidy
 # Copyright (c) 2013 Sebastien Hanicotte <shanicotte@hi-media.com>
+# Copyright (c) 2014 Laurent Toussaint <lt.laurent.toussaint@gmail.com>
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance
 # with the License. You may obtain a copy of the License at
@@ -23,6 +24,7 @@
 # @copyright 2012-2013 Geoffroy Aubry <geoffroy.aubry@free.fr>
 # @copyright 2013 Cyrille Hemidy
 # @copyright 2013 Sebastien Hanicotte <shanicotte@hi-media.com>
+# @copyright 2014 Laurent Toussaint <lt.laurent.toussaint@gmail.com>
 # @license http://www.apache.org/licenses/LICENSE-2.0
 #
 
@@ -77,9 +79,22 @@ function cmd_list () {
     process_options "$@"
     process_fetch 'F'
 
-    local hotfixes=$(get_last_hotfixes 1)
-    CUI_displayMsg help "Remote current hotfix:"
-    display_branches 'hotfix' "$hotfixes"; echo
+    local hotfixes=$(git branch --no-color -r --merged $TWGIT_ORIGIN/$TWGIT_STABLE | grep "$TWGIT_ORIGIN/$TWGIT_PREFIX_HOTFIX" | sed 's/^[* ]*//')
+    if [ ! -z "$hotfixes" ]; then
+        CUI_displayMsg help "Remote hotfixes merged into '<b>$TWGIT_STABLE</b>':"
+        CUI_displayMsg warning "A hotfixes must be deleted after merge into '<b>$TWGIT_STABLE</b>'! Following hotfixes should not exists!"
+        display_branches 'hotfix' "$hotfixes"
+        echo
+    fi
+
+    local hotfix=$(get_current_hotfix_in_progress)
+    if [ ! -z "$hotfix" ]; then
+        CUI_displayMsg help "Remote current hotfix:"
+        display_super_branch 'hotfix' "$hotfix"
+    else
+        display_branches 'hotfix' ''
+    fi
+    echo
 
     alert_dissident_branches
 }

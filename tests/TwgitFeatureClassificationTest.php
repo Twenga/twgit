@@ -226,7 +226,64 @@ class TwgitFeatureClassificationTest extends TwgitTestCase
         $this->assertEquals(self::_remote('feature-1') . ' ' . self::_remote('feature-2') . ' ' . $release . ' ' . self::$_remoteStable, $sMsg);
     }
 
+    /**
+     * @shcovers inc/common.inc.sh::get_git_merged_branches
+     */
+    public function testGetGitMergedBranches_WithNewFeatureAndHotfix ()
+    {
+        $hotfix = self::_remote('hotfix-1.0.1');
+        $this->_localExec(TWGIT_EXEC . ' hotfix start -I');
+        $this->_localExec(TWGIT_EXEC . ' feature start 1');
+        $sCmd = 'get_git_merged_branches ' . $hotfix . '; echo \${MERGED_BRANCHES[' . $hotfix . ']}';
+        $sMsg = $this->_localShellCodeCall($sCmd);
+        $this->assertEquals($hotfix . ' ' . self::$_remoteStable, $sMsg);
+    }
 
+    /**
+     * @shcovers inc/common.inc.sh::get_git_merged_branches
+     */
+    public function testGetGitMergedBranches_WithFeatureMergeIntoHotfix ()
+    {
+        $hotfix = self::_remote('hotfix-1.0.1');
+        $this->_localExec(TWGIT_EXEC . ' hotfix start -I');
+        $this->_localExec(TWGIT_EXEC . ' feature start 1');
+        $this->_localExec(TWGIT_EXEC . ' feature merge-into-hotfix 1');
+        $sCmd = 'get_git_merged_branches ' . $hotfix . '; echo \${MERGED_BRANCHES[' . $hotfix . ']}';
+        $sMsg = $this->_localShellCodeCall($sCmd);
+        $this->assertEquals(self::_remote('feature-1') . ' ' . $hotfix . ' ' . self::$_remoteStable, $sMsg);
+    }
+
+    /**
+     * @shcovers inc/common.inc.sh::get_git_merged_branches
+     */
+    public function testGetGitMergedBranches_With2InterdependentFeaturesInHotfix1 ()
+    {
+        $hotfix = self::_remote('hotfix-1.0.1');
+        $this->_localExec(TWGIT_EXEC . ' hotfix start -I');
+        $this->_localExec(TWGIT_EXEC . ' feature start 1');
+        $this->_localExec(TWGIT_EXEC . ' feature start 2');
+        $this->_localExec('git merge feature-1');
+        $this->_localExec(TWGIT_EXEC . ' feature merge-into-hotfix 1');
+        $sCmd = 'get_git_merged_branches ' . $hotfix . '; echo \${MERGED_BRANCHES[' . $hotfix . ']}';
+        $sMsg = $this->_localShellCodeCall($sCmd);
+        $this->assertEquals(self::_remote('feature-1') . ' ' . $hotfix . ' ' . self::$_remoteStable, $sMsg);
+    }
+
+    /**
+     * @shcovers inc/common.inc.sh::get_git_merged_branches
+     */
+    public function testGetGitMergedBranches_With2InterdependentFeaturesInHotfix2 ()
+    {
+        $hotfix = self::_remote('hotfix-1.0.1');
+        $this->_localExec(TWGIT_EXEC . ' hotfix start -I');
+        $this->_localExec(TWGIT_EXEC . ' feature start 1');
+        $this->_localExec(TWGIT_EXEC . ' feature start 2');
+        $this->_localExec('git merge feature-1');
+        $this->_localExec(TWGIT_EXEC . ' feature merge-into-hotfix 2');
+        $sCmd = 'get_git_merged_branches ' . $hotfix . '; echo \${MERGED_BRANCHES[' . $hotfix . ']}';
+        $sMsg = $this->_localShellCodeCall($sCmd);
+        $this->assertEquals(self::_remote('feature-1') . ' ' . self::_remote('feature-2') . ' ' . $hotfix . ' ' . self::$_remoteStable, $sMsg);
+    }
 
     /**
      * @shcovers inc/common.inc.sh::get_git_merge_base

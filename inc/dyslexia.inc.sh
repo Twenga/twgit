@@ -10,6 +10,7 @@
 #
 #
 # Copyright (c) 2013 Sebastien Hanicotte <shanicotte@hi-media.com>
+# Copyright (c) 2014 Laurent Toussaint <lt.laurent.toussaint@gmail.com>
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance
 # with the License. You may obtain a copy of the License at
@@ -21,6 +22,7 @@
 # for the specific language governing permissions and limitations under the License.
 #
 # @copyright 2013 Sebastien Hanicotte <shanicotte@hi-media.com>
+# @copyright 2014 Laurent Toussaint <lt.laurent.toussaint@gmail.com>
 # @license http://www.apache.org/licenses/LICENSE-2.0
 #
 
@@ -42,6 +44,7 @@ dyslexia['1f1h2i1n1s']='finish'
 dyslexia['1a2s2t1u']='status'
 dyslexia['1c1e1i2m1o1r1s2t']='committers'
 dyslexia['2-1a5e1g1i1l1m1n1o2r1s1t']='merge-into-release'
+dyslexia['2-2e1f1g1h2i1m1n2o1r2t1x']='merge-into-hotfix'
 dyslexia['1a1e1g1i1m1r1t']='migrate'
 dyslexia['1h1p1s1u']='push'
 dyslexia['2e1m1o1r1v']='remove'

@@ -9,6 +9,7 @@
 # Copyright (c) 2012-2013 Geoffroy Aubry <geoffroy.aubry@free.fr>
 # Copyright (c) 2013 Cyrille Hemidy
 # Copyright (c) 2013 Sebastien Hanicotte <shanicotte@hi-media.com>
+# Copyright (c) 2014 Laurent Toussaint <lt.laurent.toussaint@gmail.com>
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance
 # with the License. You may obtain a copy of the License at
@@ -23,6 +24,7 @@
 # @copyright 2012-2013 Geoffroy Aubry <geoffroy.aubry@free.fr>
 # @copyright 2013 Cyrille Hemidy
 # @copyright 2013 Sebastien Hanicotte <shanicotte@hi-media.com>
+# @copyright 2014 Laurent Toussaint <lt.laurent.toussaint@gmail.com>
 # @license http://www.apache.org/licenses/LICENSE-2.0
 #
 
@@ -46,6 +48,9 @@ function usage () {
     CUI_displayMsg help_detail '    <b>-d</b> to force detailed display and <b>-x</b> (eXtremely compact) to CSV display.'; echo
     CUI_displayMsg help_detail '<b>merge-into-release [<featurename>]</b>'
     CUI_displayMsg help_detail '    Try to merge specified feature into current release.'
+    CUI_displayMsg help_detail '    If no <b><featurename></b> is specified, then ask to use current feature.'; echo
+    CUI_displayMsg help_detail '<b>merge-into-hotfix [<featurename>]</b>'
+    CUI_displayMsg help_detail '    Try to merge specified feature into current hotfix.'
     CUI_displayMsg help_detail '    If no <b><featurename></b> is specified, then ask to use current feature.'; echo
     CUI_displayMsg help_detail '<b>migrate <oldfeaturefullname> <newfeaturename></b>'
     CUI_displayMsg help_detail '    Migrate old branch to new process.'
@@ -336,6 +341,50 @@ function cmd_merge-into-release () {
     fi
 
     merge_feature_into_branch "$feature" "$release_fullname"
+}
+
+##
+# Merge feature into current hotfix
+#
+# @param string $1 If defined, merge this feature into hotfix, else merge the current feature
+#
+function cmd_merge-into-hotfix () {
+    process_options "$@"
+    require_parameter '-'
+    clean_prefixes "$RETVAL" 'feature'
+    local feature="$RETVAL"
+
+    # Firsts tests :
+    assert_clean_working_tree
+    process_fetch
+
+
+    # Retrieve current hotfix :
+    CUI_displayMsg processing 'Check remote hotfix...'
+    local hotfix_fullname=$(get_current_hotfix_in_progress)
+    local hotfix="${hotfix_fullname:${#TWGIT_PREFIX_HOTFIX}}"
+    [ -z "$hotfix" ] && die 'No hotfix in progress!'
+
+    CUI_displayMsg error $hotfix_fullname
+
+    # If no feature given, retrieve the current one
+    local feature_fullname
+    if [ -z "$feature" ]; then
+        local all_features=$(git branch --no-color -r --no-merged $TWGIT_ORIGIN/$TWGIT_STABLE | grep "$TWGIT_ORIGIN/$TWGIT_PREFIX_FEATURE" | sed 's/^[* ]*//' | tr '\n' ' ' | sed 's/ *$//g')
+        local current_branch=$(get_current_branch)
+        if ! has "$TWGIT_ORIGIN/$current_branch" $all_features; then
+            die "You must be in a feature if you didn't specify one!"
+        else
+            echo -n $(CUI_displayMsg question "Are you sure to merge '$TWGIT_ORIGIN/$current_branch' into '$TWGIT_ORIGIN/$hotfix_fullname'? [Y/N] "); read answer
+            [ "$answer" != "Y" ] && [ "$answer" != "y" ] && die 'Merge into current release aborted!'
+        fi
+        feature_fullname="$current_branch"
+        feature="${feature_fullname:${#TWGIT_PREFIX_FEATURE}}"
+    else
+        feature_fullname="$TWGIT_PREFIX_FEATURE$feature"
+    fi
+
+    merge_feature_into_branch "$feature" "$hotfix_fullname"
 }
 
 ##

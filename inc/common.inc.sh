@@ -1563,7 +1563,7 @@ function update_version_information () {
         for filepath in $(echo $TWGIT_VERSION_INFO_PATH | tr ',' ' '); do
             if [[ -f $filepath ]]; then
                 CUI_displayMsg processing "Updating $Id$ tags in $filepath..."
-                sed -i 's/\$Id[:v0-9\.]*\$/$Id:'$version'$/g' "$filepath"
+                sed -i -e 's/\$Id[:v0-9\.]*\$/$Id:'$version'$/g' "$filepath"
                 exec_git_command "git add $filepath" "Could not add version info into $filepath!"
             else
                 CUI_displayMsg warning "TWGIT_VERSION_INFO_PATH contains a non-existing file: $filepath!"

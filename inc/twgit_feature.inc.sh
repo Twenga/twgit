@@ -229,8 +229,11 @@ function cmd_migrate () {
         die "Remote feature '$feature_fullname' already exists!"
     fi
 
-    echo -n $(CUI_displayMsg question "Are you sure to migrate '$oldfeature_fullname' to '$feature_fullname'? Branch '$oldfeature_fullname' will be deleted. [Y/N] "); read answer
-    [ "$answer" != "Y" ] && [ "$answer" != "y" ] && die 'Branch migration aborted!'
+
+    if ! isset_option 'I'; then
+        echo -n $(CUI_displayMsg question "Are you sure to migrate '$oldfeature_fullname' to '$feature_fullname'? Branch '$oldfeature_fullname' will be deleted. [Y/N] "); read answer
+        [ "$answer" != "Y" ] && [ "$answer" != "y" ] && die 'Branch migration aborted!'
+    fi
 
     CUI_displayMsg processing "Migrate '<b>$oldfeature_fullname</b>' to '<b>$feature_fullname</b>'..."
     exec_git_command "git checkout --track -b $feature_fullname $TWGIT_ORIGIN/$oldfeature_fullname" "Could not check out feature '$TWGIT_ORIGIN/$oldfeature_fullname'!"

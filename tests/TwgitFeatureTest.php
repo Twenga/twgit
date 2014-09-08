@@ -198,7 +198,7 @@ class TwgitFeatureTest extends TwgitTestCase
         $this->_remoteExec('git init');
         $this->_localExec(TWGIT_EXEC . ' init 1.2.3 ' . TWGIT_REPOSITORY_ORIGIN_DIR);
         $this->_remoteExec('git checkout ' . self::STABLE . ' && git branch toto');
-        $sMsg = $this->_localExec('yes | ' . TWGIT_EXEC . ' feature migrate toto feature-42');
+        $sMsg = $this->_localExec(TWGIT_EXEC . ' feature migrate -I toto feature-42');
         $this->assertContains("Assume feature was '42' instead of 'feature-42'", $sMsg);
     }
 

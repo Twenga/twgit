@@ -7,6 +7,7 @@
 #
 # Copyright (c) 2014 Romain Derocle <rderocle@gmail.com>
 # Copyright (c) 2014 Geoffroy Aubry <geoffroy.aubry@free.fr>
+# Copyright (c) 2014 Laurent Toussaint <lt.laurent.toussaint@gmail.com>
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance
 # with the License. You may obtain a copy of the License at
@@ -19,6 +20,7 @@
 #
 # @copyright 2014 Romain Derocle <rderocle@gmail.com>
 # @copyright 2014 Geoffroy Aubry <geoffroy.aubry@free.fr>
+# @copyright 2014 Laurent Toussaint <lt.laurent.toussaint@gmail.com>
 # @license http://www.apache.org/licenses/LICENSE-2.0
 #
 
@@ -36,7 +38,13 @@ else
     scheme='https://'
 fi
 issue_url="$scheme$TWGIT_FEATURE_SUBJECT_JIRA_DOMAIN/rest/api/latest/issue/$issue"
-wget_cmd="wget --no-check-certificate --timeout=3 -q -O - --no-cache --header \"Authorization: Basic $TWGIT_FEATURE_SUBJECT_JIRA_CREDENTIAL_BASE64\" --header \"Content-Type: application/json\" $issue_url"
+
+if ${has_wget}; then
+    cmd="wget --no-check-certificate --timeout=3 -q -O - --no-cache --header \"Authorization: Basic $TWGIT_FEATURE_SUBJECT_JIRA_CREDENTIAL_BASE64\" --header \"Content-Type: application/json\""
+else
+    cmd="curl --insecure --max-time 3 --user-agent Twenga-twgit --silent -H \"Cache-control: no-cache\" -H \"Authorization: Basic $TWGIT_FEATURE_SUBJECT_JIRA_CREDENTIAL_BASE64\" -H \"Content-Type: application/json\""
+fi
+cmd="${cmd} ${issue_url}"
 
 # Python or PHP ?
 language='?'
@@ -52,12 +60,12 @@ fi
 
 # Convert JSON with Python or PHP:
 if [ "$language" = 'python' ]; then
-    data=$(eval $wget_cmd)
+    data=$(eval $cmd)
     if [ ! -z "$data" ]; then
         echo $data | python -c "import json,sys;s=sys.stdin.read();s=s.replace('\r\n', '');s=json.loads(s);print s['fields']['summary'].encode('utf8');" 2>/dev/null
     fi
 elif [ "$language" = 'php' ]; then
-    data=$(eval $wget_cmd)
+    data=$(eval $cmd)
     if [ ! -z "$data" ]; then
         echo $data | php -r '$o = json_decode(file_get_contents("php://stdin")); if (!empty($o)){print_r($o->fields->summary);}' 2>/dev/null
     fi

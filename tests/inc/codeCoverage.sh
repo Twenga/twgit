@@ -3,11 +3,11 @@
 ##
 # Usage: /bin/bash tests/inc/codeCoverage.sh
 # @copyright 2012-2013 Geoffroy Aubry <geoffroy.aubry@free.fr>
-# @copyright 2012 Laurent Toussaint <lt.laurent.toussaint@gmail.com>
+# @copyright 2012-2014 Laurent Toussaint <lt.laurent.toussaint@gmail.com>
 # @license http://www.apache.org/licenses/LICENSE-2.0
 #
 
-. ./inc/os_compatibility.inc.sh
+. ./inc/compatibility.inc.sh
 
 
 rStats="/tmp/file.$$.$RANDOM"

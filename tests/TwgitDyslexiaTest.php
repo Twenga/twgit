@@ -33,7 +33,7 @@ class TwgitDyslexiaTest extends TwgitTestCase
             /** Yep... But Lance <<Armstrong>> wasn't so clean **/
             array('mode', "Assume 'mode' was 'demo'…", '', 'demo'),
             array('itni', "Assume 'itni' was 'init'…", '', 'init'),
-            /** Testing one clean commande **/
+            /** Testing one clean command **/
             array('clean', '', 'Assume', 'clean'),
             array('foxhit', "Assume 'foxhit' was 'hotfix'…", '', 'hotfix'),
             array('relasee', "Assume 'relasee' was 'release'…", '', 'release'),
@@ -45,9 +45,10 @@ class TwgitDyslexiaTest extends TwgitTestCase
             array('hsinif', "Assume 'hsinif' was 'finish'…", '', 'finish'),
             array('sautts', "Assume 'sautts' was 'status'…", '', 'status'),
             array('comimtetrs', "Assume 'comimtetrs' was 'committers'…", '', 'committers'),
-            /** Testing one unknowk hash key **/
+            /** Testing one unknown hash key **/
             array('commiters', '', 'Assume', 'commiters'),
             array('merg-einto-rleease', "Assume 'merg-einto-rleease' was 'merge-into-release'…", '', 'merge-into-release'),
+            array('mereg-into-hoftix', "Assume 'mereg-into-hoftix' was 'merge-into-hotfix'…", '', 'merge-into-hotfix'),
             array('migarte', "Assume 'migarte' was 'migrate'…", '', 'migrate'),
             array('hups', "Assume 'hups' was 'push'…", '', 'push'),
             array('movere', "Assume 'movere' was 'remove'…", '', 'remove'),

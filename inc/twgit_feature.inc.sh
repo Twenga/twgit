@@ -368,8 +368,6 @@ function cmd_merge-into-hotfix () {
     local hotfix="${hotfix_fullname:${#TWGIT_PREFIX_HOTFIX}}"
     [ -z "$hotfix" ] && die 'No hotfix in progress!'
 
-    CUI_displayMsg error $hotfix_fullname
-
     # If no feature given, retrieve the current one
     local feature_fullname
     if [ -z "$feature" ]; then

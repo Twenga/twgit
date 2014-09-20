@@ -5,8 +5,7 @@
 #
 #
 #
-# Copyright (c) 2011 Twenga SA
-# Copyright (c) 2012-2013 Geoffroy Aubry <geoffroy.aubry@free.fr>
+# Copyright (c) 2014 Karl Marques <marques.karl@live.fr>
 # Copyright (c) 2014 Laurent Toussaint <lt.laurent.toussaint@gmail.com>
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance
@@ -18,28 +17,27 @@
 # on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License
 # for the specific language governing permissions and limitations under the License.
 #
-# @copyright 2011 Twenga SA
-# @copyright 2012-2013 Geoffroy Aubry <geoffroy.aubry@free.fr>
+# @copyright 2014 Karl Marques <marques.karl@live.fr>
 # @copyright 2014 Laurent Toussaint <lt.laurent.toussaint@gmail.com>
 # @license http://www.apache.org/licenses/LICENSE-2.0
 #
 
-
-
 ##
-# Retrieve and display subject of a Redmine's issue.
+# Retrieve and display subject of a Gitlab's issue.
 #
-# @param string $1 issue number or project name
+# @param string $1 issue number
 #
 ref="$1"
-if [[ "$TWGIT_FEATURE_SUBJECT_REDMINE_DOMAIN" =~ ^https?:// ]]; then
+project_addr=$(git remote show -n $TWGIT_ORIGIN | grep Fetch | cut -d: -f3 | cut -d. -f1)
+
+if [[ "$TWGIT_FEATURE_SUBJECT_GITLAB_DOMAIN" =~ ^https?:// ]]; then
     scheme=''
 else
     scheme='https://'
 fi
-issue_url="$scheme$TWGIT_FEATURE_SUBJECT_REDMINE_DOMAIN/issues/$ref.json?key=$TWGIT_FEATURE_SUBJECT_REDMINE_API_KEY"
-project_url="$scheme$TWGIT_FEATURE_SUBJECT_REDMINE_DOMAIN/projects/$ref.json?key=$TWGIT_FEATURE_SUBJECT_REDMINE_API_KEY"
 
+project_url="$scheme$TWGIT_FEATURE_SUBJECT_GITLAB_DOMAIN/api/v3/projects/all?private_token=$TWGIT_FEATURE_SUBJECT_GITLAB_API_KEY"
+issue_url="$scheme$TWGIT_FEATURE_SUBJECT_GITLAB_DOMAIN/api/v3/projects/%s/issues?private_token=$TWGIT_FEATURE_SUBJECT_GITLAB_API_KEY"
 if ${has_wget}; then
     cmd="wget --no-check-certificate --timeout=3 -q -O - --no-cache"
 else
@@ -61,24 +59,27 @@ fi
 # Convert JSON with Python or PHP:
 if [ "$language" = 'python' ]; then
     if [[ "$ref" =~ ^[0-9]+$ ]]; then
-        ($cmd $issue_url \
-        | python -c 'import sys,json;s=sys.stdin.read();
-if s!="": data=json.loads(s); print data["issue"]["subject"].encode("utf8")')
-        2>/dev/null
-    else
         ($cmd $project_url \
-        | python -c 'import sys,json;s=sys.stdin.read();
-if s!="": data=json.loads(s); print data["project"]["name"].encode("utf8")')
+        | python -c 'import sys,json,urllib;s=sys.stdin.read();
+data=json.loads(s) if s!="" else sys.exit(0)
+projectId=None
+for row in data:
+    if row["path_with_namespace"] == "'$project_addr'" :
+        projectId = row["id"]; break;
+f = urllib.urlopen("http://gitlab.brandzofferz.com/api/v3/projects/%s/issues?private_token=GNR9tuTVGXBTxYkpsQDa" % (projectId))
+s = f.read()
+data=json.loads(s) if s!="" else sys.exit(0);
+for row in data:
+    if row["iid"] == '$ref' :
+        print row["title"].encode("utf8"); break;')
         2>/dev/null
     fi
 elif [ "$language" = 'php' ]; then
     if [[ "$ref" =~ ^[0-9]+$ ]]; then
-        ($cmd $issue_url \
-        | php -r '$o = json_decode(file_get_contents("php://stdin")); if ($o !== NULL) {print_r($o->issue->subject);}')
-        2>/dev/null
-    else
         ($cmd $project_url \
-        | php -r '$o = json_decode(file_get_contents("php://stdin")); if ($o !== NULL) {print_r($o->project->name);}')
+        | php -r '$o = json_decode(file_get_contents("php://stdin"));$projectid=array_reduce($o, function($carry, $item){if($carry==null && $item->path_with_namespace == "'$project_addr'"){return 
+$item->id;}return $carry;}, null);$o=json_decode(file_get_contents(sprintf("'$issue_url'", $projectid,'$ref')));if ($o !== NULL) {array_walk($o, function($item, 
+$key){if($item->iid == '$ref'){print_r($item->title);}});}')
         2>/dev/null
     fi
 else

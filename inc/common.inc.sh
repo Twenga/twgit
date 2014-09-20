@@ -7,7 +7,7 @@
 #
 # Copyright (c) 2011 Twenga SA
 # Copyright (c) 2012-2013 Geoffroy Aubry <geoffroy.aubry@free.fr>
-# Copyright (c) 2012 Laurent Toussaint <lt.laurent.toussaint@gmail.com>
+# Copyright (c) 2012-2014 Laurent Toussaint <lt.laurent.toussaint@gmail.com>
 # Copyright (c) 2013 Cyrille Hemidy
 # Copyright (c) 2013 Geoffroy Letournel <gletournel@hi-media.com>
 # Copyright (c) 2013 Sebastien Hanicotte <shanicotte@hi-media.com>
@@ -24,7 +24,7 @@
 # @copyright 2011 Twenga SA
 # @copyright 2012-2013 Geoffroy Aubry <geoffroy.aubry@free.fr>
 # @copyright 2012 Jérémie Havret <jhavret@hi-media.com>
-# @copyright 2012 Laurent Toussaint <lt.laurent.toussaint@gmail.com>
+# @copyright 2012-2014 Laurent Toussaint <lt.laurent.toussaint@gmail.com>
 # @copyright 2013 Cyrille Hemidy
 # @copyright 2013 Geoffroy Letournel <gletournel@hi-media.com>
 # @copyright 2013 Sebastien Hanicotte <shanicotte@hi-media.com>
@@ -35,7 +35,7 @@
 
 . $TWGIT_INC_DIR/options_handler.inc.sh
 . $TWGIT_INC_DIR/coloredUI.inc.sh
-. $TWGIT_INC_DIR/os_compatibility.inc.sh
+. $TWGIT_INC_DIR/compatibility.inc.sh
 . $TWGIT_INC_DIR/dyslexia.inc.sh
 
 
@@ -115,7 +115,14 @@ function get_current_release_in_progress () {
     local releases="$(get_releases_in_progress)"
     local release="$(echo $releases | tr '\n' ' ' | cut -d' ' -f1)"
     [[ $(echo $releases | wc -w) > 1 ]] && die "More than one release in progress detected: $(echo $releases | sed 's/ /, /g')! Only '$release' will be treated here."
-    echo ${release:((${#TWGIT_ORIGIN}+1))}	# supprime le préfixe 'origin/'
+    echo ${release:((${#TWGIT_ORIGIN}+1))}	# delete 'origin/' prefix
+}
+
+function get_current_hotfix_in_progress () {
+    local hotfixes="$(get_hotfixes_in_progress)"
+    local hotfix="$(echo $hotfixes | tr '\n' ' ' | cut -d' ' -f1)"
+    [[ $(echo $hotfixes | wc -w) > 1 ]] && die "More than one hotfix in progress detected: $(echo $hotfixes | sed 's/ /, /g')! Only '$hotfix' will be treated here."
+    echo ${hotfix:((${#TWGIT_ORIGIN}+1))}	# delete 'origin/' prefix
 }
 
 ##
@@ -501,12 +508,9 @@ function assert_connectors_well_configured () {
         if [ ! -f "$connector" ]; then
             die "'<b>$TWGIT_FEATURE_SUBJECT_CONNECTOR</b>' connector not found!" \
                 "Please adjust <b>TWGIT_FEATURE_SUBJECT_CONNECTOR</b> in '$config_file'."
-        else
-            which wget 1>/dev/null 2>&1
-            if [ $? -ne 0 ]; then
-                die "Feature's subject not available because <b>wget</b> was not found!" \
-                    "Install it (e.g.: apt-get install wget) or switch off connectors in '$config_file'."
-            fi
+        elif ! ${has_wget} && ! ${has_curl} ; then
+            die "Feature's subject not available because <b>wget</b> or <b>curl</b> was not found!" \
+                "Install wget (e.g.: apt-get install wget) or curl (e.g.: apt-get install curl) or switch off connectors in '$config_file'."
         fi
     fi
 }
@@ -939,12 +943,12 @@ function start_simple_branch () {
 }
 
 ##
-# Exécutes les commandes de merge de la feature spécifiée dans la branche de destination, release ou demo.
+# Exécutes les commandes de merge de la feature spécifiée dans la branche de destination, release, hotfix ou demo.
 # Si le merge automatique ne peut se faire à cause de conflits, alors affiche les instructions
 # restantes pour accomplir le merge, puis exécute un "exit 1".
 #
 # @param string $1 nom court de la feature à merger dans la branche de destination
-# @param string $2 nom long de la release ou de la demo devant recevoir la feature, sans le "$TWGIT_ORIGIN/"
+# @param string $2 nom long de la release, du hotfix ou de la demo devant recevoir la feature, sans le "$TWGIT_ORIGIN/"
 #
 function merge_feature_into_branch () {
     local feature="$1"
@@ -961,6 +965,8 @@ function merge_feature_into_branch () {
     local start_branch_cmd
     if [ "${dest_branch_fullname:0:${#TWGIT_PREFIX_RELEASE}}" = "$TWGIT_PREFIX_RELEASE" ]; then
         start_branch_cmd="$TWGIT_EXEC release start"
+    elif [ "${dest_branch_fullname:0:${#TWGIT_PREFIX_HOTFIX}}" = "$TWGIT_PREFIX_HOTFIX" ]; then
+        start_branch_cmd="$TWGIT_EXEC hotfix start"
     else
         start_branch_cmd="$TWGIT_EXEC demo start ${dest_branch_fullname:${#TWGIT_PREFIX_DEMO}}"
     fi
@@ -1554,7 +1560,7 @@ function update_version_information () {
         for filepath in $(echo $TWGIT_VERSION_INFO_PATH | tr ',' ' '); do
             if [[ -f $filepath ]]; then
                 CUI_displayMsg processing "Updating $Id$ tags in $filepath..."
-                sed -i 's/\$Id[:v0-9\.]*\$/$Id:'$version'$/g' "$filepath"
+                sed -i -e 's/\$Id[:v0-9\.]*\$/$Id:'$version'$/g' "$filepath"
                 exec_git_command "git add $filepath" "Could not add version info into $filepath!"
             else
                 CUI_displayMsg warning "TWGIT_VERSION_INFO_PATH contains a non-existing file: $filepath!"

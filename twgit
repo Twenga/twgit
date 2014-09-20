@@ -3,7 +3,7 @@
 ##
 # twgit
 #
-# git clone git@git.twenga.com:aa/twgit.git [path]
+# git clone git@github.com:Twenga/twgit.git [path]
 # cd [path]
 # Install: sudo make install --always-make
 # ou /bin/bash [path]/twgit

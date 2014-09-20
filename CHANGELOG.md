@@ -1,7 +1,15 @@
 ChangeLog
 =========
 
-## Version 1.14.2 (2014-07-30)
+## Version 1.15.0 (2014-09-20)
+
+Features:
+
+  - [#145](https://github.com/Twenga/twgit/pull/145): Add gitlab connector
+  - [#125](https://github.com/Twenga/twgit/issues/125): Add command `twgit feature merge-into-release`
+  - [#146](https://github.com/Twenga/twgit/issues/146): Use curl as failover of wget for connectors
+
+## Version 1.14.3 (2014-07-30)
 
 Fixes:
   - [#141](https://github.com/Twenga/twgit/issues/141): Fix user home detection

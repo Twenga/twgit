@@ -7,7 +7,7 @@
 #
 # Copyright (c) 2011 Twenga SA
 # Copyright (c) 2012-2013 Geoffroy Aubry <geoffroy.aubry@free.fr>
-# Copyright (c) 2012 Laurent Toussaint <lt.laurent.toussaint@gmail.com>
+# Copyright (c) 2012-2014 Laurent Toussaint <lt.laurent.toussaint@gmail.com>
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance
 # with the License. You may obtain a copy of the License at
@@ -20,11 +20,23 @@
 #
 # @copyright 2011 Twenga SA
 # @copyright 2012-2013 Geoffroy Aubry <geoffroy.aubry@free.fr>
-# @copyright 2012 Laurent Toussaint <lt.laurent.toussaint@gmail.com>
+# @copyright 2012-2014 Laurent Toussaint <lt.laurent.toussaint@gmail.com>
 # @license http://www.apache.org/licenses/LICENSE-2.0
 #
 
 
+has_wget=false
+has_curl=false
+
+which wget 1>/dev/null 2>&1
+if [ $? -eq 0 ]; then
+    has_wget=true
+fi
+
+which curl 1>/dev/null 2>&1
+if [ $? -eq 0 ]; then
+    has_curl=true
+fi
 
 #--------------------------------------------------------------------
 # Mac OS X compatibility layer

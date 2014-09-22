@@ -1,12 +1,18 @@
 ChangeLog
 =========
 
+## Version 1.15.1 (2014-09-22)
+
+Fixes:
+
+  - Fix changelog
+
 ## Version 1.15.0 (2014-09-20)
 
 Features:
 
   - [#145](https://github.com/Twenga/twgit/pull/145): Add gitlab connector
-  - [#125](https://github.com/Twenga/twgit/issues/125): Add command `twgit feature merge-into-release`
+  - [#125](https://github.com/Twenga/twgit/issues/125): Add command `twgit feature merge-into-hotfix`
   - [#146](https://github.com/Twenga/twgit/issues/146): Use curl as failover of wget for connectors
 
 ## Version 1.14.3 (2014-07-30)

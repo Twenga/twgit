@@ -66,7 +66,7 @@ projectId=None
 for row in data:
     if row["path_with_namespace"] == "'$project_addr'" :
         projectId = row["id"]; break;
-f = urllib.urlopen("http://gitlab.brandzofferz.com/api/v3/projects/%s/issues?private_token=GNR9tuTVGXBTxYkpsQDa" % (projectId))
+f = urllib.urlopen("'$issue_url'" % (projectId))
 s = f.read()
 data=json.loads(s) if s!="" else sys.exit(0);
 for row in data:

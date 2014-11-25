@@ -5,8 +5,7 @@
 #
 #
 #
-# Copyright (c) 2014 Romain Derocle <rderocle@gmail.com>
-# Copyright (c) 2014 Geoffroy Aubry <geoffroy.aubry@free.fr>
+# Copyright (c) 2014 Julien Pottier <julien.pottier@sensiolabs.com>
 # Copyright (c) 2014 Laurent Toussaint <lt.laurent.toussaint@gmail.com>
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance
@@ -18,8 +17,7 @@
 # on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License
 # for the specific language governing permissions and limitations under the License.
 #
-# @copyright 2014 Romain Derocle <rderocle@gmail.com>
-# @copyright 2014 Geoffroy Aubry <geoffroy.aubry@free.fr>
+# @copyright 2014 Julien Pottier <julien.pottier@sensiolabs.com>
 # @copyright 2014 Laurent Toussaint <lt.laurent.toussaint@gmail.com>
 # @license http://www.apache.org/licenses/LICENSE-2.0
 #
@@ -27,7 +25,7 @@
 
 
 ##
-# Retrieve and display subject of a Jira's issue.
+# Retrieve and display subject of a Trello's issue.
 #
 # @param string $1 issue number or project name
 #

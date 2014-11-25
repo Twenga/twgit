@@ -78,6 +78,9 @@ TWGIT_FEATURE_SUBJECT_GITHUB_USER=''		    # e.g. 'Twenga'
 TWGIT_FEATURE_SUBJECT_GITHUB_REPOSITORY=''	    # e.g. 'twgit'
 TWGIT_FEATURE_SUBJECT_JIRA_DOMAIN=''            # e.g. 'www.abc.xyz'
 TWGIT_FEATURE_SUBJECT_JIRA_CREDENTIAL_BASE64='' # base64 (login:password)
+TWGIT_FEATURE_SUBJECT_TRELLO_DOMAIN='https://trello.com' # trello domain
+TWGIT_FEATURE_SUBJECT_TRELLO_APPLICATION_KEY=''          # trello application key (check https://trello.com/docs/gettingstarted/index.html#getting-an-application-key)
+TWGIT_FEATURE_SUBJECT_TRELLO_TOKEN=''                    # trello token (check https://trello.com/docs/gettingstarted/index.html#getting-a-token-from-a-user)
 
 # All the files designed in the TWGIT_VERSION_INFO_PATH list will be
 # parsed in order to search for $Id$ or $Id:X.Y.Z$ and replace with

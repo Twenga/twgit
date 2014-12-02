@@ -1,6 +1,12 @@
 ChangeLog
 =========
 
+## Version 1.15.2 (2014-11-13)
+
+Fixes:
+
+  - Fix hard coded URL when using Python in Gitlab connector.
+
 ## Version 1.15.1 (2014-09-22)
 
 Fixes:

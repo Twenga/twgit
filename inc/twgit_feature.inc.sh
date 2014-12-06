@@ -239,7 +239,7 @@ function cmd_migrate () {
     exec_git_command "git checkout --track -b $feature_fullname $TWGIT_ORIGIN/$oldfeature_fullname" "Could not check out feature '$TWGIT_ORIGIN/$oldfeature_fullname'!"
     remove_local_branch "$oldfeature_fullname"
     remove_remote_branch "$oldfeature_fullname"
-    exec_git_command "git merge --no-ff $TWGIT_STABLE" "Could not merge stable into '$feature_fullname'!"
+    exec_git_command "git merge --no-ff $TWGIT_ORIGIN/$TWGIT_STABLE" "Could not merge stable into '$feature_fullname'!"
     process_push_branch "$feature_fullname"
 }
 

@@ -1,6 +1,19 @@
 ChangeLog
 =========
 
+## Version 1.15.3 (2014-12-06)
+
+Fixes:
+
+  - [#154](https://github.com/Twenga/twgit/pull/154):
+    Fixed an issue with feature migrate task when local repository has multiple remotes.
+
+## Version 1.15.2 (2014-11-13)
+
+Fixes:
+
+  - [#151](https://github.com/Twenga/twgit/pull/151): Fix hard coded URL when using Python in Gitlab connector.
+
 ## Version 1.15.1 (2014-09-22)
 
 Fixes:

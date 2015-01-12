@@ -3,16 +3,8 @@
 
 #### [Homepage](http://twgit.twenga.com/)
 
-#### Continuous integration [![travis-ci.org](doc/travis-favicon.png)](http://travis-ci.org/Twenga/twgit)&nbsp;[![Build Status](https://secure.travis-ci.org/Twenga/twgit.png?branch=stable)](http://travis-ci.org/Twenga/twgit)
-To run the test suite, simply:
-
-```bash
-$ cp conf/twgit-dist.sh conf/twgit.sh          # and adapt, if necessary
-$ cp conf/phpunit-dist.php conf/phpunit.php    # and adapt, if necessary
-$ phpunit -c conf/phpunit-dist.xml
-```
-
 ## Description
+
 Twgit is a free and open source assisting tools for managing features, hotfixes and releases on Git repositories.
 It provides simple, high-level commands to adopt the branching model describes in our documentation (see below).
 
@@ -29,6 +21,7 @@ Feel free to contribute to it if you like.
   - Supported operating systems: Debian/Ubuntu Linux, FreeBSD, Mac OS X
 
 ## Installing twgit
+
 In the directory of your choice, e.g. `~/twgit`:
 
 ```bash
@@ -43,6 +36,7 @@ More [Installation instructions](https://github.com/Twenga/twgit/wiki/Twgit#wiki
 ![Getting started](doc/getting-started.png)
 
 ## Documentation
+
 [French documentation](https://github.com/Twenga/twgit/wiki) is available in wiki, waiting English translation...
 
 ### Help on command prompt
@@ -59,9 +53,31 @@ More [Installation instructions](https://github.com/Twenga/twgit/wiki/Twgit#wiki
 
 ![twgit tag](doc/screenshot-twgit-tag.png)
 
+## Continuous integration [![travis-ci.org](doc/travis-favicon.png)](http://travis-ci.org/Twenga/twgit)&nbsp;[![Build Status](https://secure.travis-ci.org/Twenga/twgit.png?branch=stable)](http://travis-ci.org/Twenga/twgit)
+
+To run the test suite locally, simply:
+
+```bash
+$ cp conf/twgit-dist.sh conf/twgit.sh          # and adapt, if necessary
+$ cp conf/phpunit-dist.php conf/phpunit.php    # and adapt, if necessary
+$ phpunit -c conf/phpunit-dist.xml
+```
+
+To show estimated code coverage (_see_ [.travis.yml](.travis.yml)):
+
+```bash
+$ tests/inc/codeCoverage.sh \
+     <(find $(pwd)/inc -type f -name '*.sh' && echo $(pwd)/twgit) \
+     <(find $(pwd) -type f -name '*Test.php')
+```
+
+[Estimated code coverage](https://travis-ci.org/Twenga/twgit): 33.1% (661 of 1994 lines).
+
 ## Copyrights & licensing
+
 Licensed under the Apache License 2.0.
 See [LICENSE](LICENSE) file for details.
 
 ## ChangeLog
+
 See [CHANGELOG](CHANGELOG.md) file for details.

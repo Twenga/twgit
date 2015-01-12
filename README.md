@@ -67,8 +67,8 @@ To show estimated code coverage (_see_ [.travis.yml](.travis.yml)):
 
 ```bash
 $ tests/inc/codeCoverage.sh \
-     <(find $(pwd)/inc -type f -name '*.sh' && echo $(pwd)/twgit) \
-     <(find $(pwd) -type f -name '*Test.php')
+    <(find $(pwd)/inc -type f -name '*.sh' && echo $(pwd)/twgit) \
+    <(find $(pwd) -type f -name '*Test.php')
 ```
 
 [Estimated code coverage](https://travis-ci.org/Twenga/twgit): 33.1% (661 of 1994 lines).

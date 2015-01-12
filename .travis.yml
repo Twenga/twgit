@@ -11,7 +11,7 @@ before_script:
   - git config --global user.email 'firstname.lastname@xyz.com'
 script: phpunit --configuration conf/phpunit-dist.xml
 after_script:
-  - /bin/bash tests/inc/codeCoverage.sh
+  - tests/inc/codeCoverage.sh <(find $(pwd)/inc -type f -name '*.sh' && echo $(pwd)/twgit) <(find $(pwd) -type f -name '*Test.php')
 
 notifications:
   on_success: always

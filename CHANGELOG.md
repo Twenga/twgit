@@ -1,6 +1,13 @@
 ChangeLog
 =========
 
+## Version 1.16.0 (2015-01-12)
+
+Features:
+
+  - [#155](https://github.com/Twenga/twgit/pull/155): Add a more verbose code coverage.
+  - [#153](https://github.com/Twenga/twgit/issues/153): Add Trello connector.
+
 ## Version 1.15.3 (2014-12-06)
 
 Fixes:
@@ -24,9 +31,9 @@ Fixes:
 
 Features:
 
+  - [#146](https://github.com/Twenga/twgit/issues/146): Use curl as failover of wget for connectors
   - [#145](https://github.com/Twenga/twgit/pull/145): Add gitlab connector
   - [#125](https://github.com/Twenga/twgit/issues/125): Add command `twgit feature merge-into-hotfix`
-  - [#146](https://github.com/Twenga/twgit/issues/146): Use curl as failover of wget for connectors
 
 ## Version 1.14.3 (2014-07-30)
 

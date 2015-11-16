@@ -44,6 +44,8 @@ function usage () {
     CUI_displayMsg help_detail "    Merge current release branch into '$TWGIT_STABLE', create a new tag and push."
     CUI_displayMsg help_detail '    If no <b><tagname></b> is specified then current release name will be used.'
     CUI_displayMsg help_detail '    Add <b>-I</b> to run in non-interactive mode (always say yes).'; echo
+    CUI_displayMsg help_detail '<b>merge-demo <demoname> </b>'
+    CUI_displayMsg help_detail '    Try to merge specified demo into specified release.'; echo
     CUI_displayMsg help_detail '<b>list [-F]</b>'
     CUI_displayMsg help_detail '    List remote release with their merged features.'
     CUI_displayMsg help_detail '    Add <b>-F</b> to do not make fetch.'; echo
@@ -287,6 +289,57 @@ function cmd_finish () {
     remove_local_branch $release_fullname
     remove_remote_branch $release_fullname
     echo
+}
+
+
+##
+# Try to merge a specified demo and his features into release
+#
+# @param string $1 nom de la demo
+#
+function cmd_merge-demo () {
+
+    process_options "$@"
+    require_parameter 'demo'
+    clean_prefixes "$RETVAL" 'demo'
+    local demo="$RETVAL"
+    local demo_fullname="$TWGIT_PREFIX_DEMO$demo"
+
+    # Tests préliminaires :
+    assert_clean_working_tree
+    process_fetch
+
+    # Récupération de la release en cours :
+    CUI_displayMsg processing 'Check remote release...'gh
+    local release_fullname="$(get_current_release_in_progress)"
+    [ -z "$release_fullname" ] && die 'No release in progress!'
+    local release="${release_fullname:${#TWGIT_PREFIX_RELEASE}}"
+    CUI_displayMsg processing "Remote release '$release_fullname' detected."
+
+    # Merge de la demo dans la release
+    exec_git_command "git merge --no-ff $demo_fullname" "Could not merge '$demo_fullname' into '$release_fullname'!"
+
+    #Recuperation de la liste des features
+    local demo_features=$(twgit demo list $demo -c -f | grep $TWGIT_PREFIX_FEATURE |  cut -d "-" -f3 | cut -d " " -f1)
+
+    CUI_displayMsg processing $demo_features
+
+    #Suppression demo avant merge features
+    remove_demo "$demo"
+
+    # merge des features associées :
+    for feature in $demo_features; do
+        CUI_displayMsg processing "Merge '$feature'"
+
+
+        merge_feature_into_branch "$feature" "$release_fullname"
+
+
+    done
+
+
+
+
 }
 
 ##

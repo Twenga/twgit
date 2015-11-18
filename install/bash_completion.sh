@@ -54,7 +54,7 @@ function _twgit () {
                 COMPREPLY=( $(compgen -W "${opts}" -- ${cur}) )
                 ;;
             release)
-                local opts="committers finish help list push remove reset start"
+                local opts="committers finish merge-demo help list push remove reset start"
                 COMPREPLY=( $(compgen -W "${opts}" -- ${cur}) )
                 ;;
             tag)

@@ -291,7 +291,6 @@ function cmd_finish () {
     echo
 }
 
-
 ##
 # Try to merge a specified demo and his features into release
 #
@@ -310,7 +309,7 @@ function cmd_merge-demo () {
     process_fetch
 
     # Récupération de la release en cours :
-    CUI_displayMsg processing 'Check remote release...'gh
+    CUI_displayMsg processing 'Check remote release...'
     local release_fullname="$(get_current_release_in_progress)"
     [ -z "$release_fullname" ] && die 'No release in progress!'
     local release="${release_fullname:${#TWGIT_PREFIX_RELEASE}}"
@@ -320,7 +319,7 @@ function cmd_merge-demo () {
     exec_git_command "git merge --no-ff $demo_fullname" "Could not merge '$demo_fullname' into '$release_fullname'!"
 
     #Recuperation de la liste des features
-    local demo_features=$(twgit demo list $demo -c -f | grep $TWGIT_PREFIX_FEATURE |  cut -d "-" -f3 | cut -d " " -f1)
+    local demo_features=$(twgit demo list $demo -c -f | grep $TWGIT_PREFIX_FEATURE | awk -F$TWGIT_PREFIX_FEATURE '{print $2}' | cut -d " " -f1)
 
     CUI_displayMsg processing $demo_features
 
@@ -330,15 +329,8 @@ function cmd_merge-demo () {
     # merge des features associées :
     for feature in $demo_features; do
         CUI_displayMsg processing "Merge '$feature'"
-
-
         merge_feature_into_branch "$feature" "$release_fullname"
-
-
     done
-
-
-
 
 }
 

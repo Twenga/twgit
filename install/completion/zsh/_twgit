@@ -25,7 +25,7 @@ _twgit() {
                             ;;
                 (hotfix)    compadd "$@" finish help list push remove start
                             ;;
-                (release)   compadd "$@" committers finish help list push remove reset start
+                (release)   compadd "$@" committers finish merge-demo help list push remove reset start
                             ;;
                 (tag)       compadd "$@" help list
                             ;;

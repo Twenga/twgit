@@ -314,6 +314,7 @@ function cmd_merge-demo () {
     [ -z "$release_fullname" ] && die 'No release in progress!'
     local release="${release_fullname:${#TWGIT_PREFIX_RELEASE}}"
     CUI_displayMsg processing "Remote release '$release_fullname' detected."
+    twgit release start $release
 
     # Merge de la demo dans la release
     exec_git_command "git merge --no-ff $demo_fullname" "Could not merge '$demo_fullname' into '$release_fullname'!"

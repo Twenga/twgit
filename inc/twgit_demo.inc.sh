@@ -38,6 +38,8 @@ function usage () {
     CUI_displayMsg help_detail '    specified, then focus on this demo. Add <b>-F</b> to do not make fetch.'; echo
     CUI_displayMsg help_detail '<b>merge-feature <featurename> </b>'
     CUI_displayMsg help_detail '    Try to merge specified feature into current demo.'; echo
+    CUI_displayMsg help_detail '<b>merge-demo <demoname> </b>'
+    CUI_displayMsg help_detail '    Try to merge specified demo into current demo.'; echo
     CUI_displayMsg help_detail '<b>push</b>'
     CUI_displayMsg help_detail "    Push current demo to '$TWGIT_ORIGIN' repository."
     CUI_displayMsg help_detail "    It's a shortcut for: \"git push $TWGIT_ORIGIN $TWGIT_PREFIX_DEMO…\""; echo
@@ -173,6 +175,47 @@ function cmd_merge-feature () {
     fi
 
     merge_feature_into_branch "$feature" "$current_branch"
+}
+
+##
+# Try to merge a specified demo and his features into demo
+#
+# @param string $1 nom de la demo
+#
+function cmd_merge-demo () {
+
+    process_options "$@"
+    require_parameter 'demo'
+    clean_prefixes "$RETVAL" 'demo'
+    local demo="$RETVAL"
+    local demo_fullname="$TWGIT_PREFIX_DEMO$demo"
+
+    # Tests préliminaires :
+    assert_clean_working_tree
+    process_fetch
+
+    get_all_demos
+    local all_demos="$RETVAL"
+    local current_branch=$(get_current_branch)
+
+    if ! has "$TWGIT_ORIGIN/$current_branch" $all_demos; then
+        die "You must be in a demo!"
+    fi
+
+    # Merge de la demo dans la demo courante
+    exec_git_command "git merge $demo_fullname" "Could not merge '$demo_fullname' into '$current_branch'!"
+
+    #Recuperation de la liste des features
+    local demo_features=$(twgit demo list $demo -c -f | grep $TWGIT_PREFIX_FEATURE | awk -F$TWGIT_PREFIX_FEATURE '{print $2}' | cut -d " " -f1)
+
+    CUI_displayMsg processing $demo_features
+
+    # merge des features associées :
+    for feature in $demo_features; do
+        CUI_displayMsg processing "Merge '$feature'"
+        merge_feature_into_branch "$feature" "$current_branch"
+    done
+
 }
 
 ##

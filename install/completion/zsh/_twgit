@@ -21,7 +21,7 @@ _twgit() {
                 (feature)   
                             compadd "$@" committers help list merge-into-release merge-into-hotfix migrate push remove start status what-changed
                             ;;
-                (demo)      compadd "$@" help list merge-feature push remove start status
+                (demo)      compadd "$@" help list merge-feature merge-demo push remove start status
                             ;;
                 (hotfix)    compadd "$@" finish help list push remove start
                             ;;

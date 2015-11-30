@@ -316,6 +316,9 @@ function cmd_merge-demo () {
     CUI_displayMsg processing "Remote release '$release_fullname' detected."
     twgit release start $release
 
+    echo -n $(CUI_displayMsg question "$demo_fullname merge to $release_fullname. Do you want to continue? [Y/N] "); read answer
+                [ "$answer" != "Y" ] && [ "$answer" != "y" ] && die 'Merge demo aborted!'
+
     # Merge de la demo dans la release
     exec_git_command "git merge --no-ff $demo_fullname" "Could not merge '$demo_fullname' into '$release_fullname'!"
 

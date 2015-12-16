@@ -46,7 +46,7 @@ function _twgit () {
                 COMPREPLY=( $(compgen -W "${opts}" -- ${cur}) )
                 ;;
             demo)
-                local opts="help list merge-feature merge-demo push remove start status"
+                local opts="help list merge-feature update-features merge-demo push remove start status"
                 COMPREPLY=( $(compgen -W "${opts}" -- ${cur}) )
                 ;;
             hotfix)

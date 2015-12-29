@@ -47,6 +47,8 @@ function usage () {
     CUI_displayMsg help_detail '<b>list [-F]</b>'
     CUI_displayMsg help_detail '    List remote release with their merged features.'
     CUI_displayMsg help_detail '    Add <b>-F</b> to do not make fetch.'; echo
+    CUI_displayMsg help_detail '<b>merge-demo <demoname> </b>'
+    CUI_displayMsg help_detail '    Try to merge specified demo into the current release.'; echo
     CUI_displayMsg help_detail '<b>push</b>'
     CUI_displayMsg help_detail "    Push current release to '$TWGIT_ORIGIN' repository."
     CUI_displayMsg help_detail "    It's a shortcut for: \"git push $TWGIT_ORIGIN $TWGIT_PREFIX_RELEASE…\""; echo
@@ -65,6 +67,7 @@ function usage () {
     CUI_displayMsg help_detail '    the last tag (e.g. v1.2.3):'
     CUI_displayMsg help_detail "        <b>-M</b> for a new major version (-> ${TWGIT_PREFIX_RELEASE}2.0.0)"
     CUI_displayMsg help_detail "        <b>-m</b> for a new minor version (default, -> ${TWGIT_PREFIX_RELEASE}1.3.0)"; echo
+    CUI_displayMsg help_detail "Prefix '$TWGIT_PREFIX_DEMO' will be added to <b><demoname></b> parameter."
     CUI_displayMsg help_detail "Prefix '$TWGIT_PREFIX_RELEASE' will be added to <b><releasename></b> parameters."
     CUI_displayMsg help_detail "Prefix '$TWGIT_PREFIX_TAG' will be added to <b><tagname></b> parameters."; echo
     CUI_displayMsg help_detail '<b>[help]</b>'
@@ -287,6 +290,53 @@ function cmd_finish () {
     remove_local_branch $release_fullname
     remove_remote_branch $release_fullname
     echo
+}
+
+##
+# Try to merge a specified demo and his features into release
+#
+# @param string $1 nom de la demo
+#
+function cmd_merge-demo () {
+
+    process_options "$@"
+    require_parameter 'demo'
+    clean_prefixes "$RETVAL" 'demo'
+    local demo="$RETVAL"
+    local demo_fullname="$TWGIT_PREFIX_DEMO$demo"
+
+    # Tests préliminaires :
+    assert_clean_working_tree
+    process_fetch
+
+    # Récupération de la release en cours :
+    CUI_displayMsg processing 'Check remote release...'
+    local release_fullname="$(get_current_release_in_progress)"
+    [ -z "$release_fullname" ] && die 'No release in progress!'
+    local release="${release_fullname:${#TWGIT_PREFIX_RELEASE}}"
+    CUI_displayMsg processing "Remote release '$release_fullname' detected."
+    twgit release start $release
+
+    echo -n $(CUI_displayMsg question "$demo_fullname merge to $release_fullname. Do you want to continue? [Y/N] "); read answer
+                [ "$answer" != "Y" ] && [ "$answer" != "y" ] && die 'Merge demo aborted!'
+
+    # Merge de la demo dans la release
+    exec_git_command "git merge --no-ff $demo_fullname" "Could not merge '$demo_fullname' into '$release_fullname'!"
+
+    #Recuperation de la liste des features
+    local demo_features=$(twgit demo list $demo -c -f | grep $TWGIT_PREFIX_FEATURE | awk -F$TWGIT_PREFIX_FEATURE '{print $2}' | cut -d " " -f1)
+
+    CUI_displayMsg processing $demo_features
+
+    #Suppression demo avant merge features
+    remove_demo "$demo"
+
+    # merge des features associées :
+    for feature in $demo_features; do
+        CUI_displayMsg processing "Merge '$feature'"
+        merge_feature_into_branch "$feature" "$release_fullname"
+    done
+
 }
 
 ##

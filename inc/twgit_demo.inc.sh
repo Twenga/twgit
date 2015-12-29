@@ -36,6 +36,8 @@ function usage () {
     CUI_displayMsg help_detail '<b>list [<demoname>] [-F]</b>'
     CUI_displayMsg help_detail '    List remote demos with their merged features. If <b><demoname></b> is';
     CUI_displayMsg help_detail '    specified, then focus on this demo. Add <b>-F</b> to do not make fetch.'; echo
+    CUI_displayMsg help_detail '<b>merge-demo <demoname> </b>'
+    CUI_displayMsg help_detail '    Try to merge specified demo into current demo.'; echo
     CUI_displayMsg help_detail '<b>merge-feature <featurename> </b>'
     CUI_displayMsg help_detail '    Try to merge specified feature into current demo.'; echo
     CUI_displayMsg help_detail '<b>push</b>'
@@ -53,6 +55,8 @@ function usage () {
     CUI_displayMsg help_detail '    set, last commit, status between local and remote demo and execute'
     CUI_displayMsg help_detail '    a git status if specified demo is the current branch.'
     CUI_displayMsg help_detail '    If no <b><demoname></b> is specified, then use current demo.'; echo
+    CUI_displayMsg help_detail '<b>update-features</b>'
+    CUI_displayMsg help_detail '    Try to update features into current demo.'; echo
     CUI_displayMsg help_detail "Prefix '$TWGIT_PREFIX_DEMO' will be added to <b><demoname></b> parameter."; echo
     CUI_displayMsg help_detail '<b>[help]</b>'
     CUI_displayMsg help_detail '    Display this help.'; echo
@@ -173,6 +177,96 @@ function cmd_merge-feature () {
     fi
 
     merge_feature_into_branch "$feature" "$current_branch"
+}
+
+##
+# Try to update features into current demo
+#
+#
+function cmd_update-features () {
+
+    # Tests préliminaires :
+    assert_clean_working_tree
+    process_fetch
+
+    get_all_demos
+    local all_demos="$RETVAL"
+    local current_branch=$(get_current_branch)
+
+    if ! has "$TWGIT_ORIGIN/$current_branch" $all_demos; then
+        die "You must be in a demo!"
+    fi
+
+    #Merge dernière release si nécessaire
+    get_tags_not_merged_into_branch "$current_branch"
+    local tags_not_merged="$GET_TAGS_NOT_MERGED_INTO_BRANCH_RETURN_VALUE"
+    local nb_tags_no_merged="$(echo "$tags_not_merged" | wc -w)"
+
+    if [ ! -z "$tags_not_merged" ]; then
+        local msg='Tag'
+        if echo "$tags_not_merged" | grep -q ' '; then
+            msg="${msg}s"
+        fi
+        exec_git_command "git merge --no-ff $(get_last_tag)"
+        msg="${msg} merged into this branch:"
+        [ "$nb_tags_no_merged" -eq "$TWGIT_MAX_RETRIEVE_TAGS_NOT_MERGED" ] && msg="${msg} at least"
+        msg="${msg} $(displayInterval "$tags_not_merged")."
+        CUI_displayMsg warning "$msg"
+    fi
+
+    #Recuperation de la liste des features
+    local demo_features=$(twgit demo list $current_branch -c -f | grep $TWGIT_PREFIX_FEATURE | awk -F$TWGIT_PREFIX_FEATURE '{print $2}' | cut -d " " -f1)
+
+    CUI_displayMsg processing $demo_features
+
+    # merge des features associées :
+    for feature in $demo_features; do
+        CUI_displayMsg processing "Merge '$feature'"
+        merge_feature_into_branch "$feature" "$current_branch"
+    done
+
+}
+
+
+##
+# Try to merge a specified demo and his features into demo
+#
+# @param string $1 nom de la demo
+#
+function cmd_merge-demo () {
+
+    process_options "$@"
+    require_parameter 'demo'
+    clean_prefixes "$RETVAL" 'demo'
+    local demo="$RETVAL"
+    local demo_fullname="$TWGIT_PREFIX_DEMO$demo"
+
+    # Tests préliminaires :
+    assert_clean_working_tree
+    process_fetch
+
+    get_all_demos
+    local all_demos="$RETVAL"
+    local current_branch=$(get_current_branch)
+
+    if ! has "$TWGIT_ORIGIN/$current_branch" $all_demos; then
+        die "You must be in a demo!"
+    fi
+
+    # Merge de la demo dans la demo courante
+    exec_git_command "git merge $demo_fullname" "Could not merge '$demo_fullname' into '$current_branch'!"
+
+    #Recuperation de la liste des features
+    local demo_features=$(twgit demo list $demo -c -f | grep $TWGIT_PREFIX_FEATURE | awk -F$TWGIT_PREFIX_FEATURE '{print $2}' | cut -d " " -f1)
+
+    CUI_displayMsg processing $demo_features
+
+    # merge des features associées :
+    for feature in $demo_features; do
+        CUI_displayMsg processing "Merge '$feature'"
+        merge_feature_into_branch "$feature" "$current_branch"
+    done
+
 }
 
 ##

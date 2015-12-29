@@ -27,8 +27,15 @@
 #
 # @param string $1 issue number
 #
+
 ref="$1"
-project_addr=$(git remote show -n $TWGIT_ORIGIN | grep Fetch | cut -d: -f3 | cut -d. -f1)
+project_addr=$(git config --get remote.$TWGIT_ORIGIN.url)
+
+gitlat_attribute="http_url_to_repo"
+
+if [[ $project_addr == *"ssh://"* ]]; then
+  gitlat_attribute="ssh_url_to_repo"
+fi
 
 if [[ "$TWGIT_FEATURE_SUBJECT_GITLAB_DOMAIN" =~ ^https?:// ]]; then
     scheme=''
@@ -58,13 +65,14 @@ fi
 
 # Convert JSON with Python or PHP:
 if [ "$language" = 'python' ]; then
+
     if [[ "$ref" =~ ^[0-9]+$ ]]; then
         ($cmd $project_url \
         | python -c 'import sys,json,urllib;s=sys.stdin.read();
 data=json.loads(s) if s!="" else sys.exit(0)
 projectId=None
 for row in data:
-    if row["path_with_namespace"] == "'$project_addr'" :
+    if row["'$gitlat_attribute'"] == "'$project_addr'" :
         projectId = row["id"]; break;
 f = urllib.urlopen("'$issue_url'" % (projectId))
 s = f.read()
@@ -75,10 +83,11 @@ for row in data:
         2>/dev/null
     fi
 elif [ "$language" = 'php' ]; then
+
     if [[ "$ref" =~ ^[0-9]+$ ]]; then
         ($cmd $project_url \
-        | php -r '$o = json_decode(file_get_contents("php://stdin"));$projectid=array_reduce($o, function($carry, $item){if($carry==null && $item->path_with_namespace == "'$project_addr'"){return 
-$item->id;}return $carry;}, null);$o=json_decode(file_get_contents(sprintf("'$issue_url'", $projectid,'$ref')));if ($o !== NULL) {array_walk($o, function($item, 
+        | php -r '$o = json_decode(file_get_contents("php://stdin"));$projectid=array_reduce($o, function($carry, $item){if($carry==null && $item->'$gitlat_attribute' == "'$project_addr'"){return
+$item->id;}return $carry;}, null);$o=json_decode(file_get_contents(sprintf("'$issue_url'", $projectid,'$ref')));if ($o !== NULL) {array_walk($o, function($item,
 $key){if($item->iid == '$ref'){print_r($item->title);}});}')
         2>/dev/null
     fi

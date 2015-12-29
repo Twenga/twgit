@@ -44,11 +44,11 @@ function usage () {
     CUI_displayMsg help_detail "    Merge current release branch into '$TWGIT_STABLE', create a new tag and push."
     CUI_displayMsg help_detail '    If no <b><tagname></b> is specified then current release name will be used.'
     CUI_displayMsg help_detail '    Add <b>-I</b> to run in non-interactive mode (always say yes).'; echo
-    CUI_displayMsg help_detail '<b>merge-demo <demoname> </b>'
-    CUI_displayMsg help_detail '    Try to merge specified demo into specified release.'; echo
     CUI_displayMsg help_detail '<b>list [-F]</b>'
     CUI_displayMsg help_detail '    List remote release with their merged features.'
     CUI_displayMsg help_detail '    Add <b>-F</b> to do not make fetch.'; echo
+    CUI_displayMsg help_detail '<b>merge-demo <demoname> </b>'
+    CUI_displayMsg help_detail '    Try to merge specified demo into the current release.'; echo
     CUI_displayMsg help_detail '<b>push</b>'
     CUI_displayMsg help_detail "    Push current release to '$TWGIT_ORIGIN' repository."
     CUI_displayMsg help_detail "    It's a shortcut for: \"git push $TWGIT_ORIGIN $TWGIT_PREFIX_RELEASE…\""; echo
@@ -67,6 +67,7 @@ function usage () {
     CUI_displayMsg help_detail '    the last tag (e.g. v1.2.3):'
     CUI_displayMsg help_detail "        <b>-M</b> for a new major version (-> ${TWGIT_PREFIX_RELEASE}2.0.0)"
     CUI_displayMsg help_detail "        <b>-m</b> for a new minor version (default, -> ${TWGIT_PREFIX_RELEASE}1.3.0)"; echo
+    CUI_displayMsg help_detail "Prefix '$TWGIT_PREFIX_DEMO' will be added to <b><demoname></b> parameter."
     CUI_displayMsg help_detail "Prefix '$TWGIT_PREFIX_RELEASE' will be added to <b><releasename></b> parameters."
     CUI_displayMsg help_detail "Prefix '$TWGIT_PREFIX_TAG' will be added to <b><tagname></b> parameters."; echo
     CUI_displayMsg help_detail '<b>[help]</b>'

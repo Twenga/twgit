@@ -1,6 +1,16 @@
 ChangeLog
 =========
 
+## Version 1.17.0 (2015-12-29)
+
+Features:
+
+  - [#159](https://github.com/Twenga/twgit/pull/159): Add release merge-demo, demo merge-demo, and demo update-features.
+
+Fixes:
+
+  - [#161](https://github.com/Twenga/twgit/pull/161): Fix Gitlab project_addr.
+
 ## Version 1.16.0 (2015-01-12)
 
 Features:

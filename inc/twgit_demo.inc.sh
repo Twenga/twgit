@@ -36,12 +36,10 @@ function usage () {
     CUI_displayMsg help_detail '<b>list [<demoname>] [-F]</b>'
     CUI_displayMsg help_detail '    List remote demos with their merged features. If <b><demoname></b> is';
     CUI_displayMsg help_detail '    specified, then focus on this demo. Add <b>-F</b> to do not make fetch.'; echo
-    CUI_displayMsg help_detail '<b>merge-feature <featurename> </b>'
-    CUI_displayMsg help_detail '    Try to merge specified feature into current demo.'; echo
-    CUI_displayMsg help_detail '<b>update-features</b>'
-    CUI_displayMsg help_detail '    Try to update features into current demo.'; echo
     CUI_displayMsg help_detail '<b>merge-demo <demoname> </b>'
     CUI_displayMsg help_detail '    Try to merge specified demo into current demo.'; echo
+    CUI_displayMsg help_detail '<b>merge-feature <featurename> </b>'
+    CUI_displayMsg help_detail '    Try to merge specified feature into current demo.'; echo
     CUI_displayMsg help_detail '<b>push</b>'
     CUI_displayMsg help_detail "    Push current demo to '$TWGIT_ORIGIN' repository."
     CUI_displayMsg help_detail "    It's a shortcut for: \"git push $TWGIT_ORIGIN $TWGIT_PREFIX_DEMO…\""; echo
@@ -57,6 +55,8 @@ function usage () {
     CUI_displayMsg help_detail '    set, last commit, status between local and remote demo and execute'
     CUI_displayMsg help_detail '    a git status if specified demo is the current branch.'
     CUI_displayMsg help_detail '    If no <b><demoname></b> is specified, then use current demo.'; echo
+    CUI_displayMsg help_detail '<b>update-features</b>'
+    CUI_displayMsg help_detail '    Try to update features into current demo.'; echo
     CUI_displayMsg help_detail "Prefix '$TWGIT_PREFIX_DEMO' will be added to <b><demoname></b> parameter."; echo
     CUI_displayMsg help_detail '<b>[help]</b>'
     CUI_displayMsg help_detail '    Display this help.'; echo
@@ -221,8 +221,14 @@ function cmd_update-features () {
 
     # merge des features associées :
     for feature in $demo_features; do
-        CUI_displayMsg processing "Merge '$feature'"
-        merge_feature_into_branch "$feature" "$current_branch"
+        CUI_displayMsg processing "Update '$TWGIT_PREFIX_FEATURE$feature'"
+        #merge_feature_into_branch "$feature" "$current_branch"
+        twgit feature start $TWGIT_PREFIX_FEATURE$feature
+        exec_git_command "git pull $TWGIT_ORIGIN $TWGIT_PREFIX_FEATURE$feature" "ATTENTION VOUS ETES SUR LA FEATURE $feature. VEUILLEZ REGLER LE CONFLIT CI-DESSUS."
+        twgit demo start $current_branch
+        exec_git_command "git pull $TWGIT_ORIGIN $dest_branch_fullname"
+        exec_git_command "git merge --no-ff $TWGIT_PREFIX_FEATURE$feature"
+        exec_git_command "git push $TWGIT_ORIGIN $current_branch"
     done
 
 }

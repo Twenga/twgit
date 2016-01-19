@@ -245,7 +245,7 @@ function cmd_merge-demo () {
     require_parameter 'demo'
     clean_prefixes "$RETVAL" 'demo'
     local demo="$RETVAL"
-    local demo_fullname="$TWGIT_PREFIX_DEMO$demo"
+    local demo_fullname="$TWGIT_ORIGIN/$TWGIT_PREFIX_DEMO$demo"
 
     # Tests préliminaires :
     assert_clean_working_tree

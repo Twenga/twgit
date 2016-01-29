@@ -136,7 +136,7 @@ install_completion () {
     echo ""
     echo "2 - Install completion"
 
-    echo "Do you want to install the completion ? [Y/N]"
+    echo "Do you want to install the completion ? [Y/n]"
     read answer
     if [ "${answer}" != "Y" ] && [ "${answer}" != "y" ]; then
         echo "(i) Skip"
@@ -177,7 +177,7 @@ install_prompt () {
     if [ $(cat ${BASH_RC} | grep -E "\.bash_twgit" | grep -vE '^#' | wc -l) -gt 0 ]; then
         echo "Colored Git prompt already loaded by '${BASH_RC}'."
     else
-        echo "Add colored Git prompt to '${BASH_RC}' ? [Y/N] "
+        echo "Add colored Git prompt to '${BASH_RC}' ? [Y/n] "
         read answer
         if [ "${answer}" = "Y" ] || [ "${answer}" = "y" ]; then
             echo "Install git prompt: ${USER_HOME}/.bash_twgit"

@@ -564,7 +564,7 @@ function assert_branches_equal () {
         if [ $status -eq 1 ]; then
             CUI_displayMsg warning "And local branch '<b>$1</b>' may be fast-forwarded!"
             if ! isset_option 'I'; then
-                echo -n $(CUI_displayMsg question "Pull '$1'? [Y/N] "); read answer
+                echo -n $(CUI_displayMsg question "Pull '$1'? [y/N] "); read answer
                 [ "$answer" != "Y" ] && [ "$answer" != "y" ] && die "Pull aborted! You must make a 'git pull $TWGIT_ORIGIN $1' to continue."
             fi
             exec_git_command "git checkout $1" "Checkout '$1' failed!"
@@ -1372,7 +1372,7 @@ function clean_branches () {
     local locales="$(get_local_branches)"
     for branch in $locales; do
         if ! has $branch $tracked; then
-            echo -n $(CUI_displayMsg question "Local branch '<b>$branch</b>' is not tracked. Remove? [Y/N] ")
+            echo -n $(CUI_displayMsg question "Local branch '<b>$branch</b>' is not tracked. Remove? [y/N] ")
             read answer
             if [ "$answer" = "Y" ] || [ "$answer" = "y" ]; then
                 exec_git_command "git branch -D $branch" "Remove local branch '$branch' failed!"
@@ -1599,7 +1599,7 @@ function is_initial_author () {
     if [ ! "$localAuthorName <$localAuthorEmail>" = "$branchAuthor" ]; then
         CUI_displayMsg warning "Remote $type '$TWGIT_ORIGIN/${prefixes[$type]}$branch_name' was started by $branchAuthor."
         if ! isset_option 'I'; then
-            echo -n $(CUI_displayMsg question 'Do you want to continue? [Y/N] '); read answer
+            echo -n $(CUI_displayMsg question 'Do you want to continue? [y/N] '); read answer
             [ "$answer" != "Y" ] && [ "$answer" != "y" ] && die 'Warning, '$type' retrieving aborted!'
         fi
     fi
@@ -1652,9 +1652,9 @@ function autoupdate () {
                     echo -e 'New content of CHANGELOG.md:\n'
                     displayChangelogSection "$current_tag" "$last_tag"
                     echo
-                    question="Do you want to update twgit from <b>$current_tag</b> to <b>$last_tag</b> (or manually: twgit update)? [Y/N] "
+                    question="Do you want to update twgit from <b>$current_tag</b> to <b>$last_tag</b> (or manually: twgit update)? [y/N] "
                 else
-                    question="You are ahead of last tag <b>$last_tag</b>. Would you like to return to it? [Y/N] "
+                    question="You are ahead of last tag <b>$last_tag</b>. Would you like to return to it? [y/N] "
                 fi
                 echo -n $(CUI_displayMsg question "\033[4m/!\ <b>twgit update</b>")
                 echo -n $(CUI_displayMsg question ": $question")

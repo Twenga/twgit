@@ -1,6 +1,12 @@
 ChangeLog
 =========
 
+## Version 1.17.1 (2016-03-01)
+
+Features:
+
+  - [#165](https://github.com/Twenga/twgit/pull/165): When twgit ask for confirmation, it is unclear if the default is yes or no.
+
 ## Version 1.17.0 (2015-12-29)
 
 Features:

@@ -231,7 +231,7 @@ function cmd_migrate () {
 
 
     if ! isset_option 'I'; then
-        echo -n $(CUI_displayMsg question "Are you sure to migrate '$oldfeature_fullname' to '$feature_fullname'? Branch '$oldfeature_fullname' will be deleted. [Y/N] "); read answer
+        echo -n $(CUI_displayMsg question "Are you sure to migrate '$oldfeature_fullname' to '$feature_fullname'? Branch '$oldfeature_fullname' will be deleted. [y/N] "); read answer
         [ "$answer" != "Y" ] && [ "$answer" != "y" ] && die 'Branch migration aborted!'
     fi
 
@@ -334,7 +334,7 @@ function cmd_merge-into-release () {
         if ! has "$TWGIT_ORIGIN/$current_branch" $all_features; then
             die "You must be in a feature if you didn't specify one!"
         else
-            echo -n $(CUI_displayMsg question "Are you sure to merge '$TWGIT_ORIGIN/$current_branch' into '$TWGIT_ORIGIN/$release_fullname'? [Y/N] "); read answer
+            echo -n $(CUI_displayMsg question "Are you sure to merge '$TWGIT_ORIGIN/$current_branch' into '$TWGIT_ORIGIN/$release_fullname'? [y/N] "); read answer
             [ "$answer" != "Y" ] && [ "$answer" != "y" ] && die 'Merge into current release aborted!'
         fi
         feature_fullname="$current_branch"
@@ -376,7 +376,7 @@ function cmd_merge-into-hotfix () {
         if ! has "$TWGIT_ORIGIN/$current_branch" $all_features; then
             die "You must be in a feature if you didn't specify one!"
         else
-            echo -n $(CUI_displayMsg question "Are you sure to merge '$TWGIT_ORIGIN/$current_branch' into '$TWGIT_ORIGIN/$hotfix_fullname'? [Y/N] "); read answer
+            echo -n $(CUI_displayMsg question "Are you sure to merge '$TWGIT_ORIGIN/$current_branch' into '$TWGIT_ORIGIN/$hotfix_fullname'? [y/N] "); read answer
             [ "$answer" != "Y" ] && [ "$answer" != "y" ] && die 'Merge into current release aborted!'
         fi
         feature_fullname="$current_branch"

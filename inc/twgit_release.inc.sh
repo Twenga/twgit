@@ -174,7 +174,7 @@ function cmd_start () {
             release=$(get_next_version $type)
             echo "Release: $TWGIT_PREFIX_RELEASE$release"
             if ! isset_option 'I'; then
-                echo -n $(CUI_displayMsg question 'Do you want to continue? [Y/N] '); read answer
+                echo -n $(CUI_displayMsg question 'Do you want to continue? [y/N] '); read answer
                 [ "$answer" != "Y" ] && [ "$answer" != "y" ] && die 'New release aborted!'
             fi
         fi
@@ -317,7 +317,7 @@ function cmd_merge-demo () {
     CUI_displayMsg processing "Remote release '$release_fullname' detected."
     twgit release start $release
 
-    echo -n $(CUI_displayMsg question "$demo_fullname merge to $release_fullname. Do you want to continue? [Y/N] "); read answer
+    echo -n $(CUI_displayMsg question "$demo_fullname merge to $release_fullname. Do you want to continue? [y/N] "); read answer
                 [ "$answer" != "Y" ] && [ "$answer" != "y" ] && die 'Merge demo aborted!'
 
     # Merge de la demo dans la release

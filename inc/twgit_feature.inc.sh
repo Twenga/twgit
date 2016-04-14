@@ -64,9 +64,10 @@ function usage () {
     CUI_displayMsg help_detail '    Create both a new local and remote feature, or fetch the remote feature,'
     CUI_displayMsg help_detail '    or checkout the local feature. Add <b>-d</b> to delete beforehand local feature'
     CUI_displayMsg help_detail '    if exists.'; echo
-    CUI_displayMsg help_detail '<b>startFrom <featurename> <branchname></b>'
+    CUI_displayMsg help_detail '<b>startFrom <featurename> <branchfullname></b>'
     CUI_displayMsg help_detail '    Create both a new local and remote feature, or fetch the remote feature,'
     CUI_displayMsg help_detail '    or checkout the local feature. And merge the remote branch what is specified'; echo
+    CUI_displayMsg help_detail '    WARNING : You must write the fullname. (Ex : feature-1234 or demo-1234)'; echo
     CUI_displayMsg help_detail '<b>status [<featurename>]</b>'
     CUI_displayMsg help_detail '    Display information about specified feature: long name if a connector is'
     CUI_displayMsg help_detail '    set, last commit, status between local and remote feature and execute'

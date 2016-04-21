@@ -221,8 +221,14 @@ function cmd_update-features () {
 
     # merge des features associées :
     for feature in $demo_features; do
-        CUI_displayMsg processing "Merge '$feature'"
-        merge_feature_into_branch "$feature" "$current_branch"
+        CUI_displayMsg processing "Update '$TWGIT_PREFIX_FEATURE$feature'"
+        #merge_feature_into_branch "$feature" "$current_branch"
+        twgit feature start $TWGIT_PREFIX_FEATURE$feature
+        exec_git_command "git pull $TWGIT_ORIGIN $TWGIT_PREFIX_FEATURE$feature" "ATTENTION VOUS ETES SUR LA FEATURE $feature. VEUILLEZ REGLER LE CONFLIT CI-DESSUS."
+        twgit demo start $current_branch
+        exec_git_command "git pull $TWGIT_ORIGIN $dest_branch_fullname"
+        exec_git_command "git merge --no-ff $TWGIT_PREFIX_FEATURE$feature"
+        exec_git_command "git push $TWGIT_ORIGIN $current_branch"
     done
 
 }
@@ -239,7 +245,7 @@ function cmd_merge-demo () {
     require_parameter 'demo'
     clean_prefixes "$RETVAL" 'demo'
     local demo="$RETVAL"
-    local demo_fullname="$TWGIT_PREFIX_DEMO$demo"
+    local demo_fullname="$TWGIT_ORIGIN/$TWGIT_PREFIX_DEMO$demo"
 
     # Tests préliminaires :
     assert_clean_working_tree

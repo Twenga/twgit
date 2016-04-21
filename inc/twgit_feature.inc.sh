@@ -64,6 +64,10 @@ function usage () {
     CUI_displayMsg help_detail '    Create both a new local and remote feature, or fetch the remote feature,'
     CUI_displayMsg help_detail '    or checkout the local feature. Add <b>-d</b> to delete beforehand local feature'
     CUI_displayMsg help_detail '    if exists.'; echo
+    CUI_displayMsg help_detail '<b>startFrom <featurename> <branchfullname></b>'
+    CUI_displayMsg help_detail '    Create both a new local and remote feature, or fetch the remote feature,'
+    CUI_displayMsg help_detail '    or checkout the local feature. And merge the remote branch what is specified'; echo
+    CUI_displayMsg help_detail '    WARNING : You must write the fullname. (Ex : feature-1234 or demo-1234)'; echo
     CUI_displayMsg help_detail '<b>status [<featurename>]</b>'
     CUI_displayMsg help_detail '    Display information about specified feature: long name if a connector is'
     CUI_displayMsg help_detail '    set, last commit, status between local and remote feature and execute'
@@ -256,6 +260,35 @@ function cmd_start () {
     local feature="$RETVAL"
     start_simple_branch "$feature" "$TWGIT_PREFIX_FEATURE"
     echo
+}
+
+##
+# Crée une nouvelle feature à partir de la demo spécifiée.
+#
+# @param string $1 nom court de la nouvelle feature.
+# @param string $2 nom long de la branche.
+#
+function cmd_startFrom () {
+    process_options "$@"
+    require_parameter 'feature'
+    clean_prefixes "$RETVAL" 'feature'
+    local feature="$RETVAL"
+    require_parameter 'demo'
+    local branch="$RETVAL"
+    local branch_remote="$TWGIT_ORIGIN/$branch"
+
+    echo "$feature"
+
+    echo "$branch_remote"
+
+    start_simple_branch "$feature" "$TWGIT_PREFIX_FEATURE"
+
+    echo -n $(CUI_displayMsg question "$branch_remote merge to $feature. Do you want to continue? [Y/N] "); read answer
+                [ "$answer" != "Y" ] && [ "$answer" != "y" ] && die 'Merge demo aborted!'
+
+    # Merge de la demo dans la demo courante
+    exec_git_command "git merge $branch_remote" "Could not merge '$branch_remote' into '$feature'!"
+
 }
 
 ##

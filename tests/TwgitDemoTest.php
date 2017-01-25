@@ -54,5 +54,29 @@ class TwgitDemoTest extends TwgitTestCase
         $sMsg = $this->_localExec(TWGIT_EXEC . ' demo status demo-42');
         $this->assertContains("Assume demo was '42' instead of 'demo-42'", $sMsg);
     }
+
+    public function testStartFromDemo_WithoutRemote ()
+    {
+        $this->_remoteExec('git init');
+        $this->_localExec(TWGIT_EXEC . ' init 1.2.3 ' . TWGIT_REPOSITORY_ORIGIN_DIR);
+        $this->setExpectedException('\RuntimeException', "Remote branch '" . self::_remote('demo-51') ."' not found!");
+        $this->_localExec(TWGIT_EXEC . ' demo start 42 from-demo 51');
+    }
+
+    public function testStartFromDemo_WithExistingRemote ()
+    {
+        $this->_remoteExec('git init');
+        $this->_localExec(TWGIT_EXEC . ' init 1.2.3 ' . TWGIT_REPOSITORY_ORIGIN_DIR);
+        $this->_remoteExec(
+            'git checkout -b demo-51'
+            . ' && git commit --allow-empty -m "Initialize demo-51"'
+            . ' && touch the-chosen-one'
+            . ' && git add .'
+            . ' && git commit -m "Add the chosen one"'
+        );
+        $this->_localExec(TWGIT_EXEC . ' demo start 42 from-demo 51');
+        $sResult = $this->_localExec('ls');
+        $this->assertContains('the-chosen-one', $sResult);
+    }
 }
 

@@ -261,4 +261,30 @@ class TwgitCommonAssertsTest extends TwgitTestCase
         $sMsg = $this->_localFunctionCall('assert_working_tree_is_not_on_delete_branch feature-1');
         $this->assertNotContains("Cannot delete the branch 'feature-1' which you are currently on!", $sMsg);
     }
+
+    /**
+     * @shcovers inc/common.inc.sh::assert_remote_branch_exists
+     */
+    public function testAssertRemoteBranchExists_WhenKo ()
+    {
+        $this->_remoteExec('git init');
+        $this->_localExec(TWGIT_EXEC . ' init 1.2.3 ' . TWGIT_REPOSITORY_ORIGIN_DIR);
+        $this->_localExec(TWGIT_EXEC . ' feature start 2');
+
+        $this->setExpectedException('\RuntimeException', "Remote branch '" . self::_remote('feature-1') . "' not found!");
+        $this->_localFunctionCall('assert_remote_branch_exists feature-1');
+    }
+
+    /**
+     * @shcovers inc/common.inc.sh::assert_remote_branch_exists
+     */
+    public function testAssertRemoteBranchExists_WhenOk ()
+    {
+        $this->_remoteExec('git init');
+        $this->_localExec(TWGIT_EXEC . ' init 1.2.3 ' . TWGIT_REPOSITORY_ORIGIN_DIR);
+        $this->_localExec(TWGIT_EXEC . ' feature start 1');
+        $this->_localExec(TWGIT_EXEC . ' feature start 2');
+        $sMsg = $this->_localFunctionCall('assert_remote_branch_exists feature-1');
+        $this->assertNotContains("Remote branch '" . self::_remote('feature-1') . "' not found!", $sMsg);
+    }
 }

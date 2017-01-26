@@ -64,10 +64,6 @@ function usage () {
     CUI_displayMsg help_detail '    Create both a new local and remote feature, or fetch the remote feature,'
     CUI_displayMsg help_detail '    or checkout the local feature. Add <b>-d</b> to delete beforehand local feature'
     CUI_displayMsg help_detail '    if exists.'; echo
-    CUI_displayMsg help_detail '<b>start-from <featurename> <branchfullname></b>'
-    CUI_displayMsg help_detail '    Execute start <b><featurename></b> command, then try to merge <b><branchfullname></b>'
-    CUI_displayMsg help_detail '    into <b><featurename></b>. '
-    CUI_displayMsg help_detail '    WARNING: You must write the fullname, e.g. feature-1234 or demo-1234.'; echo
     CUI_displayMsg help_detail '<b>status [<featurename>]</b>'
     CUI_displayMsg help_detail '    Display information about specified feature: long name if a connector is'
     CUI_displayMsg help_detail '    set, last commit, status between local and remote feature and execute'
@@ -262,34 +258,6 @@ function cmd_start () {
     local source_branch="$RETVAL"
     start_simple_branch "$feature" "$TWGIT_PREFIX_FEATURE" "$source_branch"
     echo
-}
-
-##
-# Crée une nouvelle feature à partir de la demo spécifiée.
-#
-# @param string $1 nom court de la nouvelle feature.
-# @param string $2 nom long de la branche.
-#
-function cmd_start-from () {
-    process_options "$@"
-    require_parameter 'feature'
-    clean_prefixes "$RETVAL" 'feature'
-    local feature="$RETVAL"
-    require_parameter 'demo'
-    local branch="$RETVAL"
-    local branch_remote="$TWGIT_ORIGIN/$branch"
-
-    echo "$feature"
-
-    echo "$branch_remote"
-
-    start_simple_branch "$feature" "$TWGIT_PREFIX_FEATURE"
-
-    echo -n $(CUI_displayMsg question "$branch_remote will be merged into $feature. Do you want to continue? [y/N] "); read answer
-    [ "$answer" != "Y" ] && [ "$answer" != "y" ] && die 'Merge aborted!'
-
-    exec_git_command "git merge --no-ff $branch_remote" "Could not merge '$branch_remote' into '$feature'!"
-
 }
 
 ##

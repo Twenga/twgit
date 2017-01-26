@@ -1,7 +1,7 @@
 #compdef twgit
- 
-_twgit() { 
- 
+
+_twgit() {
+
     local curcontext="$curcontext" state line
     typeset -A opt_args
 
@@ -18,7 +18,7 @@ _twgit() {
             case $words[2] in
                 (clean)     ret=0
                             ;;
-                (feature)   
+                (feature)
                             compadd "$@" committers help list merge-into-release merge-into-hotfix migrate push remove start status what-changed
                             ;;
                 (demo)      compadd "$@" help list merge-feature update-features merge-demo push remove start status
@@ -49,7 +49,7 @@ _twgit() {
                     ;;
             esac
         ;;
-    esac 
+    esac
 }
- 
+
 _twgit "$@"

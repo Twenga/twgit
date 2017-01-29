@@ -742,7 +742,7 @@ function assert_clean_stable_branch_and_checkout () {
 
 ##
 # S'assure que la branche existe dans le dépôt distant.
-# 
+#
 # @param string $1 nom complet de la branche
 # @testedby TwgitCommonAssertsTest
 #
@@ -1292,7 +1292,7 @@ function displayQuotedEnum () {
     if [ -z "$trimmed_list" ]; then
         echo
     else
-        local quoted_list="'<b>${trimmed_list// /</b>\', \'<b>}</b>'"
+        local quoted_list="'<b>${trimmed_list// /</b>', '<b>}</b>'"
         echo $quoted_list
     fi
 }

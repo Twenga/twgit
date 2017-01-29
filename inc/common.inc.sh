@@ -740,6 +740,24 @@ function assert_clean_stable_branch_and_checkout () {
         "Could not merge '$TWGIT_ORIGIN/$TWGIT_STABLE' into '$TWGIT_STABLE'!"
 }
 
+##
+# S'assure que la branche existe dans le dépôt distant.
+#
+# @param string $1 nom complet de la branche
+# @testedby TwgitCommonAssertsTest
+#
+function assert_remote_branch_exists () {
+    local branch_fullname="$1"
+    CUI_displayMsg processing 'Check remote branches...'
+    if ! has "$TWGIT_ORIGIN/$branch_fullname" $(get_remote_branches); then
+        CUI_displayMsg error "Remote branch '$TWGIT_ORIGIN/$branch_fullname' not found!"
+        CUI_displayMsg help "Perhaps:"
+        CUI_displayMsg help_detail "- check the name of the branch"
+        CUI_displayMsg help_detail "- check if the branch has been deleted"
+        echo
+        exit 1
+    fi
+}
 
 
 #--------------------------------------------------------------------
@@ -893,15 +911,17 @@ function create_and_push_tag () {
 }
 
 ##
-# Crée une branche du type feature ou démo à partir du dernier tag.
+# Crée une branche du type feature ou démo à partir du dernier tag, ou d'une branche source.
 # Gère l'option '-d' supprimant préalablement la feature locale, afin de forcer le récréation de la branche.
 #
 # @param string $1 nom court de la nouvelle branche.
 # @param string $2 préfixe de branche, par exemple $TWGIT_PREFIX_FEATURE ou $TWGIT_PREFIX_DEMO.
+# @param string $3 nom complet de la branche source à partir de laquelle créer la branche (optionnel).
 #
 function start_simple_branch () {
     local branch="$1"
     local branch_prefix="$2"
+    local source_branch_fullname="$3"
     local branch_fullname="$branch_prefix$branch"
 
     local -A wording=(
@@ -928,9 +948,14 @@ function start_simple_branch () {
         CUI_displayMsg processing "Remote $branch_type '$branch_fullname' detected."
         exec_git_command "git checkout --track -b $branch_fullname $TWGIT_ORIGIN/$branch_fullname" "Could not check out $branch_type '$TWGIT_ORIGIN/$branch_fullname'!"
     else
-        assert_tag_exists
-        local last_tag=$(get_last_tag)
-        exec_git_command "git checkout -b $branch_fullname tags/$last_tag" "Could not check out tag '$last_tag'!"
+        if [ -z "$source_branch_fullname" ]; then
+            assert_tag_exists
+            local last_tag=$(get_last_tag)
+            exec_git_command "git checkout -b $branch_fullname tags/$last_tag" "Could not check out tag '$last_tag'!"
+        else
+            assert_remote_branch_exists "$source_branch_fullname"
+            exec_git_command "git checkout -b $branch_fullname $TWGIT_ORIGIN/$source_branch_fullname" "Could not check out '$TWGIT_ORIGIN/$source_branch_fullname'!"
+        fi
 
         local subject="$(getFeatureSubject "$branch")"
         [ ! -z "$subject" ] && subject=": $subject"
@@ -1365,6 +1390,38 @@ function convertList2CSV () {
 }
 
 ##
+# Analyse les prochains paramètres de la ligne de commande pour déduire la branche source demandée par
+# l'utilisateur. S'attend à dépiler les paramètres 'from-<source_type> <source_name>'.
+# Le résultat est stocké dans la variable $RETVAL.
+#
+# Si le premier paramètre n'est pas de la forme 'from-<source_type>' ou si <source_type> ne fait pas
+# parti des types demandés, une erreur est levée.
+#
+# Si aucun paramètre n'est dépilé, $RETVAL est vide.
+#
+# @param string $1..$n Liste des types possibles de la branche source
+#
+function parse_source_branch () {
+    require_parameter '-'
+    if [ ! -z "$RETVAL" ]; then
+        for type in "$@"; do
+            if [ "$RETVAL" = "from-$type" ]; then
+                require_parameter "${type}name"
+                clean_prefixes "$RETVAL" "$type"
+                local source_branch="$RETVAL"
+                RETVAL="$(prefix_of $type)$source_branch"
+                return
+            fi
+        done
+        CUI_displayMsg error "Unknown action extension: '$RETVAL'!"
+        usage
+        exit 1
+    else
+        RETVAL=''
+    fi
+}
+
+##
 # Propose de supprimer une à une les branches qui ne sont plus trackées.
 #
 function clean_branches () {
@@ -1510,6 +1567,23 @@ function displayChangelogSection () {
 }
 
 ##
+# Retourne le prefix correspondant au type demandé.
+#
+# @param string $1 Type de la branche {'demo', 'feature', 'hotfix', 'release', 'tag'}
+#
+function prefix_of () {
+    local type="$1"
+    local -A prefixes=(
+        [demo]="$TWGIT_PREFIX_DEMO"
+        [feature]="$TWGIT_PREFIX_FEATURE"
+        [hotfix]="$TWGIT_PREFIX_HOTFIX"
+        [release]="$TWGIT_PREFIX_RELEASE"
+        [tag]="$TWGIT_PREFIX_TAG"
+    )
+    echo ${prefixes[$type]}
+}
+
+##
 # This add-on cleans the <<tag>> name sent to twgit.
 # In case of call with use of prefix v (for init & tag), feature- (for feature),
 # hotfix- (for hotfix) or demo- (for demos), then this function will automatically
@@ -1518,22 +1592,17 @@ function displayChangelogSection () {
 #
 # @param string $1 Full name of branch
 # @param string $2 Branch type in {'demo', 'feature', 'hotfix', 'release', 'tag'}
+# @testedby TwgitCommonToolsTest
 #
 function clean_prefixes () {
     local branch_name="$1"
     local type="$2"
-    local -A prefixes=(
-        [demo]="$TWGIT_PREFIX_DEMO"
-        [feature]="$TWGIT_PREFIX_FEATURE"
-        [hotfix]="$TWGIT_PREFIX_HOTFIX"
-        [release]="$TWGIT_PREFIX_RELEASE"
-        [tag]="$TWGIT_PREFIX_TAG"
-    )
+    local prefix="$(prefix_of $type)"
 
     RETVAL="$branch_name"
-    if [ ! -z "${prefixes[$type]-}" ]; then
-        if [[ $branch_name == ${prefixes[$type]}* ]]; then
-            RETVAL=$(echo $branch_name | sed -e 's/^'"${prefixes[$type]}"'//')
+    if [ ! -z "$prefix" ]; then
+        if [[ $branch_name == $prefix* ]]; then
+            RETVAL=$(echo $branch_name | sed -e 's/^'"$prefix"'//')
             CUI_displayMsg warning "Assume $type was '<b>$RETVAL</b>' instead of '<b>$branch_name</b>'…"
         fi
     fi

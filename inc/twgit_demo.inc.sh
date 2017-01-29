@@ -46,7 +46,7 @@ function usage () {
     CUI_displayMsg help_detail '<b>remove <demoname></b>'
     CUI_displayMsg help_detail '    Remove both local and remote specified demo branch. No feature will'
     CUI_displayMsg help_detail '    be removed.'; echo
-    CUI_displayMsg help_detail '<b>start <demoname> [-d]</b>'
+    CUI_displayMsg help_detail '<b>start <demoname> [from-demo <demoname>] [-d]</b>'
     CUI_displayMsg help_detail '    Create both a new local and remote demo, or fetch the remote demo,'
     CUI_displayMsg help_detail '    or checkout the local demo. Add <b>-d</b> to delete beforehand local demo'
     CUI_displayMsg help_detail '    if exists.'; echo
@@ -124,7 +124,7 @@ function cmd_push () {
 }
 
 ##
-# Crée une nouvelle demo à partir du dernier tag.
+# Crée une nouvelle demo à partir du dernier tag, ou à partir de la demo demandée.
 # Gère l'option '-d' supprimant préalablement la demo locale, afin de forcer le recréation de la branche.
 #
 # @param string $1 nom court de la nouvelle demo.
@@ -134,7 +134,9 @@ function cmd_start () {
     require_parameter 'demo'
     clean_prefixes "$RETVAL" 'demo'
     local demo="$RETVAL"
-    start_simple_branch "$demo" "$TWGIT_PREFIX_DEMO"
+    parse_source_branch 'demo'
+    local source_branch="$RETVAL"
+    start_simple_branch "$demo" "$TWGIT_PREFIX_DEMO" "$source_branch"
     echo
 }
 

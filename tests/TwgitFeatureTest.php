@@ -258,5 +258,43 @@ class TwgitFeatureTest extends TwgitTestCase
             . "\$Id:1.4.0\$ \$Id:1.4.0\$";
         $this->assertEquals($sExpected, $sResult);
     }
+
+    /**
+     * @dataProvider provideStartFrom
+     */
+    public function testStartFrom_WithoutRemote ($sSourceBranchType)
+    {
+        $this->_remoteExec('git init');
+        $this->_localExec(TWGIT_EXEC . ' init 1.2.3 ' . TWGIT_REPOSITORY_ORIGIN_DIR);
+        $this->setExpectedException('\RuntimeException', "Remote branch '" . self::_remote($sSourceBranchType . '-51') ."' not found!");
+        $this->_localExec(TWGIT_EXEC . ' feature start 42 from-' . $sSourceBranchType . ' 51');
+    }
+
+    /**
+     * @dataProvider provideStartFrom
+     */
+    public function testStartFrom_WithExistingRemote ($sSourceBranchType)
+    {
+        $this->_remoteExec('git init');
+        $this->_localExec(TWGIT_EXEC . ' init 1.2.3 ' . TWGIT_REPOSITORY_ORIGIN_DIR);
+        $this->_remoteExec(
+            'git checkout -b ' . $sSourceBranchType . '-51'
+            . ' && git commit --allow-empty -m "Initialize ' . $sSourceBranchType . '-51"'
+            . ' && touch the-chosen-one'
+            . ' && git add .'
+            . ' && git commit -m "Add the chosen one"'
+        );
+        $this->_localExec(TWGIT_EXEC . ' feature start 42 from-' . $sSourceBranchType . ' 51');
+        $sResult = $this->_localExec('ls');
+        $this->assertContains('the-chosen-one', $sResult);
+    }
+
+    public function provideStartFrom ()
+    {
+        return array(
+            array('feature'),
+            array('demo'),
+        );
+    }
 }
 

@@ -57,10 +57,10 @@ function usage () {
     CUI_displayMsg help_detail '    For example: "twgit feature migrate rm7880 7880"'; echo
     CUI_displayMsg help_detail '<b>push</b>'
     CUI_displayMsg help_detail "    Push current feature to '$TWGIT_ORIGIN' repository."
-    CUI_displayMsg help_detail "    It's a shortcut for: \"git push $TWGIT_ORIGIN $TWGIT_PREFIX_FEATURE…\""; echo
+    CUI_displayMsg help_detail "    It's a shortcut for: \"git push $TWGIT_ORIGIN ${TWGIT_PREFIX_FEATURE}…\""; echo
     CUI_displayMsg help_detail '<b>remove <featurename></b>'
     CUI_displayMsg help_detail '    Remove both local and remote specified feature branch.'; echo
-    CUI_displayMsg help_detail '<b>start <featurename> [-d]</b>'
+    CUI_displayMsg help_detail '<b>start <featurename> [from-feature <featurename>|from-demo <demoname>] [-d]</b>'
     CUI_displayMsg help_detail '    Create both a new local and remote feature, or fetch the remote feature,'
     CUI_displayMsg help_detail '    or checkout the local feature. Add <b>-d</b> to delete beforehand local feature'
     CUI_displayMsg help_detail '    if exists.'; echo
@@ -244,7 +244,7 @@ function cmd_migrate () {
 }
 
 ##
-# Crée une nouvelle feature à partir du dernier tag.
+# Crée une nouvelle feature à partir du dernier tag, ou à partir de la demo demandée.
 # Gère l'option '-d' supprimant préalablement la feature locale, afin de forcer le récréation de la branche.
 #
 # @param string $1 nom court de la nouvelle feature.
@@ -254,7 +254,9 @@ function cmd_start () {
     require_parameter 'feature'
     clean_prefixes "$RETVAL" 'feature'
     local feature="$RETVAL"
-    start_simple_branch "$feature" "$TWGIT_PREFIX_FEATURE"
+    parse_source_branch 'feature' 'demo'
+    local source_branch="$RETVAL"
+    start_simple_branch "$feature" "$TWGIT_PREFIX_FEATURE" "$source_branch"
     echo
 }
 

@@ -80,4 +80,32 @@ class TwgitCommonToolsTest extends TwgitTestCase
             array('"a\'b"', '"a\\\'b"'),
         );
     }
+
+    /**
+     * @dataProvider providerCleanPrefixes
+     * @shcovers inc/common.inc.sh::clean_prefixes
+     */
+    public function testCleanPrefixes ($sBranchName, $sBranchType, $sExpectedResult)
+    {
+        $sMsg = $this->_localShellCodeCall('clean_prefixes ' . $sBranchName . ' ' . $sBranchType . '; echo \$RETVAL;');
+        $this->assertEquals($sExpectedResult, $sMsg);
+    }
+
+    public function providerCleanPrefixes ()
+    {
+        return array(
+            array('1224', 'feature', '1224'),
+            array('7889', 'demo', '7889'),
+            array('1.2.0', 'release', '1.2.0'),
+            array('1.2.3', 'hotfix', '1.2.3'),
+            array('3.1.4', 'tag', '3.1.4'),
+            array('feature-1224', 'feature', "/!\\ Assume feature was '1224' instead of 'feature-1224'…\n1224"),
+            array('demo-7889', 'demo', "/!\\ Assume demo was '7889' instead of 'demo-7889'…\n7889"),
+            array('release-1.2.0', 'release', "/!\\ Assume release was '1.2.0' instead of 'release-1.2.0'…\n1.2.0"),
+            array('hotfix-1.2.3', 'hotfix', "/!\\ Assume hotfix was '1.2.3' instead of 'hotfix-1.2.3'…\n1.2.3"),
+            array('v3.1.4', 'tag', "/!\\ Assume tag was '3.1.4' instead of 'v3.1.4'…\n3.1.4"),
+            array('tag-3.1.4', 'tag', 'tag-3.1.4'),
+            array('unknown-148', 'unknown', 'unknown-148'),
+        );
+    }
 }

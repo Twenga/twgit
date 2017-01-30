@@ -51,7 +51,7 @@ function usage () {
     CUI_displayMsg help_detail '    Try to merge specified demo into the current release.'; echo
     CUI_displayMsg help_detail '<b>push</b>'
     CUI_displayMsg help_detail "    Push current release to '$TWGIT_ORIGIN' repository."
-    CUI_displayMsg help_detail "    It's a shortcut for: \"git push $TWGIT_ORIGIN $TWGIT_PREFIX_RELEASE…\""; echo
+    CUI_displayMsg help_detail "    It's a shortcut for: \"git push $TWGIT_ORIGIN ${TWGIT_PREFIX_RELEASE}…\""; echo
     CUI_displayMsg help_detail '<b>remove <releasename></b>'
     CUI_displayMsg help_detail '    Remove both local and remote specified release branch. No feature will'
     CUI_displayMsg help_detail '    be removed. Despite that, create the same tag as finish action to clearly'
@@ -303,7 +303,7 @@ function cmd_merge-demo () {
     require_parameter 'demo'
     clean_prefixes "$RETVAL" 'demo'
     local demo="$RETVAL"
-    local demo_fullname="$TWGIT_PREFIX_DEMO$demo"
+    local demo_fullname="$TWGIT_ORIGIN/$TWGIT_PREFIX_DEMO$demo"
 
     # Tests préliminaires :
     assert_clean_working_tree

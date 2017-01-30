@@ -42,7 +42,7 @@ function usage () {
     CUI_displayMsg help_detail '    Try to merge specified feature into current demo.'; echo
     CUI_displayMsg help_detail '<b>push</b>'
     CUI_displayMsg help_detail "    Push current demo to '$TWGIT_ORIGIN' repository."
-    CUI_displayMsg help_detail "    It's a shortcut for: \"git push $TWGIT_ORIGIN $TWGIT_PREFIX_DEMO…\""; echo
+    CUI_displayMsg help_detail "    It's a shortcut for: \"git push $TWGIT_ORIGIN ${TWGIT_PREFIX_DEMO}…\""; echo
     CUI_displayMsg help_detail '<b>remove <demoname></b>'
     CUI_displayMsg help_detail '    Remove both local and remote specified demo branch. No feature will'
     CUI_displayMsg help_detail '    be removed.'; echo

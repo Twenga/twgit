@@ -57,7 +57,7 @@ function usage () {
     CUI_displayMsg help_detail '    For example: "twgit feature migrate rm7880 7880"'; echo
     CUI_displayMsg help_detail '<b>push</b>'
     CUI_displayMsg help_detail "    Push current feature to '$TWGIT_ORIGIN' repository."
-    CUI_displayMsg help_detail "    It's a shortcut for: \"git push $TWGIT_ORIGIN $TWGIT_PREFIX_FEATURE…\""; echo
+    CUI_displayMsg help_detail "    It's a shortcut for: \"git push $TWGIT_ORIGIN ${TWGIT_PREFIX_FEATURE}…\""; echo
     CUI_displayMsg help_detail '<b>remove <featurename></b>'
     CUI_displayMsg help_detail '    Remove both local and remote specified feature branch.'; echo
     CUI_displayMsg help_detail '<b>start <featurename> [from-feature <featurename>|from-demo <demoname>] [-d]</b>'

@@ -46,7 +46,7 @@ function usage () {
     CUI_displayMsg help_detail '    List current hotfix. Add <b>-F</b> to do not make fetch.'; echo
     CUI_displayMsg help_detail '<b>push</b>'
     CUI_displayMsg help_detail "    Push current hotfix to '$TWGIT_ORIGIN' repository."
-    CUI_displayMsg help_detail "    It's a shortcut for: \"git push $TWGIT_ORIGIN $TWGIT_PREFIX_HOTFIX…\""; echo
+    CUI_displayMsg help_detail "    It's a shortcut for: \"git push $TWGIT_ORIGIN ${TWGIT_PREFIX_HOTFIX}…\""; echo
     CUI_displayMsg help_detail '<b>remove <hotfixname></b>'
     CUI_displayMsg help_detail '    Remove both local and remote specified hotfix branch.'
     CUI_displayMsg help_detail '    Despite that, create the same tag as finish action to clearly distinguish'

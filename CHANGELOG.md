@@ -1,6 +1,13 @@
 ChangeLog
 =========
 
+## Version 1.18.0 (2017-01-30)
+
+Features:
+
+  - [#168](https://github.com/Twenga/twgit/pull/168): New feature or demo starting from a demo.
+  - [#166](https://github.com/Twenga/twgit/pull/166): Improve copy/paste of git command to apply last tag in current branch.
+
 ## Version 1.17.1 (2016-03-01)
 
 Features:

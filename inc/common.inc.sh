@@ -1228,7 +1228,8 @@ function alert_old_branch () {
         msg="${msg} not merged into this branch:"
         [ "$nb_tags_no_merged" -eq "$TWGIT_MAX_RETRIEVE_TAGS_NOT_MERGED" ] && msg="${msg} at least"
         msg="${msg} $(displayInterval "$tags_not_merged")."
-        [ "$2" = 'with-help' ] && msg="${msg} If need be: git merge --no-ff $(get_last_tag), then: twgit feature push"
+        [ "$2" = 'with-help' ] && msg="${msg} If need be: git merge --no-ff $(get_last_tag) && twgit feature push"
+        [ "$2" = 'with-help' ] && msg="${msg} If need be: git merge --no-ff $(get_last_tag) && git push $TWGIT_ORIGIN $branch"
         CUI_displayMsg warning "$msg"
     fi
 }

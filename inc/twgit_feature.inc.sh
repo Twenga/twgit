@@ -52,8 +52,9 @@ function usage () {
     CUI_displayMsg help_detail '<b>merge-into-hotfix [<featurename>]</b>'
     CUI_displayMsg help_detail '    Try to merge specified feature into current hotfix.'
     CUI_displayMsg help_detail '    If no <b><featurename></b> is specified, then ask to use current feature.'; echo
-    CUI_displayMsg help_detail '<b>migrate <oldfeaturefullname> <newfeaturename></b>'
-    CUI_displayMsg help_detail '    Migrate old branch to new process.'
+    CUI_displayMsg help_detail '<b>migrate <oldfeaturefullname> <newfeaturename> [-I]</b>'
+    CUI_displayMsg help_detail '    Migrate old branch to new process. Add <b>-I</b> to run in non-interactive'
+    CUI_displayMsg help_detail '    mode (always say yes).'
     CUI_displayMsg help_detail '    For example: "twgit feature migrate rm7880 7880"'; echo
     CUI_displayMsg help_detail '<b>push</b>'
     CUI_displayMsg help_detail "    Push current feature to '$TWGIT_ORIGIN' repository."
@@ -75,7 +76,8 @@ function usage () {
     CUI_displayMsg help_detail '    and deleted files in the specified feature branch since its creation. If'
     CUI_displayMsg help_detail '    no <b><featurename></b> is specified, then use current feature.'; echo
     CUI_displayMsg help_detail "Prefix '$TWGIT_PREFIX_FEATURE' will be added to <b><featurename></b> and <b><newfeaturename></b>"
-    CUI_displayMsg help_detail "parameters."; echo
+    CUI_displayMsg help_detail "parameters.";
+    CUI_displayMsg help_detail "Prefix '$TWGIT_PREFIX_DEMO' will be added to <b><demoname></b> parameters."; echo
     CUI_displayMsg help_detail '<b>[help]</b>'
     CUI_displayMsg help_detail '    Display this help.'; echo
 }

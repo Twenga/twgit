@@ -57,7 +57,8 @@ function usage () {
     CUI_displayMsg help_detail '    If no <b><demoname></b> is specified, then use current demo.'; echo
     CUI_displayMsg help_detail '<b>update-features</b>'
     CUI_displayMsg help_detail '    Try to update features into current demo.'; echo
-    CUI_displayMsg help_detail "Prefix '$TWGIT_PREFIX_DEMO' will be added to <b><demoname></b> parameter."; echo
+    CUI_displayMsg help_detail "Prefix '$TWGIT_PREFIX_FEATURE' will be added to <b><featurename></b> parameters."
+    CUI_displayMsg help_detail "Prefix '$TWGIT_PREFIX_DEMO' will be added to <b><demoname></b> parameters."; echo
     CUI_displayMsg help_detail '<b>[help]</b>'
     CUI_displayMsg help_detail '    Display this help.'; echo
 }

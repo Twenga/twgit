@@ -381,7 +381,7 @@ function cmd_merge-into-hotfix () {
             die "You must be in a feature if you didn't specify one!"
         else
             echo -n $(CUI_displayMsg question "Are you sure to merge '$TWGIT_ORIGIN/$current_branch' into '$TWGIT_ORIGIN/$hotfix_fullname'? [y/N] "); read answer
-            [ "$answer" != "Y" ] && [ "$answer" != "y" ] && die 'Merge into current release aborted!'
+            [ "$answer" != "Y" ] && [ "$answer" != "y" ] && die 'Merge into current hotfix aborted!'
         fi
         feature_fullname="$current_branch"
         feature="${feature_fullname:${#TWGIT_PREFIX_FEATURE}}"

@@ -303,7 +303,7 @@ function cmd_status() {
     fi
 
     echo
-    display_branches 'feature' "$TWGIT_ORIGIN/$demo_fullname"
+    display_branches 'demo' "$TWGIT_ORIGIN/$demo_fullname"
     echo
     inform_about_branch_status $demo_fullname
     if [ "$demo_fullname" = "$current_branch" ]; then

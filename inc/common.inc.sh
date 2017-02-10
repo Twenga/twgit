@@ -916,13 +916,16 @@ function create_and_push_tag () {
 #
 # @param string $1 nom court de la nouvelle branche.
 # @param string $2 préfixe de branche, par exemple $TWGIT_PREFIX_FEATURE ou $TWGIT_PREFIX_DEMO.
-# @param string $3 nom complet de la branche source à partir de laquelle créer la branche (optionnel).
+# @param string $3 type de la branche source à partir de laquelle créer la branche (optionnel).
+# @param string $4 nom court de la branche source (requis pour une branche source de type 'feature' ou 'demo').
 #
 function start_simple_branch () {
     local branch="$1"
     local branch_prefix="$2"
-    local source_branch_fullname="$3"
+    local source_branch_type="$3"
+    local source_branch_name="$4"
     local branch_fullname="$branch_prefix$branch"
+    local source_branch_fullname=''
 
     local -A wording=(
         [$TWGIT_PREFIX_FEATURE]='feature'
@@ -933,6 +936,16 @@ function start_simple_branch () {
     assert_valid_ref_name $branch
     assert_clean_working_tree
     process_fetch
+
+    if [ ! -z "$source_branch_type" ]; then
+        if [ "$source_branch_type" = 'release' ]; then
+            source_branch_fullname=$(get_current_release_in_progress)
+            [ -z "$source_branch_fullname" ] && die 'No release in progress!'
+        else
+            source_branch_fullname="$(prefix_of $source_branch_type)$source_branch_name"
+            assert_remote_branch_exists "$source_branch_fullname"
+        fi
+    fi
 
     if isset_option 'd'; then
         if has $branch_fullname $(get_local_branches); then
@@ -953,8 +966,7 @@ function start_simple_branch () {
             local last_tag=$(get_last_tag)
             exec_git_command "git checkout -b $branch_fullname tags/$last_tag" "Could not check out tag '$last_tag'!"
         else
-            assert_remote_branch_exists "$source_branch_fullname"
-            exec_git_command "git checkout -b $branch_fullname $TWGIT_ORIGIN/$source_branch_fullname" "Could not check out '$TWGIT_ORIGIN/$source_branch_fullname'!"
+            exec_git_command "git checkout -b $branch_fullname $TWGIT_ORIGIN/$source_branch_fullname" "Could not check out $source_branch_type '$TWGIT_ORIGIN/$source_branch_fullname'!"
         fi
 
         local subject="$(getFeatureSubject "$branch")"
@@ -1392,7 +1404,8 @@ function convertList2CSV () {
 ##
 # Analyse les prochains paramètres de la ligne de commande pour déduire la branche source demandée par
 # l'utilisateur. S'attend à dépiler les paramètres 'from-<source_type> <source_name>'.
-# Le résultat est stocké dans la variable $RETVAL.
+# Le résultat est stocké dans la variable $RETVAL, et contient le type de la branche source et son
+# nom court (s'il s'agit d'une branche source de type 'feature' ou 'demo').
 #
 # Si le premier paramètre n'est pas de la forme 'from-<source_type>' ou si <source_type> ne fait pas
 # parti des types demandés, une erreur est levée.
@@ -1401,18 +1414,28 @@ function convertList2CSV () {
 #
 # @param string $1..$n Liste des types possibles de la branche source
 #
-function parse_source_branch () {
+function parse_source_branch_info () {
     require_parameter '-'
-    if [ ! -z "$RETVAL" ]; then
+    local keyword="$RETVAL"
+
+    if [ ! -z "$keyword" ]; then
+
         for type in "$@"; do
-            if [ "$RETVAL" = "from-$type" ]; then
-                require_parameter "${type}name"
-                clean_prefixes "$RETVAL" "$type"
-                local source_branch="$RETVAL"
-                RETVAL="$(prefix_of $type)$source_branch"
+            if [ "$keyword" = "from-$type" ]; then
+
+                if [ "$type" = 'release' ]; then
+                    RETVAL="$type"
+                else
+                    require_parameter "${type}name"
+                    clean_prefixes "$RETVAL" "$type"
+                    local source_branch="$RETVAL"
+                    RETVAL="$type $source_branch"
+                fi
+
                 return
             fi
         done
+
         CUI_displayMsg error "Unknown action extension: '$RETVAL'!"
         usage
         exit 1

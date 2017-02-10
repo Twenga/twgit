@@ -296,5 +296,29 @@ class TwgitFeatureTest extends TwgitTestCase
             array('demo'),
         );
     }
+
+    public function testStartFromRelease_WithoutRemote ()
+    {
+        $this->_remoteExec('git init');
+        $this->_localExec(TWGIT_EXEC . ' init 1.2.3 ' . TWGIT_REPOSITORY_ORIGIN_DIR);
+        $this->setExpectedException('\RuntimeException', 'No release in progress!');
+        $this->_localExec(TWGIT_EXEC . ' feature start 42 from-release');
+    }
+
+    public function testStartFromRelease_WithExistingRemote ()
+    {
+        $this->_remoteExec('git init');
+        $this->_localExec(TWGIT_EXEC . ' init 1.2.3 ' . TWGIT_REPOSITORY_ORIGIN_DIR);
+        $this->_remoteExec(
+            'git checkout -b release-1.3.0'
+            . ' && git commit --allow-empty -m "Initialize release-1.3.0"'
+            . ' && touch the-chosen-one'
+            . ' && git add .'
+            . ' && git commit -m "Add the chosen one"'
+        );
+        $this->_localExec(TWGIT_EXEC . ' feature start 42 from-release');
+        $sResult = $this->_localExec('ls');
+        $this->assertContains('the-chosen-one', $sResult);
+    }
 }
 

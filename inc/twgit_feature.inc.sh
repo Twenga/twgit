@@ -61,7 +61,7 @@ function usage () {
     CUI_displayMsg help_detail "    It's a shortcut for: \"git push $TWGIT_ORIGIN ${TWGIT_PREFIX_FEATURE}…\""; echo
     CUI_displayMsg help_detail '<b>remove <featurename></b>'
     CUI_displayMsg help_detail '    Remove both local and remote specified feature branch.'; echo
-    CUI_displayMsg help_detail '<b>start <featurename> [from-feature <featurename>|from-demo <demoname>] [-d]</b>'
+    CUI_displayMsg help_detail '<b>start <featurename> [from-release|from-demo <demoname>|from-feature <featurename>] [-d]</b>'
     CUI_displayMsg help_detail '    Create both a new local and remote feature, or fetch the remote feature,'
     CUI_displayMsg help_detail '    or checkout the local feature. Add <b>-d</b> to delete beforehand local feature'
     CUI_displayMsg help_detail '    if exists.'; echo
@@ -256,9 +256,9 @@ function cmd_start () {
     require_parameter 'feature'
     clean_prefixes "$RETVAL" 'feature'
     local feature="$RETVAL"
-    parse_source_branch 'feature' 'demo'
-    local source_branch="$RETVAL"
-    start_simple_branch "$feature" "$TWGIT_PREFIX_FEATURE" "$source_branch"
+    parse_source_branch_info 'release' 'demo' 'feature'
+    local source_branch_info="$RETVAL"
+    start_simple_branch "$feature" "$TWGIT_PREFIX_FEATURE" ${source_branch_info}
     echo
 }
 

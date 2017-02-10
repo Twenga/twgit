@@ -117,7 +117,7 @@ function _twgit () {
                                     ;;
                                 *)
                                     if [[ ${words[-2]} == "${action}" && " ${features} " != *" ${previous} "* ]] ; then
-                                        local opts="from-demo from-feature"
+                                        local opts="from-demo from-feature from-release"
                                         COMPREPLY=( $(compgen -W "${opts}" -- ${cur}) )
                                     fi
                                     ;;
@@ -158,7 +158,7 @@ function _twgit () {
                                 ;;
                                 *)
                                     if [[ ${words[-2]} == "${action}" && " ${demos} " != *" ${previous} "* ]] ; then
-                                        local opts="from-demo"
+                                        local opts="from-demo from-release"
                                         COMPREPLY=( $(compgen -W "${opts}" -- ${cur}) )
                                     fi
                                     ;;

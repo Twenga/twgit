@@ -67,7 +67,7 @@ function usage () {
     CUI_displayMsg help_detail '    the last tag (e.g. v1.2.3):'
     CUI_displayMsg help_detail "        <b>-M</b> for a new major version (-> ${TWGIT_PREFIX_RELEASE}2.0.0)"
     CUI_displayMsg help_detail "        <b>-m</b> for a new minor version (default, -> ${TWGIT_PREFIX_RELEASE}1.3.0)"; echo
-    CUI_displayMsg help_detail "Prefix '$TWGIT_PREFIX_DEMO' will be added to <b><demoname></b> parameter."
+    CUI_displayMsg help_detail "Prefix '$TWGIT_PREFIX_DEMO' will be added to <b><demoname></b> parameters."
     CUI_displayMsg help_detail "Prefix '$TWGIT_PREFIX_RELEASE' will be added to <b><releasename></b> parameters."
     CUI_displayMsg help_detail "Prefix '$TWGIT_PREFIX_TAG' will be added to <b><tagname></b> parameters."; echo
     CUI_displayMsg help_detail '<b>[help]</b>'

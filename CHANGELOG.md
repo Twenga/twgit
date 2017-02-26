@@ -1,6 +1,12 @@
 ChangeLog
 =========
 
+## Version 1.19.0 (2017-02-27)
+
+Features:
+
+  - [#169](https://github.com/Twenga/twgit/pull/169): Add feature start from release and improve bash completion.
+
 ## Version 1.18.0 (2017-01-30)
 
 Features:

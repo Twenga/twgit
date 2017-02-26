@@ -52,15 +52,16 @@ function usage () {
     CUI_displayMsg help_detail '<b>merge-into-hotfix [<featurename>]</b>'
     CUI_displayMsg help_detail '    Try to merge specified feature into current hotfix.'
     CUI_displayMsg help_detail '    If no <b><featurename></b> is specified, then ask to use current feature.'; echo
-    CUI_displayMsg help_detail '<b>migrate <oldfeaturefullname> <newfeaturename></b>'
-    CUI_displayMsg help_detail '    Migrate old branch to new process.'
+    CUI_displayMsg help_detail '<b>migrate <oldfeaturefullname> <newfeaturename> [-I]</b>'
+    CUI_displayMsg help_detail '    Migrate old branch to new process. Add <b>-I</b> to run in non-interactive'
+    CUI_displayMsg help_detail '    mode (always say yes).'
     CUI_displayMsg help_detail '    For example: "twgit feature migrate rm7880 7880"'; echo
     CUI_displayMsg help_detail '<b>push</b>'
     CUI_displayMsg help_detail "    Push current feature to '$TWGIT_ORIGIN' repository."
     CUI_displayMsg help_detail "    It's a shortcut for: \"git push $TWGIT_ORIGIN ${TWGIT_PREFIX_FEATURE}…\""; echo
     CUI_displayMsg help_detail '<b>remove <featurename></b>'
     CUI_displayMsg help_detail '    Remove both local and remote specified feature branch.'; echo
-    CUI_displayMsg help_detail '<b>start <featurename> [from-feature <featurename>|from-demo <demoname>] [-d]</b>'
+    CUI_displayMsg help_detail '<b>start <featurename> [from-release|from-demo <demoname>|from-feature <featurename>] [-d]</b>'
     CUI_displayMsg help_detail '    Create both a new local and remote feature, or fetch the remote feature,'
     CUI_displayMsg help_detail '    or checkout the local feature. Add <b>-d</b> to delete beforehand local feature'
     CUI_displayMsg help_detail '    if exists.'; echo
@@ -75,7 +76,8 @@ function usage () {
     CUI_displayMsg help_detail '    and deleted files in the specified feature branch since its creation. If'
     CUI_displayMsg help_detail '    no <b><featurename></b> is specified, then use current feature.'; echo
     CUI_displayMsg help_detail "Prefix '$TWGIT_PREFIX_FEATURE' will be added to <b><featurename></b> and <b><newfeaturename></b>"
-    CUI_displayMsg help_detail "parameters."; echo
+    CUI_displayMsg help_detail "parameters.";
+    CUI_displayMsg help_detail "Prefix '$TWGIT_PREFIX_DEMO' will be added to <b><demoname></b> parameters."; echo
     CUI_displayMsg help_detail '<b>[help]</b>'
     CUI_displayMsg help_detail '    Display this help.'; echo
 }
@@ -254,9 +256,9 @@ function cmd_start () {
     require_parameter 'feature'
     clean_prefixes "$RETVAL" 'feature'
     local feature="$RETVAL"
-    parse_source_branch 'feature' 'demo'
-    local source_branch="$RETVAL"
-    start_simple_branch "$feature" "$TWGIT_PREFIX_FEATURE" "$source_branch"
+    parse_source_branch_info 'release' 'demo' 'feature'
+    local source_branch_info="$RETVAL"
+    start_simple_branch "$feature" "$TWGIT_PREFIX_FEATURE" ${source_branch_info}
     echo
 }
 
@@ -379,7 +381,7 @@ function cmd_merge-into-hotfix () {
             die "You must be in a feature if you didn't specify one!"
         else
             echo -n $(CUI_displayMsg question "Are you sure to merge '$TWGIT_ORIGIN/$current_branch' into '$TWGIT_ORIGIN/$hotfix_fullname'? [y/N] "); read answer
-            [ "$answer" != "Y" ] && [ "$answer" != "y" ] && die 'Merge into current release aborted!'
+            [ "$answer" != "Y" ] && [ "$answer" != "y" ] && die 'Merge into current hotfix aborted!'
         fi
         feature_fullname="$current_branch"
         feature="${feature_fullname:${#TWGIT_PREFIX_FEATURE}}"

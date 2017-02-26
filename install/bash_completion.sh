@@ -35,18 +35,18 @@ function _twgit () {
     local cur="${COMP_WORDS[COMP_CWORD]}"
 
     if [ "$COMP_CWORD" = "1" ]; then
-        local opts="clean feature demo help init hotfix release tag update"
+        local opts="clean demo feature help hotfix init release tag update"
         COMPREPLY=( $(compgen -W "${opts}" -- ${cur}) )
 
     elif [ "$COMP_CWORD" = "2" ]; then
         local command="${COMP_WORDS[COMP_CWORD-1]}"
         case "${command}" in
             feature)
-                local opts="committers help list merge-into-release merge-into-hotfix migrate push remove start status what-changed"
+                local opts="committers help list merge-into-hotfix merge-into-release migrate push remove start status what-changed"
                 COMPREPLY=( $(compgen -W "${opts}" -- ${cur}) )
                 ;;
             demo)
-                local opts="help list merge-feature update-features merge-demo push remove start status"
+                local opts="help list merge-demo merge-feature push remove start status update-features"
                 COMPREPLY=( $(compgen -W "${opts}" -- ${cur}) )
                 ;;
             hotfix)
@@ -54,7 +54,7 @@ function _twgit () {
                 COMPREPLY=( $(compgen -W "${opts}" -- ${cur}) )
                 ;;
             release)
-                local opts="committers finish merge-demo help list push remove reset start"
+                local opts="committers finish help list merge-demo push remove reset start"
                 COMPREPLY=( $(compgen -W "${opts}" -- ${cur}) )
                 ;;
             tag)
@@ -64,18 +64,23 @@ function _twgit () {
         esac
 
     elif [ "$COMP_CWORD" -gt "2" ]; then
+
+        local words=( $(echo ${COMP_WORDS[@]} | sed 's/ -[a-zA-Z-]*//g' | sed "s/ ${cur}$//") )
+        local previous="${words[-1]}"
         local command="${COMP_WORDS[1]}"
         local action="${COMP_WORDS[2]}"
+        local features="$( (git branch --no-color -r | grep 'feature-' | sed 's#^[* ]*origin/feature-##' | tr '\n' ' ') 2>/dev/null)"
+        local demos="$( (git branch --no-color -r | grep 'demo-' | sed 's#^[* ]*origin/demo-##' | tr '\n' ' ') 2>/dev/null)"
+
         case "${command}" in
             feature)
                 case "${action}" in
                     committers)
-                         if [[ ${cur} != -* ]] ; then
-                            local opts=$((git branch --no-color -r | grep "feature-" | sed 's/^[* ]*//' | sed 's#^origin/feature-##' | tr '\n' ' ') 2>/dev/null)
-                            COMPREPLY=( $(compgen -W "${opts}" -- ${cur}) )
-                        else
+                        if [[ ${cur} == -* ]] ; then
                             local opts="-F"
                             COMPREPLY=( $(compgen -W "${opts}" -- ${cur}) )
+                        elif [[ "${previous}" == "${action}" ]] ; then
+                            COMPREPLY=( $(compgen -W "${features}" -- ${cur}) )
                         fi
                         ;;
                     list)
@@ -84,29 +89,38 @@ function _twgit () {
                             COMPREPLY=( $(compgen -W "${opts}" -- ${cur}) )
                         fi
                         ;;
+                    merge-into-release|merge-into-hotfix|remove|status|what-changed)
+                        if [[ "${previous}" == "${action}" ]] ; then
+                            COMPREPLY=( $(compgen -W "${features}" -- ${cur}) )
+                        fi
+                        ;;
+                    migrate)
+                        if [[ ${cur} == -* ]] ; then
+                            local opts="-I"
+                            COMPREPLY=( $(compgen -W "${opts}" -- ${cur}) )
+                        elif [[ "${previous}" == "${action}" ]] ; then
+                            local branches="$( (git branch --no-color -r | grep -vE 'origin/(feature-|demo-|release-|hotfix-|HEAD |stable$|master$)' | sed 's#^[* ]*origin/##' | tr '\n' ' ') 2>/dev/null)"
+                            COMPREPLY=( $(compgen -W "${branches}" -- ${cur}) )
+                        fi
+                        ;;
                     start)
                         if [[ ${cur} == -* ]] ; then
                             local opts="-d"
                             COMPREPLY=( $(compgen -W "${opts}" -- ${cur}) )
                         else
-                            local parameters=( $(echo ${COMP_WORDS[@]} | sed 's/ -[a-zA-Z-]*//g' | sed "s/ ${cur}$//") )
-                            local previous="${parameters[-1]}"
-                            case "$previous" in
-                                start)
-                                    local opts=$((git branch --no-color -r | grep "feature-" | sed 's/^[* ]*//' | sed 's#^origin/feature-##' | tr '\n' ' ') 2>/dev/null)
-                                    COMPREPLY=( $(compgen -W "${opts}" -- ${cur}) )
-                                ;;
-                                from-*)
-                                    local branch_type=$(echo ${previous} | sed 's/^from-//')
-                                    local opts=$((git branch --no-color -r | grep "${branch_type}-" | sed 's/^[* ]*//' | sed "s#^origin/${branch_type}-##" | tr '\n' ' ') 2>/dev/null)
-                                    COMPREPLY=( $(compgen -W "${opts}" -- ${cur}) )
-                                ;;
+                            case "${previous}" in
+                                start|from-feature)
+                                    COMPREPLY=( $(compgen -W "${features}" -- ${cur}) )
+                                    ;;
+                                from-demo)
+                                    COMPREPLY=( $(compgen -W "${demos}" -- ${cur}) )
+                                    ;;
                                 *)
-                                    if [[ ${parameters[-2]} == "start" ]] ; then
-                                        local opts="from-demo from-feature"
+                                    if [[ ${words[-2]} == "${action}" && " ${features} " != *" ${previous} "* ]] ; then
+                                        local opts="from-demo from-feature from-release"
                                         COMPREPLY=( $(compgen -W "${opts}" -- ${cur}) )
                                     fi
-                                ;;
+                                    ;;
                             esac
                         fi
                         ;;
@@ -119,6 +133,18 @@ function _twgit () {
                         if [[ ${cur} == -* ]] ; then
                             local opts="-F -c"
                             COMPREPLY=( $(compgen -W "${opts}" -- ${cur}) )
+                        elif [[ "${previous}" == "${action}" ]] ; then
+                            COMPREPLY=( $(compgen -W "${demos}" -- ${cur}) )
+                        fi
+                        ;;
+                    merge-demo|remove|status)
+                        if [[ "${previous}" == "${action}" ]] ; then
+                            COMPREPLY=( $(compgen -W "${demos}" -- ${cur}) )
+                        fi
+                        ;;
+                    merge-feature)
+                        if [[ "${previous}" == "${action}" ]] ; then
+                            COMPREPLY=( $(compgen -W "${features}" -- ${cur}) )
                         fi
                         ;;
                     start)
@@ -126,19 +152,16 @@ function _twgit () {
                             local opts="-d"
                             COMPREPLY=( $(compgen -W "${opts}" -- ${cur}) )
                         else
-                            local parameters=( $(echo ${COMP_WORDS[@]} | sed 's/ -[a-zA-Z-]*//g' | sed "s/ ${cur}$//") )
-                            local previous="${parameters[-1]}"
-                            case "$previous" in
+                            case "${previous}" in
                                 start|from-demo)
-                                    local opts=$((git branch --no-color -r | grep "demo-" | sed 's/^[* ]*//' | sed 's#^origin/demo-##' | tr '\n' ' ') 2>/dev/null)
-                                    COMPREPLY=( $(compgen -W "${opts}" -- ${cur}) )
+                                    COMPREPLY=( $(compgen -W "${demos}" -- ${cur}) )
                                 ;;
                                 *)
-                                    if [[ ${parameters[-2]} == "start" ]] ; then
-                                        local opts="from-demo"
+                                    if [[ ${words[-2]} == "${action}" && " ${demos} " != *" ${previous} "* ]] ; then
+                                        local opts="from-demo from-release"
                                         COMPREPLY=( $(compgen -W "${opts}" -- ${cur}) )
                                     fi
-                                ;;
+                                    ;;
                             esac
                         fi
                         ;;
@@ -146,8 +169,9 @@ function _twgit () {
                 ;;
 
             hotfix)
+                local hotfixes="$( (git branch --no-color -r | grep 'hotfix-' | sed 's#^[* ]*origin/hotfix-##' | tr '\n' ' ') 2>/dev/null)"
                 case "${action}" in
-                    finish)
+                    finish|start)
                         if [[ ${cur} == -* ]] ; then
                             local opts="-I"
                             COMPREPLY=( $(compgen -W "${opts}" -- ${cur}) )
@@ -157,24 +181,27 @@ function _twgit () {
                         if [[ ${cur} == -* ]] ; then
                             local opts="-F"
                             COMPREPLY=( $(compgen -W "${opts}" -- ${cur}) )
+                        fi
+                        ;;
+                    remove)
+                        if [[ "${previous}" == "${action}" ]] ; then
+                            COMPREPLY=( $(compgen -W "${hotfixes}" -- ${cur}) )
                         fi
                         ;;
                 esac
                 ;;
 
             release)
+                local releases="$( (git branch --no-color -r | grep 'release-' | sed 's#^[* ]*origin/release-##' | tr '\n' ' ') 2>/dev/null)"
                 case "${action}" in
                     committers)
-                         if [[ ${cur} == -* ]] ; then
+                        if [[ ${cur} == -* ]] ; then
                             local opts="-F"
                             COMPREPLY=( $(compgen -W "${opts}" -- ${cur}) )
                         fi
                         ;;
                     finish)
-                         if [[ ${cur} != -* ]] ; then
-                            local opts=$((git branch --no-color -r | grep "release-" | sed 's/^[* ]*//' | sed 's#^origin/release-##' | tr '\n' ' ') 2>/dev/null)
-                            COMPREPLY=( $(compgen -W "${opts}" -- ${cur}) )
-                        else
+                        if [[ ${cur} == -* ]] ; then
                             local opts="-I"
                             COMPREPLY=( $(compgen -W "${opts}" -- ${cur}) )
                         fi
@@ -185,9 +212,38 @@ function _twgit () {
                             COMPREPLY=( $(compgen -W "${opts}" -- ${cur}) )
                         fi
                         ;;
+                    merge-demo)
+                        if [[ "${previous}" == "${action}" ]] ; then
+                            COMPREPLY=( $(compgen -W "${demos}" -- ${cur}) )
+                        fi
+                        ;;
+                    remove)
+                        if [[ "${previous}" == "${action}" ]] ; then
+                            COMPREPLY=( $(compgen -W "${releases}" -- ${cur}) )
+                        fi
+                        ;;
+                    reset)
+                        if [[ ${cur} == -* ]] ; then
+                            local opts="-I -M -m"
+                            COMPREPLY=( $(compgen -W "${opts}" -- ${cur}) )
+                        elif [[ "${previous}" == "${action}" ]] ; then
+                            COMPREPLY=( $(compgen -W "${releases}" -- ${cur}) )
+                        fi
+                        ;;
                     start)
                         if [[ ${cur} == -* ]] ; then
                             local opts="-I -M -m"
+                            COMPREPLY=( $(compgen -W "${opts}" -- ${cur}) )
+                        fi
+                        ;;
+                esac
+                ;;
+
+            tag)
+                case "${action}" in
+                    list)
+                        if [[ ${cur} == -* ]] ; then
+                            local opts="-F"
                             COMPREPLY=( $(compgen -W "${opts}" -- ${cur}) )
                         fi
                         ;;

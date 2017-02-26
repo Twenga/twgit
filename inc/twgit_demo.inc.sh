@@ -46,7 +46,7 @@ function usage () {
     CUI_displayMsg help_detail '<b>remove <demoname></b>'
     CUI_displayMsg help_detail '    Remove both local and remote specified demo branch. No feature will'
     CUI_displayMsg help_detail '    be removed.'; echo
-    CUI_displayMsg help_detail '<b>start <demoname> [from-demo <demoname>] [-d]</b>'
+    CUI_displayMsg help_detail '<b>start <demoname> [from-release|from-demo <demoname>] [-d]</b>'
     CUI_displayMsg help_detail '    Create both a new local and remote demo, or fetch the remote demo,'
     CUI_displayMsg help_detail '    or checkout the local demo. Add <b>-d</b> to delete beforehand local demo'
     CUI_displayMsg help_detail '    if exists.'; echo
@@ -57,7 +57,8 @@ function usage () {
     CUI_displayMsg help_detail '    If no <b><demoname></b> is specified, then use current demo.'; echo
     CUI_displayMsg help_detail '<b>update-features</b>'
     CUI_displayMsg help_detail '    Try to update features into current demo.'; echo
-    CUI_displayMsg help_detail "Prefix '$TWGIT_PREFIX_DEMO' will be added to <b><demoname></b> parameter."; echo
+    CUI_displayMsg help_detail "Prefix '$TWGIT_PREFIX_FEATURE' will be added to <b><featurename></b> parameters."
+    CUI_displayMsg help_detail "Prefix '$TWGIT_PREFIX_DEMO' will be added to <b><demoname></b> parameters."; echo
     CUI_displayMsg help_detail '<b>[help]</b>'
     CUI_displayMsg help_detail '    Display this help.'; echo
 }
@@ -134,9 +135,9 @@ function cmd_start () {
     require_parameter 'demo'
     clean_prefixes "$RETVAL" 'demo'
     local demo="$RETVAL"
-    parse_source_branch 'demo'
-    local source_branch="$RETVAL"
-    start_simple_branch "$demo" "$TWGIT_PREFIX_DEMO" "$source_branch"
+    parse_source_branch_info 'release' 'demo'
+    local source_branch_info="$RETVAL"
+    start_simple_branch "$demo" "$TWGIT_PREFIX_DEMO" ${source_branch_info}
     echo
 }
 
@@ -302,7 +303,7 @@ function cmd_status() {
     fi
 
     echo
-    display_branches 'feature' "$TWGIT_ORIGIN/$demo_fullname"
+    display_branches 'demo' "$TWGIT_ORIGIN/$demo_fullname"
     echo
     inform_about_branch_status $demo_fullname
     if [ "$demo_fullname" = "$current_branch" ]; then

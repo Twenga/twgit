@@ -1304,7 +1304,7 @@ function displayQuotedEnum () {
     if [ -z "$trimmed_list" ]; then
         echo
     else
-        local quoted_list="'<b>${trimmed_list// /</b>\', \'<b>}</b>'"
+        local quoted_list="'<b>${trimmed_list// /</b>', '<b>}</b>'"
         echo $quoted_list
     fi
 }

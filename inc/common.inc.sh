@@ -1259,7 +1259,7 @@ function alert_dissident_branches () {
         fi
     fi
 
-    local local_ambiguous_branches="$((get_local_branches; git tag) | sort | uniq -d)"
+    local local_ambiguous_branches="$( (get_local_branches; git tag) | sort | uniq -d)"
     if [ ! -z "$local_ambiguous_branches" ]; then
         CUI_displayMsg warning "Following local branches are ambiguous: $(displayQuotedEnum $local_ambiguous_branches)!"
     fi
@@ -1304,7 +1304,7 @@ function displayQuotedEnum () {
     if [ -z "$trimmed_list" ]; then
         echo
     else
-        local quoted_list="'<b>${trimmed_list// /</b>', '<b>}</b>'"
+        local quoted_list="'<b>${trimmed_list// /</b>\', \'<b>}</b>'"
         echo $quoted_list
     fi
 }

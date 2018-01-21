@@ -68,7 +68,7 @@ TWGIT_EMAIL_DOMAIN_NAME=''	# e.g. twenga.com
 TWGIT_MAX_RETRIEVE_TAGS_NOT_MERGED=3
 TWGIT_MAX_TAG_LIST_TO_SHOW=5
 
-TWGIT_FEATURE_SUBJECT_CONNECTOR=''			    # in {'', 'github', 'redmine', 'jira', 'gitlab'}
+TWGIT_FEATURE_SUBJECT_CONNECTOR=''			    # in {'', 'github', 'redmine', 'jira', 'gitlab', 'pivotal'}
 TWGIT_FEATURE_SUBJECT_CONNECTOR_PATH="$TWGIT_INC_DIR/connectors/feature_subject_%s.sh"	# où %s est un $TWGIT_FEATURE_SUBJECT_CONNECTOR
 TWGIT_FEATURE_SUBJECT_REDMINE_API_KEY=''	    # API key is a 40-byte hexadecimal string.
 TWGIT_FEATURE_SUBJECT_REDMINE_DOMAIN=''		    # e.g. 'www.redmine.org', with optionally scheme: 'http://', 'https://' (default).
@@ -81,6 +81,8 @@ TWGIT_FEATURE_SUBJECT_JIRA_CREDENTIAL_BASE64='' # base64 (login:password)
 TWGIT_FEATURE_SUBJECT_TRELLO_DOMAIN='https://trello.com' # trello domain
 TWGIT_FEATURE_SUBJECT_TRELLO_APPLICATION_KEY=''          # trello application key (check https://trello.com/docs/gettingstarted/index.html#getting-an-application-key)
 TWGIT_FEATURE_SUBJECT_TRELLO_TOKEN=''                    # trello token (check https://trello.com/docs/gettingstarted/index.html#getting-a-token-from-a-user)
+TWGIT_FEATURE_SUBJECT_PIVOTAL_PROJECT_ID=''         # pivotal tracker project id
+TWGIT_FEATURE_SUBJECT_PIVOTAL_API_TOKEN=''          # API key is a 40-byte hexadecimal string (check https://www.pivotaltracker.com/help/articles/api_token/)
 
 # All the files designed in the TWGIT_VERSION_INFO_PATH list will be
 # parsed in order to search for $Id$ or $Id:X.Y.Z$ and replace with

@@ -1,6 +1,12 @@
 ChangeLog
 =========
 
+## Version 1.20.0 (2018-01-21)
+
+Features:
+
+  - [#171](https://github.com/Twenga/twgit/pull/171): Add [Pivotal Tracker](https://www.pivotaltracker.com/) support.
+
 ## Version 1.19.0 (2017-02-27)
 
 Features:

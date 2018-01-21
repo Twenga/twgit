@@ -154,7 +154,7 @@ class TwgitFeatureTest extends TwgitTestCase
         $this->_remoteExec('git init');
         $this->_localExec(TWGIT_EXEC . ' init 1.2.3 ' . TWGIT_REPOSITORY_ORIGIN_DIR);
         $this->_localExec(TWGIT_EXEC . ' feature start 42');
-        $sMsg = $this->_localExec('cd ' . TWGIT_REPOSITORY_SECOND_LOCAL_DIR
+        $this->_localExec('cd ' . TWGIT_REPOSITORY_SECOND_LOCAL_DIR
             . ' && git init && git remote add ' . self::ORIGIN . ' ' . TWGIT_REPOSITORY_ORIGIN_DIR
             . ' && git pull ' . self::ORIGIN . ' ' . self::STABLE . ':' . self::STABLE
             . ' && ' . TWGIT_EXEC . ' release start -I');
@@ -163,9 +163,9 @@ class TwgitFeatureTest extends TwgitTestCase
         $sExpectedMsg = "git# git pull " . self::ORIGIN . " release-1.3.0\n"
             . "From " . TWGIT_REPOSITORY_ORIGIN_DIR . "\n"
             . " * branch            release-1.3.0 -> FETCH_HEAD\n"
-            . "Already up-to-date.\n"
+            . "Already up to date.\n"
             . "git# git merge --no-ff feature-42\n"
-            . "Already up-to-date!";
+            . "Already up to date!";
         $this->assertContains($sExpectedMsg, $sMsg);
         $this->assertContains("git# git push " . self::ORIGIN . " release-1.3.0", $sMsg);
     }
@@ -175,7 +175,7 @@ class TwgitFeatureTest extends TwgitTestCase
         $this->_remoteExec('git init');
         $this->_localExec(TWGIT_EXEC . ' init 1.2.3 ' . TWGIT_REPOSITORY_ORIGIN_DIR);
         $this->_localExec(TWGIT_EXEC . ' feature start 42');
-        $sMsg = $this->_localExec('cd ' . TWGIT_REPOSITORY_SECOND_LOCAL_DIR
+        $this->_localExec('cd ' . TWGIT_REPOSITORY_SECOND_LOCAL_DIR
             . ' && git init && git remote add ' . self::ORIGIN . ' ' . TWGIT_REPOSITORY_ORIGIN_DIR
             . ' && git pull ' . self::ORIGIN . ' ' . self::STABLE . ':' . self::STABLE
             . ' && ' . TWGIT_EXEC . ' release start -I');

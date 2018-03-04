@@ -345,8 +345,13 @@ function get_current_branch () {
 function get_all_tags () {
     local n="$1"
     [ -z "$n" ] && n=10000	# pour tout retourner
-    git tag | grep -E '^'$TWGIT_PREFIX_TAG'[0-9]+\.[0-9]+\.[0-9]+$' | sed "s/$TWGIT_PREFIX_TAG//" | sed 's/\./;/g' \
-        | sort --field-separator=";" -k1n -k2n -k3n | sed 's/;/./g' | tail -n $n | sed "s/^/$TWGIT_PREFIX_TAG/"
+    if [ -z "$TWGIT_PREFIX_TAG" ]; then
+        git tag | sed 's/\./;/g' \
+            | sort --field-separator=";" -k1n -k2n -k3n | sed 's/;/./g' | tail -n $n
+    else
+        git tag | grep -E '^'$TWGIT_PREFIX_TAG'[0-9]+\.[0-9]+\.[0-9]+$' | sed "s/$TWGIT_PREFIX_TAG//" | sed 's/\./;/g' \
+            | sort --field-separator=";" -k1n -k2n -k3n | sed 's/;/./g' | tail -n $n | sed "s/^/$TWGIT_PREFIX_TAG/"
+    fi
 }
 
 ##

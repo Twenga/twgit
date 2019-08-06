@@ -31,10 +31,10 @@
 ref="$1"
 project_addr=$(git config --get remote.$TWGIT_ORIGIN.url)
 
-gitlat_attribute="http_url_to_repo"
+gitlat_attribute="ssh_url_to_repo"
 
-if [[ $project_addr == *"ssh://"* ]]; then
-  gitlat_attribute="ssh_url_to_repo"
+if [[ $project_addr == *"https://"* ]]; then
+    gitlat_attribute="http_url_to_repo"
 fi
 
 if [[ "$TWGIT_FEATURE_SUBJECT_GITLAB_DOMAIN" =~ ^https?:// ]]; then
@@ -43,8 +43,8 @@ else
     scheme='https://'
 fi
 
-project_url="$scheme$TWGIT_FEATURE_SUBJECT_GITLAB_DOMAIN/api/v3/projects/all?private_token=$TWGIT_FEATURE_SUBJECT_GITLAB_API_KEY"
-issue_url="$scheme$TWGIT_FEATURE_SUBJECT_GITLAB_DOMAIN/api/v3/projects/%s/issues?private_token=$TWGIT_FEATURE_SUBJECT_GITLAB_API_KEY"
+project_url="$scheme$TWGIT_FEATURE_SUBJECT_GITLAB_DOMAIN/api/v4/projects?private_token=$TWGIT_FEATURE_SUBJECT_GITLAB_API_KEY"
+issue_url="$scheme$TWGIT_FEATURE_SUBJECT_GITLAB_DOMAIN/api/v4/projects/%s/issues?private_token=$TWGIT_FEATURE_SUBJECT_GITLAB_API_KEY"
 if ${has_wget}; then
     cmd="wget --no-check-certificate --timeout=3 -q -O - --no-cache"
 else

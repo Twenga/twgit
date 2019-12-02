@@ -790,8 +790,8 @@ function process_fetch () {
 #
 function process_first_commit () {
     local commit_msg=$(printf "$TWGIT_FIRST_COMMIT_MSG" "$1" "$2" "$3")
-    CUI_displayMsg processing "${TWGIT_GIT_COMMAND_PROMPT}git commit --allow-empty -m \"$commit_msg\""
-    git commit --allow-empty -m "$commit_msg" || die 'Could not make initial commit!'
+    CUI_displayMsg processing "${TWGIT_GIT_COMMAND_PROMPT}git commit --no-verify --allow-empty -m \"$commit_msg\""
+    git commit --no-verify --allow-empty -m "$commit_msg" || die 'Could not make initial commit!'
 }
 
 ##

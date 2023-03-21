@@ -42,11 +42,16 @@ language='?'
 which python 1>/dev/null 2>&1
 if [ $? -eq 0 ]; then
     language='python'
-else
-    which php 1>/dev/null 2>&1
-    if [ $? -eq 0 ]; then
-        language='php'
-    fi
+fi
+
+which php 1>/dev/null 2>&1
+if [ $? -eq 0 ]; then
+    language='php'
+fi
+
+which node 1>/dev/null 2>&1
+if [ $? -eq 0 ]; then
+    language='javascript'
 fi
 
 # Convert JSON with Python or PHP:
@@ -57,6 +62,10 @@ if [ "$language" = 'python' ]; then
 elif [ "$language" = 'php' ]; then
     if [ ! -z "$data" ]; then
         echo $data | php -r '$o = json_decode(file_get_contents("php://stdin")); echo $o->title;' 2>/dev/null
+    fi
+elif [ "$language" = 'javascript' ]; then
+    if [ ! -z "$data" ]; then
+        echo $data | node -e "var data = ''; process.stdin.on('data', function(chunk) { data += chunk; }); process.stdin.on('end', function() { var o = JSON.parse(data); console.log(o.title); });" 2>/dev/null
     fi
 else
     echo "Language '$language' not handled!" >&2
